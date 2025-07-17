@@ -324,6 +324,7 @@ const AccountPage = () => {
               disabled={isUpgrading}
               className="w-full bg-[#c5a8de] text-white py-2 px-4 rounded-md hover:bg-[#7c5e99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
+              
               {isUpgrading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
