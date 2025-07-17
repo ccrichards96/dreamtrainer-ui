@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
-import { storyblokInit, apiPlugin } from '@storyblok/react';
-import Login from './auth/login';
-import Signup from './auth/signup';
-import Dashboard from './dashboard';
-import { validateAuth0Config } from './utils/auth0Config';
-import ProtectedRoute from './routes/ProtectedRoute';
-import AccountPage from './account';
-import Home from './home';
-import CMSRoute from './routes/CMSRoute';
+import { Auth0Provider } from '@auth0/auth0-react';
+import Login from './pages/auth/login';
+import Signup from './pages/auth/signup';
+import Dashboard from './pages/dashboard';
+import ProtectedRoute from './components/routes/ProtectedRoute';
+import AccountPage from './pages/account';
+import Home from './pages/home';
+import CMSRoute from './components/routes/CMSRoute';
+import { AuthProvider, useAuthContext } from './contexts';
 
 // Initialize Storyblok
 // storyblokInit({
@@ -18,7 +17,7 @@ import CMSRoute from './routes/CMSRoute';
 // });
 
 function NavigationBar() {
-  const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
+  const { isAuthenticated, login, logout } = useAuthContext();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/100 backdrop-blur-md">
@@ -46,7 +45,7 @@ function NavigationBar() {
                   My Account
                 </Link>
                 <button
-                  onClick={() => logout({ returnTo: window.location.origin })}
+                  onClick={() => logout()}
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Logout
@@ -61,13 +60,13 @@ function NavigationBar() {
                   Home
                 </Link>
                 <button
-                  onClick={() => loginWithRedirect()}
+                  onClick={() => login()}
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Login
                 </button>
                 <button
-                  onClick={() => loginWithRedirect({ screen_hint: 'signup' })}
+                  onClick={() => login()}
                   className="bg-[#c5a8de] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#b399d6] border border-[#c5a8de]"
                 >
                   Sign Up
@@ -91,37 +90,39 @@ function App() {
         redirect_uri: window.location.origin
       }}
     >
-      <Router>
-        <div className="min-h-screen bg-gray-100">
-          <NavigationBar />
-          <div className="pt-16">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/account" 
-                element={
-                  <ProtectedRoute>
-                    <AccountPage />
-                  </ProtectedRoute>
-                } 
-              />
-              {/* CMS Routes */}
-              <Route path="/p/:slug" element={<CMSRoute />} />
-              <Route path="/p" element={<CMSRoute />} />
-            </Routes>
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-gray-100">
+            <NavigationBar />
+            <div className="pt-16">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/account" 
+                  element={
+                    <ProtectedRoute>
+                      <AccountPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                {/* CMS Routes */}
+                <Route path="/p/:slug" element={<CMSRoute />} />
+                <Route path="/p" element={<CMSRoute />} />
+              </Routes>
+            </div>
           </div>
-        </div>
-      </Router>
+        </Router>
+      </AuthProvider>
     </Auth0Provider>
   );
 }
