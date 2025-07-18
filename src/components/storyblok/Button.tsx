@@ -1,7 +1,6 @@
 
 import React from "react";
 
-
 const ButtonComponent = ({ blok }) => {
   // Compose Tailwind classes from blok props
   const baseClasses = [

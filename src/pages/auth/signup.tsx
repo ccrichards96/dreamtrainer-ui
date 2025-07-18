@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth0, RedirectLoginOptions } from '@auth0/auth0-react';
 import { ArrowRight, UserPlus } from 'lucide-react';
@@ -20,16 +19,6 @@ export default function Signup() {
     const options: RedirectLoginOptions = {
       authorizationParams: {
         connection: 'google-oauth2',
-        screen_hint: 'signup'
-      }
-    };
-    loginWithRedirect(options);
-  };
-
-  const handleGithubSignup = () => {
-    const options: RedirectLoginOptions = {
-      authorizationParams: {
-        connection: 'github',
         screen_hint: 'signup'
       }
     };

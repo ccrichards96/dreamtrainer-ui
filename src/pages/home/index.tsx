@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Star, Check, ChevronRight, Users, Trophy, Target, Zap, ArrowRight, Play, MessageCircle } from 'lucide-react';
-import VideoModal from '../../components/VideoModal';
+import VideoModal from '../../components/modals/VideoModal';
 
 export default function Home() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
