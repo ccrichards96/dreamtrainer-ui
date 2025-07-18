@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2, Info, Save, AlertCircle, LifeBuoy } from 'lucide-react';
 import { useAuth0 } from '@auth0/auth0-react';
 
@@ -7,52 +7,10 @@ const PHONE_REGEX = /^\+?[1-9]\d{1,14}$/; // E.164 format
 
 // Placeholder data structure - this will be replaced with API data later
 const accountData = {
-  company: {
-    name: 'Acme Inc.',
-    teamSize: '1-10',
-    teamSizeOptions: ['1-10', '11-50', '51-200', '200+'],
-    industry: 'Technology',
-    industryOptions: [
-      'Technology',
-      'Healthcare',
-      'Education',
-      'Finance',
-      'Manufacturing',
-      'Retail',
-      'Media & Entertainment',
-      'Professional Services',
-      'Government',
-      'Non-profit',
-      'Other'
-    ],
-  },
   plan: {
-    current: 'Pro Plan',
-    usage: {
-      workflows: {
-        current: 12,
-        limit: 50,
-      },
-      integrations: {
-        current: 5,
-        limit: 10,
-      },
-    },
+    current: 'Free Plan',
+    nextBillingDate: null, // No billing for free plan
   },
-  integrations: [
-    {
-      name: 'Slack',
-      status: 'connected',
-    },
-    {
-      name: 'Google Workspace',
-      status: 'connected',
-    },
-    {
-      name: 'Microsoft Teams',
-      status: 'not_connected',
-    },
-  ],
   security: {
     twoFactorEnabled: false,
   },
@@ -60,16 +18,12 @@ const accountData = {
 
 const AccountPage = () => {
   const { user, isLoading: isAuthLoading } = useAuth0();
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     phoneNumber: user?.phone_number || '',
-    companyName: accountData.company.name,
-    teamSize: accountData.company.teamSize,
-    industry: accountData.company.industry,
   });
   const [errors, setErrors] = useState({
     phoneNumber: '',
@@ -106,10 +60,7 @@ const AccountPage = () => {
     // Check if any form fields have been modified from their initial values
     const hasChanges = 
       formData.name !== (user?.name || '') ||
-      formData.phoneNumber !== (user?.phone_number || '') ||
-      formData.companyName !== accountData.company.name ||
-      formData.teamSize !== accountData.company.teamSize ||
-      formData.industry !== accountData.company.industry;
+      formData.phoneNumber !== (user?.phone_number || '');
     
     setHasUnsavedChanges(hasChanges && !errors.phoneNumber);
   }, [formData, user, errors]);
@@ -137,10 +88,7 @@ const AccountPage = () => {
       //   },
       //   body: JSON.stringify({
       //     name: formData.name,
-      //     phoneNumber: formData.phoneNumber,
-      //     companyName: formData.companyName,
-      //     teamSize: formData.teamSize,
-      //     industry: formData.industry
+      //     phoneNumber: formData.phoneNumber
       //   })
       // });
       
@@ -176,7 +124,7 @@ const AccountPage = () => {
       // window.location.href = url;
       
       // For now, just show a success message
-      alert('Upgrade initiated! This will redirect to Stripe in the future.');
+      alert('This will redirect to Stripe in the future.');
     } catch (error) {
       console.error('Error initiating upgrade:', error);
       alert('Failed to initiate upgrade. Please try again.');
@@ -314,7 +262,7 @@ const AccountPage = () => {
                     <td className="py-2 pr-6 pl-4">
                       <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">Active</span>
                     </td>
-                    <td className="py-2 pr-6 pl-4 text-gray-700">Aug 15, 2025</td>
+                    <td className="py-2 pr-6 pl-4 text-gray-700">{accountData.plan.nextBillingDate || '-'}</td>
                   </tr>
                 </tbody>
               </table>

@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useAuthContext } from '../contexts';
+import AvatarDropdown from './AvatarDropdown';
 
 export default function Navigation() {
-  const { isAuthenticated, login, logout } = useAuthContext();
+  const { isAuthenticated, login } = useAuthContext();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/100 backdrop-blur-md">
@@ -16,26 +17,7 @@ export default function Navigation() {
 
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
-              <>
-                <Link
-                  to="/dashboard"
-                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/account"
-                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  My Account
-                </Link>
-                <button
-                  onClick={() => logout()}
-                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Logout
-                </button>
-              </>
+              <AvatarDropdown />
             ) : (
               <>
                 <Link

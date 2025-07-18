@@ -1,10 +1,19 @@
 import { motion } from 'framer-motion';
 import { useAuth0, RedirectLoginOptions } from '@auth0/auth0-react';
 import { ArrowRight, UserPlus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export default function Signup() {
   const { loginWithRedirect, isAuthenticated, isLoading } = useAuth0();
+  const navigate = useNavigate();
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSignup = () => {
     const options: RedirectLoginOptions = {
