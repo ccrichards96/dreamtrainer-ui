@@ -53,7 +53,7 @@ export default function AvatarDropdown({ className = '' }: AvatarDropdownProps) 
         <div className="relative">
           {avatarUrl ? (
             <img
-              className="h-8 w-8 rounded-full object-cover border-2 border-gray- pt-1"
+              className="h-8 w-8 rounded-full object-cover border-2 border-gray-200"
               src={avatarUrl}
               alt={getInitials(displayName)}
             />

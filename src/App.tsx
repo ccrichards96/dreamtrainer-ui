@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { Auth0Provider } from '@auth0/auth0-react';
 import Login from './pages/auth/login';
 import Signup from './pages/auth/signup';
@@ -13,6 +13,7 @@ import { AuthProvider } from './contexts';
 
 function App() {
   // validateAuth0Config(); // Optionally call for side effects if needed
+
   return (
     <Auth0Provider
       domain={import.meta.env.VITE_AUTH0_DOMAIN}

@@ -7,55 +7,52 @@ interface GridBlok extends SbBlokData {
     component: string;
     [key: string]: unknown;
   }>;
-  templateColumns?: string;
-  gap?: string;
-  rowGap?: string;
-  columnGap?: string;
-  autoFlow?: string;
-  autoRows?: string;
-  autoColumns?: string;
-  padding?: string;
-  margin?: string;
+  cols?: '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12';
+  rows?: '1' | '2' | '3' | '4' | '5' | '6';
+  gap?: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '8' | '10' | '12' | '16' | '20' | '24';
+  gapX?: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '8' | '10' | '12' | '16' | '20' | '24';
+  gapY?: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '8' | '10' | '12' | '16' | '20' | '24';
+  flow?: 'row' | 'col' | 'row-dense' | 'col-dense';
+  padding?: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '8' | '10' | '12' | '16' | '20' | '24';
+  margin?: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '8' | '10' | '12' | '16' | '20' | '24';
 }
 
 const defaultGridStyles = {
-  gap: '4', // Default to gap-4 (1rem)
-  rowGap: undefined, // Use gap by default
-  columnGap: undefined, // Use gap by default
-  autoFlow: 'row', // Default flow direction
-  autoRows: 'auto', // Default auto sizing
-  autoColumns: 'auto', // Default auto sizing
+  cols: '2', // Default to two columns
+  gap: '4', // Default gap-4 (1rem)
+  flow: 'row', // Default flow direction
   padding: '0',
   margin: '0'
 };
 
 const Grid: React.FC<{blok: GridBlok}> = ({ blok }) => {
-  const styles = {
-    gap: blok.gap || defaultGridStyles.gap,
-    rowGap: blok.rowGap || defaultGridStyles.rowGap,
-    columnGap: blok.columnGap || defaultGridStyles.columnGap,
-    autoFlow: blok.autoFlow || defaultGridStyles.autoFlow,
-    autoRows: blok.autoRows || defaultGridStyles.autoRows,
-    autoColumns: blok.autoColumns || defaultGridStyles.autoColumns,
-    padding: blok.padding || defaultGridStyles.padding,
-    margin: blok.margin || defaultGridStyles.margin,
-  };
-
-  const classes = [
-    'grid', // Base grid class always included
-    blok.templateColumns ? `grid-cols-[${blok.templateColumns}]` : 'grid-cols-1', // Default to single column
-    blok.gap ? `gap-[${blok.gap}]` : `gap-${styles.gap}`,
-    styles.rowGap && `row-gap-[${styles.rowGap}]`,
-    styles.columnGap && `column-gap-[${styles.columnGap}]`,
-    `grid-flow-${styles.autoFlow}`,
-    styles.autoRows !== 'auto' && `auto-rows-[${styles.autoRows}]`,
-    styles.autoColumns !== 'auto' && `auto-cols-[${styles.autoColumns}]`,
-    styles.padding !== '0' && `p-[${styles.padding}]`,
-    styles.margin !== '0' && `m-[${styles.margin}]`,
+  // Build class names using Preline UI patterns
+  const gridClasses = [
+    'grid', // Base grid class
+    
+    // Grid template columns - use standard Tailwind grid-cols-n pattern
+    blok.cols ? `grid-cols-${blok.cols}` : `grid-cols-${defaultGridStyles.cols}`,
+    
+    // Grid template rows if specified
+    blok.rows && `grid-rows-${blok.rows}`,
+    
+    // Gap handling - prefer individual gap-x and gap-y over general gap
+    blok.gapX && blok.gapY 
+      ? `gap-x-${blok.gapX} gap-y-${blok.gapY}`
+      : blok.gap 
+        ? `gap-${blok.gap}`
+        : `gap-${defaultGridStyles.gap}`,
+    
+    // Grid flow direction
+    blok.flow && blok.flow !== 'row' ? `grid-flow-${blok.flow}` : undefined,
+    
+    // Spacing
+    blok.padding && blok.padding !== '0' ? `p-${blok.padding}` : undefined,
+    blok.margin && blok.margin !== '0' ? `m-${blok.margin}` : undefined,
   ].filter(Boolean).join(' ');
 
   return (
-    <div {...storyblokEditable(blok)} className={classes}>
+    <div {...storyblokEditable(blok)} className={gridClasses}>
       {blok.columns?.map((nestedBlok) => (
         <StoryblokComponent blok={nestedBlok} key={nestedBlok._uid} />
       ))}
