@@ -14,7 +14,8 @@ import Header from '../components/storyblok/Header';
 import Row from '../components/storyblok/Row';
 import Column from '../components/storyblok/Column';
 import Image from '../components/storyblok/Image';
-import HeroContainer from '../components/storyblok/HeroContainer';
+import Hero from '../components/storyblok/Hero';
+import Features from '../components/storyblok/Features';
 import Page from '../components/storyblok/Page';
 // import Post from '../components/storyblok/Post';
 import Icon from '../components/storyblok/Icon';
@@ -27,7 +28,8 @@ const components = {
   row: Row,
   column: Column,
   image: Image,
-  hero_container: HeroContainer,
+  hero: Hero,
+  features: Features,
   page: Page,
 //   post: Post,
   icon: Icon
