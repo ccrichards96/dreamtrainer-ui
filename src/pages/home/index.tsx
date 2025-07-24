@@ -53,7 +53,7 @@ export default function Home() {
                 </button>
               </div>
               
-              <div className="flex items-center space-x-6 text-sm text-gray-600">
+              <div className="flex items-center space-x-6 text-sm text-gray-600 mb-4">
                 <div className="flex items-center">
                   <div className="flex -space-x-2 mr-3">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-pink-400 to-red-400"></div>
@@ -70,6 +70,15 @@ export default function Home() {
                   </div>
                   <span>4.9/5 rating</span>
                 </div>
+              </div>
+              
+              <div className="text-sm text-gray-500">
+                <button
+                  onClick={() => navigate('/blog')}
+                  className="text-blue-600 hover:text-blue-700 hover:underline"
+                >
+                  Read our latest insights →
+                </button>
               </div>
             </div>
             

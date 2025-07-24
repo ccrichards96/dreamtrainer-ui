@@ -17,7 +17,15 @@ export default function Navigation() {
 
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
-              <AvatarDropdown />
+              <>
+                <Link
+                  to="/blog"
+                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Blog
+                </Link>
+                <AvatarDropdown />
+              </>
             ) : (
               <>
                 <Link
@@ -25,6 +33,12 @@ export default function Navigation() {
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Home
+                </Link>
+                <Link
+                  to="/blog"
+                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Blog
                 </Link>
                 <button
                   onClick={() => login()}

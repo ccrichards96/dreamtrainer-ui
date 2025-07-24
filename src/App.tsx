@@ -6,6 +6,7 @@ import Dashboard from './pages/dashboard';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 import AccountPage from './pages/account';
 import Home from './pages/home';
+import BlogPage from './pages/blog';
 import CMSRoute from './components/routes/CMSRoute';
 import Navigation from './components/Navigation';
 import { AuthProvider } from './contexts';
@@ -28,6 +29,7 @@ function App() {
             <div className="pt-16">
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/blog" element={<BlogPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route 
