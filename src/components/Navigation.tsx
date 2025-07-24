@@ -22,7 +22,7 @@ export default function Navigation() {
                   to="/blog"
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Blog
+                  Insights
                 </Link>
                 <AvatarDropdown />
               </>
@@ -35,10 +35,16 @@ export default function Navigation() {
                   Home
                 </Link>
                 <Link
+                  to="/p/about"
+                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  About Us
+                </Link>
+                <Link
                   to="/blog"
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Blog
+                  Insights
                 </Link>
                 <button
                   onClick={() => login()}

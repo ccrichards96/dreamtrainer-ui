@@ -75,7 +75,7 @@ const Hero: React.FC<{blok: HeroBlok}> = ({ blok }) => {
             {/* Title */}
             {blok.title && (
               <div className="mt-5 max-w-2xl">
-                <h1 className="block font-semibold text-gray-800 text-4xl md:text-5xl lg:text-6xl dark:text-neutral-200">
+                <h1 className="block font-semibold text-gray-100 text-4xl md:text-5xl lg:text-6xl dark:text-neutral-100">
                   {blok.title}
                 </h1>
               </div>
@@ -84,7 +84,7 @@ const Hero: React.FC<{blok: HeroBlok}> = ({ blok }) => {
             {/* Description */}
             {blok.description && (
               <div className="mt-5 max-w-3xl">
-                <p className="text-lg text-gray-600 dark:text-neutral-400">
+                <p className="text-lg text-white dark:text-neutral-100">
                   {blok.description}
                 </p>
               </div>
