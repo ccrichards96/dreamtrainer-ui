@@ -129,7 +129,7 @@ export default function BlogPage() {
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
             Dream Trainer{' '}
-            <span className="text-green-400 bg-clip-text text-transparent">
+            <span className="text-green-400">
               Insights
             </span>
           </h1>
