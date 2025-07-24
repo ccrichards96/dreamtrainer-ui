@@ -10,6 +10,7 @@ import BlogPage from './pages/blog';
 import CMSRoute from './components/routes/CMSRoute';
 import Navigation from './components/Navigation';
 import { AuthProvider } from './contexts';
+import NotFound from './pages/NotFound';
 
 function App() {
   // validateAuth0Config(); // Optionally call for side effects if needed
@@ -51,6 +52,9 @@ function App() {
                 {/* CMS Routes */}
                 <Route path="/p/*" element={<CMSRoute />} />
                 <Route path="/p" element={<CMSRoute />} />
+                
+                {/* 404 Catch-all route - must be last */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
           </div>

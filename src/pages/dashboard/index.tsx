@@ -3,6 +3,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { CheckCircle2, Circle, ArrowRight, MessageSquare, RefreshCw, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardContext, DashboardProvider, Module } from '../../contexts';
+import DreamFlow from '../../components/DreamFlow';
 
 function DashboardContent() {
   const { user } = useAuth0();
@@ -30,6 +31,25 @@ function DashboardContent() {
 
   const completedModulesWithStatus = modulesCompleted.map(m => mapModuleWithStatus(m, 'done'));
   const modulesToStartWithStatus = modulesToComplete.map(m => mapModuleWithStatus(m, 'not-started'));
+
+  // Add sample TOEFL module for demonstration
+  const sampleTOEFLModule = {
+    title: "TOEFL: Writing Question 1",
+    description: "Master the TOEFL Writing Task 1 - Integrated Writing. Learn how to effectively read an academic passage, listen to a lecture, and write a coherent response that demonstrates your ability to synthesize information from multiple sources.",
+    videoUrl: "https://www.youtube.com/embed/8DaTKVBqUNs", // TOEFL Writing tutorial video
+    botIframeUrl: "https://app.vectorshift.ai/chatbots/deployed/67c28ce25d6b7f0ba2b47803"
+  };
+
+  // For now, always use the sample TOEFL module to demonstrate the functionality
+  const finalDreamFlowModules = [sampleTOEFLModule];
+
+  const handleCourseComplete = () => {
+    console.log('Course completed!');
+    // You can add additional completion logic here, such as:
+    // - Updating completion status in the dashboard context
+    // - Navigating to a completion page
+    // - Showing a success message
+  };
 
   // Modular icon generator for module status
   function getModuleStatusIcon(status: 'done' | 'in-progress' | 'not-started') {
@@ -166,6 +186,33 @@ function DashboardContent() {
               </motion.div>
             )}
           </div>
+        )}
+
+        {/* Learning Modules - DreamFlow Section */}
+        {finalDreamFlowModules.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8"
+          >
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+              <div className="p-8 border-b border-gray-100">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                  Learning Modules
+                </h2>
+                <p className="text-gray-600">
+                  Progress through your certification modules with interactive content and guided tutorials.
+                </p>
+              </div>
+              <div className="p-4">
+                <DreamFlow 
+                  modules={finalDreamFlowModules} 
+                  onComplete={handleCourseComplete}
+                />
+              </div>
+            </div>
+          </motion.div>
         )}
 
         {/* Final Assessment Section */}
