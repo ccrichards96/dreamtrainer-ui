@@ -19,7 +19,8 @@ import Image from '../components/storyblok/Image';
 import Hero from '../components/storyblok/Hero';
 import Features from '../components/storyblok/Features';
 import Page from '../components/storyblok/Page';
-// import Post from '../components/storyblok/Post';
+import Post from '../components/storyblok/Post';
+// import TestPost from '../components/storyblok/TestPost';
 import Icon from '../components/storyblok/Icon';
 
 const components = {
@@ -34,7 +35,7 @@ const components = {
   hero: Hero,
   features: Features,
   page: Page,
-//   post: Post,
+  post: Post,
   icon: Icon
 };
 

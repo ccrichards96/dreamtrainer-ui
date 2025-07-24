@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { Auth0Provider } from '@auth0/auth0-react';
 import Login from './pages/auth/login';
@@ -48,7 +47,7 @@ function App() {
                   } 
                 />
                 {/* CMS Routes */}
-                <Route path="/p/:slug" element={<CMSRoute />} />
+                <Route path="/p/*" element={<CMSRoute />} />
                 <Route path="/p" element={<CMSRoute />} />
               </Routes>
             </div>
