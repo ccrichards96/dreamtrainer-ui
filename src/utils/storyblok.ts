@@ -2,6 +2,7 @@ import {
   apiPlugin, 
   storyblokInit, 
   useStoryblokApi,
+  useStoryblok,
   storyblokEditable,
   ISbStoryData 
 } from "@storyblok/react";
@@ -13,6 +14,7 @@ import Text from '../components/storyblok/Text';
 import Header from '../components/storyblok/Header';
 import Row from '../components/storyblok/Row';
 import Column from '../components/storyblok/Column';
+import Container from '../components/storyblok/Container';
 import Image from '../components/storyblok/Image';
 import Hero from '../components/storyblok/Hero';
 import Features from '../components/storyblok/Features';
@@ -27,6 +29,7 @@ const components = {
   header: Header,
   row: Row,
   column: Column,
+  container: Container,
   image: Image,
   hero: Hero,
   features: Features,
@@ -36,7 +39,7 @@ const components = {
 };
 
 // Initialize Storyblok with preview mode support
-const getStoryblokApi = storyblokInit({
+storyblokInit({
   accessToken: import.meta.env.VITE_STORYBLOK_DELIVERY_API_TOKEN,
   use: [apiPlugin],
   apiOptions: {
@@ -48,13 +51,13 @@ const getStoryblokApi = storyblokInit({
   },
   components,
   enableFallbackComponent: true,
-  bridge: true // Enable bridge for both dev and production for preview mode
+  bridge: import.meta.env.DEV // Enable bridge only in development
 });
 
 // Export commonly used utilities
 export { 
   useStoryblokApi,
-  getStoryblokApi,
+  useStoryblok,
   storyblokEditable,
   components
 };
