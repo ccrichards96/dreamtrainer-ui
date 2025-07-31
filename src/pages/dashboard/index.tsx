@@ -296,7 +296,28 @@ function DashboardContent() {
 
         {/* Main Dashboard Grid - Implementation from image */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Connect Your Tools Section */}
+          {/* Take Assessment Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-white rounded-2xl shadow-lg p-8"
+          >
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+              Ready for Assessment?
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Submit your TOEFL writing test for professional evaluation and feedback.
+            </p>
+            <button 
+              onClick={() => navigate('/assessment')}
+              className="w-full bg-[#c5a8de] text-white py-4 rounded-lg font-medium hover:bg-[#b399d6] transition-all flex items-center justify-center gap-2"
+            >
+              <ArrowRight className="w-5 h-5" />
+              Take Assessment
+            </button>
+          </motion.div>
+
           {/* Need Help? */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

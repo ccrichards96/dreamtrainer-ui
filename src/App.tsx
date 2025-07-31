@@ -3,6 +3,7 @@ import { Auth0Provider } from '@auth0/auth0-react';
 import Login from './pages/auth/login';
 import Signup from './pages/auth/signup';
 import Dashboard from './pages/dashboard';
+import Assessment from './pages/assessment';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 import AccountPage from './pages/account';
 import Home from './pages/home';
@@ -38,6 +39,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/assessment" 
+                  element={
+                    <ProtectedRoute>
+                      <Assessment />
                     </ProtectedRoute>
                   } 
                 />
