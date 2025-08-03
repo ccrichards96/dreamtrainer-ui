@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   RefreshCw
 } from 'lucide-react';
+import { submitAssessment, type AssessmentSubmission } from '../../services/api';
 
 interface AssessmentForm {
   first_name: string;
@@ -107,20 +108,34 @@ export default function Assessment() {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Prepare the data for API submission
+      const assessmentData: AssessmentSubmission = {
+        first_name: form.first_name,
+        last_name: form.last_name,
+        email: form.email,
+        test_number: form.test_number,
+        homework_completed: form.homework_completed,
+        followed_toefl_timing: form.followed_toefl_timing,
+        essay_question_1: form.essay_question_1,
+        essay_question_1_word_count: form.essay_question_1_word_count,
+        essay_question_2: form.essay_question_2,
+        essay_question_2_word_count: form.essay_question_2_word_count,
+      };
+
+      // Submit to API
+      const response = await submitAssessment(assessmentData);
       
-      // Here you would make the actual API call
-      // const response = await fetch('/api/assessment', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(form),
-      // });
-      
+      console.log('Assessment submitted successfully:', response);
       setSubmitted(true);
     } catch (error) {
       console.error('Error submitting assessment:', error);
-      alert('Something went wrong. Please try again or contact support.');
+      
+      // Show user-friendly error message
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Something went wrong. Please try again or contact support.';
+      
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

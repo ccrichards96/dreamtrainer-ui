@@ -32,16 +32,23 @@ function DashboardContent() {
   const completedModulesWithStatus = modulesCompleted.map(m => mapModuleWithStatus(m, 'done'));
   const modulesToStartWithStatus = modulesToComplete.map(m => mapModuleWithStatus(m, 'not-started'));
 
-  // Add sample TOEFL module for demonstration
-  const sampleTOEFLModule = {
+  // Add sample TOEFL modules for demonstration
+  const sampleTOEFLModule1 = {
     title: "TOEFL: Writing Question 1",
     description: "Master the TOEFL Writing Task 1 - Integrated Writing. Learn how to effectively read an academic passage, listen to a lecture, and write a coherent response that demonstrates your ability to synthesize information from multiple sources.",
     videoUrl: "https://www.youtube.com/embed/8DaTKVBqUNs", // TOEFL Writing tutorial video
     botIframeUrl: "https://app.vectorshift.ai/chatbots/deployed/67c28ce25d6b7f0ba2b47803"
   };
 
-  // For now, always use the sample TOEFL module to demonstrate the functionality
-  const finalDreamFlowModules = [sampleTOEFLModule];
+  const sampleTOEFLModule2 = {
+    title: "TOEFL: Writing Question 2",
+    description: "Master the TOEFL Writing Task 2 - Independent Writing. Learn how to develop your ideas, organize your thoughts, and write a well-structured essay that demonstrates your ability to express and support your opinions effectively.",
+    videoUrl: "https://www.youtube.com/embed/8DaTKVBqUNs", // TOEFL Writing Task 2 tutorial video
+    botIframeUrl: "https://app.vectorshift.ai/chatbots/deployed/67c28ce25d6b7f0ba2b47803"
+  };
+
+  // For now, always use the sample TOEFL modules to demonstrate the functionality
+  const finalDreamFlowModules = [sampleTOEFLModule1, sampleTOEFLModule2];
 
   const handleCourseComplete = () => {
     console.log('Course completed!');
