@@ -14,6 +14,8 @@
     "@auth0/auth0-react": "^2.3.0",
     "@rollup/rollup-win32-x64-msvc": "^4.46.2",
     "@storyblok/react": "^5.4.0",
+    "@stripe/react-stripe-js": "^3.9.0",
+    "@stripe/stripe-js": "^7.8.0",
     "@types/react-router-dom": "^5.3.3",
     "@types/uuid": "^10.0.0",
     "axios": "^1.11.0",
