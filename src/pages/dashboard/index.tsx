@@ -229,25 +229,18 @@ function DashboardContent() {
                           {announcement.name}
                         </h3>
                         <span className={`text-xs px-2 py-1 rounded-full ${
-                          announcement.priority === 'high' ? 'bg-red-100 text-red-800' :
-                          announcement.priority === 'normal' ? 'bg-blue-100 text-blue-800' :
+                          announcement.type === 'general' ? 'bg-blue-100 text-blue-800' :
+                          announcement.type === 'account' ? 'bg-green-100 text-green-800' :
+                          announcement.type === 'support' ? 'bg-yellow-100 text-yellow-800' :
                           'bg-gray-100 text-gray-800'
                         }`}>
-                          {announcement.priority}
+                          {announcement.type.charAt(0).toUpperCase() + announcement.type.slice(1)}
                         </span>
                       </div>
                       <p className="text-gray-700 text-sm mb-3">
                         {announcement.message}
                       </p>
                       <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span className={`px-2 py-1 rounded-full ${
-                          announcement.type === 'general' ? 'bg-blue-100 text-blue-700' :
-                          announcement.type === 'account' ? 'bg-green-100 text-green-700' :
-                          announcement.type === 'support' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-gray-100 text-gray-700'
-                        }`}>
-                          {announcement.type}
-                        </span>
                         <span>
                           {new Date(announcement.createdAt).toLocaleDateString('en-US', {
                             month: 'short',
