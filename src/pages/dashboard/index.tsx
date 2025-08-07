@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useAuth0 } from '@auth0/auth0-react';
-import { CheckCircle2, Circle, ArrowRight, MessageSquare, RefreshCw, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Circle, ArrowRight, MessageSquare, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardContext, DashboardProvider, Module } from '../../contexts';
 import DreamFlow from '../../components/DreamFlow';
@@ -36,7 +36,7 @@ function DashboardContent() {
   const sampleTOEFLModule1 = {
     title: "TOEFL: Writing Question 1",
     description: "Master the TOEFL Writing Task 1 - Integrated Writing. Learn how to effectively read an academic passage, listen to a lecture, and write a coherent response that demonstrates your ability to synthesize information from multiple sources.",
-    videoUrl: "https://www.youtube.com/embed/8DaTKVBqUNs", // TOEFL Writing tutorial video
+    videoUrl: "https://vimeo.com/981374557/52c7d357b3?share=copy", // TOEFL Writing tutorial video
     botIframeUrl: "https://app.vectorshift.ai/chatbots/deployed/67c28ce25d6b7f0ba2b47803"
   };
 
@@ -246,64 +246,9 @@ function DashboardContent() {
           </motion.div>
         )}
 
-
-        {/* Modules Grid*/}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          
-            {/* Modules Completed */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-lg p-8"
-            >
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Modules Completed
-              </h2>
-              <ul className="pl-0 text-gray-700">
-                {completedModulesWithStatus.length === 0 ? (
-                  <li className="list-none">No modules completed yet.</li>
-                ) : (
-                  completedModulesWithStatus.map((mod) => (
-                    <li key={mod.id} className="flex items-center gap-3 mb-2 list-none">
-                      {getModuleStatusIcon(mod.status)}
-                      <span>{mod.title}</span>
-                    </li>
-                  ))
-                )}
-              </ul>
-            </motion.div>
-
-            {/* Modules To Start */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl shadow-lg p-8"
-            >
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Modules To Start
-              </h2>
-              <ul className="pl-0 text-gray-700">
-                {modulesToStartWithStatus.length === 0 ? (
-                  <li className="list-none">All modules completed!</li>
-                ) : (
-                  modulesToStartWithStatus.map((mod) => (
-                    <li key={mod.id} className="flex items-center gap-3 mb-2 list-none">
-                      {getModuleStatusIcon(mod.status)}
-                      <span>{mod.title}</span>
-                      <span className="ml-2 text-xs text-gray-500 bg-gray-100 rounded px-2 py-0.5">Not Started</span>
-                    </li>
-                  ))
-                )}
-              </ul>
-            </motion.div>
-        </div>
-
-
         {/* Main Dashboard Grid - Implementation from image */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Take Assessment Section */}
+        <div className="grid grid-cols-1 gap-8">
+          {/* Need Help? */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -311,36 +256,16 @@ function DashboardContent() {
             className="bg-white rounded-2xl shadow-lg p-8"
           >
             <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-              Ready for Assessment?
+              Need help/support from our trusted experts?
             </h2>
-            <p className="text-gray-600 mb-6">
-              Submit your TOEFL writing test for professional evaluation and feedback.
-            </p>
-            <button 
-              onClick={() => navigate('/assessment')}
-              className="w-full bg-[#c5a8de] text-white py-4 rounded-lg font-medium hover:bg-[#b399d6] transition-all flex items-center justify-center gap-2"
+            <a 
+              href="https://calendly.com/your-calendly-link" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-full bg-[#c5a8de] text-white py-4 rounded-lg font-medium hover:bg-[#b399d6] transition-all flex items-center justify-center gap-2 mb-4"
             >
-              <ArrowRight className="w-5 h-5" />
-              Take Assessment
-            </button>
-          </motion.div>
-
-          {/* Need Help? */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white rounded-2xl shadow-lg p-8"
-          >
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-              Need help?
-            </h2>
-            <button className="w-full bg-[#c5a8de] text-white py-4 rounded-lg font-medium hover:bg-[#b399d6] transition-all flex items-center justify-center gap-2 mb-4">
-              <MessageSquare className="w-5 h-5" />
-              Chat with us
-            </button>
-            <a href="#" className="text-[#c5a8de] hover:text-[#b399d6] transition-all text-center block">
-              Video tutorials
+              <Calendar className="w-5 h-5" />
+              Book A Meeting with Calendly
             </a>
           </motion.div>
         </div>
