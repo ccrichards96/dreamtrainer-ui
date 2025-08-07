@@ -5,6 +5,7 @@ import Signup from './pages/auth/signup';
 import Dashboard from './pages/dashboard';
 import Assessment from './pages/assessment';
 import Onboarding from './pages/onboarding';
+import CheckoutSuccess from './pages/checkout/Success';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 import AccountPage from './pages/account';
 import Home from './pages/home';
@@ -36,6 +37,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/checkout/success" element={<CheckoutSuccess />} />
                 <Route 
                   path="/dashboard" 
                   element={

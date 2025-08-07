@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { ChevronLeft, Check, Crown, Star, Zap, BookOpen } from 'lucide-react';
+import { ChevronLeft, Check, Crown, Star } from 'lucide-react';
 import { OnboardingData } from './index';
 import ProgressIndicator from './ProgressIndicator';
+import { createCheckoutSession } from '../../services/api/billing';
 
 interface PricingSelectionProps {
   data: OnboardingData;
   updateData: (data: Partial<OnboardingData>) => void;
   onPrev: () => void;
-  onComplete: () => void;
   currentStep?: number;
   totalSteps?: number;
 }
@@ -18,6 +18,7 @@ const pricingPlans = [
     name: 'TOEFL MAX Writing',
     price: 47,
     period: 'month',
+    priceId: 'price_1RslNR1TwH4sDeUMAhEoAPjp', // Replace with actual Stripe price ID
     description: 'Get your dream TOEFL score with personalized AI coachiing',
     icon: Crown,
     iconColor: 'text-blue-600',
@@ -35,17 +36,47 @@ const pricingPlans = [
   },
 ];
 
-export default function PricingSelection({ data, updateData, onPrev, onComplete, currentStep = 3, totalSteps = 3 }: PricingSelectionProps) {
+export default function PricingSelection({ data, updateData, onPrev, currentStep = 3, totalSteps = 3 }: PricingSelectionProps) {
   const [selectedPlan, setSelectedPlan] = useState(data.selectedPackage || 'premium');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
     updateData({ selectedPackage: planId });
   };
 
-  const handleComplete = () => {
-    if (selectedPlan) {
-      onComplete();
+  const handleComplete = async () => {
+    if (!selectedPlan) return;
+
+    try {
+      setIsProcessing(true);
+      
+      // Find the selected plan to get its price ID
+      const selectedPlanData = pricingPlans.find(plan => plan.id === selectedPlan);
+      if (!selectedPlanData) {
+        setIsProcessing(false);
+        throw new Error('Selected plan not found');
+      }
+
+      // Create checkout session
+      const checkoutSession = await createCheckoutSession({
+        priceIds: [selectedPlanData.priceId],
+        successUrl: `${window.location.origin}/checkout/success`,
+        cancelUrl: `${window.location.origin}/onboarding`,
+        mode: 'subscription'
+      });
+
+      // Only redirect if we successfully got a checkout session URL
+      if (checkoutSession?.data?.checkoutUrl) {
+        window.location.href = checkoutSession.data.checkoutUrl;
+      } else {
+        throw new Error('No checkout URL received from server');
+      }
+    } catch (error) {
+      console.error('Failed to create checkout session:', error);
+      setIsProcessing(false);
+      // You can add user-friendly error notification here
+      // For example: toast.error('Failed to process checkout. Please try again.');
     }
   };
 
@@ -139,10 +170,10 @@ export default function PricingSelection({ data, updateData, onPrev, onComplete,
 
         <button
           onClick={handleComplete}
-          disabled={!selectedPlan}
+          disabled={!selectedPlan || isProcessing}
           className="py-3 px-8 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:pointer-events-none transition-all"
         >
-          Proceed to Checkout
+          {isProcessing ? 'Processing...' : 'Proceed to Checkout'}
           <Check className="w-4 h-4" />
         </button>
       </div>

@@ -33,11 +33,6 @@ export default function Onboarding() {
     }
   };
 
-  const handleComplete = () => {
-    console.log('Onboarding completed with data:', onboardingData);
-    // TODO: Submit onboarding data to API and navigate to dashboard
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white">
       {/* Main Content */}
@@ -92,7 +87,6 @@ export default function Onboarding() {
                 data={onboardingData}
                 updateData={updateData}
                 onPrev={prevStep}
-                onComplete={handleComplete}
                 currentStep={currentStep}
                 totalSteps={totalSteps}
               />
