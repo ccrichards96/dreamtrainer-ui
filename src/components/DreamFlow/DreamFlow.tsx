@@ -42,14 +42,16 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ modules, onComplete }) => {
           />
         </div>
 
-        {/* Sticky Next Button */}
-        <NavigationButton
-          onNext={handleNextModule}
-          isLastModule={isLastModule}
-        />
+        {/* Footer Navigation Button */}
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <NavigationButton
+            onNext={handleNextModule}
+            isLastModule={isLastModule}
+          />
+        </div>
 
         {/* Mobile Bottom Padding */}
-        <div className="h-24 md:hidden" />
+        <div className="h-4 md:hidden" />
       </div>
     </div>
   );

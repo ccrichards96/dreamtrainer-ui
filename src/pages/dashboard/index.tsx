@@ -52,10 +52,8 @@ function DashboardContent() {
 
   const handleCourseComplete = () => {
     console.log('Course completed!');
-    // You can add additional completion logic here, such as:
-    // - Updating completion status in the dashboard context
-    // - Navigating to a completion page
-    // - Showing a success message
+    // Navigate to assessment page after course completion
+    navigate('/assessment');
   };
 
   // Modular icon generator for module status
@@ -265,7 +263,7 @@ function DashboardContent() {
               className="w-full bg-[#c5a8de] text-white py-4 rounded-lg font-medium hover:bg-[#b399d6] transition-all flex items-center justify-center gap-2 mb-4"
             >
               <Calendar className="w-5 h-5" />
-              Book A Meeting with Calendly
+              Book A Meeting Calendly
             </a>
           </motion.div>
         </div>
