@@ -19,6 +19,7 @@ function DashboardContent() {
     modulesCompleted,
     modulesToComplete,
     showFinalAssessment,
+    announcements,
     loading,
     error
   } = useDashboardContext();
@@ -192,6 +193,75 @@ function DashboardContent() {
             )}
           </div>
         )}
+
+        {/* General Announcements Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-2xl shadow-lg p-8 mb-8"
+        >
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+            General Announcements
+          </h2>
+          <div className="max-h-80 overflow-y-auto">
+            {announcements.length === 0 ? (
+              <div className="text-center py-8">
+                <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No announcements at this time</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {announcements
+                  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                  .map((announcement) => (
+                    <div
+                      key={announcement.id}
+                      className={`p-4 rounded-lg border-l-4 ${
+                        announcement.type === 'general' ? 'border-blue-500 bg-blue-50' :
+                        announcement.type === 'account' ? 'border-green-500 bg-green-50' :
+                        announcement.type === 'support' ? 'border-yellow-500 bg-yellow-50' :
+                        'border-gray-500 bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900 text-sm">
+                          {announcement.name}
+                        </h3>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          announcement.priority === 'high' ? 'bg-red-100 text-red-800' :
+                          announcement.priority === 'normal' ? 'bg-blue-100 text-blue-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {announcement.priority}
+                        </span>
+                      </div>
+                      <p className="text-gray-700 text-sm mb-3">
+                        {announcement.message}
+                      </p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span className={`px-2 py-1 rounded-full ${
+                          announcement.type === 'general' ? 'bg-blue-100 text-blue-700' :
+                          announcement.type === 'account' ? 'bg-green-100 text-green-700' :
+                          announcement.type === 'support' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {announcement.type}
+                        </span>
+                        <span>
+                          {new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+        </motion.div>
 
         {/* Learning Modules - DreamFlow Section */}
         {finalDreamFlowModules.length > 0 && (
