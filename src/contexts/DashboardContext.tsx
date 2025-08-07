@@ -1,4 +1,6 @@
 import React, { createContext, ReactNode, useState, useCallback, useEffect } from 'react';
+import { Announcement } from '../types/announcements';
+import { getAllAnnouncements } from '../services/api/announcements';
 
 // Define the module interface
 export interface Module {
@@ -17,6 +19,7 @@ export interface DashboardContextType {
   modulesCompleted: Module[];
   modulesToComplete: Module[];
   showFinalAssessment: boolean;
+  announcements: Announcement[];
   loading: boolean;
   error: string | null;
   refetchDashboard: () => Promise<void>;
@@ -38,6 +41,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
   const [modulesCompleted, setModulesCompleted] = useState<Module[]>([]);
   const [modulesToComplete, setModulesToComplete] = useState<Module[]>([]);
   const [showFinalAssessment, setShowFinalAssessment] = useState<boolean>(false);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -116,14 +120,23 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchDashboardFromAPI();
-      setStartingScore(data.startingScore);
-      setStartingScoreDate(data.startingScoreDate);
-      setCurrentScore(data.currentScore);
-      setCurrentScoreDate(data.currentScoreDate);
-      setModulesCompleted(data.modulesCompleted);
-      setModulesToComplete(data.modulesToComplete);
-      setShowFinalAssessment(data.showFinalAssessment);
+      // Fetch both dashboard data and announcements in parallel
+      const [dashboardData, ] = await Promise.all([
+        fetchDashboardFromAPI(),
+        //getAllAnnouncements()
+      ]);
+
+      // Set dashboard data
+      setStartingScore(dashboardData.startingScore);
+      setStartingScoreDate(dashboardData.startingScoreDate);
+      setCurrentScore(dashboardData.currentScore);
+      setCurrentScoreDate(dashboardData.currentScoreDate);
+      setModulesCompleted(dashboardData.modulesCompleted);
+      setModulesToComplete(dashboardData.modulesToComplete);
+      setShowFinalAssessment(dashboardData.showFinalAssessment);
+
+      // Set announcements data
+      //setAnnouncements(announcementsData);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred while fetching dashboard data';
       setError(errorMessage);
@@ -146,6 +159,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     modulesCompleted,
     modulesToComplete,
     showFinalAssessment,
+    announcements,
     loading,
     error,
     refetchDashboard,
