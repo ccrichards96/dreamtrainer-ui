@@ -4,6 +4,7 @@ import Login from './pages/auth/login';
 import Signup from './pages/auth/signup';
 import Dashboard from './pages/dashboard';
 import Assessment from './pages/assessment';
+import Onboarding from './pages/onboarding';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 import AccountPage from './pages/account';
 import Home from './pages/home';
@@ -34,6 +35,7 @@ function App() {
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/onboarding" element={<Onboarding />} />
                 <Route 
                   path="/dashboard" 
                   element={
