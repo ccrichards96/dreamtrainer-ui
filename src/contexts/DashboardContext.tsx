@@ -16,9 +16,6 @@ export interface DashboardContextType {
   startingScoreDate: Date | null;
   currentScore: number | null;
   currentScoreDate: Date | null;
-  modulesCompleted: Module[];
-  modulesToComplete: Module[];
-  showFinalAssessment: boolean;
   announcements: Announcement[];
   loading: boolean;
   error: string | null;
@@ -38,9 +35,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
   const [startingScoreDate, setStartingScoreDate] = useState<Date | null>(null);
   const [currentScore, setCurrentScore] = useState<number | null>(null);
   const [currentScoreDate, setCurrentScoreDate] = useState<Date | null>(null);
-  const [modulesCompleted, setModulesCompleted] = useState<Module[]>([]);
-  const [modulesToComplete, setModulesToComplete] = useState<Module[]>([]);
-  const [showFinalAssessment, setShowFinalAssessment] = useState<boolean>(false);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,9 +45,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     startingScoreDate: Date;
     currentScore: number;
     currentScoreDate: Date | null;
-    modulesCompleted: Module[];
-    modulesToComplete: Module[];
-    showFinalAssessment: boolean;
   }> => {
     // Simulate network delay (1-3 seconds)
     const delay = Math.random() * 2000 + 1000;
@@ -68,50 +59,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
       startingScoreDate: startingDate,
       currentScore: 0,
       currentScoreDate: currentDate,
-      modulesCompleted: [],
-      modulesToComplete: [
-        {
-          id: 'mod1',
-          title: 'Initial Assessment',
-          description: 'Take your baseline assessment to determine your starting level'
-        },
-        {
-          id: 'mod2',
-          title: 'Reading Fundamentals',
-          description: 'Learn core reading comprehension strategies'
-        },
-        {
-          id: 'mod3',
-          title: 'Listening Skills',
-          description: 'Develop active listening and note-taking techniques'
-        },
-        {
-          id: 'mod4',
-          title: 'Speaking Practice',
-          description: 'Build confidence in verbal communication'
-        },
-        {
-          id: 'mod5',
-          title: 'Writing Essentials',
-          description: 'Master structured writing and grammar'
-        },
-        {
-          id: 'mod6',
-          title: 'Practice Test 1',
-          description: 'Full-length practice examination'
-        },
-        {
-          id: 'mod7',
-          title: 'Test Strategies',
-          description: 'Learn time management and test-taking strategies'
-        },
-        {
-          id: 'mod8',
-          title: 'Final Practice Test',
-          description: 'Complete practice test before certification'
-        }
-      ],
-      showFinalAssessment: false
     };
   };
 
@@ -121,9 +68,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     setError(null);
     try {
       // Fetch both dashboard data and announcements in parallel
-      const [dashboardData, ] = await Promise.all([
+      const [dashboardData, announcementsData] = await Promise.all([
         fetchDashboardFromAPI(),
-        //getAllAnnouncements()
+        getAllAnnouncements()
       ]);
 
       // Set dashboard data
@@ -131,12 +78,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
       setStartingScoreDate(dashboardData.startingScoreDate);
       setCurrentScore(dashboardData.currentScore);
       setCurrentScoreDate(dashboardData.currentScoreDate);
-      setModulesCompleted(dashboardData.modulesCompleted);
-      setModulesToComplete(dashboardData.modulesToComplete);
-      setShowFinalAssessment(dashboardData.showFinalAssessment);
 
       // Set announcements data
-      //setAnnouncements(announcementsData);
+      setAnnouncements(announcementsData);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred while fetching dashboard data';
       setError(errorMessage);
@@ -156,9 +100,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     startingScoreDate,
     currentScore,
     currentScoreDate,
-    modulesCompleted,
-    modulesToComplete,
-    showFinalAssessment,
     announcements,
     loading,
     error,

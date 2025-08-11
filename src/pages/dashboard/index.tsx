@@ -16,22 +16,10 @@ function DashboardContent() {
     startingScoreDate,
     currentScore,
     currentScoreDate,
-    modulesCompleted,
-    modulesToComplete,
-    showFinalAssessment,
     announcements,
     loading,
     error
   } = useDashboardContext();
-
-  // Map context modules to include status for compatibility with existing UI
-  const mapModuleWithStatus = (module: Module, status: 'done' | 'not-started') => ({
-    ...module,
-    status
-  });
-
-  const completedModulesWithStatus = modulesCompleted.map(m => mapModuleWithStatus(m, 'done'));
-  const modulesToStartWithStatus = modulesToComplete.map(m => mapModuleWithStatus(m, 'not-started'));
 
   // Add sample TOEFL modules for demonstration
   const sampleTOEFLModule1 = {
@@ -56,17 +44,6 @@ function DashboardContent() {
     // Navigate to assessment page after course completion
     navigate('/assessment');
   };
-
-  // Modular icon generator for module status
-  function getModuleStatusIcon(status: 'done' | 'in-progress' | 'not-started') {
-    if (status === 'done') {
-      return <CheckCircle2 className="w-5 h-5 text-green-500" />;
-    }
-    if (status === 'in-progress') {
-      return <Circle className="w-5 h-5 text-yellow-500 animate-pulse" />;
-    }
-    return <Circle className="w-5 h-5 text-gray-400" />;
-  }
 
   // Loading state
   if (loading) {
@@ -280,30 +257,6 @@ function DashboardContent() {
                 />
               </div>
             </div>
-          </motion.div>
-        )}
-
-        {/* Final Assessment Section */}
-        {showFinalAssessment && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-lg p-8 mb-8 text-white"
-          >
-            <h2 className="text-2xl font-semibold mb-4">
-              🎉 Ready for Final Assessment!
-            </h2>
-            <p className="text-green-100 mb-6">
-              Congratulations! You've completed all required modules and are ready to take your final assessment.
-            </p>
-            <button
-              onClick={() => navigate('/assessment')}
-              className="bg-white text-green-600 px-6 py-3 rounded-lg font-medium hover:bg-green-50 transition-all flex items-center gap-2"
-            >
-              Start Final Assessment
-              <ArrowRight className="w-5 h-5" />
-            </button>
           </motion.div>
         )}
 
