@@ -88,7 +88,7 @@ const ModuleContent: React.FC<ModuleContentProps> = ({
                 </span>
               </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                {currentModule.title}
+                {currentModule.topic}
               </h1>
               <p className="text-lg text-gray-600 leading-relaxed">
                 {currentModule.description}
@@ -104,7 +104,7 @@ const ModuleContent: React.FC<ModuleContentProps> = ({
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  title={`${currentModule.title} Video`}
+                  title={`${currentModule.topic} Video`}
                 />
               </div>
             </motion.div>
@@ -120,7 +120,7 @@ const ModuleContent: React.FC<ModuleContentProps> = ({
                     src={currentModule.botIframeUrl}
                     className="w-full h-full"
                     frameBorder="0"
-                    title={`${currentModule.title} Tutor`}
+                    title={`${currentModule.topic} Tutor`}
                   />
                 </div>
               </div>

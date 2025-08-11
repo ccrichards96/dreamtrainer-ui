@@ -1,11 +1,6 @@
-export interface Module {
-  title: string;
-  description: string;
-  videoUrl: string;
-  botIframeUrl: string;
-}
+// Re-export Module type from the main types
+export type { Module } from '../../../types/modules';
 
 export interface DreamFlowProps {
-  modules: Module[];
   onComplete?: () => void;
 }

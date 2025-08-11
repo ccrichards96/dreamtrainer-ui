@@ -2,7 +2,10 @@ import { motion } from 'framer-motion';
 import { useAuth0 } from '@auth0/auth0-react';
 import { CheckCircle2, Circle, ArrowRight, MessageSquare, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useDashboardContext, DashboardProvider, Module } from '../../contexts';
+import { useEffect } from 'react';
+import { useDashboardContext, DashboardProvider } from '../../contexts';
+import { CourseProvider } from '../../contexts/CourseContext';
+import { useCourseContext } from '../../contexts/useCourseContext';
 import DreamFlow from '../../components/DreamFlow';
 
 function DashboardContent() {
@@ -17,33 +20,35 @@ function DashboardContent() {
     currentScore,
     currentScoreDate,
     announcements,
-    loading,
-    error
+    loading: dashboardLoading,
+    error: dashboardError
   } = useDashboardContext();
 
-  // Add sample TOEFL modules for demonstration
-  const sampleTOEFLModule1 = {
-    title: "TOEFL: Writing Question 1",
-    description: "Master the TOEFL Writing Task 1 - Integrated Writing. Learn how to effectively read an academic passage, listen to a lecture, and write a coherent response that demonstrates your ability to synthesize information from multiple sources.",
-    videoUrl: "https://vimeo.com/981374557/52c7d357b3?share=copy", // TOEFL Writing tutorial video
-    botIframeUrl: "https://app.vectorshift.ai/chatbots/deployed/67c28ce25d6b7f0ba2b47803"
-  };
+  // Use Course context for module management
+  const {
+    modules,
+    loading: courseLoading,
+    error: courseError,
+    loadCourse
+  } = useCourseContext();
 
-  const sampleTOEFLModule2 = {
-    title: "TOEFL: Writing Question 2",
-    description: "Master the TOEFL Writing Task 2 - Independent Writing. Learn how to develop your ideas, organize your thoughts, and write a well-structured essay that demonstrates your ability to express and support your opinions effectively.",
-    videoUrl: "https://www.youtube.com/embed/8DaTKVBqUNs", // TOEFL Writing Task 2 tutorial video
-    botIframeUrl: "https://app.vectorshift.ai/chatbots/deployed/67c28ce25d6b7f0ba2b47803"
-  };
-
-  // For now, always use the sample TOEFL modules to demonstrate the functionality
-  const finalDreamFlowModules = [sampleTOEFLModule1, sampleTOEFLModule2];
+  // Load course on component mount
+  useEffect(() => {
+    // For demo purposes, we'll use a sample course ID
+    // In a real app, this would come from user data or route params
+    const sampleCourseId = "sample-toefl-course";
+    loadCourse(sampleCourseId);
+  }, [loadCourse]);
 
   const handleCourseComplete = () => {
     console.log('Course completed!');
     // Navigate to assessment page after course completion
     navigate('/assessment');
   };
+
+  // Combined loading state
+  const loading = dashboardLoading || courseLoading;
+  const error = dashboardError || courseError;
 
   // Loading state
   if (loading) {
@@ -234,7 +239,7 @@ function DashboardContent() {
         </motion.div>
 
         {/* Learning Modules - DreamFlow Section */}
-        {finalDreamFlowModules.length > 0 && (
+        {modules.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -252,7 +257,6 @@ function DashboardContent() {
               </div>
               <div className="p-4">
                 <DreamFlow 
-                  modules={finalDreamFlowModules} 
                   onComplete={handleCourseComplete}
                 />
               </div>
@@ -292,7 +296,9 @@ function DashboardContent() {
 export default function Dashboard() {
   return (
     <DashboardProvider>
-      <DashboardContent />
+      <CourseProvider>
+        <DashboardContent />
+      </CourseProvider>
     </DashboardProvider>
   );
 }

@@ -170,7 +170,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                         <h4 className={`text-sm font-medium truncate ${
                           index === currentModuleIndex ? 'text-indigo-600' : 'text-gray-700'
                         }`}>
-                          {module.title}
+                          {module.topic}
                         </h4>
                         <p className="text-xs text-gray-500 mt-1 line-clamp-2">
                           {module.description}

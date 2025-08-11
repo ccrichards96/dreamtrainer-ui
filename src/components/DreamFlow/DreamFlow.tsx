@@ -1,33 +1,36 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { DreamFlowProps } from './types';
 import { ProgressTracker, ModuleContent, NavigationButton } from './components';
+import { useCourseContext } from '../../contexts/useCourseContext';
 
-const DreamFlow: React.FC<DreamFlowProps> = ({ modules, onComplete }) => {
-  const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
-  const [completedModules, setCompletedModules] = useState<Set<number>>(new Set());
-
-  const isLastModule = currentModuleIndex === modules.length - 1;
-  const isFirstModule = currentModuleIndex === 0;
+const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
+  const {
+    modules,
+    currentModuleIndex,
+    completedModules,
+    markModuleAsCompleted,
+    nextModule,
+    previousModule,
+    getProgressPercentage,
+    isLastModule,
+    isFirstModule
+  } = useCourseContext();
 
   const handleNextModule = () => {
     // Mark current module as completed
-    setCompletedModules(prev => new Set([...prev, currentModuleIndex]));
+    markModuleAsCompleted(currentModuleIndex);
     
-    if (isLastModule) {
+    if (isLastModule()) {
       onComplete?.();
     } else {
-      setCurrentModuleIndex(prev => prev + 1);
+      nextModule();
     }
   };
 
   const handlePreviousModule = () => {
-    if (currentModuleIndex > 0) {
-      setCurrentModuleIndex(prev => prev - 1);
+    if (!isFirstModule()) {
+      previousModule();
     }
-  };
-
-  const getProgressPercentage = () => {
-    return ((completedModules.size + (currentModuleIndex > completedModules.size ? 1 : 0)) / modules.length) * 100;
   };
 
   return (
@@ -46,8 +49,8 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ modules, onComplete }) => {
           <NavigationButton
             onNext={handleNextModule}
             onPrevious={handlePreviousModule}
-            isLastModule={isLastModule}
-            isFirstModule={isFirstModule}
+            isLastModule={isLastModule()}
+            isFirstModule={isFirstModule()}
           />
         </div>
 
