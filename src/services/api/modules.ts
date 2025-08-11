@@ -12,6 +12,25 @@ export interface ModulesResponse {
   message: string;
 }
 
+
+/**
+ * Get all modules for a specific course
+ * @param courseId - The ID of the course
+ * @returns Promise<any>
+ */
+export const getCourseById = async (courseId: string): Promise<any> => {
+  try {
+    const response = await apiClient.get<any>(`/courses/${courseId}`);
+    return response.data;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || 'Failed to fetch modules',
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
 /**
  * Get all modules for a specific course
  * @param courseId - The ID of the course
