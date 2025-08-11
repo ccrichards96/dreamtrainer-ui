@@ -320,7 +320,7 @@ function DashboardContent() {
               Need help/support from our trusted experts?
             </h2>
             <a 
-              href="https://calendly.com/your-calendly-link" 
+              href="https://calendly.com/notefulljoseph/toefl-course-help" 
               target="_blank" 
               rel="noopener noreferrer"
               className="w-full bg-[#c5a8de] text-white py-4 rounded-lg font-medium hover:bg-[#b399d6] transition-all flex items-center justify-center gap-2 mb-4"
