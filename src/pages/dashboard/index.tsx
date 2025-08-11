@@ -264,7 +264,7 @@ function DashboardContent() {
             transition={{ delay: 0.2 }}
             className="mb-8"
           >
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-lg">
               <div className="p-8 border-b border-gray-100">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-2">
                   Learning Modules

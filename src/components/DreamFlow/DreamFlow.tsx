@@ -7,6 +7,7 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ modules, onComplete }) => {
   const [completedModules, setCompletedModules] = useState<Set<number>>(new Set());
 
   const isLastModule = currentModuleIndex === modules.length - 1;
+  const isFirstModule = currentModuleIndex === 0;
 
   const handleNextModule = () => {
     // Mark current module as completed
@@ -19,26 +20,24 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ modules, onComplete }) => {
     }
   };
 
+  const handlePreviousModule = () => {
+    if (currentModuleIndex > 0) {
+      setCurrentModuleIndex(prev => prev - 1);
+    }
+  };
+
   const getProgressPercentage = () => {
     return ((completedModules.size + (currentModuleIndex > completedModules.size ? 1 : 0)) / modules.length) * 100;
   };
 
   return (
-    <div className="py-8 px-4">
-      <div className="w-full">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Main Content Area */}
+    <div className="py-8 px-4 pr-20 lg:pr-24">
+      <div className="w-full max-w-none">
+        {/* Main Content Area - Full width with sidebar space */}
+        <div className="w-full">
           <ModuleContent 
             modules={modules}
             currentModuleIndex={currentModuleIndex}
-          />
-
-          {/* Vertical Progress Tracker - Right Side */}
-          <ProgressTracker
-            modules={modules}
-            currentModuleIndex={currentModuleIndex}
-            completedModules={completedModules}
-            getProgressPercentage={getProgressPercentage}
           />
         </div>
 
@@ -46,13 +45,23 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ modules, onComplete }) => {
         <div className="mt-8 pt-6 border-t border-gray-200">
           <NavigationButton
             onNext={handleNextModule}
+            onPrevious={handlePreviousModule}
             isLastModule={isLastModule}
+            isFirstModule={isFirstModule}
           />
         </div>
 
         {/* Mobile Bottom Padding */}
         <div className="h-4 md:hidden" />
       </div>
+
+      {/* Fixed Sidebar Progress Tracker */}
+      <ProgressTracker
+        modules={modules}
+        currentModuleIndex={currentModuleIndex}
+        completedModules={completedModules}
+        getProgressPercentage={getProgressPercentage}
+      />
     </div>
   );
 };
