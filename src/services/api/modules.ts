@@ -179,14 +179,9 @@ export const deleteCourse = async (courseId: string): Promise<any> => {
  * @param moduleData - The module data
  * @returns Promise<any>
  */
-export const createModule = async (courseId: string, moduleData: Omit<CreateModuleDTO, 'categoryId' | 'createdBy'>): Promise<any> => {
+export const createModule = async (moduleData: CreateModuleDTO): Promise<any> => {
   try {
-    const createModulePayload: CreateModuleDTO = {
-      ...moduleData,
-      categoryId: courseId, // Use courseId as categoryId
-    };
-    
-    const response = await apiClient.post<any>(`/modules`, createModulePayload);
+    const response = await apiClient.post<any>(`/modules`, moduleData);
     return response.data;
   } catch (error: any) {
     const apiError: ApiError = {

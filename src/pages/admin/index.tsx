@@ -334,7 +334,6 @@ const AdminDashboard: React.FC = () => {
             <ModuleManager
               course={selectedCourse}
               modules={selectedCourseModules}
-              onSave={refreshCourses}
             />
           ) : (
             <div className="bg-white rounded-lg shadow p-8">

@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Edit3, Trash2, X, Save, AlertCircle, BookOpen } from 'lucide-react';
 import { Course, Module } from '../../types/modules';
 import { createModule, updateModule, deleteModule } from '../../services/api/modules';
+import { Category, getAllCategories } from '../../services/api/categories';
 
 interface ModuleManagerProps {
   course: Course;
   modules: Module[];
-  onSave: () => void;
 }
 
 interface ModuleFormData {
@@ -18,14 +18,17 @@ interface ModuleFormData {
   videoUrl: string;
   botIframeUrl: string;
   lessonContent: string;
+  categoryId: string;
 }
 
-const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules, onSave }) => {
+const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
   const [moduleList, setModuleList] = useState<Module[]>(modules);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingModule, setEditingModule] = useState<Module | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
   const [formData, setFormData] = useState<ModuleFormData>({
     topic: '',
@@ -35,6 +38,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules, onSave }
     videoUrl: '',
     botIframeUrl: '',
     lessonContent: '',
+    categoryId: '',
   });
 
   const resetForm = () => {
@@ -46,8 +50,27 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules, onSave }
       videoUrl: '',
       botIframeUrl: '',
       lessonContent: '',
+      categoryId: '',
     });
   };
+
+  // Load categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const categoriesData = await getAllCategories();
+        setCategories(categoriesData || []);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+        setError('Failed to load categories');
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -74,6 +97,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules, onSave }
       videoUrl: module.videoUrl,
       botIframeUrl: module.botIframeUrl,
       lessonContent: module.lessonContent,
+      categoryId: module.categoryId || '',
     });
   };
 
@@ -104,8 +128,9 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules, onSave }
           videoUrl: formData.videoUrl,
           botIframeUrl: formData.botIframeUrl,
           lessonContent: formData.lessonContent,
+          categoryId: formData.categoryId,
         };
-        const response = await createModule(course.id, moduleData);
+        const response = await createModule(moduleData);
         const newModule = response.data;
         
         // Add to local state
@@ -245,6 +270,32 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules, onSave }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Describe what students will learn in this module"
                 />
+              </div>
+
+              {/* Category */}
+              <div className="md:col-span-2">
+                <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
+                  Category *
+                </label>
+                <select
+                  id="categoryId"
+                  name="categoryId"
+                  value={formData.categoryId}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={categoriesLoading}
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+                {categoriesLoading && (
+                  <p className="text-sm text-gray-500 mt-1">Loading categories...</p>
+                )}
               </div>
 
               {/* Level */}
@@ -416,17 +467,6 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules, onSave }
             ))}
           </div>
         )}
-      </div>
-
-      {/* Save Changes */}
-      <div className="flex justify-end">
-        <button
-          onClick={onSave}
-          className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-        >
-          <Save className="w-4 h-4" />
-          Save All Changes
-        </button>
       </div>
     </motion.div>
   );
