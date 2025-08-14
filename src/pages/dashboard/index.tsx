@@ -7,6 +7,7 @@ import { useDashboardContext, DashboardProvider } from '../../contexts';
 import { CourseProvider } from '../../contexts/CourseContext';
 import { useCourseContext } from '../../contexts/useCourseContext';
 import DreamFlow from '../../components/DreamFlow';
+import { Course } from '../../types/modules';
 
 function DashboardContent() {
   const { user } = useAuth0();
@@ -27,18 +28,31 @@ function DashboardContent() {
   // Use Course context for module management
   const {
     modules,
+    currentCourse,
     loading: courseLoading,
     error: courseError,
-    loadCourse
+    loadCourse,
+    getAllCourses
   } = useCourseContext();
 
-  // Load course on component mount
+  // Load TOEFL Max course on component mount
   useEffect(() => {
-    // For demo purposes, we'll use a sample course ID
-    // In a real app, this would come from user data or route params
-    const sampleCourseId = "sample-toefl-course";
-    loadCourse(sampleCourseId);
-  }, [loadCourse]);
+    const fetchCourses = async () => {
+      try {
+        const courses: Course[] = await getAllCourses();
+        console.log('Fetched courses:', courses);
+        if (courses.length > 0) {
+          console.log('Loading first course:', courses[0].id);
+          await loadCourse(courses[0].id);
+        } else {
+          console.warn('No courses found');
+        }
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
+    };
+    fetchCourses();
+  }, [getAllCourses, loadCourse]);
 
   const handleCourseComplete = () => {
     console.log('Course completed!');
@@ -249,10 +263,10 @@ function DashboardContent() {
             <div className="bg-white rounded-2xl shadow-lg">
               <div className="p-8 border-b border-gray-100">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                  Learning Modules
+                  {currentCourse?.name || 'Learning Modules'}
                 </h2>
                 <p className="text-gray-600">
-                  Progress through your certification modules with interactive content and guided tutorials.
+                  {currentCourse?.description || 'Progress through your certification modules with interactive content and guided tutorials.'}
                 </p>
               </div>
               <div className="p-4">

@@ -1,7 +1,53 @@
 import React, { createContext, ReactNode, useState, useCallback } from 'react';
 import { Course, Module } from '../types/modules';
 import { Test } from '../types/tests';
-import { getCourseById } from '../services/api/modules';
+import { getCourseWithModulesById, getAllCourses as fetchAllCourses } from '../services/api/modules';
+
+
+
+ // Fallback sample data for development
+// const fallbackModules: Module[] = [
+//   {
+//     id: "sample-module-1",
+//     courseId: courseId,
+//     categoryId: null,
+//     topic: "TOEFL: Writing Question 1",
+//     description: "Master the TOEFL Writing Task 1 - Integrated Writing. Learn how to effectively read an academic passage, listen to a lecture, and write a coherent response that demonstrates your ability to synthesize information from multiple sources.",
+//     level: 1,
+//     status: "active",
+//     estimatedTime: 30,
+//     videoUrl: "https://vimeo.com/981374557/52c7d357b3?share=copy",
+//     botIframeUrl: "https://app.vectorshift.ai/chatbots/deployed/67c28ce25d6b7f0ba2b47803",
+//     lessonContent: "Comprehensive lesson content for TOEFL Writing Task 1",
+//     createdBy: "system",
+//     createdAt: new Date(),
+//     updatedAt: new Date()
+//   },
+//   {
+//     id: "sample-module-2",
+//     courseId: courseId,
+//     categoryId: null,
+//     topic: "TOEFL: Writing Question 2",
+//     description: "Master the TOEFL Writing Task 2 - Independent Writing. Learn how to develop your ideas, organize your thoughts, and write a well-structured essay that demonstrates your ability to express and support your opinions effectively.",
+//     level: 2,
+//     status: "active",
+//     estimatedTime: 35,
+//     videoUrl: "https://www.youtube.com/embed/8DaTKVBqUNs",
+//     botIframeUrl: "https://app.vectorshift.ai/chatbots/deployed/67c28ce25d6b7f0ba2b47803",
+//     lessonContent: "Comprehensive lesson content for TOEFL Writing Task 2",
+//     createdBy: "system",
+//     createdAt: new Date(),
+//     updatedAt: new Date()
+//   }
+// ];
+
+// const fallbackCourse = {
+//   id: courseId,
+//   name: "TOEFL Writing Mastery Course",
+//   description: "Complete TOEFL Writing preparation course",
+//   createdAt: new Date(),
+//   updatedAt: new Date()
+// };
 
 export interface CourseContextType {
   currentCourse: Course | null;
@@ -23,6 +69,7 @@ export interface CourseContextType {
   
   // Actions
   loadCourse: (courseId: string) => Promise<void>;
+  getAllCourses: () => Promise<Course[]>;
   setCurrentModuleIndex: (index: number) => void;
   markModuleAsCompleted: (index: number) => void;
   nextModule: () => void;
@@ -65,73 +112,48 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getCourseById(courseId);
-      setCurrentCourse(data.course);
-      setModules(data.modules);
-      setTests(data.tests);
+      const response = await getCourseWithModulesById(courseId);
+      // API returns { success: true, data: { course: {...}, modules: [...], tests: [...] }, message: "..." }
+      const data = response.data;
+      
+      setCurrentCourse(data);
+      setModules(data.modules || []);
+      setTests(data.tests || []);
       // setTestAttempts(data.testAttempts);
 
       // Reset module navigation state
       setCurrentModuleIndexState(0);
       setCompletedModules(new Set());
-      setCurrentModule(data.modules[0] || null);
+      setCurrentModule(data.modules?.[0] || null);
     } catch (err) {
       console.warn('Course loading failed, using fallback data:', err);
-      
-      // Fallback sample data for development
-      const fallbackModules: Module[] = [
-        {
-          id: "sample-module-1",
-          courseId: courseId,
-          categoryId: null,
-          topic: "TOEFL: Writing Question 1",
-          description: "Master the TOEFL Writing Task 1 - Integrated Writing. Learn how to effectively read an academic passage, listen to a lecture, and write a coherent response that demonstrates your ability to synthesize information from multiple sources.",
-          level: 1,
-          status: "active",
-          estimatedTime: 30,
-          videoUrl: "https://vimeo.com/981374557/52c7d357b3?share=copy",
-          botIframeUrl: "https://app.vectorshift.ai/chatbots/deployed/67c28ce25d6b7f0ba2b47803",
-          lessonContent: "Comprehensive lesson content for TOEFL Writing Task 1",
-          createdBy: "system",
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          id: "sample-module-2",
-          courseId: courseId,
-          categoryId: null,
-          topic: "TOEFL: Writing Question 2",
-          description: "Master the TOEFL Writing Task 2 - Independent Writing. Learn how to develop your ideas, organize your thoughts, and write a well-structured essay that demonstrates your ability to express and support your opinions effectively.",
-          level: 2,
-          status: "active",
-          estimatedTime: 35,
-          videoUrl: "https://www.youtube.com/embed/8DaTKVBqUNs",
-          botIframeUrl: "https://app.vectorshift.ai/chatbots/deployed/67c28ce25d6b7f0ba2b47803",
-          lessonContent: "Comprehensive lesson content for TOEFL Writing Task 2",
-          createdBy: "system",
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-      ];
 
-      const fallbackCourse = {
-        id: courseId,
-        name: "TOEFL Writing Mastery Course",
-        description: "Complete TOEFL Writing preparation course",
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-
-      setCurrentCourse(fallbackCourse);
-      setModules(fallbackModules);
+      setCurrentCourse(null);
+      setModules([]);
       setTests([]);
       setCurrentModuleIndexState(0);
       setCompletedModules(new Set());
-      setCurrentModule(fallbackModules[0] || null);
+      setCurrentModule(null);
     } finally {
       setLoading(false);
     }
   }, []);
+
+  // Get all available courses
+  const getAllCourses = useCallback(async (): Promise<Course[]> => {
+    try {
+      const response = await fetchAllCourses();
+      // API returns { success: true, data: [...], message: "..." }
+      // The courses are directly in the data array
+      return response.data || [];
+    } catch (err) {
+      console.warn('Failed to fetch courses:', err);
+      setError('Failed to fetch courses');
+      return [];
+    }
+  }, []);
+
+  
 
   // Set current module by index
   const setCurrentModuleIndex = useCallback((index: number): void => {
@@ -213,6 +235,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     
     // Actions
     loadCourse,
+    getAllCourses,
     setCurrentModuleIndex,
     markModuleAsCompleted,
     nextModule,

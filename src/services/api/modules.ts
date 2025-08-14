@@ -14,6 +14,24 @@ export interface ModulesResponse {
 
 
 /**
+ * Get all courses
+ * @returns Promise<any>
+ */
+export const getAllCourses = async (): Promise<any> => {
+  try {
+    const response = await apiClient.get<any>(`/courses`);
+    return response.data;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || 'Failed to fetch courses',
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
+
+/**
  * Get all modules for a specific course
  * @param courseId - The ID of the course
  * @returns Promise<any>
@@ -31,6 +49,25 @@ export const getCourseById = async (courseId: string): Promise<any> => {
   }
 };
 
+
+/**
+ * Get all modules for a specific course
+ * @param courseId - The ID of the course
+ * @returns Promise<any>
+ */
+export const getCourseWithModulesById = async (courseId: string): Promise<any> => {
+  try {
+    const response = await apiClient.get<any>(`/courses/${courseId}/modules`);
+    return response.data;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || 'Failed to fetch modules',
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
 /**
  * Get all modules for a specific course
  * @param courseId - The ID of the course
@@ -38,7 +75,7 @@ export const getCourseById = async (courseId: string): Promise<any> => {
  */
 export const getAllModulesByCourse = async (courseId: string): Promise<ModulesResponse> => {
   try {
-    const response = await apiClient.get<ModulesResponse>(`/courses/${courseId}/modules`);
+    const response = await apiClient.get<ModulesResponse>(`/courses/${courseId}/modules-list`);
     return response.data;
   } catch (error: any) {
     const apiError: ApiError = {
