@@ -120,6 +120,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
       } else {
         // Create new module via API
         const moduleData = {
+          courseId: course.id,
           topic: formData.topic,
           description: formData.description,
           level: formData.level,

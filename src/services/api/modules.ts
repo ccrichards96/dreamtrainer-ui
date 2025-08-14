@@ -7,6 +7,7 @@ export interface ApiError {
 }
 
 export interface CreateModuleDTO {
+  courseId: string;
   topic: string;
   description: string;
   level: number;
