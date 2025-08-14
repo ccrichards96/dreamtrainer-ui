@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Module } from '../types';
+import "react-quill/dist/quill.snow.css";
 
 interface ModuleContentProps {
   modules: Module[];
@@ -108,6 +109,26 @@ const ModuleContent: React.FC<ModuleContentProps> = ({
                 />
               </div>
             </motion.div>
+
+            {/* Lesson Content Section */}
+            {currentModule.lessonContent && (
+              <motion.div variants={itemVariants} className="px-8 pb-6">
+                <div className="border-t border-gray-100 pt-6">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                    Lesson Content
+                  </h3>
+                  <div 
+                    className="ql-editor prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ 
+                      __html: currentModule.lessonContent 
+                    }}
+                    style={{
+                      lineHeight: '1.7',
+                    }}
+                  />
+                </div>
+              </motion.div>
+            )}
 
             {/* Bot Iframe Section */}
             <motion.div variants={itemVariants} className="px-8 pb-8">

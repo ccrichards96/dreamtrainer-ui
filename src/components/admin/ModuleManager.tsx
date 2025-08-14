@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Edit3, Trash2, X, Save, AlertCircle, BookOpen } from 'lucide-react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { Course, Module } from '../../types/modules';
 import { createModule, updateModule, deleteModule } from '../../services/api/modules';
 import { Category, getAllCategories } from '../../services/api/categories';
@@ -77,6 +79,13 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     setFormData(prev => ({
       ...prev,
       [name]: name === 'level' || name === 'estimatedTime' ? parseInt(value) || 0 : value
+    }));
+  };
+
+  const handleQuillChange = (content: string) => {
+    setFormData(prev => ({
+      ...prev,
+      lessonContent: content
     }));
   };
 
@@ -373,15 +382,33 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                 <label htmlFor="lessonContent" className="block text-sm font-medium text-gray-700 mb-1">
                   Lesson Content
                 </label>
-                <textarea
-                  id="lessonContent"
-                  name="lessonContent"
-                  value={formData.lessonContent}
-                  onChange={handleInputChange}
-                  rows={6}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter the lesson content..."
-                />
+                <div className="border border-gray-300 rounded-lg overflow-hidden">
+                  <ReactQuill
+                    theme="snow"
+                    value={formData.lessonContent}
+                    onChange={handleQuillChange}
+                    placeholder="Enter the lesson content..."
+                    style={{ 
+                      minHeight: '150px',
+                      backgroundColor: 'white'
+                    }}
+                    modules={{
+                      toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'color': [] }, { 'background': [] }],
+                        ['link', 'image'],
+                        ['clean']
+                      ],
+                    }}
+                    formats={[
+                      'header', 'bold', 'italic', 'underline', 'strike',
+                      'list', 'bullet', 'color', 'background',
+                      'link', 'image'
+                    ]}
+                  />
+                </div>
               </div>
             </div>
 
