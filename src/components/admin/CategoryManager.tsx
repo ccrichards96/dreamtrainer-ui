@@ -11,15 +11,11 @@ import {
   deleteCategory
 } from '../../services/api/categories';
 
-interface CategoryManagerProps {
-  onBack: () => void;
-}
-
 interface CategoryFormData {
   name: string;
 }
 
-const CategoryManager: React.FC<CategoryManagerProps> = ({ onBack }) => {
+const CategoryManager: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -182,12 +178,6 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ onBack }) => {
               <p className="text-sm text-gray-500">Create and manage content categories</p>
             </div>
             <div className="flex items-center gap-3">
-              <button
-                onClick={onBack}
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Back to Overview
-              </button>
               <button
                 onClick={handleAddCategory}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Edit3, Trash2, BookOpen, Users, Search, Tag } from 'lucide-react';
+import { Edit3, Trash2, BookOpen, Users, Search, Tag } from 'lucide-react';
 import { Course, Module } from '../../types/modules';
 import { getAllCourses, getCourseById, getCourseWithModulesById } from '../../services/api/modules';
 import { CourseEditor, ModuleManager, CategoryManager } from '../../components/admin';
@@ -171,10 +171,10 @@ const AdminDashboard: React.FC = () => {
                   Back to Overview
                 </button>
               )}
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+              {/* <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
                 <Plus className="w-4 h-4" />
                 New Course
-              </button>
+              </button> */}
               <button 
                 onClick={handleManageCategories}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
@@ -348,7 +348,7 @@ const AdminDashboard: React.FC = () => {
 
         {/* Category Manager */}
         {view === 'category-manage' && (
-          <CategoryManager onBack={handleBackToOverview} />
+          <CategoryManager />
         )}
       </div>
     </div>
