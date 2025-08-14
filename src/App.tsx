@@ -10,6 +10,7 @@ import ProtectedRoute from './components/routes/ProtectedRoute';
 import AccountPage from './pages/account';
 import Home from './pages/home';
 import BlogPage from './pages/blog';
+import AdminDashboard from './pages/admin';
 import CMSRoute from './components/routes/CMSRoute';
 import Navigation from './components/Navigation';
 import { AuthProvider } from './contexts';
@@ -59,6 +60,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <AccountPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin" 
+                  element={
+                    <ProtectedRoute>
+                      <AdminDashboard />
                     </ProtectedRoute>
                   } 
                 />

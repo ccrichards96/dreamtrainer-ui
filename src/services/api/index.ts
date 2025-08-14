@@ -13,6 +13,10 @@ export { default as assessmentService } from './assessment';
 export * from './billing';
 export { default as billingService } from './billing';
 
+// Export categories services
+export * from './categories';
+export { default as categoriesService } from './categories';
+
 // Export modules services
 export * from './modules';
 export { default as modulesService } from './modules';
@@ -21,4 +25,5 @@ export { default as modulesService } from './modules';
 // export type { Announcement, AnnouncementsResponse } from './announcements';
 export type { AssessmentSubmission, AssessmentResponse, ApiError } from './assessment';
 export type { UserBillingInfo } from './billing';
+export type { Category, CreateCategoryDTO, UpdateCategoryDTO, CategoryResponse, CategoryListResponse } from './categories';
 export type { ModulesResponse } from './modules';
