@@ -4,6 +4,7 @@ interface Test {
     name: string;
     description: string;
     videoUrl?: string;
+    formLink?: string;
     richTextContent?: string; // Rich text content
     passingScore: number;
     createdAt: Date;
