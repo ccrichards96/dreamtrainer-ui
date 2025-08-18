@@ -60,8 +60,9 @@ export interface CourseContextType {
   completedModules: Set<number>;
   
   // Test management
-//   testAttempts: TestAttempt[];
-//   lastTestResult: TestResult | null;
+  isTestMode: boolean;
+  currentTest: Test | null;
+  allModulesCompleted: boolean;
   
   // State management
   loading: boolean;
@@ -74,6 +75,10 @@ export interface CourseContextType {
   markModuleAsCompleted: (index: number) => void;
   nextModule: () => void;
   previousModule: () => void;
+  
+  // Test actions
+  startTestMode: () => void;
+  exitTestMode: () => void;
   
   // Utility functions
   getNextModule: () => Module | null;
@@ -101,10 +106,13 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   const [tests, setTests] = useState<Test[]>([]);
   const [currentModuleIndex, setCurrentModuleIndexState] = useState<number>(0);
   const [completedModules, setCompletedModules] = useState<Set<number>>(new Set());
-//   const [testAttempts, setTestAttempts] = useState<TestAttempt[]>([]);
-//   const [lastTestResult, setLastTestResult] = useState<TestResult | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Test-related state
+  const [isTestMode, setIsTestMode] = useState<boolean>(false);
+  const [currentTest, setCurrentTest] = useState<Test | null>(null);
+  const [allModulesCompleted, setAllModulesCompleted] = useState<boolean>(false);
 
 
   // Load course data
@@ -165,7 +173,29 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
 
   // Mark a module as completed
   const markModuleAsCompleted = useCallback((index: number): void => {
-    setCompletedModules(prev => new Set([...prev, index]));
+    setCompletedModules(prev => {
+      const newCompleted = new Set([...prev, index]);
+      // Check if all modules are completed
+      if (newCompleted.size === modules.length) {
+        setAllModulesCompleted(true);
+      }
+      return newCompleted;
+    });
+  }, [modules.length]);
+
+  // Test-related functions
+  const startTestMode = useCallback((): void => {
+    if (tests.length > 0) {
+      // Select a random test
+      const randomTest = tests[Math.floor(Math.random() * tests.length)];
+      setCurrentTest(randomTest);
+      setIsTestMode(true);
+    }
+  }, [tests]);
+
+  const exitTestMode = useCallback((): void => {
+    setIsTestMode(false);
+    setCurrentTest(null);
   }, []);
 
   // Navigate to next module
@@ -229,6 +259,11 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     currentModuleIndex,
     completedModules,
     
+    // Test management
+    isTestMode,
+    currentTest,
+    allModulesCompleted,
+    
     // State management
     loading,
     error,
@@ -240,6 +275,10 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     markModuleAsCompleted,
     nextModule,
     previousModule,
+    
+    // Test actions
+    startTestMode,
+    exitTestMode,
         
     // Utility functions
     getNextModule,

@@ -6,7 +6,8 @@ interface Test {
     videoUrl?: string;
     formLink?: string;
     richTextContent?: string; // Rich text content
-    passingScore: number;
+    passingScore: number; // Total possible score - passing score // remove
+    order: number; //TODO: Add to backend
     createdAt: Date;
     updatedAt: Date;
 }

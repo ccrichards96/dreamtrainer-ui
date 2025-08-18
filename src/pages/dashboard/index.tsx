@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { useAuth0 } from '@auth0/auth0-react';
 import { CheckCircle2, Circle, ArrowRight, MessageSquare, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useDashboardContext, DashboardProvider } from '../../contexts';
 import { CourseProvider } from '../../contexts/CourseContext';
@@ -11,7 +10,6 @@ import { Course } from '../../types/modules';
 
 function DashboardContent() {
   const { user } = useAuth0();
-  const navigate = useNavigate();
   const firstName = user?.given_name || 'there';
 
   // Use Dashboard context instead of dummy data
@@ -56,8 +54,7 @@ function DashboardContent() {
 
   const handleCourseComplete = () => {
     console.log('Course completed!');
-    // Navigate to assessment page after course completion
-    navigate('/assessment');
+    // Course completion handling - no longer navigating to assessment
   };
 
   // Combined loading state
