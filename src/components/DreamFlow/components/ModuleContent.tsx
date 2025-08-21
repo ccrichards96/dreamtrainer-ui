@@ -136,11 +136,12 @@ const ModuleContent: React.FC<ModuleContentProps> = ({
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                   Interactive Tutor
                 </h3>
-                <div className="relative w-full h-96 rounded-xl overflow-hidden shadow-lg border border-gray-200">
+                <div className="relative w-full h-[600px] rounded-xl overflow-hidden shadow-lg border border-gray-200">
                   <iframe
                     src={currentModule.botIframeUrl}
                     className="w-full h-full"
                     frameBorder="0"
+                    scrolling="no"
                     title={`${currentModule.topic} Tutor`}
                   />
                 </div>

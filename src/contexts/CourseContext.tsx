@@ -79,6 +79,7 @@ export interface CourseContextType {
   // Test actions
   startTestMode: () => void;
   exitTestMode: () => void;
+  resetToFirstModule: (clearProgress?: boolean) => void;
   
   // Utility functions
   getNextModule: () => Module | null;
@@ -198,6 +199,19 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     setCurrentTest(null);
   }, []);
 
+  const resetToFirstModule = useCallback((clearProgress: boolean = false): void => {
+    setCurrentModuleIndexState(0);
+    setCurrentModule(modules[0] || null);
+    setIsTestMode(false);
+    setCurrentTest(null);
+    setAllModulesCompleted(false);
+    
+    // Optionally reset completed modules if you want users to go through everything fresh
+    if (clearProgress) {
+      setCompletedModules(new Set());
+    }
+  }, [modules]);
+
   // Navigate to next module
   const nextModule = useCallback((): void => {
     if (currentModuleIndex < modules.length - 1) {
@@ -279,6 +293,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     // Test actions
     startTestMode,
     exitTestMode,
+    resetToFirstModule,
         
     // Utility functions
     getNextModule,

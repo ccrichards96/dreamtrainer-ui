@@ -55,6 +55,15 @@ export const submitAssessment = async (assessmentData: AssessmentSubmission): Pr
       body: params.toString(),
     });
 
+    // Send to test scorer webhook
+    await fetch('http://18.118.77.149:5678/webhook-test/test-scorer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params.toString(),
+    });
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
