@@ -20,7 +20,8 @@ function DashboardContent() {
     currentScoreDate,
     announcements,
     loading: dashboardLoading,
-    error: dashboardError
+    error: dashboardError,
+    getTestScores
   } = useDashboardContext();
 
   // Use Course context for module management
@@ -42,6 +43,9 @@ function DashboardContent() {
         if (courses.length > 0) {
           console.log('Loading first course:', courses[0].id);
           await loadCourse(courses[0].id);
+
+          const testAttempts = await getTestScores(courses[0].id);
+          console.log('Fetched test attempts:', testAttempts);
         } else {
           console.warn('No courses found');
         }
@@ -133,7 +137,7 @@ function DashboardContent() {
                   </div>
                   {startingScoreDate && (
                     <div className="text-xs text-gray-400 mt-3">
-                      Assessed: {startingScoreDate.toLocaleDateString('en-US', {
+                      Assessed: {new Date(startingScoreDate).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric'
@@ -174,7 +178,7 @@ function DashboardContent() {
                   )}
                   {currentScoreDate && (
                     <div className="text-xs text-gray-400 mt-3">
-                      Assessed: {currentScoreDate.toLocaleDateString('en-US', {
+                      Assessed: {new Date(currentScoreDate).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric'

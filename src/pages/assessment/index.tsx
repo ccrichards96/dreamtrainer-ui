@@ -16,6 +16,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { submitAssessment, type AssessmentSubmission } from '../../services/api';
+import { useCourseContext } from '../../contexts/useCourseContext';
 
 interface AssessmentForm {
   first_name: string;
@@ -40,6 +41,7 @@ interface FormErrors {
 export default function Assessment() {
   const { user } = useAuth0();
   const navigate = useNavigate();
+  const { currentTest } = useCourseContext();
 
   const [form, setForm] = useState<AssessmentForm>({
     first_name: user?.given_name || '',
@@ -123,7 +125,11 @@ export default function Assessment() {
       };
 
       // Submit to API
-      const response = await submitAssessment(assessmentData);
+      const response = await submitAssessment(
+        currentTest?.id || 'default-test-id', // testId
+        user?.sub || '', // userId
+        assessmentData
+      );
       
       console.log('Assessment submitted successfully:', response);
       setSubmitted(true);

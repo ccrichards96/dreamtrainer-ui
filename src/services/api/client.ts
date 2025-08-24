@@ -12,6 +12,12 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
+export interface APIResponse<T = unknown> {
+  message: string;
+  data: T;
+  success: boolean;
+}
+
 // Note: Request interceptor for authentication is now handled by ApiProvider
 // This keeps the client clean and allows for proper Auth0 token management
 

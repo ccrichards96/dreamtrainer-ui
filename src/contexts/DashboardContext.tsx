@@ -1,6 +1,7 @@
 import React, { createContext, ReactNode, useState, useCallback, useEffect } from 'react';
 import { Announcement } from '../types/announcements';
 import { getAllAnnouncements } from '../services/api/announcements';
+import { getTestAttemptsByCourse } from '../services/api/tests';
 
 // Define the module interface
 export interface Module {
@@ -20,6 +21,7 @@ export interface DashboardContextType {
   loading: boolean;
   error: string | null;
   refetchDashboard: () => Promise<void>;
+  getTestScores: (courseId: string) => Promise<void>;
 }
 
 // Create the context with undefined as default
@@ -39,28 +41,27 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Simulate API call to fetch dashboard data
-  const fetchDashboardFromAPI = async (): Promise<{
-    startingScore: number;
-    startingScoreDate: Date;
-    currentScore: number;
-    currentScoreDate: Date | null;
-  }> => {
-    // Simulate network delay (1-3 seconds)
-    const delay = Math.random() * 2000 + 1000;
-    await new Promise(resolve => setTimeout(resolve, delay));
+  const getTestScores = useCallback(async (courseId: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    try {
 
-    // Generate realistic data for a first-time user
-    const currentDate = null;
-    const startingDate = new Date();
+      const testAttempts: any = await getTestAttemptsByCourse(courseId);
 
-    return {
-      startingScore: 0,
-      startingScoreDate: startingDate,
-      currentScore: 0,
-      currentScoreDate: currentDate,
-    };
-  };
+      // Set dashboard data
+      setStartingScore(testAttempts.firstAttempt?.score || 0);
+      setStartingScoreDate(testAttempts.firstAttempt?.createdAt || null);
+      setCurrentScore(testAttempts.currentAttempt?.score || 0);
+      setCurrentScoreDate(testAttempts.currentAttempt?.createdAt || null);
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred while fetching dashboard data';
+      setError(errorMessage);
+      console.error('Dashboard API Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // Refetch function that can be called to update dashboard data
   const refetchDashboard = useCallback(async (): Promise<void> => {
@@ -68,16 +69,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     setError(null);
     try {
       // Fetch both dashboard data and announcements in parallel
-      const [dashboardData, announcementsData] = await Promise.all([
-        fetchDashboardFromAPI(),
+      const [announcementsData] = await Promise.all([
         getAllAnnouncements()
       ]);
 
       // Set dashboard data
-      setStartingScore(dashboardData.startingScore);
-      setStartingScoreDate(dashboardData.startingScoreDate);
-      setCurrentScore(dashboardData.currentScore);
-      setCurrentScoreDate(dashboardData.currentScoreDate);
+      // setStartingScore(dashboardData.startingScore);
+      // setStartingScoreDate(dashboardData.startingScoreDate);
+      // setCurrentScore(dashboardData.currentScore);
+      // setCurrentScoreDate(dashboardData.currentScoreDate);
 
       // Set announcements data
       setAnnouncements(announcementsData);
@@ -104,6 +104,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     loading,
     error,
     refetchDashboard,
+    getTestScores,
   };
 
   return (

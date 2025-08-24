@@ -1,4 +1,5 @@
-import apiClient from './client';
+import { TestAttempt, DraftTestAttempt } from '../../types/tests';
+import apiClient, {APIResponse} from './client';
 
 export interface AssessmentSubmission {
   first_name: string;
@@ -31,7 +32,7 @@ export interface ApiError {
  * @param assessmentData - The assessment form data
  * @returns Promise<AssessmentResponse> - The submission response
  */
-export const submitAssessment = async (assessmentData: AssessmentSubmission): Promise<AssessmentResponse> => {
+export const submitAssessment = async (testId:string, userId:string, assessmentData: AssessmentSubmission): Promise<AssessmentResponse> => {
   try {
     // Prepare data as x-www-form-urlencoded
     const params = new URLSearchParams();
@@ -46,6 +47,16 @@ export const submitAssessment = async (assessmentData: AssessmentSubmission): Pr
     params.append('essay_question_2', assessmentData.essay_question_2 || '');
     params.append('essay_question_2_word_count', assessmentData.essay_question_2_word_count || '');
 
+    const draftTestAttempt: DraftTestAttempt = {
+      testId: testId,
+      userId: userId,
+      answerContent: params.toString(),
+    };
+
+    const testAttemptResponse = await apiClient.post<APIResponse<TestAttempt>>('/test-attempts', draftTestAttempt);
+
+    params.append('testAttemptId', testAttemptResponse.data.data?.id || '');
+
     // Submit to external webhook
     const response = await fetch('http://18.118.77.149:5678/webhook/submit-form', {
       method: 'POST',
@@ -56,7 +67,7 @@ export const submitAssessment = async (assessmentData: AssessmentSubmission): Pr
     });
 
     // Send to test scorer webhook
-    await fetch('http://18.118.77.149:5678/webhook-test/test-scorer', {
+    await fetch('http://18.118.77.149:5678/webhook/test-scorer', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

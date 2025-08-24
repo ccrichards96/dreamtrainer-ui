@@ -11,6 +11,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { submitAssessment, type AssessmentSubmission } from '../services/api';
+import { useCourseContext } from '../contexts/useCourseContext';
 
 interface AssessmentFormData {
   test_number: string;
@@ -40,6 +41,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
   showHeader = true
 }) => {
   const { user } = useAuth0();
+  const { currentTest } = useCourseContext();
 
   const [form, setForm] = useState<AssessmentFormData>({
     test_number: '',
@@ -99,7 +101,11 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
       };
 
       // Submit to API
-      const response = await submitAssessment(assessmentData);
+      const response = await submitAssessment(
+        currentTest?.id || 'default-test-id', // testId
+        user?.sub || '', // userId 
+        assessmentData
+      );
       
       console.log('Assessment submitted successfully:', response);
       setSubmitted(true);

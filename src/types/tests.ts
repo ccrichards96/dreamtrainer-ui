@@ -23,7 +23,14 @@ interface TestAttempt {
     completedAt: Date | null;
 }
 
+type DraftTestAttempt = Pick<
+  TestAttempt,
+  'testId' | 'userId' | 'answerContent'
+>;
+
+
 export type { 
     Test, 
-    TestAttempt
+    TestAttempt,
+    DraftTestAttempt
 };
