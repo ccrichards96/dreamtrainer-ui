@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useAuth0 } from '@auth0/auth0-react';
-import { CheckCircle2, Circle, ArrowRight, MessageSquare, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
+import { MessageSquare, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
 import { useEffect } from 'react';
 import { useDashboardContext, DashboardProvider } from '../../contexts';
 import { CourseProvider } from '../../contexts/CourseContext';
