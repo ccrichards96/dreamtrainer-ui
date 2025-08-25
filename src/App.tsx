@@ -13,11 +13,10 @@ import AdminDashboard from './pages/admin';
 import CMSRoute from './components/routes/CMSRoute';
 import Navigation from './components/Navigation';
 import { AuthProvider, ApiProvider } from './contexts';
+import { AppProvider } from './contexts/AppContext';
 import NotFound from './pages/NotFound';
 
 function App() {
-  // validateAuth0Config(); // Optionally call for side effects if needed
-
   return (
     <Auth0Provider
       domain={import.meta.env.VITE_AUTH0_DOMAIN as string}
@@ -29,51 +28,60 @@ function App() {
     >
       <AuthProvider>
         <ApiProvider>
-          <Router>
-            <div className="min-h-screen bg-gray-100">
-              <Navigation />
-              <div className="pt-16">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/blog" element={<BlogPage />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/onboarding" element={<Onboarding />} />
-                  <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                  <Route 
-                    path="/dashboard" 
-                    element={
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/account" 
-                    element={
-                      <ProtectedRoute>
-                        <AccountPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin" 
-                    element={
-                      <ProtectedRoute>
-                        <AdminDashboard />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  {/* CMS Routes */}
-                  <Route path="/p/*" element={<CMSRoute />} />
-                  <Route path="/p" element={<CMSRoute />} />
-                  
-                  {/* 404 Catch-all route - must be last */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
+          <AppProvider>
+            <Router>
+              <div className="min-h-screen bg-gray-100">
+                <Navigation />
+                <div className="pt-16">
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/blog" element={<BlogPage />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route 
+                      path="/onboarding" 
+                      element={
+                        <ProtectedRoute>
+                          <Onboarding />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                    <Route 
+                      path="/dashboard" 
+                      element={
+                        <ProtectedRoute>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/account" 
+                      element={
+                        <ProtectedRoute>
+                          <AccountPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin" 
+                      element={
+                        <ProtectedRoute>
+                          <AdminDashboard />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    {/* CMS Routes */}
+                    <Route path="/p/*" element={<CMSRoute />} />
+                    <Route path="/p" element={<CMSRoute />} />
+                    
+                    {/* 404 Catch-all route - must be last */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </div>
               </div>
-            </div>
-          </Router>
+            </Router>
+          </AppProvider>
         </ApiProvider>
       </AuthProvider>
     </Auth0Provider>

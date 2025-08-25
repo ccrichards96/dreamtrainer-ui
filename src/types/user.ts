@@ -1,17 +1,18 @@
-import { User as authUser} from '@auth0/auth0-react';
+import { User as Auth0User} from '@auth0/auth0-react';
 
 interface User {
-    authUser: authUser,
-    auth0Id: string;
+    id: string;
+    authUser?: Auth0User;
+    auth0Id: string | null;
     firstName: string;
     lastName: string;
     email: string;
-    phoneNumber: string;
     isEmailVerified: boolean;
-    lastLoginAt: Date;
-    avatarUrl?: string;
-    createdAt: Date;
-    updatedAt: Date;
+    onboardingComplete: boolean;
+    avatarUrl: string | null;
+    lastLoginAt: Date | null;
+    createdAt: Date | null;
+    updatedAt: Date | null;
 }
 
 export type { User };

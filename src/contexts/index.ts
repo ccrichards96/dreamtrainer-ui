@@ -4,3 +4,5 @@ export { DashboardProvider, DashboardContext, type DashboardContextType, type Mo
 export { useDashboardContext } from './useDashboardContext';
 export { ApiProvider, ApiContext } from './ApiContext';
 export { useApiContext } from './useApiContext';
+export { AppProvider, AppContext } from './AppContext';
+export { useApp } from './useAppContext';
