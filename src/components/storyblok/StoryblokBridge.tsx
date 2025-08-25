@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { storyblokInit, apiPlugin } from '@storyblok/react';
 
 declare global {
   interface Window {

@@ -4,7 +4,6 @@ import { Plus, Edit3, Trash2, X, Save, AlertCircle, Tag } from 'lucide-react';
 import { 
   Category, 
   CreateCategoryDTO, 
-  UpdateCategoryDTO,
   getAllCategories,
   createCategory,
   updateCategory,
