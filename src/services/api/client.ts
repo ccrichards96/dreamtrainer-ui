@@ -18,6 +18,12 @@ export interface APIResponse<T = unknown> {
   success: boolean;
 }
 
+export interface ApiError {
+  message: string;
+  code?: string;
+  details?: Record<string, unknown>;
+}
+
 // Note: Request interceptor for authentication is now handled by ApiProvider
 // This keeps the client clean and allows for proper Auth0 token management
 

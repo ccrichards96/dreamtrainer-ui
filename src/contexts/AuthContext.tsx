@@ -1,7 +1,6 @@
 import React, { createContext, ReactNode } from 'react';
 import { useAuth0, User } from '@auth0/auth0-react';
 
-// Define the shape of our Auth context
 export interface AuthContextType {
   isAuthenticated: boolean;
   user: User | undefined;
@@ -10,10 +9,8 @@ export interface AuthContextType {
   loading: boolean;
 }
 
-// Create the context with undefined as default
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// AuthProvider component that wraps the Auth0Provider functionality
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -27,7 +24,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading
   } = useAuth0();
 
-  // Wrapper functions for cleaner API
   const login = () => {
     loginWithRedirect();
   };
@@ -55,5 +51,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 };
 
-// Export the context for advanced use cases (optional)
 export { AuthContext };
