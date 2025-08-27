@@ -34,6 +34,7 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
               const token = await getAccessTokenSilently({
                 authorizationParams: {
                   audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+                  scope: 'openid profile email'
                 },
               });
               
