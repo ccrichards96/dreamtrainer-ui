@@ -10,7 +10,7 @@ import {
 // Import all components that will be used in Storyblok
 import Grid from '../components/storyblok/Grid';
 import Button from '../components/storyblok/Button';
-import Text from '../components/storyblok/Text';
+import Text, { RichTextField } from '../components/storyblok/Text';
 import Header from '../components/storyblok/Header';
 import Row from '../components/storyblok/Row';
 import Column from '../components/storyblok/Column';
@@ -27,6 +27,7 @@ const components = {
   grid: Grid,
   button: Button,
   text: Text,
+  richText: RichTextField,
   header: Header,
   row: Row,
   column: Column,
