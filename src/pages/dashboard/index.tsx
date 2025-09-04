@@ -1,16 +1,20 @@
 import { motion } from 'framer-motion';
 import { useAuth0 } from '@auth0/auth0-react';
 import { MessageSquare, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDashboardContext, DashboardProvider } from '../../contexts';
 import { CourseProvider } from '../../contexts/CourseContext';
 import { useCourseContext } from '../../contexts/useCourseContext';
 import DreamFlow from '../../components/DreamFlow';
+import Modal from '../../components/modals/Modal';
 import { Course } from '../../types/modules';
 
 function DashboardContent() {
   const { user } = useAuth0();
   const firstName = user?.given_name || 'there';
+  
+  // Welcome modal state
+  const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
 
   // Use Dashboard context instead of dummy data
   const {
@@ -198,9 +202,17 @@ function DashboardContent() {
           transition={{ delay: 0.2 }}
           className="bg-white rounded-2xl shadow-lg p-8 mb-8"
         >
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-            General Announcements
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold text-gray-900">
+              General Announcements
+            </h2>
+            <button
+              onClick={() => setWelcomeModalOpen(true)}
+              className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors"
+            >
+              View Welcome Video
+            </button>
+          </div>
           <div className="max-h-80 overflow-y-auto">
             {announcements.length === 0 ? (
               <div className="text-center py-8">
@@ -303,6 +315,41 @@ function DashboardContent() {
           </motion.div>
         </div>
       </div>
+
+      {/* Welcome Modal */}
+      <Modal
+        isOpen={welcomeModalOpen}
+        onClose={() => setWelcomeModalOpen(false)}
+        title="Welcome to Dream Trainer!"
+        size="xl"
+        closeOnOverlayClick={false}
+        closeOnEscape={false}
+        showCloseButton={false}
+      >
+        <div className="p-8 text-center">
+          {/* Vimeo Video */}
+          <div className="w-full h-64 md:h-96 rounded-lg overflow-hidden">
+            <iframe
+              src="https://player.vimeo.com/video/1114100368?h=a8cd5f3151&badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1"
+              width="100%"
+              height="100%"
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+              title="Welcome to Dream Trainer"
+              className="rounded-lg"
+            ></iframe>
+          </div>
+
+          {/* Start Button */}
+          <button
+            onClick={() => setWelcomeModalOpen(false)}
+            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
+          >
+            Start My First Test
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
