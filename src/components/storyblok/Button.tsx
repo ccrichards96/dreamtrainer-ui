@@ -9,6 +9,7 @@ interface ButtonBlok {
   size?: 'sm' | 'md' | 'lg';
   shape?: 'default' | 'pill' | 'square';
   block?: boolean;
+  full_width?: boolean;
   disabled?: boolean;
   loading?: boolean;
   icon_left?: string;
@@ -16,6 +17,17 @@ interface ButtonBlok {
   target?: '_blank' | '_self';
   as_button?: boolean;
   onClick?: () => void;
+  // Spacing parameters
+  margin?: string;
+  margin_top?: string;
+  margin_bottom?: string;
+  margin_left?: string;
+  margin_right?: string;
+  padding?: string;
+  padding_top?: string;
+  padding_bottom?: string;
+  padding_left?: string;
+  padding_right?: string;
 }
 
 const ButtonComponent = ({ blok }: { blok: ButtonBlok }) => {
@@ -46,6 +58,92 @@ const ButtonComponent = ({ blok }: { blok: ButtonBlok }) => {
     md: 'px-4 py-2.5 text-sm',
     lg: 'px-6 py-3 text-base'
   };
+
+  // Handle spacing - this will be added to the final classes
+  const spacingClasses = [];
+  const customStyles: React.CSSProperties = {};
+
+  // Handle margins
+  if (blok.margin) {
+    if (blok.margin.includes('px') || blok.margin.includes('rem') || blok.margin.includes('em') || blok.margin.includes('%')) {
+      customStyles.margin = blok.margin;
+    } else {
+      spacingClasses.push(`m-${blok.margin}`);
+    }
+  }
+
+  if (blok.margin_top) {
+    if (blok.margin_top.includes('px') || blok.margin_top.includes('rem') || blok.margin_top.includes('em') || blok.margin_top.includes('%')) {
+      customStyles.marginTop = blok.margin_top;
+    } else {
+      spacingClasses.push(`mt-${blok.margin_top}`);
+    }
+  }
+
+  if (blok.margin_bottom) {
+    if (blok.margin_bottom.includes('px') || blok.margin_bottom.includes('rem') || blok.margin_bottom.includes('em') || blok.margin_bottom.includes('%')) {
+      customStyles.marginBottom = blok.margin_bottom;
+    } else {
+      spacingClasses.push(`mb-${blok.margin_bottom}`);
+    }
+  }
+
+  if (blok.margin_left) {
+    if (blok.margin_left.includes('px') || blok.margin_left.includes('rem') || blok.margin_left.includes('em') || blok.margin_left.includes('%')) {
+      customStyles.marginLeft = blok.margin_left;
+    } else {
+      spacingClasses.push(`ml-${blok.margin_left}`);
+    }
+  }
+
+  if (blok.margin_right) {
+    if (blok.margin_right.includes('px') || blok.margin_right.includes('rem') || blok.margin_right.includes('em') || blok.margin_right.includes('%')) {
+      customStyles.marginRight = blok.margin_right;
+    } else {
+      spacingClasses.push(`mr-${blok.margin_right}`);
+    }
+  }
+
+  // Handle custom padding (will override size-based padding if provided)
+  if (blok.padding) {
+    if (blok.padding.includes('px') || blok.padding.includes('rem') || blok.padding.includes('em') || blok.padding.includes('%')) {
+      customStyles.padding = blok.padding;
+    } else {
+      spacingClasses.push(`p-${blok.padding}`);
+    }
+  }
+
+  if (blok.padding_top) {
+    if (blok.padding_top.includes('px') || blok.padding_top.includes('rem') || blok.padding_top.includes('em') || blok.padding_top.includes('%')) {
+      customStyles.paddingTop = blok.padding_top;
+    } else {
+      spacingClasses.push(`pt-${blok.padding_top}`);
+    }
+  }
+
+  if (blok.padding_bottom) {
+    if (blok.padding_bottom.includes('px') || blok.padding_bottom.includes('rem') || blok.padding_bottom.includes('em') || blok.padding_bottom.includes('%')) {
+      customStyles.paddingBottom = blok.padding_bottom;
+    } else {
+      spacingClasses.push(`pb-${blok.padding_bottom}`);
+    }
+  }
+
+  if (blok.padding_left) {
+    if (blok.padding_left.includes('px') || blok.padding_left.includes('rem') || blok.padding_left.includes('em') || blok.padding_left.includes('%')) {
+      customStyles.paddingLeft = blok.padding_left;
+    } else {
+      spacingClasses.push(`pl-${blok.padding_left}`);
+    }
+  }
+
+  if (blok.padding_right) {
+    if (blok.padding_right.includes('px') || blok.padding_right.includes('rem') || blok.padding_right.includes('em') || blok.padding_right.includes('%')) {
+      customStyles.paddingRight = blok.padding_right;
+    } else {
+      spacingClasses.push(`pr-${blok.padding_right}`);
+    }
+  }
 
   // Shape variants
   const shapeClasses = {
@@ -124,7 +222,8 @@ const ButtonComponent = ({ blok }: { blok: ButtonBlok }) => {
     sizeClasses[size],
     shapeClasses[shape],
     variantClasses[variant][color],
-    blok.block ? 'w-full' : '',
+    ...spacingClasses,
+    (blok.block || blok.full_width) ? 'w-full' : '',
     blok.loading ? 'cursor-wait' : '',
   ].filter(Boolean).join(' ');
 
@@ -173,6 +272,7 @@ const ButtonComponent = ({ blok }: { blok: ButtonBlok }) => {
       <button
         type="button"
         className={buttonClasses}
+        style={customStyles}
         disabled={blok.disabled || blok.loading}
         onClick={blok.onClick}
       >
@@ -186,6 +286,7 @@ const ButtonComponent = ({ blok }: { blok: ButtonBlok }) => {
       href={blok.link}
       target={blok.target}
       className={buttonClasses}
+      style={customStyles}
       {...(blok.disabled && { 'aria-disabled': 'true', tabIndex: -1 })}
     >
       {buttonContent}

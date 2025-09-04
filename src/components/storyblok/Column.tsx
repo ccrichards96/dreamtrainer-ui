@@ -76,19 +76,14 @@ const Column = ({ blok }: { blok: ColumnBlok }) => {
   // Base classes following Preline UI patterns
   const baseClasses = [];
   
-  // Display classes
-  if (blok.display) {
-    baseClasses.push(blok.display);
-  } else {
-    baseClasses.push(layoutType === 'grid' ? 'grid' : 'flex');
-  }
+  // Always set the layout type (no display override)
+  baseClasses.push(layoutType === 'grid' ? 'grid' : 'flex');
   
   // Layout-specific classes
   if (layoutType === 'flex') {
-    // Flex properties
-    if (blok.flex_direction) {
-      baseClasses.push(`flex-${blok.flex_direction}`);
-    }
+    // Flex properties - ensure flex direction is always set
+    const flexDirection = blok.flex_direction || 'column'; // Default to column for better layout control
+    baseClasses.push(`flex-${flexDirection}`);
     
     if (blok.flex_grow) {
       baseClasses.push('flex-grow');
@@ -134,6 +129,16 @@ const Column = ({ blok }: { blok: ColumnBlok }) => {
     if (blok.grid_row_end) {
       baseClasses.push(`row-end-${blok.grid_row_end}`);
     }
+    
+    // Grid alignment - use correct grid alignment properties
+    // Note: In Grid, align-items controls vertical alignment, justify-items controls horizontal alignment
+    if (blok.align_items) {
+      baseClasses.push(`items-${blok.align_items}`); // This works for grid too (align-items)
+    }
+    
+    if (blok.justify_content) {
+      baseClasses.push(`justify-items-${blok.justify_content}`); // Use justify-items for grid horizontal alignment
+    }
   }
   
   // Responsive grid columns (for both flex and grid)
@@ -153,18 +158,22 @@ const Column = ({ blok }: { blok: ColumnBlok }) => {
     baseClasses.push(`xl:grid-cols-${blok.xl_cols}`);
   }
   
-  // Alignment classes
-  if (blok.align_items) {
-    baseClasses.push(`items-${blok.align_items}`);
+  // Alignment classes - handle differently for flex vs grid
+  if (layoutType === 'flex') {
+    // Flex alignment
+    if (blok.align_items) {
+      baseClasses.push(`items-${blok.align_items}`);
+    }
+    
+    if (blok.justify_content) {
+      baseClasses.push(`justify-${blok.justify_content}`);
+    }
+    
+    if (blok.align_self) {
+      baseClasses.push(`self-${blok.align_self}`);
+    }
   }
-  
-  if (blok.justify_content) {
-    baseClasses.push(`justify-${blok.justify_content}`);
-  }
-  
-  if (blok.align_self) {
-    baseClasses.push(`self-${blok.align_self}`);
-  }
+  // Grid alignment is handled above in the grid section to avoid conflicts
   
   // Spacing classes
   if (blok.gap) {
@@ -187,34 +196,8 @@ const Column = ({ blok }: { blok: ColumnBlok }) => {
     baseClasses.push(`m-${blok.margin}`);
   }
   
-  // Sizing classes
-  if (blok.width) {
-    if (blok.width.includes('/')) {
-      baseClasses.push(`w-${blok.width}`);
-    } else {
-      baseClasses.push(`w-${blok.width}`);
-    }
-  }
-  
-  if (blok.height) {
-    baseClasses.push(`h-${blok.height}`);
-  }
-  
-  if (blok.min_width) {
-    baseClasses.push(`min-w-${blok.min_width}`);
-  }
-  
-  if (blok.max_width) {
-    baseClasses.push(`max-w-${blok.max_width}`);
-  }
-  
-  if (blok.min_height) {
-    baseClasses.push(`min-h-${blok.min_height}`);
-  }
-  
-  if (blok.max_height) {
-    baseClasses.push(`max-h-${blok.max_height}`);
-  }
+  // Sizing classes - simplified to just width auto by default
+  baseClasses.push('w-auto'); // Auto width for proper alignment
   
   // Visual classes
   if (blok.background_color) {
@@ -255,6 +238,16 @@ const Column = ({ blok }: { blok: ColumnBlok }) => {
   }
   
   const finalClasses = baseClasses.filter(Boolean).join(' ');
+
+  // Debug logging for centering issues (remove in production)
+  if (blok.align_items === 'center') {
+    console.log('Column centering debug:', {
+      layoutType,
+      flex_direction: blok.flex_direction,
+      align_items: blok.align_items,
+      classes: finalClasses
+    });
+  }
 
   return (
     <div {...storyblokEditable(blok)} className={finalClasses}>

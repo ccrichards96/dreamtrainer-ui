@@ -7,12 +7,12 @@ interface ContainerBlok extends SbBlokData {
     component: string;
     [key: string]: unknown;
   }>;
-  maxWidth?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+  maxWidth?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full';
   centerContainer?: boolean;
   horizontalPadding?: string;
   verticalPadding?: string;
   margin?: string;
-  responsiveBreakpoint?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  responsiveBreakpoint?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   backgroundColor?: string;
   customClasses?: string;
 }
@@ -50,6 +50,9 @@ const Container: React.FC<{blok: ContainerBlok}> = ({ blok }) => {
             break;
           case '2xl':
             baseClasses.push('max-w-2xl');
+            break;
+          case '3xl':
+            baseClasses.push('max-w-3xl');
             break;
         }
       }

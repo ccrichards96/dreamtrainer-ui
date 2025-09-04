@@ -83,8 +83,8 @@ const ImageComponent: React.FC<{blok: ImageBlok}> = ({blok}) => {
     getRoundedClass(),
     getShadowClass(),
     getHoverEffectClass(),
-    // Responsive behavior - ensure images don't overflow
-    'h-auto',
+    // Responsive behavior - only add h-auto if no explicit height is set
+    !blok.height && !blok.boxsize_base && 'h-auto',
   ].filter(Boolean).join(' ');
 
   const containerClasses = [

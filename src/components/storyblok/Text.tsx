@@ -1,7 +1,7 @@
 import React from 'react'
 import { FaQuoteLeft, FaQuoteRight } from 'react-icons/fa';
 import { render, NODE_PARAGRAPH, NODE_HEADING, NODE_UL, NODE_OL, NODE_IMAGE, MARK_LINK, NODE_HR, NODE_QUOTE } from "storyblok-rich-text-react-renderer"
-import { storyblokEditable, SbBlokData } from "@storyblok/react"
+import { storyblokEditable, SbBlokData, StoryblokRichText } from "@storyblok/react"
 
 // interface TextBlok extends SbBlokData {
 //   text_align?: string;
@@ -76,15 +76,6 @@ interface StoryblokContent {
   text?: string;
 }
 
-interface RichTextBlok extends SbBlokData {
-  data: {
-    type: string;
-    content?: Array<StoryblokContent>;
-  };
-  color?: string;
-  paragraph_fontsize?: string;
-}
-
 const defaultRichTextStyles = {
   color: '#000000',
   paragraph_fontsize: '16px'
@@ -105,82 +96,86 @@ interface MarkLinkProps {
   linktype?: string;
 }
 
-export const RichTextField: React.FC<{blok: RichTextBlok}> = ({blok}) => {
-  const styles = {
-    color: blok.color || defaultRichTextStyles.color,
-    paragraph_fontsize: blok.paragraph_fontsize || defaultRichTextStyles.paragraph_fontsize
-  };
+// export const RichTextField: React.FC<{blok: RichTextBlok}> = ({blok}) => {
+//   const styles = {
+//     color: blok.color || defaultRichTextStyles.color,
+//     paragraph_fontsize: blok.paragraph_fontsize || defaultRichTextStyles.paragraph_fontsize
+//   };
 
-  return (
-    <div {...storyblokEditable(blok)}>
-      {render(blok.data, {
-        nodeResolvers: {
-          [NODE_PARAGRAPH]: (children: React.ReactNode) => (
-            <p className={`text-[${styles.color}] text-[${styles.paragraph_fontsize}]`}>
-              {children}
-            </p>
-          ),
-          [NODE_HEADING]: (children: React.ReactNode, { level = 1 }: { level?: number }) => {
-            const Tag = `h${level}` as keyof JSX.IntrinsicElements;
-            return React.createElement(
-              Tag,
-              { 
-                className: `${defaultHeadingSizes[level as keyof typeof defaultHeadingSizes]} text-[${styles.color}]`
-              },
-              children
-            );
-          },
-          [NODE_UL]: (children: React.ReactNode) => (
-            <ul className={`ml-[45px] text-[${styles.color}]`}>
-              {children}
-            </ul>
-          ),
-          [NODE_HR]: () => (
-            <hr className="my-4" />
-          ),
-          [NODE_OL]: (children: React.ReactNode) => (
-            <ol className={`ml-[45px] text-[${styles.color}]`}>
-              {children}
-            </ol>
-          ),
-          [NODE_IMAGE]: (_: React.ReactNode, { src, alt }: { src?: string; alt?: string }) => (
-            <img 
-              src={src}
-              alt={alt || ''}
-              className="h-[450px] my-10 mx-auto"
-            />
-          ),
-          [NODE_QUOTE]: (children: React.ReactNode) => (
-            <div className="flex flex-nowrap">
-              <div className="pr-2">
-                <FaQuoteLeft className="w-4 h-4 text-[#5DC0DF]" />
-              </div>
-              <div>
-                {children}
-              </div>
-              <div className="pl-2 mt-auto">
-                <FaQuoteRight className="w-4 h-4 text-[#5DC0DF]" />
-              </div>
-            </div>
-          ),
-        },
-        markResolvers: {
-          [MARK_LINK]: (children: React.ReactNode, props: MarkLinkProps) => {
-            const { href = '', target, linktype } = props;
-            const classes = "text-blue-600 hover:text-blue-800 underline";
+//   return (
+//     <div {...storyblokEditable(blok)}>
+//       {render(blok.data, {
+//         nodeResolvers: {
+//           [NODE_PARAGRAPH]: (children: React.ReactNode) => (
+//             <p>
+//               {children}
+//             </p>
+//           ),
+//           [NODE_HEADING]: (children: React.ReactNode, { level = 1 }: { level?: number }) => {
+//             const Tag = `h${level}` as keyof JSX.IntrinsicElements;
+//             return React.createElement(
+//               Tag,
+//               { 
+//                 className: `${defaultHeadingSizes[level as keyof typeof defaultHeadingSizes]} text-[${styles.color}]`
+//               },
+//               children
+//             );
+//           },
+//           [NODE_UL]: (children: React.ReactNode) => (
+//             <ul className={`ml-[45px] text-[${styles.color}]`}>
+//               {children}
+//             </ul>
+//           ),
+//           [NODE_HR]: () => (
+//             <hr className="my-4" />
+//           ),
+//           [NODE_OL]: (children: React.ReactNode) => (
+//             <ol className={`ml-[45px] text-[${styles.color}]`}>
+//               {children}
+//             </ol>
+//           ),
+//           [NODE_IMAGE]: (_: React.ReactNode, { src, alt }: { src?: string; alt?: string }) => (
+//             <img 
+//               src={src}
+//               alt={alt || ''}
+//               className="h-[450px] my-10 mx-auto"
+//             />
+//           ),
+//           [NODE_QUOTE]: (children: React.ReactNode) => (
+//             <div className="flex flex-nowrap">
+//               <div className="pr-2">
+//                 <FaQuoteLeft className="w-4 h-4 text-[#5DC0DF]" />
+//               </div>
+//               <div>
+//                 {children}
+//               </div>
+//               <div className="pl-2 mt-auto">
+//                 <FaQuoteRight className="w-4 h-4 text-[#5DC0DF]" />
+//               </div>
+//             </div>
+//           ),
+//         },
+//         markResolvers: {
+//           [MARK_LINK]: (children: React.ReactNode, props: MarkLinkProps) => {
+//             const { href = '', target, linktype } = props;
+//             const classes = "text-blue-600 hover:text-blue-800 underline";
             
-            if (linktype === 'email') {
-              return <a href={`mailto:${href}`} className={classes}>{children}</a>;
-            }
-            if (href.match(/^(https?:)?\/\//)) {
-              return <a href={href} target={target || '_blank'} rel="noopener noreferrer" className={classes}>{children}</a>;
-            }
-            return <a href={href} className={classes}>{children}</a>;
-          }
-        }
-      })}
-    </div>
-  )
+//             if (linktype === 'email') {
+//               return <a href={`mailto:${href}`} className={classes}>{children}</a>;
+//             }
+//             if (href.match(/^(https?:)?\/\//)) {
+//               return <a href={href} target={target || '_blank'} rel="noopener noreferrer" className={classes}>{children}</a>;
+//             }
+//             return <a href={href} className={classes}>{children}</a>;
+//           }
+//         }
+//       })}
+//     </div>
+//   )
+// }
+
+export const RichTextField: React.FC<{blok: any}> = ({blok}) => {
+  return <StoryblokRichText doc={blok.text} />
 }
 
 export default TextComponent

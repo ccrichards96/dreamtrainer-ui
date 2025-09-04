@@ -22,12 +22,16 @@ import Page from '../components/storyblok/Page';
 import Post from '../components/storyblok/Post';
 // import TestPost from '../components/storyblok/TestPost';
 import Icon from '../components/storyblok/Icon';
+import Section from '../components/storyblok/Section';
+import Spacer from '../components/storyblok/Spacer';
+import Testimonial from '../components/storyblok/Testimonial';
+import Accordion from '../components/storyblok/Accordion';
 
 const components = {
   grid: Grid,
   button: Button,
   text: Text,
-  richText: RichTextField,
+  RichTextField: RichTextField,
   header: Header,
   row: Row,
   column: Column,
@@ -37,7 +41,11 @@ const components = {
   features: Features,
   page: Page,
   post: Post,
-  icon: Icon
+  icon: Icon,
+  section: Section,
+  spacer: Spacer,
+  testimonial: Testimonial,
+  accordion: Accordion
 };
 
 // Initialize Storyblok with preview mode support

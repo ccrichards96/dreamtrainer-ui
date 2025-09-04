@@ -3,6 +3,7 @@ import * as FontAwesome from "react-icons/fa";
 import * as DevIcons from "react-icons/di";
 import * as SimpleIcons from "react-icons/si";
 import * as BootrapIcons from "react-icons/bs";
+import * as PiIcons from "react-icons/pi";
 
 const IconComponent = ({blok}) => {
   let ic:any = null;
@@ -23,6 +24,14 @@ const IconComponent = ({blok}) => {
       }
       else if(blok.iconLib === "bs"){
         ic = BootrapIcons[blok.name];
+        icon = React.createElement(ic);
+      }
+      else if(blok.iconLib === "pi"){
+        ic = PiIcons[blok.name];
+        icon = React.createElement(ic);
+      }
+      else{
+        ic = FontAwesome[blok.name];
         icon = React.createElement(ic);
       }
 
