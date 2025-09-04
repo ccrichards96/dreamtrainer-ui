@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth0 } from '@auth0/auth0-react';
 import { 
-  Target, 
   CheckCircle, 
   Clock, 
   Star, 
@@ -44,7 +43,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
   const { currentTest } = useCourseContext();
 
   const [form, setForm] = useState<AssessmentFormData>({
-    test_number: '',
+    test_number: testName,
     homework_completed: '',
     followed_toefl_timing: '',
     essay_question_1: '',
@@ -55,8 +54,35 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
 
   const [errors, setErrors] = useState<FormErrors>({});
 
+  // Update test_number when testName prop changes
+  useEffect(() => {
+    setForm(prev => ({
+      ...prev,
+      test_number: testName
+    }));
+  }, [testName]);
+
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Word counting function
+  const countWords = (text: string): number => {
+    if (!text || text.trim() === '') return 0;
+    return text.trim().split(/\s+/).length;
+  };
+
+  // Update word count for specific essay
+  const updateWordCount = (essayField: string, text: string) => {
+    const wordCount = countWords(text);
+    const wordCountField = essayField === 'essay_question_1' 
+      ? 'essay_question_1_word_count' 
+      : 'essay_question_2_word_count';
+    
+    setForm(prev => ({
+      ...prev,
+      [wordCountField]: wordCount.toString()
+    }));
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -187,26 +213,12 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
         className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Test Information */}
-          <div>
-            <label
-              className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
-              htmlFor="test_number"
-            >
-              <Target className="w-4 h-4 text-gray-400" />
-              What Writing Test is This? *
-            </label>
-            <input
-              id="test_number"
-              name="test_number"
-              type="text"
-              value={form.test_number}
-              onChange={handleChange}
-              placeholder="Test 1"
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-            />
-          </div>
+          {/* Hidden Test Information - Auto-populated */}
+          <input
+            name="test_number"
+            type="hidden"
+            value={form.test_number}
+          />
 
           <div>
             <label
@@ -262,6 +274,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
               name="essay_question_1"
               value={form.essay_question_1}
               onChange={handleChange}
+              onBlur={(e) => updateWordCount('essay_question_1', e.target.value)}
               placeholder="[Your essay text here]"
               rows={6}
               required
@@ -282,6 +295,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
               name="essay_question_2"
               value={form.essay_question_2}
               onChange={handleChange}
+              onBlur={(e) => updateWordCount('essay_question_2', e.target.value)}
               placeholder="[Your essay text here]"
               rows={6}
               required
@@ -297,7 +311,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
                 htmlFor="essay_question_1_word_count"
               >
                 <TrendingUp className="w-4 h-4 text-gray-400" />
-                Essay 1 Word Count *
+                Essay 1 Word Count (Auto-calculated)
               </label>
               <input
                 id="essay_question_1_word_count"
@@ -305,10 +319,9 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
                 type="number"
                 min="0"
                 value={form.essay_question_1_word_count}
-                onChange={handleChange}
-                placeholder="350"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                readOnly
+                placeholder="0"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
               />
             </div>
 
@@ -318,7 +331,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
                 htmlFor="essay_question_2_word_count"
               >
                 <TrendingUp className="w-4 h-4 text-gray-400" />
-                Essay 2 Word Count *
+                Essay 2 Word Count (Auto-calculated)
               </label>
               <input
                 id="essay_question_2_word_count"
@@ -326,10 +339,9 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
                 type="number"
                 min="0"
                 value={form.essay_question_2_word_count}
-                onChange={handleChange}
-                placeholder="300"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                readOnly
+                placeholder="0"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
               />
             </div>
           </div>
