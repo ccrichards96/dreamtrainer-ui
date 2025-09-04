@@ -14,24 +14,29 @@ interface ProficiencyLevelProps {
 
 const proficiencyLevels = [
   {
-    value: 'beginner',
-    label: 'Beginner (A1-A2)',
-    description: 'I can understand basic phrases and simple conversations'
+    value: 'not-taken',
+    label: "I haven't taken it yet",
+    description: 'I have not taken the TOEFL exam before'
   },
   {
-    value: 'intermediate',
-    label: 'Intermediate (B1-B2)',
-    description: 'I can handle most everyday situations and express opinions'
+    value: '0-60',
+    label: '0 to 60',
+    description: 'Beginning level - Basic understanding of simple conversations'
   },
   {
-    value: 'advanced',
-    label: 'Advanced (C1-C2)',
-    description: 'I can understand complex texts and express myself fluently'
+    value: '61-80',
+    label: '61 to 80',
+    description: 'Intermediate level - Can handle most everyday situations'
   },
   {
-    value: 'native',
-    label: 'Native/Near-Native',
-    description: 'English is my first language or I speak at a native level'
+    value: '81-100',
+    label: '81 to 100',
+    description: 'Advanced level - Good command of English for academic purposes'
+  },
+  {
+    value: '101-120',
+    label: '101 to 120',
+    description: 'Excellent level - Near-native proficiency in academic English'
   }
 ];
 
@@ -62,9 +67,9 @@ export default function ProficiencyLevel({ data, updateData, onNext, onPrev, cur
         <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <BookOpen className="w-8 h-8 text-blue-600" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">What's Your English Level?</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">What was your last TOEFL score?</h2>
         <p className="text-lg text-gray-600">
-          This helps us personalize your learning experience
+          This helps us personalize your TOEFL preparation experience
         </p>
       </div>
 

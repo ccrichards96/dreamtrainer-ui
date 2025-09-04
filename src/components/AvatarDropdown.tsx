@@ -92,13 +92,6 @@ export default function AvatarDropdown({ className = '' }: AvatarDropdownProps) 
 
             {/* Menu Items */}
             <Link
-              to="/dashboard"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              onClick={() => setIsOpen(false)}
-            >
-              Dashboard
-            </Link>
-            <Link
               to="/account"
               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
               onClick={() => setIsOpen(false)}

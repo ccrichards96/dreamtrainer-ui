@@ -111,7 +111,7 @@ function DashboardContent() {
             Welcome back, {firstName}!
           </h1>
           <p className="text-xl text-gray-600">
-            Let's get you started with your professional certification journey.
+            Let's get you started with your TOEFL journey.
           </p>
         </motion.div>
 
@@ -289,7 +289,7 @@ function DashboardContent() {
             className="bg-white rounded-2xl shadow-lg p-8"
           >
             <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-              Need help/support from our trusted experts?
+              Need help/support from Joseph, our trusted expert?
             </h2>
             <a 
               href="https://calendly.com/notefulljoseph/toefl-course-help" 

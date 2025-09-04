@@ -19,11 +19,17 @@ export default function Navigation() {
             {isAuthenticated ? (
               <>
                 <Link
+                  to="/dashboard"
+                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Dashboard
+                </Link>
+                {/* <Link
                   to="/blog"
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Insights
-                </Link>
+                </Link> */}
                 <AvatarDropdown />
               </>
             ) : (
@@ -34,7 +40,7 @@ export default function Navigation() {
                 >
                   Home
                 </Link>
-                <Link
+                {/* <Link
                   to="/p/about"
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
                 >
@@ -45,7 +51,7 @@ export default function Navigation() {
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Insights
-                </Link>
+                </Link> */}
                 <button
                   onClick={() => login()}
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"

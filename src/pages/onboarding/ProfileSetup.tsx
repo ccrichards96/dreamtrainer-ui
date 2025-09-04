@@ -25,7 +25,15 @@ const howDidYouHearOptions = [
 
 export default function ProfileSetup({ data, updateData, onNext, currentStep = 1, totalSteps = 3 }: ProfileSetupProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [selectedSource, setSelectedSource] = useState(data.howDidYouHearAboutUs || '');
+  const [selectedSource, setSelectedSource] = useState(
+    howDidYouHearOptions.find(option => option.value === data.howDidYouHearAboutUs)?.value || 
+    (data.howDidYouHearAboutUs && !howDidYouHearOptions.find(option => option.value === data.howDidYouHearAboutUs) ? 'other' : '')
+  );
+  const [customSource, setCustomSource] = useState(
+    data.howDidYouHearAboutUs && !howDidYouHearOptions.find(option => option.value === data.howDidYouHearAboutUs) 
+      ? data.howDidYouHearAboutUs 
+      : ''
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,11 +49,24 @@ export default function ProfileSetup({ data, updateData, onNext, currentStep = 1
 
   const handleSourceChange = (value: string) => {
     setSelectedSource(value);
+    if (value === 'other') {
+      // Don't update howDidYouHearAboutUs yet, wait for custom input
+      setCustomSource('');
+    } else {
+      // For predefined options, update immediately
+      updateData({ howDidYouHearAboutUs: value });
+      setCustomSource('');
+    }
+  };
+
+  const handleCustomSourceChange = (value: string) => {
+    setCustomSource(value);
+    // Update howDidYouHearAboutUs with the custom text
     updateData({ howDidYouHearAboutUs: value });
   };
 
   const handleNext = () => {
-    if (selectedSource) {
+    if (selectedSource && (selectedSource !== 'other' || customSource.trim())) {
       onNext();
     }
   };
@@ -143,13 +164,30 @@ export default function ProfileSetup({ data, updateData, onNext, currentStep = 1
               </svg>
             </div>
           </div>
+
+          {/* Custom source input - shown when "other" is selected */}
+          {selectedSource === 'other' && (
+            <div className="mt-3">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Please specify: *
+              </label>
+              <input
+                type="text"
+                value={customSource}
+                onChange={(e) => handleCustomSourceChange(e.target.value)}
+                placeholder="How did you hear about us?"
+                className="py-3 px-4 w-full bg-white border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                maxLength={100}
+              />
+            </div>
+          )}
         </div>
 
         {/* Continue Button */}
         <div className="pt-6">
           <button
             onClick={handleNext}
-            disabled={!selectedSource}
+            disabled={!selectedSource || (selectedSource === 'other' && !customSource.trim())}
             className="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none transition-colors"
           >
             Continue
