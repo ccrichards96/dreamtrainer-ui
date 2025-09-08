@@ -115,7 +115,7 @@ function DashboardContent() {
             Welcome back, {firstName}!
           </h1>
           <p className="text-xl text-gray-600">
-            Let's get you started with your TOEFL journey.
+            Let's get you to your dream TOEFL writing score.
           </p>
         </motion.div>
 

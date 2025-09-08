@@ -3,7 +3,7 @@ import React from "react";
 
 interface ButtonBlok {
   text: string;
-  link?: string;
+  link?: string | { url?: string; cached_url?: string; linktype?: string };
   variant?: 'solid' | 'outline' | 'ghost' | 'soft' | 'white' | 'link';
   color?: 'blue' | 'gray' | 'red' | 'yellow' | 'green' | 'indigo' | 'purple' | 'pink';
   size?: 'sm' | 'md' | 'lg';
@@ -16,7 +16,6 @@ interface ButtonBlok {
   icon_right?: string;
   target?: '_blank' | '_self';
   as_button?: boolean;
-  onClick?: () => void;
   // Spacing parameters
   margin?: string;
   margin_top?: string;
@@ -31,6 +30,16 @@ interface ButtonBlok {
 }
 
 const ButtonComponent = ({ blok }: { blok: ButtonBlok }) => {
+  // Helper function to extract URL from Storyblok link
+  const getLinkUrl = (link: string | { url?: string; cached_url?: string; linktype?: string } | undefined): string | undefined => {
+    if (!link) return undefined;
+    if (typeof link === 'string') return link;
+    if (typeof link === 'object') {
+      return link.url || link.cached_url;
+    }
+    return undefined;
+  };
+
   // Default values based on Preline UI patterns
   const variant = blok.variant || 'solid';
   const color = blok.color || 'blue';
@@ -267,14 +276,13 @@ const ButtonComponent = ({ blok }: { blok: ButtonBlok }) => {
   );
 
   // Render as button or link based on props
-  if (blok.as_button || blok.onClick) {
+  if (blok.as_button) {
     return (
       <button
         type="button"
         className={buttonClasses}
         style={customStyles}
         disabled={blok.disabled || blok.loading}
-        onClick={blok.onClick}
       >
         {buttonContent}
       </button>
@@ -283,7 +291,7 @@ const ButtonComponent = ({ blok }: { blok: ButtonBlok }) => {
 
   return (
     <a
-      href={blok.link}
+      href={getLinkUrl(blok.link)}
       target={blok.target}
       className={buttonClasses}
       style={customStyles}

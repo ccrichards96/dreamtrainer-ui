@@ -6,16 +6,17 @@ import { StoryblokComponent } from "@storyblok/react";
 const CMSRoute: React.FC = () => {
   const { "*": wildcard } = useParams<{ "*": string }>();
   const location = useLocation();
+
+  let fullSlug = 'home'; // Default to home
   
-  // Extract the full slug from the location pathname
-  // Remove the '/p/' prefix to get the actual slug
-  const fullSlug = wildcard || location.pathname.replace(/^\/p\/?/, '') || 'home';
+  if (location.pathname.startsWith('/site/')) {
+    // For /site/ prefixed routes, use the path after /site/
+    fullSlug = location.pathname.replace(/^\/site\/?/, '') || 'home';
+  } else if (wildcard) {
+    // Handle other wildcard cases
+    fullSlug = wildcard;
+  }
   
-  // console.log('CMSRoute - wildcard:', wildcard);
-  // console.log('CMSRoute - location.pathname:', location.pathname);
-  // console.log('CMSRoute - fullSlug:', fullSlug);
-  
-  // Use the useStoryblok hook which handles both fetching and bridge
   const story = useStoryblok(fullSlug, {
     version: import.meta.env.DEV ? 'draft' : 'published'
   });
@@ -33,20 +34,6 @@ const CMSRoute: React.FC = () => {
 
   return (
     <div>
-      {/* {import.meta.env.DEV && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
-          <p className="font-bold">Debug Info:</p>
-          <p>Slug: {fullSlug}</p>
-          <p>Story UUID: {story.uuid}</p>
-          <p>Content Type: {story.content.component}</p>
-          {story.content.component === 'post' && (
-            <div>
-              <p>Layout Style: {story.content.layout_style}</p>
-              <p>Image: {JSON.stringify(story.content.image)}</p>
-            </div>
-          )}
-        </div>
-      )} */}
       <StoryblokComponent blok={story.content} />
     </div>
   );

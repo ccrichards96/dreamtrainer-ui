@@ -7,7 +7,6 @@ import Onboarding from './pages/onboarding';
 import CheckoutSuccess from './pages/checkout/Success';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 import AccountPage from './pages/account';
-import Home from './pages/home';
 import BlogPage from './pages/blog';
 import AdminDashboard from './pages/admin';
 import CMSRoute from './components/routes/CMSRoute';
@@ -34,7 +33,7 @@ function App() {
                 <Navigation />
                 <div className="pt-16">
                   <Routes>
-                    <Route path="/" element={<Home />} />
+                    <Route path="/" element={<CMSRoute />} />
                     <Route path="/blog" element={<BlogPage />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
@@ -72,8 +71,8 @@ function App() {
                       } 
                     />
                     {/* CMS Routes */}
-                    <Route path="/p/*" element={<CMSRoute />} />
-                    <Route path="/p" element={<CMSRoute />} />
+                    <Route path="/site/*" element={<CMSRoute />} />
+                    <Route path="/site" element={<CMSRoute />} />
                     
                     {/* 404 Catch-all route - must be last */}
                     <Route path="*" element={<NotFound />} />

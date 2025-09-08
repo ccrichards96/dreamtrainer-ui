@@ -501,7 +501,7 @@ const AccountPage = () => {
                 <p className="text-gray-600 mt-1">Our support team is here to assist you with any questions or issues.</p>
               </div>
               <button 
-                onClick={() => window.location.href = 'mailto:support@uxbrite.com'}
+                onClick={() => window.location.href = 'mailto:joem@thedreamtrainer.com'}
                 className="bg-[#c5a8de] text-white py-2 px-6 rounded-md hover:bg-[#7c5e99] flex items-center justify-center gap-2 transition-colors"
               >
                 Contact Support
