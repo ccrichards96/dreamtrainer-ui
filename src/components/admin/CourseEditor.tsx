@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Save, X, AlertCircle } from 'lucide-react';
-import { Course } from '../../types/modules';
-import { updateCourse } from '../../services/api/modules';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Save, X, AlertCircle } from "lucide-react";
+import { Course } from "../../types/modules";
+import { updateCourse } from "../../services/api/modules";
 
 interface CourseEditorProps {
   course: Course;
@@ -10,20 +10,26 @@ interface CourseEditorProps {
   onCancel: () => void;
 }
 
-const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel }) => {
+const CourseEditor: React.FC<CourseEditorProps> = ({
+  course,
+  onSave,
+  onCancel,
+}) => {
   const [formData, setFormData] = useState({
-    name: course.name || '',
-    description: course.description || '',
+    name: course.name || "",
+    description: course.description || "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -35,14 +41,14 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     try {
       // Update course via API
       await updateCourse(course.id, formData);
-      
+
       setSuccess(true);
       setTimeout(() => {
         onSave();
       }, 1000);
     } catch (err) {
-      setError('Failed to update course. Please try again.');
-      console.error('Error updating course:', err);
+      setError("Failed to update course. Please try again.");
+      console.error("Error updating course:", err);
     } finally {
       setLoading(false);
     }
@@ -88,7 +94,10 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
         <div className="grid grid-cols-1 gap-6">
           {/* Course Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Course Name *
             </label>
             <input
@@ -105,7 +114,10 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
 
           {/* Course Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Course Description
             </label>
             <textarea

@@ -1,5 +1,5 @@
-import React from 'react';
-import Modal from './Modal';
+import React from "react";
+import Modal from "./Modal";
 
 interface VideoModalProps {
   isOpen: boolean;
@@ -29,8 +29,11 @@ const VideoModal: React.FC<VideoModalProps> = ({
         {description && (
           <p className="text-gray-600 mb-6 text-center">{description}</p>
         )}
-        
-        <div className="relative w-full" style={{ paddingBottom: '56.25%' /* 16:9 aspect ratio */ }}>
+
+        <div
+          className="relative w-full"
+          style={{ paddingBottom: "56.25%" /* 16:9 aspect ratio */ }}
+        >
           <iframe
             className="absolute top-0 left-0 w-full h-full rounded-lg"
             src={videoUrl}
@@ -40,7 +43,7 @@ const VideoModal: React.FC<VideoModalProps> = ({
             allowFullScreen
           />
         </div>
-        
+
         <div className="mt-6 text-center">
           <button
             onClick={onClose}

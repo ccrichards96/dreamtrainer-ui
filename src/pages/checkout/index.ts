@@ -1,1 +1,1 @@
-export { default as CheckoutSuccess } from './Success';
+export { default as CheckoutSuccess } from "./Success";

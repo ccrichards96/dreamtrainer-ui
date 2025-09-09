@@ -1,17 +1,17 @@
-import apiClient from './client';
-import { Subscription } from '../../types/billing';
+import apiClient from "./client";
+import { Subscription } from "../../types/billing";
 
 // Billing related interfaces
 export interface UserBillingInfo {
   userId: string;
-  subscription: Subscription
+  subscription: Subscription;
 }
 
 export interface CheckoutSessionRequest {
   priceIds: string[];
   successUrl: string;
   cancelUrl: string;
-  mode?: 'payment' | 'subscription' | 'setup';
+  mode?: "payment" | "subscription" | "setup";
 }
 
 export interface CheckoutSessionResponse {
@@ -28,13 +28,13 @@ export interface CheckoutSessionResponse {
  */
 export const getAllProducts = async (): Promise<any[]> => {
   try {
-    const response = await apiClient.get<any[]>('/billing/packages');
+    const response = await apiClient.get<any[]>("/billing/packages");
     return response.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to get products: ${error.message}`);
     }
-    throw new Error('An unexpected error occurred while fetching products');
+    throw new Error("An unexpected error occurred while fetching products");
   }
 };
 
@@ -44,13 +44,15 @@ export const getAllProducts = async (): Promise<any[]> => {
  */
 export const getUserBillingInfo = async (): Promise<UserBillingInfo> => {
   try {
-    const response = await apiClient.get<UserBillingInfo>('/billing/user');
+    const response = await apiClient.get<UserBillingInfo>("/billing/user");
     return response.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to get user billing info: ${error.message}`);
     }
-    throw new Error('An unexpected error occurred while fetching billing information');
+    throw new Error(
+      "An unexpected error occurred while fetching billing information",
+    );
   }
 };
 
@@ -59,15 +61,22 @@ export const getUserBillingInfo = async (): Promise<UserBillingInfo> => {
  * @param checkoutData - Checkout session configuration
  * @returns Promise<CheckoutSessionResponse> - Checkout session URL and ID
  */
-export const createCheckoutSession = async (checkoutData: CheckoutSessionRequest): Promise<CheckoutSessionResponse> => {
+export const createCheckoutSession = async (
+  checkoutData: CheckoutSessionRequest,
+): Promise<CheckoutSessionResponse> => {
   try {
-    const response = await apiClient.post<CheckoutSessionResponse>('/billing/checkout-session', checkoutData);
+    const response = await apiClient.post<CheckoutSessionResponse>(
+      "/billing/checkout-session",
+      checkoutData,
+    );
     return response.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to create checkout session: ${error.message}`);
     }
-    throw new Error('An unexpected error occurred while creating checkout session');
+    throw new Error(
+      "An unexpected error occurred while creating checkout session",
+    );
   }
 };
 

@@ -1,16 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { useAuth0 } from '@auth0/auth0-react';
-import { 
-  CheckCircle, 
-  Clock, 
-  Star, 
-  TrendingUp, 
-  ArrowRight, 
-  RefreshCw
-} from 'lucide-react';
-import { submitAssessment, type AssessmentSubmission } from '../../services/api';
-import { useCourseContext } from '../../contexts/useCourseContext';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useAuth0 } from "@auth0/auth0-react";
+import {
+  CheckCircle,
+  Clock,
+  Star,
+  TrendingUp,
+  ArrowRight,
+  RefreshCw,
+} from "lucide-react";
+import {
+  submitAssessment,
+  type AssessmentSubmission,
+} from "../../services/api";
+import { useCourseContext } from "../../contexts/useCourseContext";
 
 interface AssessmentFormData {
   test_number: string;
@@ -33,32 +36,32 @@ interface AssessmentFormProps {
   showHeader?: boolean;
 }
 
-const AssessmentForm: React.FC<AssessmentFormProps> = ({ 
-  testName = 'TOEFL Writing Assessment',
+const AssessmentForm: React.FC<AssessmentFormProps> = ({
+  testName = "TOEFL Writing Assessment",
   onSubmit,
   onSuccess,
-  showHeader = true
+  showHeader = true,
 }) => {
   const { user } = useAuth0();
   const { currentTest } = useCourseContext();
 
   const [form, setForm] = useState<AssessmentFormData>({
     test_number: testName,
-    homework_completed: '',
-    followed_toefl_timing: '',
-    essay_question_1: '',
-    essay_question_1_word_count: '',
-    essay_question_2: '',
-    essay_question_2_word_count: '',
+    homework_completed: "",
+    followed_toefl_timing: "",
+    essay_question_1: "",
+    essay_question_1_word_count: "",
+    essay_question_2: "",
+    essay_question_2_word_count: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
 
   // Update test_number when testName prop changes
   useEffect(() => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      test_number: testName
+      test_number: testName,
     }));
   }, [testName]);
 
@@ -67,32 +70,33 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
 
   // Word counting function
   const countWords = (text: string): number => {
-    if (!text || text.trim() === '') return 0;
+    if (!text || text.trim() === "") return 0;
     return text.trim().split(/\s+/).length;
   };
 
   // Update word count for specific essay
   const updateWordCount = (essayField: string, text: string) => {
     const wordCount = countWords(text);
-    const wordCountField = essayField === 'essay_question_1' 
-      ? 'essay_question_1_word_count' 
-      : 'essay_question_2_word_count';
-    
-    setForm(prev => ({
+    const wordCountField =
+      essayField === "essay_question_1"
+        ? "essay_question_1_word_count"
+        : "essay_question_2_word_count";
+
+    setForm((prev) => ({
       ...prev,
-      [wordCountField]: wordCount.toString()
+      [wordCountField]: wordCount.toString(),
     }));
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-    
+    setForm((prev) => ({ ...prev, [name]: value }));
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -104,19 +108,19 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
       // Prepare the data for API submission using user data from Auth0
       const assessmentData: AssessmentSubmission = {
-        first_name: user?.given_name || '',
-        last_name: user?.family_name || '',
-        email: user?.email || '',
+        first_name: user?.given_name || "",
+        last_name: user?.family_name || "",
+        email: user?.email || "",
         test_number: form.test_number,
         homework_completed: form.homework_completed,
         followed_toefl_timing: form.followed_toefl_timing,
@@ -128,14 +132,14 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
 
       // Submit to API
       const response = await submitAssessment(
-        currentTest?.id || 'default-test-id', // testId
-        user?.sub || '', // userId 
-        assessmentData
+        currentTest?.id || "default-test-id", // testId
+        user?.sub || "", // userId
+        assessmentData,
       );
-      
-      console.log('Assessment submitted successfully:', response);
+
+      console.log("Assessment submitted successfully:", response);
       setSubmitted(true);
-      
+
       // Call parent onSubmit if provided (only form data, personal info handled in background)
       if (onSubmit) {
         onSubmit({
@@ -148,19 +152,20 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
           essay_question_2_word_count: form.essay_question_2_word_count,
         });
       }
-      
+
       // Call onSuccess callback
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      console.error('Error submitting assessment:', error);
-      
+      console.error("Error submitting assessment:", error);
+
       // Show user-friendly error message
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Something went wrong. Please try again or contact support.';
-      
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again or contact support.";
+
       alert(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -181,7 +186,8 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
           Assessment Submitted Successfully!
         </h2>
         <p className="text-lg text-gray-600 mb-8">
-          Thank you for your submission. We'll review your assessment and send your score and feedback to your email within 24-48 hours.
+          Thank you for your submission. We'll review your assessment and send
+          your score and feedback to your email within 24-48 hours.
         </p>
       </motion.div>
     );
@@ -196,11 +202,10 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
           animate={{ opacity: 1, y: 0 }}
           className="mb-6"
         >
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            {testName}
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{testName}</h2>
           <p className="text-gray-600">
-            Submit your TOEFL writing test for professional evaluation and feedback.
+            Submit your TOEFL writing test for professional evaluation and
+            feedback.
           </p>
         </motion.div>
       )}
@@ -214,11 +219,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
       >
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Hidden Test Information - Auto-populated */}
-          <input
-            name="test_number"
-            type="hidden"
-            value={form.test_number}
-          />
+          <input name="test_number" type="hidden" value={form.test_number} />
 
           <div>
             <label
@@ -226,7 +227,8 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
               htmlFor="homework_completed"
             >
               <CheckCircle className="w-4 h-4 text-gray-400" />
-              Did you complete your full homework since your last test submission? *
+              Did you complete your full homework since your last test
+              submission? *
             </label>
             <input
               id="homework_completed"
@@ -246,7 +248,8 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
               htmlFor="followed_toefl_timing"
             >
               <Clock className="w-4 h-4 text-gray-400" />
-              Did you complete this practice test according to strict TOEFL timing? *
+              Did you complete this practice test according to strict TOEFL
+              timing? *
             </label>
             <input
               id="followed_toefl_timing"
@@ -274,7 +277,9 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
               name="essay_question_1"
               value={form.essay_question_1}
               onChange={handleChange}
-              onBlur={(e) => updateWordCount('essay_question_1', e.target.value)}
+              onBlur={(e) =>
+                updateWordCount("essay_question_1", e.target.value)
+              }
               placeholder="[Your essay text here]"
               rows={6}
               required
@@ -295,7 +300,9 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
               name="essay_question_2"
               value={form.essay_question_2}
               onChange={handleChange}
-              onBlur={(e) => updateWordCount('essay_question_2', e.target.value)}
+              onBlur={(e) =>
+                updateWordCount("essay_question_2", e.target.value)
+              }
               placeholder="[Your essay text here]"
               rows={6}
               required

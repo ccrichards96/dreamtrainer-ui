@@ -1,36 +1,31 @@
 interface Test {
-    id: string;
-    courseId: string;
-    name: string;
-    description: string;
-    videoUrl?: string;
-    formLink?: string;
-    richTextContent?: string; // Rich text content
-    passingScore: number; // Total possible score - passing score // remove
-    order: number; //TODO: Add to backend
-    createdAt: Date;
-    updatedAt: Date;
+  id: string;
+  courseId: string;
+  name: string;
+  description: string;
+  videoUrl?: string;
+  formLink?: string;
+  richTextContent?: string; // Rich text content
+  passingScore: number; // Total possible score - passing score // remove
+  order: number; //TODO: Add to backend
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface TestAttempt {
-    id: string;
-    testId: string;
-    userId: string;
-    answerContent: string;
-    score: number | null; // null if not yet graded
-    passed: boolean | null; // null if not yet graded
-    startedAt: Date;
-    completedAt: Date | null;
+  id: string;
+  testId: string;
+  userId: string;
+  answerContent: string;
+  score: number | null; // null if not yet graded
+  passed: boolean | null; // null if not yet graded
+  startedAt: Date;
+  completedAt: Date | null;
 }
 
 type DraftTestAttempt = Pick<
   TestAttempt,
-  'testId' | 'userId' | 'answerContent'
+  "testId" | "userId" | "answerContent"
 >;
 
-
-export type { 
-    Test, 
-    TestAttempt,
-    DraftTestAttempt
-};
+export type { Test, TestAttempt, DraftTestAttempt };

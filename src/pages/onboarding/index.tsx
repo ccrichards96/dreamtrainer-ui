@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import ProfileSetup from './ProfileSetup.tsx';
-import ProficiencyLevel from './ProficiencyLevel.tsx';
-import PricingSelection from './PricingSelection.tsx';
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import ProfileSetup from "./ProfileSetup.tsx";
+import ProficiencyLevel from "./ProficiencyLevel.tsx";
+import PricingSelection from "./PricingSelection.tsx";
 
 export type OnboardingData = {
   profileImage?: File | null;
@@ -18,18 +18,18 @@ export default function Onboarding() {
   const totalSteps = 3;
 
   const updateData = (data: Partial<OnboardingData>) => {
-    setOnboardingData(prev => ({ ...prev, ...data }));
+    setOnboardingData((prev) => ({ ...prev, ...data }));
   };
 
   const nextStep = () => {
     if (currentStep < totalSteps) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     }
   };
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1);
+      setCurrentStep((prev) => prev - 1);
     }
   };
 

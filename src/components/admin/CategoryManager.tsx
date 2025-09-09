@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, Edit3, Trash2, X, Save, AlertCircle, Tag } from 'lucide-react';
-import { 
-  Category, 
-  CreateCategoryDTO, 
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Plus, Edit3, Trash2, X, Save, AlertCircle, Tag } from "lucide-react";
+import {
+  Category,
+  CreateCategoryDTO,
   getAllCategories,
   createCategory,
   updateCategory,
-  deleteCategory
-} from '../../services/api/categories';
+  deleteCategory,
+} from "../../services/api/categories";
 
 interface CategoryFormData {
   name: string;
@@ -20,10 +20,10 @@ const CategoryManager: React.FC = () => {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [formData, setFormData] = useState<CategoryFormData>({
-    name: ''
+    name: "",
   });
 
   // Load all categories on component mount
@@ -35,27 +35,27 @@ const CategoryManager: React.FC = () => {
         setCategories(categoriesData || []);
         setError(null);
       } catch (err) {
-        console.error('Error fetching categories:', err);
-        setError('Failed to load categories');
+        console.error("Error fetching categories:", err);
+        setError("Failed to load categories");
         // Fallback sample data for development
         const sampleCategories: Category[] = [
           {
-            id: '1',
-            name: 'TOEFL Writing',
-            createdAt: '2024-01-15T00:00:00Z',
-            updatedAt: '2024-01-15T00:00:00Z',
+            id: "1",
+            name: "TOEFL Writing",
+            createdAt: "2024-01-15T00:00:00Z",
+            updatedAt: "2024-01-15T00:00:00Z",
           },
           {
-            id: '2',
-            name: 'TOEFL Speaking',
-            createdAt: '2024-01-20T00:00:00Z',
-            updatedAt: '2024-01-20T00:00:00Z',
+            id: "2",
+            name: "TOEFL Speaking",
+            createdAt: "2024-01-20T00:00:00Z",
+            updatedAt: "2024-01-20T00:00:00Z",
           },
           {
-            id: '3',
-            name: 'TOEFL Reading',
-            createdAt: '2024-02-01T00:00:00Z',
-            updatedAt: '2024-02-01T00:00:00Z',
+            id: "3",
+            name: "TOEFL Reading",
+            createdAt: "2024-02-01T00:00:00Z",
+            updatedAt: "2024-02-01T00:00:00Z",
           },
         ];
         setCategories(sampleCategories);
@@ -68,21 +68,23 @@ const CategoryManager: React.FC = () => {
   }, []);
 
   // Filter categories based on search term
-  const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategories = categories.filter((category) =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const resetForm = () => {
     setFormData({
-      name: ''
+      name: "",
     });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -96,7 +98,7 @@ const CategoryManager: React.FC = () => {
     setEditingCategory(category);
     setShowAddForm(true);
     setFormData({
-      name: category.name
+      name: category.name,
     });
   };
 
@@ -108,38 +110,50 @@ const CategoryManager: React.FC = () => {
     try {
       if (editingCategory) {
         // Update existing category
-        const updatedCategory = await updateCategory(editingCategory.id, formData);
-        setCategories(prev => prev.map(category => 
-          category.id === editingCategory.id ? updatedCategory : category
-        ));
+        const updatedCategory = await updateCategory(
+          editingCategory.id,
+          formData,
+        );
+        setCategories((prev) =>
+          prev.map((category) =>
+            category.id === editingCategory.id ? updatedCategory : category,
+          ),
+        );
       } else {
         // Create new category
         const newCategory = await createCategory(formData as CreateCategoryDTO);
-        setCategories(prev => [...prev, newCategory]);
+        setCategories((prev) => [...prev, newCategory]);
       }
 
       setShowAddForm(false);
       setEditingCategory(null);
       resetForm();
     } catch (err) {
-      setError('Failed to save category. Please try again.');
-      console.error('Error saving category:', err);
+      setError("Failed to save category. Please try again.");
+      console.error("Error saving category:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-    if (!confirm('Are you sure you want to delete this category? This action cannot be undone.')) return;
+    if (
+      !confirm(
+        "Are you sure you want to delete this category? This action cannot be undone.",
+      )
+    )
+      return;
 
     try {
       // Delete category via API
       await deleteCategory(categoryId);
       // Remove from local state
-      setCategories(prev => prev.filter(category => category.id !== categoryId));
+      setCategories((prev) =>
+        prev.filter((category) => category.id !== categoryId),
+      );
     } catch (err) {
-      setError('Failed to delete category. Please try again.');
-      console.error('Error deleting category:', err);
+      setError("Failed to delete category. Please try again.");
+      console.error("Error deleting category:", err);
     }
   };
 
@@ -173,8 +187,12 @@ const CategoryManager: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-medium text-gray-900">Manage Categories</h3>
-              <p className="text-sm text-gray-500">Create and manage content categories</p>
+              <h3 className="text-lg font-medium text-gray-900">
+                Manage Categories
+              </h3>
+              <p className="text-sm text-gray-500">
+                Create and manage content categories
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -220,7 +238,7 @@ const CategoryManager: React.FC = () => {
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h4 className="text-lg font-medium text-gray-900">
-                {editingCategory ? 'Edit Category' : 'Add New Category'}
+                {editingCategory ? "Edit Category" : "Add New Category"}
               </h4>
               <button
                 onClick={handleCancel}
@@ -235,7 +253,10 @@ const CategoryManager: React.FC = () => {
             <div className="grid grid-cols-1 gap-6">
               {/* Category Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Category Name *
                 </label>
                 <input
@@ -273,7 +294,7 @@ const CategoryManager: React.FC = () => {
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    {editingCategory ? 'Update Category' : 'Add Category'}
+                    {editingCategory ? "Update Category" : "Add Category"}
                   </>
                 )}
               </button>
@@ -294,7 +315,9 @@ const CategoryManager: React.FC = () => {
           <div className="p-8 text-center">
             <Tag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500">
-              {searchTerm ? 'No categories found matching your search.' : 'No categories found. Add your first category to get started.'}
+              {searchTerm
+                ? "No categories found matching your search."
+                : "No categories found. Add your first category to get started."}
             </p>
           </div>
         ) : (
@@ -320,8 +343,12 @@ const CategoryManager: React.FC = () => {
                       <div className="flex items-center">
                         <Tag className="w-5 h-5 text-gray-400 mr-3" />
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{category.name}</div>
-                          <div className="text-sm text-gray-500">ID: {category.id}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {category.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            ID: {category.id}
+                          </div>
                         </div>
                       </div>
                     </td>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 declare global {
   interface Window {
@@ -15,12 +15,12 @@ const StoryblokBridge: React.FC<StoryblokBridgeProps> = ({ onStoryChange }) => {
     // Initialize the Storyblok Bridge only in development
     if (import.meta.env.DEV) {
       const { StoryblokBridge } = window;
-      if (typeof StoryblokBridge !== 'undefined') {
+      if (typeof StoryblokBridge !== "undefined") {
         const bridge = new StoryblokBridge();
 
-        bridge.on(['input', 'published', 'change'], () => {
+        bridge.on(["input", "published", "change"], () => {
           // Reload the content on change
-          console.log('Story changed in editor');
+          console.log("Story changed in editor");
           onStoryChange?.();
         });
       }

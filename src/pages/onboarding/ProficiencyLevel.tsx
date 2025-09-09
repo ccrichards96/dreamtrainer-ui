@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { ChevronLeft, BookOpen } from 'lucide-react';
-import { OnboardingData } from './index';
-import ProgressIndicator from './ProgressIndicator';
+import { useState } from "react";
+import { ChevronLeft, BookOpen } from "lucide-react";
+import { OnboardingData } from "./index";
+import ProgressIndicator from "./ProgressIndicator";
 
 interface ProficiencyLevelProps {
   data: OnboardingData;
@@ -14,34 +14,46 @@ interface ProficiencyLevelProps {
 
 const proficiencyLevels = [
   {
-    value: 'not-taken',
+    value: "not-taken",
     label: "I haven't taken it yet",
-    description: 'I have not taken the TOEFL exam before'
+    description: "I have not taken the TOEFL exam before",
   },
   {
-    value: '0-60',
-    label: '0 to 60',
-    description: 'Beginning level - Basic understanding of simple conversations'
+    value: "0-60",
+    label: "0 to 60",
+    description:
+      "Beginning level - Basic understanding of simple conversations",
   },
   {
-    value: '61-80',
-    label: '61 to 80',
-    description: 'Intermediate level - Can handle most everyday situations'
+    value: "61-80",
+    label: "61 to 80",
+    description: "Intermediate level - Can handle most everyday situations",
   },
   {
-    value: '81-100',
-    label: '81 to 100',
-    description: 'Advanced level - Good command of English for academic purposes'
+    value: "81-100",
+    label: "81 to 100",
+    description:
+      "Advanced level - Good command of English for academic purposes",
   },
   {
-    value: '101-120',
-    label: '101 to 120',
-    description: 'Excellent level - Near-native proficiency in academic English'
-  }
+    value: "101-120",
+    label: "101 to 120",
+    description:
+      "Excellent level - Near-native proficiency in academic English",
+  },
 ];
 
-export default function ProficiencyLevel({ data, updateData, onNext, onPrev, currentStep = 2, totalSteps = 3 }: ProficiencyLevelProps) {
-  const [selectedLevel, setSelectedLevel] = useState(data.englishProficiency || '');
+export default function ProficiencyLevel({
+  data,
+  updateData,
+  onNext,
+  onPrev,
+  currentStep = 2,
+  totalSteps = 3,
+}: ProficiencyLevelProps) {
+  const [selectedLevel, setSelectedLevel] = useState(
+    data.englishProficiency || "",
+  );
 
   const handleLevelSelect = (level: string) => {
     setSelectedLevel(level);
@@ -57,17 +69,16 @@ export default function ProficiencyLevel({ data, updateData, onNext, onPrev, cur
   return (
     <div className="bg-white rounded-xl shadow-lg p-8">
       {/* Progress Steps */}
-      <ProgressIndicator 
-        currentStep={currentStep} 
-        totalSteps={totalSteps} 
-      />
+      <ProgressIndicator currentStep={currentStep} totalSteps={totalSteps} />
 
       {/* Content */}
       <div className="text-center mb-8">
         <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <BookOpen className="w-8 h-8 text-blue-600" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">What was your last TOEFL score?</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          What was your last TOEFL score?
+        </h2>
         <p className="text-lg text-gray-600">
           This helps us personalize your TOEFL preparation experience
         </p>
@@ -80,29 +91,39 @@ export default function ProficiencyLevel({ data, updateData, onNext, onPrev, cur
             onClick={() => handleLevelSelect(level.value)}
             className={`relative p-6 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
               selectedLevel === level.value
-                ? 'border-blue-500 bg-blue-50 shadow-md'
-                : 'border-gray-200 hover:border-gray-300'
+                ? "border-blue-500 bg-blue-50 shadow-md"
+                : "border-gray-200 hover:border-gray-300"
             }`}
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h3 className={`text-lg font-semibold mb-2 ${
-                  selectedLevel === level.value ? 'text-blue-900' : 'text-gray-900'
-                }`}>
+                <h3
+                  className={`text-lg font-semibold mb-2 ${
+                    selectedLevel === level.value
+                      ? "text-blue-900"
+                      : "text-gray-900"
+                  }`}
+                >
                   {level.label}
                 </h3>
-                <p className={`text-sm ${
-                  selectedLevel === level.value ? 'text-blue-700' : 'text-gray-600'
-                }`}>
+                <p
+                  className={`text-sm ${
+                    selectedLevel === level.value
+                      ? "text-blue-700"
+                      : "text-gray-600"
+                  }`}
+                >
                   {level.description}
                 </p>
               </div>
-              
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-1 ${
-                selectedLevel === level.value
-                  ? 'border-blue-500 bg-blue-500'
-                  : 'border-gray-300'
-              }`}>
+
+              <div
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-1 ${
+                  selectedLevel === level.value
+                    ? "border-blue-500 bg-blue-500"
+                    : "border-gray-300"
+                }`}
+              >
                 {selectedLevel === level.value && (
                   <div className="w-2 h-2 bg-white rounded-full" />
                 )}
@@ -128,8 +149,20 @@ export default function ProficiencyLevel({ data, updateData, onNext, onPrev, cur
           className="py-3 px-6 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none transition-colors"
         >
           Continue
-          <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+          <svg
+            className="w-4 h-4"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 10"
+          >
+            <path
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M1 5h12m0 0L9 1m4 4L9 9"
+            />
           </svg>
         </button>
       </div>

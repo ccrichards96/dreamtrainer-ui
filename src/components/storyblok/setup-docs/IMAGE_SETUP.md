@@ -5,6 +5,7 @@ This document provides complete setup instructions for the enhanced Image compon
 ## Overview
 
 The updated Image component provides comprehensive image handling capabilities including:
+
 - Responsive image behavior following Preline UI patterns
 - Advanced styling options (shadows, borders, hover effects)
 - Object fit controls for proper image scaling
@@ -28,51 +29,51 @@ Add the following fields to your Image component in Storyblok:
 
 #### Required Fields
 
-| Field Name | Field Type | Description | Default Value |
-|------------|------------|-------------|---------------|
-| `image_url` | Asset | The image file | Required |
-| `alt` | Text | Alt text for accessibility | Empty |
+| Field Name  | Field Type | Description                | Default Value |
+| ----------- | ---------- | -------------------------- | ------------- |
+| `image_url` | Asset      | The image file             | Required      |
+| `alt`       | Text       | Alt text for accessibility | Empty         |
 
 #### Layout & Sizing Fields
 
-| Field Name | Field Type | Description | Options/Default |
-|------------|------------|-------------|-----------------|
-| `width` | Text | Custom width (e.g., "300px", "100%") | Empty |
-| `height` | Text | Custom height (e.g., "200px", "auto") | Empty |
-| `boxsize_base` | Text | Square dimensions (e.g., "64px") | Empty |
-| `maxWidth` | Text | Maximum width constraint | Empty |
-| `aspectRatio` | Single-Option | Predefined aspect ratios | Options: `auto`, `square`, `video`, `photo` |
+| Field Name     | Field Type    | Description                           | Options/Default                             |
+| -------------- | ------------- | ------------------------------------- | ------------------------------------------- |
+| `width`        | Text          | Custom width (e.g., "300px", "100%")  | Empty                                       |
+| `height`       | Text          | Custom height (e.g., "200px", "auto") | Empty                                       |
+| `boxsize_base` | Text          | Square dimensions (e.g., "64px")      | Empty                                       |
+| `maxWidth`     | Text          | Maximum width constraint              | Empty                                       |
+| `aspectRatio`  | Single-Option | Predefined aspect ratios              | Options: `auto`, `square`, `video`, `photo` |
 
 #### Visual Design Fields
 
-| Field Name | Field Type | Description | Options/Default |
-|------------|------------|-------------|-----------------|
-| `objectFit` | Single-Option | How image fits container | Options: `cover`, `contain`, `fill`, `scale-down`, `none` (Default: `cover`) |
-| `rounded` | Single-Option | Border radius | Options: `none`, `sm`, `md`, `lg`, `xl`, `2xl`, `full` |
-| `borderRadius` | Text | Custom border radius (legacy support) | Empty |
-| `shadow` | Single-Option | Drop shadow | Options: `none`, `sm`, `md`, `lg`, `xl`, `2xl` |
+| Field Name     | Field Type    | Description                           | Options/Default                                                              |
+| -------------- | ------------- | ------------------------------------- | ---------------------------------------------------------------------------- |
+| `objectFit`    | Single-Option | How image fits container              | Options: `cover`, `contain`, `fill`, `scale-down`, `none` (Default: `cover`) |
+| `rounded`      | Single-Option | Border radius                         | Options: `none`, `sm`, `md`, `lg`, `xl`, `2xl`, `full`                       |
+| `borderRadius` | Text          | Custom border radius (legacy support) | Empty                                                                        |
+| `shadow`       | Single-Option | Drop shadow                           | Options: `none`, `sm`, `md`, `lg`, `xl`, `2xl`                               |
 
 #### Interactive Effects
 
-| Field Name | Field Type | Description | Options/Default |
-|------------|------------|-------------|-----------------|
+| Field Name    | Field Type    | Description     | Options/Default                             |
+| ------------- | ------------- | --------------- | ------------------------------------------- |
 | `hoverEffect` | Single-Option | Hover animation | Options: `none`, `zoom`, `opacity`, `scale` |
 
 #### Performance & Display
 
-| Field Name | Field Type | Description | Options/Default |
-|------------|------------|-------------|-----------------|
-| `loading` | Single-Option | Loading behavior | Options: `lazy`, `eager` (Default: `lazy`) |
+| Field Name    | Field Type    | Description          | Options/Default                               |
+| ------------- | ------------- | -------------------- | --------------------------------------------- |
+| `loading`     | Single-Option | Loading behavior     | Options: `lazy`, `eager` (Default: `lazy`)    |
 | `displayMode` | Single-Option | CSS display property | Options: `block`, `inline` (Default: `block`) |
 
 #### Container & Overlay
 
-| Field Name | Field Type | Description | Options/Default |
-|------------|------------|-------------|-----------------|
-| `containerBackground` | Text | Background color class | Empty |
-| `overlay` | Boolean | Enable image overlay | Default: `false` |
-| `overlayColor` | Text | Overlay color class | Default: `black` |
-| `overlayOpacity` | Single-Option | Overlay transparency | Options: `10`, `20`, `30`, `40`, `50`, `60`, `70`, `80`, `90` |
+| Field Name            | Field Type    | Description            | Options/Default                                               |
+| --------------------- | ------------- | ---------------------- | ------------------------------------------------------------- |
+| `containerBackground` | Text          | Background color class | Empty                                                         |
+| `overlay`             | Boolean       | Enable image overlay   | Default: `false`                                              |
+| `overlayColor`        | Text          | Overlay color class    | Default: `black`                                              |
+| `overlayOpacity`      | Single-Option | Overlay transparency   | Options: `10`, `20`, `30`, `40`, `50`, `60`, `70`, `80`, `90` |
 
 ### 3. Field Configuration Details
 
@@ -81,6 +82,7 @@ Add the following fields to your Image component in Storyblok:
 For dropdown fields, configure the options as follows:
 
 **aspectRatio Options:**
+
 ```
 auto|Auto
 square|Square (1:1)
@@ -89,6 +91,7 @@ photo|Photo (4:3)
 ```
 
 **objectFit Options:**
+
 ```
 cover|Cover (crop to fit)
 contain|Contain (fit entirely)
@@ -98,6 +101,7 @@ none|Original Size
 ```
 
 **rounded Options:**
+
 ```
 none|No Rounding
 sm|Small
@@ -109,6 +113,7 @@ full|Fully Rounded
 ```
 
 **shadow Options:**
+
 ```
 none|No Shadow
 sm|Small Shadow
@@ -119,6 +124,7 @@ xl|Extra Large Shadow
 ```
 
 **hoverEffect Options:**
+
 ```
 none|No Effect
 zoom|Zoom In (105%)
@@ -127,18 +133,21 @@ scale|Scale Up (110%)
 ```
 
 **loading Options:**
+
 ```
 lazy|Lazy Load
 eager|Load Immediately
 ```
 
 **displayMode Options:**
+
 ```
 block|Block Display
 inline|Inline Display
 ```
 
 **overlayOpacity Options:**
+
 ```
 10|10%
 20|20%
@@ -172,6 +181,7 @@ Add this preview configuration to your Image component in Storyblok:
 ## Usage Examples
 
 ### Basic Image
+
 ```json
 {
   "image_url": {
@@ -184,6 +194,7 @@ Add this preview configuration to your Image component in Storyblok:
 ```
 
 ### Responsive Square Thumbnail
+
 ```json
 {
   "image_url": {
@@ -199,6 +210,7 @@ Add this preview configuration to your Image component in Storyblok:
 ```
 
 ### Hero Image with Overlay
+
 ```json
 {
   "image_url": {
@@ -214,6 +226,7 @@ Add this preview configuration to your Image component in Storyblok:
 ```
 
 ### Gallery Image with Hover Effect
+
 ```json
 {
   "image_url": {
@@ -231,26 +244,31 @@ Add this preview configuration to your Image component in Storyblok:
 ## Best Practices
 
 ### 1. Performance
+
 - Use `loading: "lazy"` for images below the fold
 - Use `loading: "eager"` for above-the-fold images
 - Optimize image sizes before uploading to Storyblok
 
 ### 2. Accessibility
+
 - Always provide meaningful `alt` text
 - Use descriptive alt text that conveys the image's purpose
 - Leave `alt` empty for decorative images
 
 ### 3. Responsive Design
+
 - Use `aspectRatio` to maintain consistent layouts
 - Set `maxWidth` to prevent images from becoming too large
 - Use `objectFit: "cover"` for most responsive scenarios
 
 ### 4. Visual Consistency
+
 - Use consistent `rounded` and `shadow` values across your site
 - Define a limited set of hover effects for your design system
 - Use overlay sparingly for better performance
 
 ### 5. Content Strategy
+
 - Create image style presets for common use cases
 - Document your organization's image standards
 - Use consistent aspect ratios across similar content types
@@ -260,16 +278,19 @@ Add this preview configuration to your Image component in Storyblok:
 ### Common Issues
 
 **Images not displaying:**
+
 - Verify the `image_url.filename` is properly set
 - Check that the image URL is accessible
 - Ensure the component is properly registered in your app
 
 **Styling not applied:**
+
 - Verify Tailwind CSS classes are available
 - Check that custom arbitrary values are properly escaped
 - Ensure the component is receiving the correct props
 
 **Performance issues:**
+
 - Use appropriate image sizes
 - Enable lazy loading for non-critical images
 - Optimize images before upload
@@ -287,7 +308,7 @@ module.exports = {
   theme: {
     extend: {
       aspectRatio: {
-        '4/3': '4 / 3',
+        "4/3": "4 / 3",
       },
     },
   },
@@ -299,7 +320,7 @@ module.exports = {
     { pattern: /^rounded-\[.+\]$/ },
     { pattern: /^max-w-\[.+\]$/ },
   ],
-}
+};
 ```
 
 ## Migration from Legacy Version
@@ -314,6 +335,7 @@ If you're upgrading from the previous Image component:
 ## Support
 
 For additional support or questions about this component:
+
 1. Check the Storyblok documentation
 2. Review the Preline UI documentation for styling references
 3. Test your configuration in Storyblok's visual editor

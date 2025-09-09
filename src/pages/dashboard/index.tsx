@@ -1,36 +1,43 @@
-import { motion } from 'framer-motion';
-import { useAuth0 } from '@auth0/auth0-react';
-import { MessageSquare, RefreshCw, AlertCircle, Calendar, Play, Mail } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useDashboardContext, DashboardProvider } from '../../contexts';
-import { CourseProvider } from '../../contexts/CourseContext';
-import { useCourseContext } from '../../contexts/useCourseContext';
-import DreamFlow from '../../components/DreamFlow';
-import Modal from '../../components/modals/Modal';
-import SupportMessageForm from '../../components/forms/SupportMessageForm';
-import { Course } from '../../types/modules';
-import posthog from 'posthog-js';
+import { motion } from "framer-motion";
+import { useAuth0 } from "@auth0/auth0-react";
+import {
+  MessageSquare,
+  RefreshCw,
+  AlertCircle,
+  Calendar,
+  Play,
+  Mail,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useDashboardContext, DashboardProvider } from "../../contexts";
+import { CourseProvider } from "../../contexts/CourseContext";
+import { useCourseContext } from "../../contexts/useCourseContext";
+import DreamFlow from "../../components/DreamFlow";
+import Modal from "../../components/modals/Modal";
+import SupportMessageForm from "../../components/forms/SupportMessageForm";
+import { Course } from "../../types/modules";
+import posthog from "posthog-js";
 
 function DashboardContent() {
   const { user, isAuthenticated } = useAuth0();
-  const firstName = user?.given_name || 'there';
-  
+  const firstName = user?.given_name || "there";
+
   // Welcome modal state
   const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
   const [supportMessageModalOpen, setSupportMessageModalOpen] = useState(false);
 
-  // Check for first login and set welcome modal 
+  // Check for first login and set welcome modal
   useEffect(() => {
     const checkFirstLogin = () => {
       if (isAuthenticated) {
-        const storageKey = 'hasVisitedDashboard';
+        const storageKey = "hasVisitedDashboard";
         const hasVisitedBefore = localStorage.getItem(storageKey);
-        if (!hasVisitedBefore || hasVisitedBefore !== 'true') {
+        if (!hasVisitedBefore || hasVisitedBefore !== "true") {
           // This is the first login
           setWelcomeModalOpen(true);
-          posthog.capture('First Login', { user });
+          posthog.capture("First Login", { user });
           // Mark as visited
-          localStorage.setItem(storageKey, 'true');
+          localStorage.setItem(storageKey, "true");
         }
       }
     };
@@ -47,7 +54,7 @@ function DashboardContent() {
     announcements,
     loading: dashboardLoading,
     error: dashboardError,
-    getTestScores
+    getTestScores,
   } = useDashboardContext();
 
   // Use Course context for module management
@@ -58,7 +65,7 @@ function DashboardContent() {
     error: courseError,
     loadCourse,
     getAllCourses,
-    startTestMode
+    startTestMode,
   } = useCourseContext();
 
   // Load TOEFL Max course on component mount
@@ -66,25 +73,25 @@ function DashboardContent() {
     const fetchCourses = async () => {
       try {
         const courses: Course[] = await getAllCourses();
-        console.log('Fetched courses:', courses);
+        console.log("Fetched courses:", courses);
         if (courses.length > 0) {
-          console.log('Loading first course:', courses[0].id);
+          console.log("Loading first course:", courses[0].id);
           await loadCourse(courses[0].id);
 
           const testAttempts = await getTestScores(courses[0].id);
-          console.log('Fetched test attempts:', testAttempts);
+          console.log("Fetched test attempts:", testAttempts);
         } else {
-          console.warn('No courses found');
+          console.warn("No courses found");
         }
       } catch (error) {
-        console.error('Error fetching courses:', error);
+        console.error("Error fetching courses:", error);
       }
     };
     fetchCourses();
   }, [getAllCourses, loadCourse, getTestScores]);
 
   const handleCourseComplete = () => {
-    console.log('Course completed!');
+    console.log("Course completed!");
     // Course completion handling - no longer navigating to assessment
   };
 
@@ -100,7 +107,9 @@ function DashboardContent() {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="flex items-center gap-3">
               <RefreshCw className="w-6 h-6 animate-spin text-[#c5a8de]" />
-              <span className="text-lg text-gray-600">Loading your dashboard...</span>
+              <span className="text-lg text-gray-600">
+                Loading your dashboard...
+              </span>
             </div>
           </div>
         </div>
@@ -116,7 +125,9 @@ function DashboardContent() {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
               <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to load dashboard</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                Unable to load dashboard
+              </h2>
               <p className="text-gray-600 mb-4">{error}</p>
             </div>
           </div>
@@ -126,7 +137,7 @@ function DashboardContent() {
   }
 
   return (
-  <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
+    <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Banner */}
         <motion.div
@@ -157,17 +168,22 @@ function DashboardContent() {
                   Starting Score
                 </h2>
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-[#c5a8de] mb-4">{startingScore}</div>
-                  <div className="text-gray-600 text-lg">Initial Assessment</div>
+                  <div className="text-4xl font-bold text-[#c5a8de] mb-4">
+                    {startingScore}
+                  </div>
+                  <div className="text-gray-600 text-lg">
+                    Initial Assessment
+                  </div>
                   <div className="text-sm text-gray-500 mt-2">
                     Your baseline score when you started
                   </div>
                   {startingScoreDate && (
                     <div className="text-xs text-gray-400 mt-3">
-                      Assessed: {new Date(startingScoreDate).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
+                      Assessed:{" "}
+                      {new Date(startingScoreDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
                       })}
                     </div>
                   )}
@@ -187,28 +203,40 @@ function DashboardContent() {
                   Current Score
                 </h2>
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-green-600 mb-4">{currentScore}</div>
+                  <div className="text-4xl font-bold text-green-600 mb-4">
+                    {currentScore}
+                  </div>
                   <div className="text-gray-600 text-lg">Latest Assessment</div>
                   {startingScore !== null && (
                     <div className="mt-4">
-                      <div className={`text-lg font-medium ${
-                        currentScore > startingScore ? 'text-green-600' : 
-                        currentScore < startingScore ? 'text-red-500' : 'text-gray-600'
-                      }`}>
-                        {currentScore > startingScore ? '+' : ''}{currentScore - startingScore} points
+                      <div
+                        className={`text-lg font-medium ${
+                          currentScore > startingScore
+                            ? "text-green-600"
+                            : currentScore < startingScore
+                              ? "text-red-500"
+                              : "text-gray-600"
+                        }`}
+                      >
+                        {currentScore > startingScore ? "+" : ""}
+                        {currentScore - startingScore} points
                       </div>
                       <div className="text-sm text-gray-500 mt-1">
-                        {currentScore > startingScore ? 'Great progress!' : 
-                         currentScore < startingScore ? 'Keep practicing!' : 'Steady performance'}
+                        {currentScore > startingScore
+                          ? "Great progress!"
+                          : currentScore < startingScore
+                            ? "Keep practicing!"
+                            : "Steady performance"}
                       </div>
                     </div>
                   )}
                   {currentScoreDate && (
                     <div className="text-xs text-gray-400 mt-3">
-                      Assessed: {new Date(currentScoreDate).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
+                      Assessed:{" "}
+                      {new Date(currentScoreDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
                       })}
                     </div>
                   )}
@@ -225,7 +253,7 @@ function DashboardContent() {
           transition={{ delay: 0.2 }}
           className="bg-white rounded-2xl shadow-lg p-8 mb-8"
         >
-            <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold text-gray-900">
               General Announcements
             </h2>
@@ -235,7 +263,7 @@ function DashboardContent() {
             >
               <Play className="w-5 h-5 mr-2" /> Watch Your Welcome Video!
             </button>
-            </div>
+          </div>
           <div className="max-h-80 overflow-y-auto">
             {announcements.length === 0 ? (
               <div className="text-center py-8">
@@ -245,28 +273,41 @@ function DashboardContent() {
             ) : (
               <div className="space-y-4">
                 {announcements
-                  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                  .sort(
+                    (a, b) =>
+                      new Date(b.createdAt).getTime() -
+                      new Date(a.createdAt).getTime(),
+                  )
                   .map((announcement) => (
                     <div
                       key={announcement.id}
                       className={`p-4 rounded-lg border-l-4 ${
-                        announcement.type === 'general' ? 'border-blue-500 bg-blue-50' :
-                        announcement.type === 'account' ? 'border-green-500 bg-green-50' :
-                        announcement.type === 'support' ? 'border-yellow-500 bg-yellow-50' :
-                        'border-gray-500 bg-gray-50'
+                        announcement.type === "general"
+                          ? "border-blue-500 bg-blue-50"
+                          : announcement.type === "account"
+                            ? "border-green-500 bg-green-50"
+                            : announcement.type === "support"
+                              ? "border-yellow-500 bg-yellow-50"
+                              : "border-gray-500 bg-gray-50"
                       }`}
                     >
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="font-semibold text-gray-900 text-sm">
                           {announcement.name}
                         </h3>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          announcement.type === 'general' ? 'bg-blue-100 text-blue-800' :
-                          announcement.type === 'account' ? 'bg-green-100 text-green-800' :
-                          announcement.type === 'support' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {announcement.type.charAt(0).toUpperCase() + announcement.type.slice(1)}
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            announcement.type === "general"
+                              ? "bg-blue-100 text-blue-800"
+                              : announcement.type === "account"
+                                ? "bg-green-100 text-green-800"
+                                : announcement.type === "support"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {announcement.type.charAt(0).toUpperCase() +
+                            announcement.type.slice(1)}
                         </span>
                       </div>
                       <p className="text-gray-700 text-sm mb-3">
@@ -274,11 +315,14 @@ function DashboardContent() {
                       </p>
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>
-                          {new Date(announcement.createdAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                          {new Date(announcement.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            },
+                          )}
                         </span>
                       </div>
                     </div>
@@ -299,16 +343,15 @@ function DashboardContent() {
             <div className="bg-white rounded-2xl shadow-lg">
               <div className="p-8 border-b border-gray-100">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                  {currentCourse?.name || 'Learning Modules'}
+                  {currentCourse?.name || "Learning Modules"}
                 </h2>
                 <p className="text-gray-600">
-                  {currentCourse?.description || 'Progress through your certification modules with interactive content and guided tutorials.'}
+                  {currentCourse?.description ||
+                    "Progress through your certification modules with interactive content and guided tutorials."}
                 </p>
               </div>
               <div className="p-4">
-                <DreamFlow 
-                  onComplete={handleCourseComplete}
-                />
+                <DreamFlow onComplete={handleCourseComplete} />
               </div>
             </div>
           </motion.div>
@@ -327,11 +370,12 @@ function DashboardContent() {
               Need help/support from Joseph, our trusted expert?
             </h2>
             <p className="text-gray-600 mb-6">
-               Struggling, confused, or not improving? We'll get you back on track right away:
+              Struggling, confused, or not improving? We'll get you back on
+              track right away:
             </p>
-            <a 
-              href="https://calendly.com/notefulljoseph/toefl-course-help" 
-              target="_blank" 
+            <a
+              href="https://calendly.com/notefulljoseph/toefl-course-help"
+              target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-[#c5a8de] text-white py-4 rounded-lg font-medium hover:bg-[#b399d6] transition-all flex items-center justify-center gap-2 mb-4"
             >
@@ -351,7 +395,8 @@ function DashboardContent() {
               Send a Message to Joseph and the Dream Trainer Team
             </h2>
             <p className="text-gray-600 mb-6">
-              Have a question or need assistance? Send us a message and we'll get back to you promptly.
+              Have a question or need assistance? Send us a message and we'll
+              get back to you promptly.
             </p>
             <button
               onClick={() => setSupportMessageModalOpen(true)}

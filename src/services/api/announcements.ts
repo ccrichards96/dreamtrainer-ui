@@ -1,5 +1,5 @@
-import apiClient from './client';
-import { Announcement, AnnouncementsResponse } from '../../types/announcements';
+import apiClient from "./client";
+import { Announcement, AnnouncementsResponse } from "../../types/announcements";
 
 /**
  * Get all announcements
@@ -7,13 +7,16 @@ import { Announcement, AnnouncementsResponse } from '../../types/announcements';
  */
 export const getAllAnnouncements = async (): Promise<Announcement[]> => {
   try {
-    const response = await apiClient.get<AnnouncementsResponse>('/announcements');
+    const response =
+      await apiClient.get<AnnouncementsResponse>("/announcements");
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to get announcements: ${error.message}`);
     }
-    throw new Error('An unexpected error occurred while fetching announcements');
+    throw new Error(
+      "An unexpected error occurred while fetching announcements",
+    );
   }
 };
 

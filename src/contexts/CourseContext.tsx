@@ -1,11 +1,12 @@
-import React, { createContext, ReactNode, useState, useCallback } from 'react';
-import { Course, Module } from '../types/modules';
-import { Test } from '../types/tests';
-import { getCourseWithModulesById, getAllCourses as fetchAllCourses } from '../services/api/modules';
+import React, { createContext, ReactNode, useState, useCallback } from "react";
+import { Course, Module } from "../types/modules";
+import { Test } from "../types/tests";
+import {
+  getCourseWithModulesById,
+  getAllCourses as fetchAllCourses,
+} from "../services/api/modules";
 
-
-
- // Fallback sample data for development
+// Fallback sample data for development
 // const fallbackModules: Module[] = [
 //   {
 //     id: "sample-module-1",
@@ -54,21 +55,21 @@ export interface CourseContextType {
   currentModule: Module | null;
   modules: Module[];
   tests: Test[];
-  
+
   // Module navigation
   currentModuleIndex: number;
   completedModules: Set<number>;
-  
+
   // Test management
   isTestMode: boolean;
   currentTest: Test | null;
   currentTestIndex: number;
   allModulesCompleted: boolean;
-  
+
   // State management
   loading: boolean;
   error: string | null;
-  
+
   // Actions
   loadCourse: (courseId: string) => Promise<void>;
   getAllCourses: () => Promise<Course[]>;
@@ -76,14 +77,14 @@ export interface CourseContextType {
   markModuleAsCompleted: (index: number) => void;
   nextModule: () => void;
   previousModule: () => void;
-  
+
   // Test actions
   startTestMode: () => void;
   exitTestMode: () => void;
   resetToFirstModule: (clearProgress?: boolean) => void;
   getNextTestInSequence: () => Test | null;
   getTestProgress: () => { current: number; total: number };
-  
+
   // Utility functions
   getNextModule: () => Module | null;
   getPreviousModule: () => Module | null;
@@ -109,16 +110,18 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   const [modules, setModules] = useState<Module[]>([]);
   const [tests, setTests] = useState<Test[]>([]);
   const [currentModuleIndex, setCurrentModuleIndexState] = useState<number>(0);
-  const [completedModules, setCompletedModules] = useState<Set<number>>(new Set());
+  const [completedModules, setCompletedModules] = useState<Set<number>>(
+    new Set(),
+  );
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Test-related state
   const [isTestMode, setIsTestMode] = useState<boolean>(false);
   const [currentTest, setCurrentTest] = useState<Test | null>(null);
   const [currentTestIndex, setCurrentTestIndex] = useState<number>(0);
-  const [allModulesCompleted, setAllModulesCompleted] = useState<boolean>(false);
-
+  const [allModulesCompleted, setAllModulesCompleted] =
+    useState<boolean>(false);
 
   // Load course data
   const loadCourse = useCallback(async (courseId: string): Promise<void> => {
@@ -128,11 +131,13 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       const response = await getCourseWithModulesById(courseId);
       // API returns { success: true, data: { course: {...}, modules: [...], tests: [...] }, message: "..." }
       const data = response.data;
-      
+
       setCurrentCourse(data);
       setModules(data.modules || []);
       // Sort tests by order field to ensure sequential ordering
-      const sortedTests = (data.tests || []).sort((a: Test, b: Test) => a.order - b.order);
+      const sortedTests = (data.tests || []).sort(
+        (a: Test, b: Test) => a.order - b.order,
+      );
       setTests(sortedTests);
       // setTestAttempts(data.testAttempts);
 
@@ -140,13 +145,13 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       setCurrentModuleIndexState(0);
       setCompletedModules(new Set());
       setCurrentModule(data.modules?.[0] || null);
-      
+
       // Reset test state
       setCurrentTestIndex(0);
       setIsTestMode(false);
       setCurrentTest(null);
     } catch (err) {
-      console.warn('Course loading failed, using fallback data:', err);
+      console.warn("Course loading failed, using fallback data:", err);
 
       setCurrentCourse(null);
       setModules([]);
@@ -168,33 +173,37 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       // The courses are directly in the data array
       return response.data || [];
     } catch (err) {
-      console.warn('Failed to fetch courses:', err);
-      setError('Failed to fetch courses');
+      console.warn("Failed to fetch courses:", err);
+      setError("Failed to fetch courses");
       return [];
     }
   }, []);
 
-  
-
   // Set current module by index
-  const setCurrentModuleIndex = useCallback((index: number): void => {
-    if (index >= 0 && index < modules.length) {
-      setCurrentModuleIndexState(index);
-      setCurrentModule(modules[index]);
-    }
-  }, [modules]);
+  const setCurrentModuleIndex = useCallback(
+    (index: number): void => {
+      if (index >= 0 && index < modules.length) {
+        setCurrentModuleIndexState(index);
+        setCurrentModule(modules[index]);
+      }
+    },
+    [modules],
+  );
 
   // Mark a module as completed
-  const markModuleAsCompleted = useCallback((index: number): void => {
-    setCompletedModules(prev => {
-      const newCompleted = new Set([...prev, index]);
-      // Check if all modules are completed
-      if (newCompleted.size === modules.length) {
-        setAllModulesCompleted(true);
-      }
-      return newCompleted;
-    });
-  }, [modules.length]);
+  const markModuleAsCompleted = useCallback(
+    (index: number): void => {
+      setCompletedModules((prev) => {
+        const newCompleted = new Set([...prev, index]);
+        // Check if all modules are completed
+        if (newCompleted.size === modules.length) {
+          setAllModulesCompleted(true);
+        }
+        return newCompleted;
+      });
+    },
+    [modules.length],
+  );
 
   // Test-related functions
   const startTestMode = useCallback((): void => {
@@ -203,7 +212,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       const testToStart = tests[currentTestIndex];
       setCurrentTest(testToStart);
       setIsTestMode(true);
-      
+
       // Advance to next test for next time, cycling back to 0 if we reach the end
       setCurrentTestIndex((prevIndex) => (prevIndex + 1) % tests.length);
     }
@@ -214,19 +223,22 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     setCurrentTest(null);
   }, []);
 
-  const resetToFirstModule = useCallback((clearProgress: boolean = false): void => {
-    setCurrentModuleIndexState(0);
-    setCurrentModule(modules[0] || null);
-    setIsTestMode(false);
-    setCurrentTest(null);
-    setCurrentTestIndex(0); // Reset test index to start from the beginning
-    setAllModulesCompleted(false);
-    
-    // Optionally reset completed modules if you want users to go through everything fresh
-    if (clearProgress) {
-      setCompletedModules(new Set());
-    }
-  }, [modules]);
+  const resetToFirstModule = useCallback(
+    (clearProgress: boolean = false): void => {
+      setCurrentModuleIndexState(0);
+      setCurrentModule(modules[0] || null);
+      setIsTestMode(false);
+      setCurrentTest(null);
+      setCurrentTestIndex(0); // Reset test index to start from the beginning
+      setAllModulesCompleted(false);
+
+      // Optionally reset completed modules if you want users to go through everything fresh
+      if (clearProgress) {
+        setCompletedModules(new Set());
+      }
+    },
+    [modules],
+  );
 
   // Get the next test in the sequence (useful for preview/information)
   const getNextTestInSequence = useCallback((): Test | null => {
@@ -235,10 +247,13 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   }, [tests, currentTestIndex]);
 
   // Get test progress information
-  const getTestProgress = useCallback((): { current: number; total: number } => {
+  const getTestProgress = useCallback((): {
+    current: number;
+    total: number;
+  } => {
     return {
       current: currentTestIndex + 1, // +1 for 1-based indexing for display
-      total: tests.length
+      total: tests.length,
     };
   }, [currentTestIndex, tests.length]);
 
@@ -273,7 +288,12 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   // Get progress percentage
   const getProgressPercentage = useCallback((): number => {
     if (modules.length === 0) return 0;
-    return ((completedModules.size + (currentModuleIndex > completedModules.size ? 1 : 0)) / modules.length) * 100;
+    return (
+      ((completedModules.size +
+        (currentModuleIndex > completedModules.size ? 1 : 0)) /
+        modules.length) *
+      100
+    );
   }, [completedModules.size, currentModuleIndex, modules.length]);
 
   // Check if current module is the last
@@ -298,21 +318,21 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     currentModule,
     modules,
     tests,
-    
+
     // Module navigation
     currentModuleIndex,
     completedModules,
-    
+
     // Test management
     isTestMode,
     currentTest,
     currentTestIndex,
     allModulesCompleted,
-    
+
     // State management
     loading,
     error,
-    
+
     // Actions
     loadCourse,
     getAllCourses,
@@ -320,14 +340,14 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     markModuleAsCompleted,
     nextModule,
     previousModule,
-    
+
     // Test actions
     startTestMode,
     exitTestMode,
     resetToFirstModule,
     getNextTestInSequence,
     getTestProgress,
-        
+
     // Utility functions
     getNextModule,
     getPreviousModule,
@@ -338,9 +358,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   };
 
   return (
-    <CourseContext.Provider value={value}>
-      {children}
-    </CourseContext.Provider>
+    <CourseContext.Provider value={value}>{children}</CourseContext.Provider>
   );
 };
 

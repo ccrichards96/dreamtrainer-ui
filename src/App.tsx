@@ -1,19 +1,19 @@
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import { Auth0Provider } from '@auth0/auth0-react';
-import Login from './pages/auth/login';
-import Signup from './pages/auth/signup';
-import Dashboard from './pages/dashboard';
-import Onboarding from './pages/onboarding';
-import CheckoutSuccess from './pages/checkout/Success';
-import ProtectedRoute from './components/routes/ProtectedRoute';
-import AccountPage from './pages/account';
-import BlogPage from './pages/blog';
-import AdminDashboard from './pages/admin';
-import CMSRoute from './components/routes/CMSRoute';
-import Navigation from './components/Navigation';
-import { AuthProvider, ApiProvider } from './contexts';
-import { AppProvider } from './contexts/AppContext';
-import NotFound from './pages/NotFound';
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Auth0Provider } from "@auth0/auth0-react";
+import Login from "./pages/auth/login";
+import Signup from "./pages/auth/signup";
+import Dashboard from "./pages/dashboard";
+import Onboarding from "./pages/onboarding";
+import CheckoutSuccess from "./pages/checkout/Success";
+import ProtectedRoute from "./components/routes/ProtectedRoute";
+import AccountPage from "./pages/account";
+import BlogPage from "./pages/blog";
+import AdminDashboard from "./pages/admin";
+import CMSRoute from "./components/routes/CMSRoute";
+import Navigation from "./components/Navigation";
+import { AuthProvider, ApiProvider } from "./contexts";
+import { AppProvider } from "./contexts/AppContext";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -37,43 +37,46 @@ function App() {
                     <Route path="/blog" element={<BlogPage />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
-                    <Route 
-                      path="/onboarding" 
+                    <Route
+                      path="/onboarding"
                       element={
                         <ProtectedRoute>
                           <Onboarding />
                         </ProtectedRoute>
-                      } 
+                      }
                     />
-                    <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                    <Route 
-                      path="/dashboard" 
+                    <Route
+                      path="/checkout/success"
+                      element={<CheckoutSuccess />}
+                    />
+                    <Route
+                      path="/dashboard"
                       element={
                         <ProtectedRoute>
                           <Dashboard />
                         </ProtectedRoute>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/account" 
+                    <Route
+                      path="/account"
                       element={
                         <ProtectedRoute>
                           <AccountPage />
                         </ProtectedRoute>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/admin" 
+                    <Route
+                      path="/admin"
                       element={
                         <ProtectedRoute>
                           <AdminDashboard />
                         </ProtectedRoute>
-                      } 
+                      }
                     />
                     {/* CMS Routes */}
                     <Route path="/site/*" element={<CMSRoute />} />
                     <Route path="/site" element={<CMSRoute />} />
-                    
+
                     {/* 404 Catch-all route - must be last */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>

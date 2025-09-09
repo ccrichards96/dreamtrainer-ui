@@ -1,24 +1,24 @@
-import React from 'react';
-import { useParams, useLocation } from 'react-router-dom';
-import { useStoryblok } from '../../utils/storyblok';
+import React from "react";
+import { useParams, useLocation } from "react-router-dom";
+import { useStoryblok } from "../../utils/storyblok";
 import { StoryblokComponent } from "@storyblok/react";
 
 const CMSRoute: React.FC = () => {
   const { "*": wildcard } = useParams<{ "*": string }>();
   const location = useLocation();
 
-  let fullSlug = 'home'; // Default to home
-  
-  if (location.pathname.startsWith('/site/')) {
+  let fullSlug = "home"; // Default to home
+
+  if (location.pathname.startsWith("/site/")) {
     // For /site/ prefixed routes, use the path after /site/
-    fullSlug = location.pathname.replace(/^\/site\/?/, '') || 'home';
+    fullSlug = location.pathname.replace(/^\/site\/?/, "") || "home";
   } else if (wildcard) {
     // Handle other wildcard cases
     fullSlug = wildcard;
   }
-  
+
   const story = useStoryblok(fullSlug, {
-    version: import.meta.env.DEV ? 'draft' : 'published'
+    version: import.meta.env.DEV ? "draft" : "published",
   });
 
   if (!story?.content) {

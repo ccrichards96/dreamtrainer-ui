@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { Module } from '../types';
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import type { Module } from "../types";
 import "react-quill/dist/quill.snow.css";
 
 interface ModuleContentProps {
@@ -10,7 +10,7 @@ interface ModuleContentProps {
 
 const ModuleContent: React.FC<ModuleContentProps> = ({
   modules,
-  currentModuleIndex
+  currentModuleIndex,
 }) => {
   const currentModule = modules[currentModuleIndex];
 
@@ -117,13 +117,13 @@ const ModuleContent: React.FC<ModuleContentProps> = ({
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">
                     Lesson Content
                   </h3>
-                  <div 
+                  <div
                     className="ql-editor prose prose-lg max-w-none text-gray-700 leading-relaxed"
-                    dangerouslySetInnerHTML={{ 
-                      __html: currentModule.lessonContent 
+                    dangerouslySetInnerHTML={{
+                      __html: currentModule.lessonContent,
                     }}
                     style={{
-                      lineHeight: '1.7',
+                      lineHeight: "1.7",
                     }}
                   />
                 </div>

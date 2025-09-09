@@ -1,18 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Edit3, Trash2, BookOpen, Users, Search, Tag } from 'lucide-react';
-import { Course, Module } from '../../types/modules';
-import { getAllCourses, getCourseById, getCourseWithModulesById } from '../../services/api/modules';
-import { CourseEditor, ModuleManager, CategoryManager } from '../../components/admin';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Edit3, Trash2, BookOpen, Users, Search, Tag } from "lucide-react";
+import { Course, Module } from "../../types/modules";
+import {
+  getAllCourses,
+  getCourseById,
+  getCourseWithModulesById,
+} from "../../services/api/modules";
+import {
+  CourseEditor,
+  ModuleManager,
+  CategoryManager,
+} from "../../components/admin";
 
 const AdminDashboard: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [selectedCourseModules, setSelectedCourseModules] = useState<Module[]>([]);
+  const [selectedCourseModules, setSelectedCourseModules] = useState<Module[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [view, setView] = useState<'overview' | 'course-edit' | 'module-manage' | 'category-manage'>('overview');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [view, setView] = useState<
+    "overview" | "course-edit" | "module-manage" | "category-manage"
+  >("overview");
 
   // Load all courses on component mount
   useEffect(() => {
@@ -22,8 +34,8 @@ const AdminDashboard: React.FC = () => {
         const response = await getAllCourses();
         setCourses(response.data || []);
       } catch (err) {
-        setError('Failed to load courses');
-        console.error('Error fetching courses:', err);
+        setError("Failed to load courses");
+        console.error("Error fetching courses:", err);
       } finally {
         setLoading(false);
       }
@@ -33,40 +45,41 @@ const AdminDashboard: React.FC = () => {
   }, []);
 
   // Filter courses based on search term
-  const filteredCourses = courses.filter(course =>
-    course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCourses = courses.filter(
+    (course) =>
+      course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.description?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleEditCourse = async (course: Course) => {
     try {
       setLoading(true);
-      
+
       try {
         const response = await getCourseById(course.id);
-        console.log('Course edit response:', response);
-        
+        console.log("Course edit response:", response);
+
         // Handle different possible response structures
         const courseData = response.data?.course || response.data || response;
         const modulesData = response.data?.modules || [];
-        
-        console.log('Parsed course data:', courseData);
-        console.log('Parsed modules data:', modulesData);
-        
+
+        console.log("Parsed course data:", courseData);
+        console.log("Parsed modules data:", modulesData);
+
         // Use the fetched data if available, otherwise fall back to the original course
         setSelectedCourse(courseData && courseData.id ? courseData : course);
         setSelectedCourseModules(modulesData);
       } catch (apiError) {
-        console.warn('API call failed, using original course data:', apiError);
+        console.warn("API call failed, using original course data:", apiError);
         // Fallback to the original course data if API fails
         setSelectedCourse(course);
         setSelectedCourseModules([]);
       }
-      
-      setView('course-edit');
+
+      setView("course-edit");
     } catch (err) {
-      setError('Failed to load course details');
-      console.error('Error fetching course details:', err);
+      setError("Failed to load course details");
+      console.error("Error fetching course details:", err);
     } finally {
       setLoading(false);
     }
@@ -75,45 +88,45 @@ const AdminDashboard: React.FC = () => {
   const handleManageModules = async (course: Course) => {
     try {
       setLoading(true);
-      
+
       try {
         const response = await getCourseWithModulesById(course.id);
-        console.log('Module management response:', response);
-        
+        console.log("Module management response:", response);
+
         // Handle different possible response structures
         const courseData = response.data || response;
         const modulesData = response.data?.modules || [];
-        
-        console.log('Parsed course data:', courseData);
-        console.log('Parsed modules data:', modulesData);
-        
+
+        console.log("Parsed course data:", courseData);
+        console.log("Parsed modules data:", modulesData);
+
         // Use the fetched data if available, otherwise fall back to the original course
         setSelectedCourse(courseData && courseData.id ? courseData : course);
         setSelectedCourseModules(modulesData);
       } catch (apiError) {
-        console.warn('API call failed, using original course data:', apiError);
+        console.warn("API call failed, using original course data:", apiError);
         // Fallback to the original course data if API fails
         setSelectedCourse(course);
         setSelectedCourseModules([]);
       }
-      
-      setView('module-manage');
+
+      setView("module-manage");
     } catch (err) {
-      setError('Failed to load course modules');
-      console.error('Error fetching course modules:', err);
+      setError("Failed to load course modules");
+      console.error("Error fetching course modules:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleBackToOverview = () => {
-    setView('overview');
+    setView("overview");
     setSelectedCourse(null);
     setSelectedCourseModules([]);
   };
 
   const handleManageCategories = () => {
-    setView('category-manage');
+    setView("category-manage");
   };
 
   const refreshCourses = async () => {
@@ -121,11 +134,11 @@ const AdminDashboard: React.FC = () => {
       const response = await getAllCourses();
       setCourses(response.data || []);
     } catch (err) {
-      console.error('Error refreshing courses:', err);
+      console.error("Error refreshing courses:", err);
     }
   };
 
-  if (loading && view === 'overview') {
+  if (loading && view === "overview") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -136,12 +149,12 @@ const AdminDashboard: React.FC = () => {
     );
   }
 
-  if (error && view === 'overview') {
+  if (error && view === "overview") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-xl mb-4">Error: {error}</div>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
@@ -159,11 +172,15 @@ const AdminDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600">Manage courses, modules, and content</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Admin Dashboard
+              </h1>
+              <p className="text-gray-600">
+                Manage courses, modules, and content
+              </p>
             </div>
             <div className="flex items-center gap-4">
-              {view !== 'overview' && (
+              {view !== "overview" && (
                 <button
                   onClick={handleBackToOverview}
                   className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -175,7 +192,7 @@ const AdminDashboard: React.FC = () => {
                 <Plus className="w-4 h-4" />
                 New Course
               </button> */}
-              <button 
+              <button
                 onClick={handleManageCategories}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
               >
@@ -189,7 +206,7 @@ const AdminDashboard: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Overview */}
-        {view === 'overview' && (
+        {view === "overview" && (
           <>
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -201,8 +218,12 @@ const AdminDashboard: React.FC = () => {
                 <div className="flex items-center">
                   <BookOpen className="w-8 h-8 text-blue-600" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Courses</p>
-                    <p className="text-2xl font-semibold text-gray-900">{courses.length}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Total Courses
+                    </p>
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {courses.length}
+                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -216,7 +237,9 @@ const AdminDashboard: React.FC = () => {
                 <div className="flex items-center">
                   <Users className="w-8 h-8 text-green-600" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Active Students</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Active Students
+                    </p>
                     <p className="text-2xl font-semibold text-gray-900">0</p>
                   </div>
                 </div>
@@ -244,7 +267,9 @@ const AdminDashboard: React.FC = () => {
             {/* Courses Table */}
             <div className="bg-white rounded-lg shadow overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">All Courses</h3>
+                <h3 className="text-lg font-medium text-gray-900">
+                  All Courses
+                </h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -268,12 +293,16 @@ const AdminDashboard: React.FC = () => {
                     {filteredCourses.map((course) => (
                       <tr key={course.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{course.name}</div>
-                          <div className="text-sm text-gray-500">ID: {course.id}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {course.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            ID: {course.id}
+                          </div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-900 max-w-xs truncate">
-                            {course.description || 'No description'}
+                            {course.description || "No description"}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -311,8 +340,8 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {/* Course Editor */}
-        {view === 'course-edit' && (
-          selectedCourse ? (
+        {view === "course-edit" &&
+          (selectedCourse ? (
             <CourseEditor
               course={selectedCourse}
               onSave={refreshCourses}
@@ -325,12 +354,11 @@ const AdminDashboard: React.FC = () => {
                 <p className="text-gray-600">Loading course details...</p>
               </div>
             </div>
-          )
-        )}
+          ))}
 
         {/* Module Manager */}
-        {view === 'module-manage' && (
-          selectedCourse ? (
+        {view === "module-manage" &&
+          (selectedCourse ? (
             <ModuleManager
               course={selectedCourse}
               modules={selectedCourseModules}
@@ -342,13 +370,10 @@ const AdminDashboard: React.FC = () => {
                 <p className="text-gray-600">Loading course modules...</p>
               </div>
             </div>
-          )
-        )}
+          ))}
 
         {/* Category Manager */}
-        {view === 'category-manage' && (
-          <CategoryManager />
-        )}
+        {view === "category-manage" && <CategoryManager />}
       </div>
     </div>
   );

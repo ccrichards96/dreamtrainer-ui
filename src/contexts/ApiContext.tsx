@@ -1,13 +1,15 @@
-import React, { createContext, useEffect, ReactNode } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
-import apiClient from '../services/api/client';
+import React, { createContext, useEffect, ReactNode } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import apiClient from "../services/api/client";
 
 interface ApiContextType {
   // We can extend this later with additional API-related functionality
   isInitialized: boolean;
 }
 
-export const ApiContext = createContext<ApiContextType>({ isInitialized: false });
+export const ApiContext = createContext<ApiContextType>({
+  isInitialized: false,
+});
 
 interface ApiProviderProps {
   children: ReactNode;
@@ -34,25 +36,28 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
               const token = await getAccessTokenSilently({
                 authorizationParams: {
                   audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-                  scope: 'openid profile email'
+                  scope: "openid profile email",
                 },
               });
-              
+
               if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
               }
             } else {
               // Fallback to localStorage token for backward compatibility
-              const token = localStorage.getItem('auth_token');
+              const token = localStorage.getItem("auth_token");
               if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
               }
             }
           } catch (error) {
-            console.warn('Failed to get Auth0 token, falling back to localStorage:', error);
-            
+            console.warn(
+              "Failed to get Auth0 token, falling back to localStorage:",
+              error,
+            );
+
             // Fallback to localStorage token
-            const token = localStorage.getItem('auth_token');
+            const token = localStorage.getItem("auth_token");
             if (token) {
               config.headers.Authorization = `Bearer ${token}`;
             }
@@ -60,20 +65,20 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
 
           // Log requests in development
           if (import.meta.env.DEV) {
-            console.log('API Request:', {
+            console.log("API Request:", {
               method: config.method?.toUpperCase(),
               url: config.url,
               data: config.data,
-              hasAuth: !!config.headers.Authorization
+              hasAuth: !!config.headers.Authorization,
             });
           }
 
           return config;
         },
         (error) => {
-          console.error('Request Error:', error);
+          console.error("Request Error:", error);
           return Promise.reject(error);
-        }
+        },
       );
     };
 
@@ -95,8 +100,6 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
   };
 
   return (
-    <ApiContext.Provider value={contextValue}>
-      {children}
-    </ApiContext.Provider>
+    <ApiContext.Provider value={contextValue}>{children}</ApiContext.Provider>
   );
 };

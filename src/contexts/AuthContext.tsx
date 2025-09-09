@@ -1,5 +1,5 @@
-import React, { createContext, ReactNode } from 'react';
-import { useAuth0, User } from '@auth0/auth0-react';
+import React, { createContext, ReactNode } from "react";
+import { useAuth0, User } from "@auth0/auth0-react";
 
 export interface AuthContextType {
   isAuthenticated: boolean;
@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     loginWithRedirect,
     logout: auth0Logout,
-    isLoading
+    isLoading,
   } = useAuth0();
 
   const login = () => {
@@ -31,8 +31,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     auth0Logout({
       logoutParams: {
-        returnTo: window.location.origin
-      }
+        returnTo: window.location.origin,
+      },
     });
   };
 
@@ -41,14 +41,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     login,
     logout,
-    loading: isLoading
+    loading: isLoading,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export { AuthContext };

@@ -4,10 +4,10 @@ interface ProgressIndicatorProps {
   title?: string;
 }
 
-export default function ProgressIndicator({ 
-  currentStep, 
-  totalSteps, 
-  title = "Setup Your Account" 
+export default function ProgressIndicator({
+  currentStep,
+  totalSteps,
+  title = "Setup Your Account",
 }: ProgressIndicatorProps) {
   return (
     <div className="mb-8">
@@ -17,20 +17,23 @@ export default function ProgressIndicator({
           Step {currentStep} of {totalSteps}
         </span>
       </div>
-      
+
       {/* Progress Indicator */}
       <div className="flex items-center w-full">
         {Array.from({ length: totalSteps }, (_, index) => {
           const step = index + 1;
           const isLast = step === totalSteps;
-          
+
           return (
-            <div key={step} className={`flex items-center ${isLast ? '' : 'flex-1'}`}>
+            <div
+              key={step}
+              className={`flex items-center ${isLast ? "" : "flex-1"}`}
+            >
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors z-10 ${
                   step <= currentStep
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-600'
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-600"
                 }`}
               >
                 {step}
@@ -38,7 +41,7 @@ export default function ProgressIndicator({
               {!isLast && (
                 <div
                   className={`flex-1 h-1 mx-4 transition-colors ${
-                    step < currentStep ? 'bg-blue-600' : 'bg-gray-200'
+                    step < currentStep ? "bg-blue-600" : "bg-gray-200"
                   }`}
                 />
               )}

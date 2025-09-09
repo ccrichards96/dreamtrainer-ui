@@ -1,4 +1,4 @@
-import { StoryblokComponent, SbBlokData } from '@storyblok/react';
+import { StoryblokComponent, SbBlokData } from "@storyblok/react";
 
 type PageProps = {
   blok: {

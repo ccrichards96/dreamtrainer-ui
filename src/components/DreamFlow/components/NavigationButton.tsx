@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 
 interface NavigationButtonProps {
   onNext: () => void;
@@ -13,7 +13,7 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
   onNext,
   onPrevious,
   isLastModule,
-  isFirstModule = false
+  isFirstModule = false,
 }) => {
   return (
     <motion.div
@@ -47,14 +47,14 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
         onClick={onNext}
         className={`group flex items-center space-x-3 px-8 py-4 rounded-lg font-semibold text-white shadow-lg transition-all ${
           isLastModule
-            ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700'
-            : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700'
+            ? "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+            : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
         }`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         whileInView={{ y: [10, 0] }}
       >
-        <span>{isLastModule ? 'Test Your Skills' : 'Next'}</span>
+        <span>{isLastModule ? "Test Your Skills" : "Next"}</span>
         <motion.div
           className="flex items-center justify-center w-6 h-6 bg-white/20 rounded-full"
           animate={{ x: [0, 4, 0] }}

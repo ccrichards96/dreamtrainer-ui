@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
-import type { DreamFlowProps } from './types';
-import { ProgressTracker, ModuleContent, NavigationButton, TestContent } from './components';
-import { useCourseContext } from '../../contexts/useCourseContext';
-import { motion } from 'framer-motion';
-import { CheckCircle, RotateCcw, Home } from 'lucide-react';
+import React, { useState } from "react";
+import type { DreamFlowProps } from "./types";
+import {
+  ProgressTracker,
+  ModuleContent,
+  NavigationButton,
+  TestContent,
+} from "./components";
+import { useCourseContext } from "../../contexts/useCourseContext";
+import { motion } from "framer-motion";
+import { CheckCircle, RotateCcw, Home } from "lucide-react";
 
 const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
   const [testSubmitted, setTestSubmitted] = useState(false);
-  
+
   const {
     modules,
     currentModuleIndex,
@@ -23,13 +28,13 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
     currentTest,
     startTestMode,
     exitTestMode,
-    resetToFirstModule
+    resetToFirstModule,
   } = useCourseContext();
 
   const handleNextModule = () => {
     // Mark current module as completed
     markModuleAsCompleted(currentModuleIndex);
-    
+
     if (isLastModule()) {
       // When user clicks "Test Your Skills" on last module, start test mode
       startTestMode();
@@ -46,8 +51,8 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
 
   const handleTestSubmit = (answers: Record<string, string | string[]>) => {
     // TODO: Submit test answers to API
-    console.log('Test answers:', answers);
-    
+    console.log("Test answers:", answers);
+
     // Show success page instead of immediately exiting
     setTestSubmitted(true);
   };
@@ -79,16 +84,17 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8">
                 <CheckCircle className="w-10 h-10 text-green-600" />
               </div>
-              
+
               <h2 className="text-4xl font-bold text-gray-900 mb-4">
                 Assessment Complete!
               </h2>
-              
+
               <p className="text-xl text-gray-600 mb-8">
-                Great job! Your assessment has been submitted successfully. 
-                Your score will update, we'll review your work, and send feedback to your email within 24-48 hours.
+                Great job! Your assessment has been submitted successfully. Your
+                score will update, we'll review your work, and send feedback to
+                your email within 24-48 hours.
               </p>
-              
+
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
                 <div className="flex items-center justify-center gap-2 mb-3">
                   <RotateCcw className="w-5 h-5 text-blue-600" />
@@ -97,8 +103,9 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
                   </span>
                 </div>
                 <p className="text-blue-700 mb-4">
-                  Continue your learning journey by going through the course modules again 
-                  to reinforce your skills and knowledge until you get your dream score!
+                  Continue your learning journey by going through the course
+                  modules again to reinforce your skills and knowledge until you
+                  get your dream score!
                 </p>
               </div>
 
@@ -113,12 +120,9 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
               </div>
             </motion.div>
           ) : isTestMode && currentTest ? (
-            <TestContent 
-              test={currentTest}
-              onSubmit={handleTestSubmit}
-            />
+            <TestContent test={currentTest} onSubmit={handleTestSubmit} />
           ) : (
-            <ModuleContent 
+            <ModuleContent
               modules={modules}
               currentModuleIndex={currentModuleIndex}
             />

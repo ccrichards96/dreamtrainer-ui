@@ -1,5 +1,9 @@
-import React from 'react'
-import { storyblokEditable, SbBlokData, StoryblokComponent } from "@storyblok/react"
+import React from "react";
+import {
+  storyblokEditable,
+  SbBlokData,
+  StoryblokComponent,
+} from "@storyblok/react";
 
 interface ContainerBlok extends SbBlokData {
   content: Array<{
@@ -7,71 +11,75 @@ interface ContainerBlok extends SbBlokData {
     component: string;
     [key: string]: unknown;
   }>;
-  maxWidth?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full';
+  maxWidth?: "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full";
   centerContainer?: boolean;
   horizontalPadding?: string;
   verticalPadding?: string;
   margin?: string;
-  responsiveBreakpoint?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
+  responsiveBreakpoint?: "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
   backgroundColor?: string;
   customClasses?: string;
 }
 
-const Container: React.FC<{blok: ContainerBlok}> = ({ blok }) => {
+const Container: React.FC<{ blok: ContainerBlok }> = ({ blok }) => {
   // Base container classes
-  const baseClasses = ['w-full'];
-  
+  const baseClasses = ["w-full"];
+
   // Handle responsive container based on breakpoint
-  if (blok.responsiveBreakpoint && blok.responsiveBreakpoint !== 'none') {
+  if (blok.responsiveBreakpoint && blok.responsiveBreakpoint !== "none") {
     baseClasses.push(`${blok.responsiveBreakpoint}:container`);
     if (blok.centerContainer) {
       baseClasses.push(`${blok.responsiveBreakpoint}:mx-auto`);
     }
   } else {
     // Handle max-width for non-responsive containers
-    if (blok.maxWidth && blok.maxWidth !== 'none') {
-      if (blok.maxWidth === 'full') {
-        baseClasses.push('w-full');
+    if (blok.maxWidth && blok.maxWidth !== "none") {
+      if (blok.maxWidth === "full") {
+        baseClasses.push("w-full");
       } else {
-        baseClasses.push('container');
+        baseClasses.push("container");
         // Apply specific max-width if needed
         switch (blok.maxWidth) {
-          case 'sm':
-            baseClasses.push('max-w-sm');
+          case "sm":
+            baseClasses.push("max-w-sm");
             break;
-          case 'md':
-            baseClasses.push('max-w-md');
+          case "md":
+            baseClasses.push("max-w-md");
             break;
-          case 'lg':
-            baseClasses.push('max-w-lg');
+          case "lg":
+            baseClasses.push("max-w-lg");
             break;
-          case 'xl':
-            baseClasses.push('max-w-xl');
+          case "xl":
+            baseClasses.push("max-w-xl");
             break;
-          case '2xl':
-            baseClasses.push('max-w-2xl');
+          case "2xl":
+            baseClasses.push("max-w-2xl");
             break;
-          case '3xl':
-            baseClasses.push('max-w-3xl');
+          case "3xl":
+            baseClasses.push("max-w-3xl");
             break;
         }
       }
     } else {
-      baseClasses.push('container');
+      baseClasses.push("container");
     }
-    
+
     // Center container if specified
     if (blok.centerContainer) {
-      baseClasses.push('mx-auto');
+      baseClasses.push("mx-auto");
     }
   }
-  
+
   // Add padding classes with proper CSS custom properties
   const customStyles: React.CSSProperties = {};
-  
+
   if (blok.horizontalPadding) {
     // Support both px values and Tailwind classes
-    if (blok.horizontalPadding.includes('px') || blok.horizontalPadding.includes('rem') || blok.horizontalPadding.includes('%')) {
+    if (
+      blok.horizontalPadding.includes("px") ||
+      blok.horizontalPadding.includes("rem") ||
+      blok.horizontalPadding.includes("%")
+    ) {
       customStyles.paddingLeft = blok.horizontalPadding;
       customStyles.paddingRight = blok.horizontalPadding;
     } else {
@@ -79,10 +87,14 @@ const Container: React.FC<{blok: ContainerBlok}> = ({ blok }) => {
       baseClasses.push(`px-${blok.horizontalPadding}`);
     }
   }
-  
+
   if (blok.verticalPadding) {
     // Support both px values and Tailwind classes
-    if (blok.verticalPadding.includes('px') || blok.verticalPadding.includes('rem') || blok.verticalPadding.includes('%')) {
+    if (
+      blok.verticalPadding.includes("px") ||
+      blok.verticalPadding.includes("rem") ||
+      blok.verticalPadding.includes("%")
+    ) {
       customStyles.paddingTop = blok.verticalPadding;
       customStyles.paddingBottom = blok.verticalPadding;
     } else {
@@ -90,33 +102,41 @@ const Container: React.FC<{blok: ContainerBlok}> = ({ blok }) => {
       baseClasses.push(`py-${blok.verticalPadding}`);
     }
   }
-  
+
   // Add margin if specified
   if (blok.margin) {
-    if (blok.margin.includes('px') || blok.margin.includes('rem') || blok.margin.includes('%')) {
+    if (
+      blok.margin.includes("px") ||
+      blok.margin.includes("rem") ||
+      blok.margin.includes("%")
+    ) {
       customStyles.margin = blok.margin;
     } else {
       // Assume it's a Tailwind class
       baseClasses.push(`m-${blok.margin}`);
     }
   }
-  
+
   // Add background color if specified
   if (blok.backgroundColor) {
-    if (blok.backgroundColor.startsWith('#') || blok.backgroundColor.startsWith('rgb') || blok.backgroundColor.startsWith('hsl')) {
+    if (
+      blok.backgroundColor.startsWith("#") ||
+      blok.backgroundColor.startsWith("rgb") ||
+      blok.backgroundColor.startsWith("hsl")
+    ) {
       customStyles.backgroundColor = blok.backgroundColor;
     } else {
       // Assume it's a Tailwind class
       baseClasses.push(`bg-${blok.backgroundColor}`);
     }
   }
-  
+
   // Add custom classes if specified
   if (blok.customClasses) {
     baseClasses.push(blok.customClasses);
   }
-  
-  const classes = baseClasses.filter(Boolean).join(' ');
+
+  const classes = baseClasses.filter(Boolean).join(" ");
 
   return (
     <div {...storyblokEditable(blok)} className={classes} style={customStyles}>
@@ -124,7 +144,7 @@ const Container: React.FC<{blok: ContainerBlok}> = ({ blok }) => {
         <StoryblokComponent blok={nestedBlok} key={nestedBlok._uid} />
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default Container
+export default Container;

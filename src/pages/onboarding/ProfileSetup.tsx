@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
-import { Camera, Upload } from 'lucide-react';
-import { OnboardingData } from './index';
-import ProgressIndicator from './ProgressIndicator';
+import { useState, useRef } from "react";
+import { Camera, Upload } from "lucide-react";
+import { OnboardingData } from "./index";
+import ProgressIndicator from "./ProgressIndicator";
 
 interface ProfileSetupProps {
   data: OnboardingData;
@@ -12,27 +12,43 @@ interface ProfileSetupProps {
 }
 
 const howDidYouHearOptions = [
-  { value: '', label: 'Please select...' },
-  { value: 'google', label: 'Google Search' },
-  { value: 'social_media', label: 'Social Media' },
-  { value: 'friend', label: 'Friend/Family Recommendation' },
-  { value: 'advertisement', label: 'Online Advertisement' },
-  { value: 'blog', label: 'Blog/Article' },
-  { value: 'youtube', label: 'YouTube' },
-  { value: 'podcast', label: 'Podcast' },
-  { value: 'other', label: 'Other' }
+  { value: "", label: "Please select..." },
+  { value: "google", label: "Google Search" },
+  { value: "social_media", label: "Social Media" },
+  { value: "friend", label: "Friend/Family Recommendation" },
+  { value: "advertisement", label: "Online Advertisement" },
+  { value: "blog", label: "Blog/Article" },
+  { value: "youtube", label: "YouTube" },
+  { value: "podcast", label: "Podcast" },
+  { value: "other", label: "Other" },
 ];
 
-export default function ProfileSetup({ data, updateData, onNext, currentStep = 1, totalSteps = 3 }: ProfileSetupProps) {
+export default function ProfileSetup({
+  data,
+  updateData,
+  onNext,
+  currentStep = 1,
+  totalSteps = 3,
+}: ProfileSetupProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedSource, setSelectedSource] = useState(
-    howDidYouHearOptions.find(option => option.value === data.howDidYouHearAboutUs)?.value || 
-    (data.howDidYouHearAboutUs && !howDidYouHearOptions.find(option => option.value === data.howDidYouHearAboutUs) ? 'other' : '')
+    howDidYouHearOptions.find(
+      (option) => option.value === data.howDidYouHearAboutUs,
+    )?.value ||
+      (data.howDidYouHearAboutUs &&
+      !howDidYouHearOptions.find(
+        (option) => option.value === data.howDidYouHearAboutUs,
+      )
+        ? "other"
+        : ""),
   );
   const [customSource, setCustomSource] = useState(
-    data.howDidYouHearAboutUs && !howDidYouHearOptions.find(option => option.value === data.howDidYouHearAboutUs) 
-      ? data.howDidYouHearAboutUs 
-      : ''
+    data.howDidYouHearAboutUs &&
+      !howDidYouHearOptions.find(
+        (option) => option.value === data.howDidYouHearAboutUs,
+      )
+      ? data.howDidYouHearAboutUs
+      : "",
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -40,7 +56,7 @@ export default function ProfileSetup({ data, updateData, onNext, currentStep = 1
     const file = event.target.files?.[0];
     if (file) {
       updateData({ profileImage: file });
-      
+
       // Create preview URL
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
@@ -49,13 +65,13 @@ export default function ProfileSetup({ data, updateData, onNext, currentStep = 1
 
   const handleSourceChange = (value: string) => {
     setSelectedSource(value);
-    if (value === 'other') {
+    if (value === "other") {
       // Don't update howDidYouHearAboutUs yet, wait for custom input
-      setCustomSource('');
+      setCustomSource("");
     } else {
       // For predefined options, update immediately
       updateData({ howDidYouHearAboutUs: value });
-      setCustomSource('');
+      setCustomSource("");
     }
   };
 
@@ -66,7 +82,7 @@ export default function ProfileSetup({ data, updateData, onNext, currentStep = 1
   };
 
   const handleNext = () => {
-    if (selectedSource && (selectedSource !== 'other' || customSource.trim())) {
+    if (selectedSource && (selectedSource !== "other" || customSource.trim())) {
       onNext();
     }
   };
@@ -78,14 +94,13 @@ export default function ProfileSetup({ data, updateData, onNext, currentStep = 1
   return (
     <div className="bg-white rounded-xl shadow-lg p-8">
       {/* Progress Steps */}
-      <ProgressIndicator 
-        currentStep={currentStep} 
-        totalSteps={totalSteps} 
-      />
+      <ProgressIndicator currentStep={currentStep} totalSteps={totalSteps} />
 
       {/* Content */}
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">Let's Set Up Your Profile</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          Let's Set Up Your Profile
+        </h2>
         <p className="text-lg text-gray-600">
           Add a profile photo and tell us how you discovered DreamTrainer
         </p>
@@ -97,7 +112,7 @@ export default function ProfileSetup({ data, updateData, onNext, currentStep = 1
           <label className="block text-sm font-medium text-gray-700 mb-4">
             Profile Photo (Optional)
           </label>
-          
+
           <div className="relative inline-block">
             <div
               onClick={triggerFileInput}
@@ -116,7 +131,7 @@ export default function ProfileSetup({ data, updateData, onNext, currentStep = 1
                 </div>
               )}
             </div>
-            
+
             <button
               type="button"
               onClick={triggerFileInput}
@@ -133,7 +148,7 @@ export default function ProfileSetup({ data, updateData, onNext, currentStep = 1
             onChange={handleImageUpload}
             className="hidden"
           />
-          
+
           <p className="text-xs text-gray-500 mt-2">
             JPG, PNG or GIF (max. 5MB)
           </p>
@@ -144,7 +159,7 @@ export default function ProfileSetup({ data, updateData, onNext, currentStep = 1
           <label className="block text-sm font-medium text-gray-700 mb-2">
             How did you hear about us? *
           </label>
-          
+
           <div className="relative">
             <select
               value={selectedSource}
@@ -157,16 +172,28 @@ export default function ProfileSetup({ data, updateData, onNext, currentStep = 1
                 </option>
               ))}
             </select>
-            
+
             <div className="absolute inset-y-0 end-0 flex items-center pointer-events-none pe-3">
-              <svg className="w-4 h-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4"/>
+              <svg
+                className="w-4 h-4 text-gray-400"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 10 6"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m1 1 4 4 4-4"
+                />
               </svg>
             </div>
           </div>
 
           {/* Custom source input - shown when "other" is selected */}
-          {selectedSource === 'other' && (
+          {selectedSource === "other" && (
             <div className="mt-3">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Please specify: *
@@ -187,12 +214,27 @@ export default function ProfileSetup({ data, updateData, onNext, currentStep = 1
         <div className="pt-6">
           <button
             onClick={handleNext}
-            disabled={!selectedSource || (selectedSource === 'other' && !customSource.trim())}
+            disabled={
+              !selectedSource ||
+              (selectedSource === "other" && !customSource.trim())
+            }
             className="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none transition-colors"
           >
             Continue
-            <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+            <svg
+              className="w-4 h-4"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 14 10"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M1 5h12m0 0L9 1m4 4L9 9"
+              />
             </svg>
           </button>
         </div>

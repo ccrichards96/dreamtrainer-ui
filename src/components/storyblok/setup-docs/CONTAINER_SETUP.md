@@ -196,6 +196,7 @@ Add the following fields to your Container block in Storyblok:
 ### 2. Configure Field Details
 
 #### Content Field
+
 - **Type**: Blocks
 - **Name**: `content`
 - **Display Name**: `Content`
@@ -203,6 +204,7 @@ Add the following fields to your Container block in Storyblok:
 - **Component Whitelist**: Leave empty to allow all components
 
 #### Max Width Field
+
 - **Type**: Single-Option
 - **Name**: `maxWidth`
 - **Display Name**: `Max Width`
@@ -210,18 +212,21 @@ Add the following fields to your Container block in Storyblok:
 - **Default**: `none`
 
 #### Center Container Field
+
 - **Type**: Boolean
 - **Name**: `centerContainer`
 - **Display Name**: `Center Container`
 - **Default**: `true`
 
 #### Padding Fields
+
 - **Type**: Text
 - **Name**: `horizontalPadding` / `verticalPadding`
 - **Display Name**: `Horizontal Padding` / `Vertical Padding`
 - **Description**: Add usage examples
 
 #### Responsive Breakpoint Field
+
 - **Type**: Single-Option
 - **Name**: `responsiveBreakpoint`
 - **Display Name**: `Responsive Breakpoint`
@@ -229,12 +234,14 @@ Add the following fields to your Container block in Storyblok:
 - **Default**: `none`
 
 #### Background Color Field
+
 - **Type**: Text
 - **Name**: `backgroundColor`
 - **Display Name**: `Background Color`
 - **Description**: "Background color (e.g., #ffffff, rgb(255,255,255))"
 
 #### Custom Classes Field
+
 - **Type**: Text
 - **Name**: `customClasses`
 - **Display Name**: `Custom Classes`
@@ -303,14 +310,17 @@ If you want to restrict which components can be nested inside the Container:
 ## Troubleshooting
 
 ### Container Not Centering
+
 - Ensure `centerContainer` is set to `true`
 - Check that you're not overriding margin with custom classes
 
 ### Padding Not Applied
+
 - Verify padding values use valid CSS units (px, rem, em)
 - Check for conflicts with custom classes
 
 ### Component Not Rendering
+
 - Ensure the Container component is imported and registered in `utils/storyblok.ts`
 - Verify the block name in Storyblok matches the component key (`container`)
 

@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, ChevronLeft, ChevronRight, BarChart3 } from 'lucide-react';
-import type { Module } from '../types';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  BarChart3,
+} from "lucide-react";
+import type { Module } from "../types";
 
 interface ProgressTrackerProps {
   modules: Module[];
@@ -14,7 +19,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   modules,
   currentModuleIndex,
   completedModules,
-  getProgressPercentage
+  getProgressPercentage,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -27,10 +32,10 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
       {/* Fixed Sidebar - Full Screen Overlay */}
       <motion.div
         className={`fixed top-16 right-0 h-[calc(100vh-4rem)] bg-white shadow-xl border-l border-gray-200 z-40 flex flex-col ${
-          isCollapsed ? 'w-16' : 'w-80'
+          isCollapsed ? "w-16" : "w-80"
         }`}
         initial={false}
-        animate={{ 
+        animate={{
           width: isCollapsed ? 64 : 320,
         }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -45,14 +50,16 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.2 }}
               >
-                <h2 className="text-lg font-semibold text-gray-800">Course Progress</h2>
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Course Progress
+                </h2>
                 <span className="text-sm text-gray-600">
                   {completedModules.size} of {modules.length} completed
                 </span>
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           <motion.button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -97,10 +104,10 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                       key={index}
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors mx-auto ${
                         completedModules.has(index)
-                          ? 'bg-green-500 text-white'
+                          ? "bg-green-500 text-white"
                           : index === currentModuleIndex
-                          ? 'bg-indigo-500 text-white'
-                          : 'bg-gray-200 text-gray-500'
+                            ? "bg-indigo-500 text-white"
+                            : "bg-gray-200 text-gray-500"
                       }`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -138,7 +145,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                     {Math.round(getProgressPercentage())}% Complete
                   </div>
                 </div>
-                
+
                 {/* Detailed Module List */}
                 <div className="space-y-4">
                   {modules.map((module, index) => (
@@ -152,10 +159,10 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                       <motion.div
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors flex-shrink-0 ${
                           completedModules.has(index)
-                            ? 'bg-green-500 text-white'
+                            ? "bg-green-500 text-white"
                             : index === currentModuleIndex
-                            ? 'bg-indigo-500 text-white'
-                            : 'bg-gray-200 text-gray-500'
+                              ? "bg-indigo-500 text-white"
+                              : "bg-gray-200 text-gray-500"
                         }`}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -167,29 +174,34 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                         )}
                       </motion.div>
                       <div className="flex-1 min-w-0">
-                        <h4 className={`text-sm font-medium truncate ${
-                          index === currentModuleIndex ? 'text-indigo-600' : 'text-gray-700'
-                        }`}>
+                        <h4
+                          className={`text-sm font-medium truncate ${
+                            index === currentModuleIndex
+                              ? "text-indigo-600"
+                              : "text-gray-700"
+                          }`}
+                        >
                           {module.topic}
                         </h4>
                         <p className="text-xs text-gray-500 mt-1 line-clamp-2">
                           {module.description}
                         </p>
                         <div className="flex items-center gap-2 mt-2">
-                          <div className={`w-2 h-2 rounded-full ${
-                            completedModules.has(index)
-                              ? 'bg-green-500'
-                              : index === currentModuleIndex
-                              ? 'bg-indigo-500'
-                              : 'bg-gray-300'
-                          }`} />
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              completedModules.has(index)
+                                ? "bg-green-500"
+                                : index === currentModuleIndex
+                                  ? "bg-indigo-500"
+                                  : "bg-gray-300"
+                            }`}
+                          />
                           <span className="text-xs text-gray-500">
-                            {completedModules.has(index) 
-                              ? 'Completed' 
-                              : index === currentModuleIndex 
-                              ? 'In Progress' 
-                              : 'Not Started'
-                            }
+                            {completedModules.has(index)
+                              ? "Completed"
+                              : index === currentModuleIndex
+                                ? "In Progress"
+                                : "Not Started"}
                           </span>
                         </div>
                       </div>

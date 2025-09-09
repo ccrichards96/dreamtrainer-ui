@@ -1,11 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, Edit3, Trash2, X, Save, AlertCircle, BookOpen } from 'lucide-react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import { Course, Module } from '../../types/modules';
-import { createModule, updateModule, deleteModule } from '../../services/api/modules';
-import { Category, getAllCategories } from '../../services/api/categories';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  Plus,
+  Edit3,
+  Trash2,
+  X,
+  Save,
+  AlertCircle,
+  BookOpen,
+} from "lucide-react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { Course, Module } from "../../types/modules";
+import {
+  createModule,
+  updateModule,
+  deleteModule,
+} from "../../services/api/modules";
+import { Category, getAllCategories } from "../../services/api/categories";
 
 interface ModuleManagerProps {
   course: Course;
@@ -33,26 +45,26 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
   const [categoriesLoading, setCategoriesLoading] = useState(false);
 
   const [formData, setFormData] = useState<ModuleFormData>({
-    topic: '',
-    description: '',
+    topic: "",
+    description: "",
     level: 1,
     estimatedTime: 30,
-    videoUrl: '',
-    botIframeUrl: '',
-    lessonContent: '',
-    categoryId: '',
+    videoUrl: "",
+    botIframeUrl: "",
+    lessonContent: "",
+    categoryId: "",
   });
 
   const resetForm = () => {
     setFormData({
-      topic: '',
-      description: '',
+      topic: "",
+      description: "",
       level: 1,
       estimatedTime: 30,
-      videoUrl: '',
-      botIframeUrl: '',
-      lessonContent: '',
-      categoryId: '',
+      videoUrl: "",
+      botIframeUrl: "",
+      lessonContent: "",
+      categoryId: "",
     });
   };
 
@@ -64,8 +76,8 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
         const categoriesData = await getAllCategories();
         setCategories(categoriesData || []);
       } catch (err) {
-        console.error('Error fetching categories:', err);
-        setError('Failed to load categories');
+        console.error("Error fetching categories:", err);
+        setError("Failed to load categories");
       } finally {
         setCategoriesLoading(false);
       }
@@ -74,18 +86,25 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     fetchCategories();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'level' || name === 'estimatedTime' ? parseInt(value) || 0 : value
+      [name]:
+        name === "level" || name === "estimatedTime"
+          ? parseInt(value) || 0
+          : value,
     }));
   };
 
   const handleQuillChange = (content: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      lessonContent: content
+      lessonContent: content,
     }));
   };
 
@@ -106,7 +125,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
       videoUrl: module.videoUrl,
       botIframeUrl: module.botIframeUrl,
       lessonContent: module.lessonContent,
-      categoryId: module.categoryId || '',
+      categoryId: module.categoryId || "",
     });
   };
 
@@ -119,13 +138,15 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
       if (editingModule) {
         // Update existing module via API
         await updateModule(editingModule.id, formData);
-        
+
         // Update local state
-        setModuleList(prev => prev.map(module => 
-          module.id === editingModule.id 
-            ? { ...module, ...formData, updatedAt: new Date() }
-            : module
-        ));
+        setModuleList((prev) =>
+          prev.map((module) =>
+            module.id === editingModule.id
+              ? { ...module, ...formData, updatedAt: new Date() }
+              : module,
+          ),
+        );
       } else {
         // Create new module via API
         const moduleData = {
@@ -133,7 +154,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
           topic: formData.topic,
           description: formData.description,
           level: formData.level,
-          status: 'active',
+          status: "active",
           estimatedTime: formData.estimatedTime,
           videoUrl: formData.videoUrl,
           botIframeUrl: formData.botIframeUrl,
@@ -142,34 +163,34 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
         };
         const response = await createModule(moduleData);
         const newModule = response.data;
-        
+
         // Add to local state
-        setModuleList(prev => [...prev, newModule]);
+        setModuleList((prev) => [...prev, newModule]);
       }
 
       setShowAddForm(false);
       setEditingModule(null);
       resetForm();
     } catch (err) {
-      setError('Failed to save module. Please try again.');
-      console.error('Error saving module:', err);
+      setError("Failed to save module. Please try again.");
+      console.error("Error saving module:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteModule = async (moduleId: string) => {
-    if (!confirm('Are you sure you want to delete this module?')) return;
+    if (!confirm("Are you sure you want to delete this module?")) return;
 
     try {
       // Delete module via API
       await deleteModule(moduleId);
-      
+
       // Remove from local state
-      setModuleList(prev => prev.filter(module => module.id !== moduleId));
+      setModuleList((prev) => prev.filter((module) => module.id !== moduleId));
     } catch (err) {
-      setError('Failed to delete module. Please try again.');
-      console.error('Error deleting module:', err);
+      setError("Failed to delete module. Please try again.");
+      console.error("Error deleting module:", err);
     }
   };
 
@@ -179,7 +200,8 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     resetForm();
   };
 
-  const isFormValid = formData.topic.trim().length > 0 && formData.description.trim().length > 0;
+  const isFormValid =
+    formData.topic.trim().length > 0 && formData.description.trim().length > 0;
 
   return (
     <motion.div
@@ -192,7 +214,9 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-medium text-gray-900">Manage Modules</h3>
+              <h3 className="text-lg font-medium text-gray-900">
+                Manage Modules
+              </h3>
               <p className="text-sm text-gray-500">Course: {course.name}</p>
             </div>
             <button
@@ -235,7 +259,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h4 className="text-lg font-medium text-gray-900">
-                {editingModule ? 'Edit Module' : 'Add New Module'}
+                {editingModule ? "Edit Module" : "Add New Module"}
               </h4>
               <button
                 onClick={handleCancel}
@@ -250,7 +274,10 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Module Topic */}
               <div className="md:col-span-2">
-                <label htmlFor="topic" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="topic"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Module Topic *
                 </label>
                 <input
@@ -267,7 +294,10 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
 
               {/* Module Description */}
               <div className="md:col-span-2">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Description *
                 </label>
                 <textarea
@@ -284,7 +314,10 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
 
               {/* Category */}
               <div className="md:col-span-2">
-                <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="categoryId"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Category *
                 </label>
                 <select
@@ -304,13 +337,18 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                   ))}
                 </select>
                 {categoriesLoading && (
-                  <p className="text-sm text-gray-500 mt-1">Loading categories...</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Loading categories...
+                  </p>
                 )}
               </div>
 
               {/* Level */}
               <div>
-                <label htmlFor="level" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="level"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Difficulty Level
                 </label>
                 <select
@@ -330,7 +368,10 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
 
               {/* Estimated Time */}
               <div>
-                <label htmlFor="estimatedTime" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="estimatedTime"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Estimated Time (minutes)
                 </label>
                 <input
@@ -347,7 +388,10 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
 
               {/* Video URL */}
               <div>
-                <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="videoUrl"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Video URL
                 </label>
                 <input
@@ -363,7 +407,10 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
 
               {/* Bot iFrame URL */}
               <div>
-                <label htmlFor="botIframeUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="botIframeUrl"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Bot iFrame URL
                 </label>
                 <input
@@ -379,7 +426,10 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
 
               {/* Lesson Content */}
               <div className="md:col-span-2">
-                <label htmlFor="lessonContent" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="lessonContent"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Lesson Content
                 </label>
                 <div className="border border-gray-300 rounded-lg overflow-hidden">
@@ -388,24 +438,32 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                     value={formData.lessonContent}
                     onChange={handleQuillChange}
                     placeholder="Enter the lesson content..."
-                    style={{ 
-                      minHeight: '150px',
-                      backgroundColor: 'white'
+                    style={{
+                      minHeight: "150px",
+                      backgroundColor: "white",
                     }}
                     modules={{
                       toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'color': [] }, { 'background': [] }],
-                        ['link', 'image'],
-                        ['clean']
+                        [{ header: [1, 2, 3, false] }],
+                        ["bold", "italic", "underline", "strike"],
+                        [{ list: "ordered" }, { list: "bullet" }],
+                        [{ color: [] }, { background: [] }],
+                        ["link", "image"],
+                        ["clean"],
                       ],
                     }}
                     formats={[
-                      'header', 'bold', 'italic', 'underline', 'strike',
-                      'list', 'bullet', 'color', 'background',
-                      'link', 'image'
+                      "header",
+                      "bold",
+                      "italic",
+                      "underline",
+                      "strike",
+                      "list",
+                      "bullet",
+                      "color",
+                      "background",
+                      "link",
+                      "image",
                     ]}
                   />
                 </div>
@@ -434,7 +492,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    {editingModule ? 'Update Module' : 'Add Module'}
+                    {editingModule ? "Update Module" : "Add Module"}
                   </>
                 )}
               </button>
@@ -454,7 +512,9 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
         {moduleList.length === 0 ? (
           <div className="p-8 text-center">
             <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">No modules found. Add your first module to get started.</p>
+            <p className="text-gray-500">
+              No modules found. Add your first module to get started.
+            </p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
@@ -463,8 +523,12 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
-                      <h5 className="text-lg font-medium text-gray-900">{module.topic}</h5>
+                      <span className="text-sm font-medium text-gray-500">
+                        #{index + 1}
+                      </span>
+                      <h5 className="text-lg font-medium text-gray-900">
+                        {module.topic}
+                      </h5>
                       <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                         Level {module.level}
                       </span>
@@ -472,8 +536,12 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                     <p className="text-gray-600 mb-3">{module.description}</p>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <span>⏱ {module.estimatedTime} minutes</span>
-                      <span>📹 {module.videoUrl ? 'Video available' : 'No video'}</span>
-                      <span>🤖 {module.botIframeUrl ? 'Bot available' : 'No bot'}</span>
+                      <span>
+                        📹 {module.videoUrl ? "Video available" : "No video"}
+                      </span>
+                      <span>
+                        🤖 {module.botIframeUrl ? "Bot available" : "No bot"}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-4">

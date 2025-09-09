@@ -1,22 +1,25 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useAuth0 } from '@auth0/auth0-react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  User, 
-  Mail, 
-  Target, 
-  CheckCircle, 
-  Clock, 
-  Star, 
-  TrendingUp, 
-  ArrowRight, 
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useNavigate } from "react-router-dom";
+import {
+  User,
+  Mail,
+  Target,
+  CheckCircle,
+  Clock,
+  Star,
+  TrendingUp,
+  ArrowRight,
   Rocket,
   ArrowLeft,
-  RefreshCw
-} from 'lucide-react';
-import { submitAssessment, type AssessmentSubmission } from '../../services/api';
-import { useCourseContext } from '../../contexts/useCourseContext';
+  RefreshCw,
+} from "lucide-react";
+import {
+  submitAssessment,
+  type AssessmentSubmission,
+} from "../../services/api";
+import { useCourseContext } from "../../contexts/useCourseContext";
 
 interface AssessmentForm {
   first_name: string;
@@ -44,71 +47,71 @@ export default function Assessment() {
   const { currentTest } = useCourseContext();
 
   const [form, setForm] = useState<AssessmentForm>({
-    first_name: user?.given_name || '',
-    last_name: user?.family_name || '',
-    email: user?.email || '',
-    test_number: '',
-    homework_completed: '',
-    followed_toefl_timing: '',
-    essay_question_1: '',
-    essay_question_1_word_count: '',
-    essay_question_2: '',
-    essay_question_2_word_count: '',
+    first_name: user?.given_name || "",
+    last_name: user?.family_name || "",
+    email: user?.email || "",
+    test_number: "",
+    homework_completed: "",
+    followed_toefl_timing: "",
+    essay_question_1: "",
+    essay_question_1_word_count: "",
+    essay_question_2: "",
+    essay_question_2_word_count: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({
-    first_name: '',
-    last_name: '',
-    email: '',
+    first_name: "",
+    last_name: "",
+    email: "",
   });
 
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-    
+    setForm((prev) => ({ ...prev, [name]: value }));
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {
-      first_name: '',
-      last_name: '',
-      email: '',
+      first_name: "",
+      last_name: "",
+      email: "",
     };
 
     if (!form.first_name.trim()) {
-      newErrors.first_name = 'First name is required';
+      newErrors.first_name = "First name is required";
     }
     if (!form.last_name.trim()) {
-      newErrors.last_name = 'Last name is required';
+      newErrors.last_name = "Last name is required";
     }
     if (!form.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Please enter a valid email address";
     }
 
     setErrors(newErrors);
-    return !Object.values(newErrors).some(error => error !== '');
+    return !Object.values(newErrors).some((error) => error !== "");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
       // Prepare the data for API submission
       const assessmentData: AssessmentSubmission = {
@@ -126,21 +129,22 @@ export default function Assessment() {
 
       // Submit to API
       const response = await submitAssessment(
-        currentTest?.id || 'default-test-id', // testId
-        user?.sub || '', // userId
-        assessmentData
+        currentTest?.id || "default-test-id", // testId
+        user?.sub || "", // userId
+        assessmentData,
       );
-      
-      console.log('Assessment submitted successfully:', response);
+
+      console.log("Assessment submitted successfully:", response);
       setSubmitted(true);
     } catch (error) {
-      console.error('Error submitting assessment:', error);
-      
+      console.error("Error submitting assessment:", error);
+
       // Show user-friendly error message
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Something went wrong. Please try again or contact support.';
-      
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again or contact support.";
+
       alert(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -163,11 +167,12 @@ export default function Assessment() {
               Assessment Submitted Successfully!
             </h2>
             <p className="text-lg text-gray-600 mb-8">
-              Thank you for your submission. We'll review your assessment and send your score and feedback to your email within 24-48 hours.
+              Thank you for your submission. We'll review your assessment and
+              send your score and feedback to your email within 24-48 hours.
             </p>
             <div className="flex gap-4 justify-center">
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate("/dashboard")}
                 className="bg-[#c5a8de] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#b399d6] transition-all flex items-center gap-2"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -195,7 +200,7 @@ export default function Assessment() {
               TOEFL Writing Assessment
             </h1>
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate("/dashboard")}
               className="text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-2"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -203,7 +208,8 @@ export default function Assessment() {
             </button>
           </div>
           <p className="text-xl text-gray-600">
-            Submit your TOEFL writing test for professional evaluation and feedback.
+            Submit your TOEFL writing test for professional evaluation and
+            feedback.
           </p>
         </motion.div>
 
@@ -233,11 +239,13 @@ export default function Assessment() {
                   onChange={handleChange}
                   placeholder="John"
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#c5a8de] focus:border-transparent transition-all ${
-                    errors.first_name ? 'border-red-300' : 'border-gray-300'
+                    errors.first_name ? "border-red-300" : "border-gray-300"
                   }`}
                 />
                 {errors.first_name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.first_name}
+                  </p>
                 )}
               </div>
 
@@ -257,11 +265,13 @@ export default function Assessment() {
                   onChange={handleChange}
                   placeholder="Doe"
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#c5a8de] focus:border-transparent transition-all ${
-                    errors.last_name ? 'border-red-300' : 'border-gray-300'
+                    errors.last_name ? "border-red-300" : "border-gray-300"
                   }`}
                 />
                 {errors.last_name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.last_name}
+                  </p>
                 )}
               </div>
             </div>
@@ -282,7 +292,7 @@ export default function Assessment() {
                 onChange={handleChange}
                 placeholder="johndoe@email.com"
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#c5a8de] focus:border-transparent transition-all ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
+                  errors.email ? "border-red-300" : "border-gray-300"
                 }`}
               />
               {errors.email && (
@@ -320,7 +330,8 @@ export default function Assessment() {
                 htmlFor="homework_completed"
               >
                 <CheckCircle className="w-4 h-4 text-gray-400" />
-                Did you complete your full homework since your last test submission? *
+                Did you complete your full homework since your last test
+                submission? *
               </label>
               <input
                 id="homework_completed"
@@ -340,7 +351,8 @@ export default function Assessment() {
                 htmlFor="followed_toefl_timing"
               >
                 <Clock className="w-4 h-4 text-gray-400" />
-                Did you complete this practice test according to strict TOEFL timing? *
+                Did you complete this practice test according to strict TOEFL
+                timing? *
               </label>
               <input
                 id="followed_toefl_timing"

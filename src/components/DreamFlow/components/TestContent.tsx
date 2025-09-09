@@ -1,6 +1,6 @@
-import React from 'react';
-import type { Test } from '../../../types/tests';
-import AssessmentForm from '../../forms/AssessmentForm';
+import React from "react";
+import type { Test } from "../../../types/tests";
+import AssessmentForm from "../../forms/AssessmentForm";
 
 interface TestContentProps {
   test: Test;
@@ -34,7 +34,7 @@ const TestContent: React.FC<TestContentProps> = ({ test, onSubmit }) => {
       {/* Rich Text Content */}
       {test.richTextContent && (
         <div className="mb-8">
-          <div 
+          <div
             className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-a:text-indigo-600 hover:prose-a:text-indigo-500"
             dangerouslySetInnerHTML={{ __html: test.richTextContent }}
           />
@@ -46,11 +46,11 @@ const TestContent: React.FC<TestContentProps> = ({ test, onSubmit }) => {
         <h2 className="text-2xl font-semibold text-gray-900 mb-4">
           Assessment: {test.name}
         </h2>
-        
+
         {test.description && (
           <p className="text-gray-600 mb-6">{test.description}</p>
         )}
-        
+
         {/* External Form Link */}
         {test.formLink ? (
           <div className="space-y-4">
@@ -78,7 +78,7 @@ const TestContent: React.FC<TestContentProps> = ({ test, onSubmit }) => {
             <p className="text-sm text-gray-600 mb-4">
               Complete the assessment form below:
             </p>
-            <AssessmentForm 
+            <AssessmentForm
               testName={`Assessment: ${test.name}`}
               onSubmit={handleFormSubmit}
               showHeader={false}

@@ -1,4 +1,4 @@
-import apiClient from './client';
+import apiClient from "./client";
 
 // Category types based on API documentation
 export interface Category {
@@ -37,11 +37,11 @@ export const categoriesApi = {
    */
   async getAllCategories(): Promise<Category[]> {
     try {
-      const response = await apiClient.get<CategoryListResponse>('/categories');
+      const response = await apiClient.get<CategoryListResponse>("/categories");
       return response.data.data || [];
     } catch (error) {
-      console.error('Error fetching categories:', error);
-      throw new Error('Failed to fetch categories');
+      console.error("Error fetching categories:", error);
+      throw new Error("Failed to fetch categories");
     }
   },
 
@@ -51,11 +51,13 @@ export const categoriesApi = {
    */
   async getCategoryById(id: string): Promise<Category> {
     try {
-      const response = await apiClient.get<CategoryResponse>(`/categories/${id}`);
+      const response = await apiClient.get<CategoryResponse>(
+        `/categories/${id}`,
+      );
       return response.data.data;
     } catch (error) {
-      console.error('Error fetching category:', error);
-      throw new Error('Failed to fetch category');
+      console.error("Error fetching category:", error);
+      throw new Error("Failed to fetch category");
     }
   },
 
@@ -65,11 +67,14 @@ export const categoriesApi = {
    */
   async createCategory(categoryData: CreateCategoryDTO): Promise<Category> {
     try {
-      const response = await apiClient.post<CategoryResponse>('/categories', categoryData);
+      const response = await apiClient.post<CategoryResponse>(
+        "/categories",
+        categoryData,
+      );
       return response.data.data;
     } catch (error) {
-      console.error('Error creating category:', error);
-      throw new Error('Failed to create category');
+      console.error("Error creating category:", error);
+      throw new Error("Failed to create category");
     }
   },
 
@@ -77,13 +82,19 @@ export const categoriesApi = {
    * Update a category
    * PUT /categories/{id}
    */
-  async updateCategory(id: string, categoryData: UpdateCategoryDTO): Promise<Category> {
+  async updateCategory(
+    id: string,
+    categoryData: UpdateCategoryDTO,
+  ): Promise<Category> {
     try {
-      const response = await apiClient.put<CategoryResponse>(`/categories/${id}`, categoryData);
+      const response = await apiClient.put<CategoryResponse>(
+        `/categories/${id}`,
+        categoryData,
+      );
       return response.data.data;
     } catch (error) {
-      console.error('Error updating category:', error);
-      throw new Error('Failed to update category');
+      console.error("Error updating category:", error);
+      throw new Error("Failed to update category");
     }
   },
 
@@ -95,10 +106,10 @@ export const categoriesApi = {
     try {
       await apiClient.delete(`/categories/${id}`);
     } catch (error) {
-      console.error('Error deleting category:', error);
-      throw new Error('Failed to delete category');
+      console.error("Error deleting category:", error);
+      throw new Error("Failed to delete category");
     }
-  }
+  },
 };
 
 // Export individual functions for convenience
@@ -107,7 +118,7 @@ export const {
   getCategoryById,
   createCategory,
   updateCategory,
-  deleteCategory
+  deleteCategory,
 } = categoriesApi;
 
 export default categoriesApi;

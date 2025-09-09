@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Send, CheckCircle, AlertCircle, Loader } from 'lucide-react';
-import { useApp } from '../../contexts/useAppContext';
-import { sendSupportMessage } from '../../services/api/users';
-import Modal from '../modals/Modal';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Send, CheckCircle, AlertCircle, Loader } from "lucide-react";
+import { useApp } from "../../contexts/useAppContext";
+import { sendSupportMessage } from "../../services/api/users";
+import Modal from "../modals/Modal";
 
 interface SupportMessageFormProps {
   isOpen: boolean;
@@ -12,82 +12,95 @@ interface SupportMessageFormProps {
 
 interface FormData {
   message: string;
-  supportType: 'technical' | 'course-content' | 'billing' | 'general' | 'feedback';
+  supportType:
+    | "technical"
+    | "course-content"
+    | "billing"
+    | "general"
+    | "feedback";
 }
 
-type FormState = 'idle' | 'loading' | 'success' | 'error';
+type FormState = "idle" | "loading" | "success" | "error";
 
-const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose }) => {
+const SupportMessageForm: React.FC<SupportMessageFormProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const { userProfile } = useApp();
   const [formData, setFormData] = useState<FormData>({
-    message: '',
-    supportType: 'general'
+    message: "",
+    supportType: "general",
   });
-  const [formState, setFormState] = useState<FormState>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [formState, setFormState] = useState<FormState>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.message.trim()) {
-      setErrorMessage('Please enter your message.');
+      setErrorMessage("Please enter your message.");
       return;
     }
 
     if (!userProfile?.id || !userProfile?.email) {
-      setErrorMessage('User information not available. Please try again.');
+      setErrorMessage("User information not available. Please try again.");
       return;
     }
 
-    setFormState('loading');
-    setErrorMessage('');
+    setFormState("loading");
+    setErrorMessage("");
 
     try {
       // Prepare payload with user information
       const payload = {
         ...formData,
         userId: userProfile.id,
-        email: userProfile.email
+        email: userProfile.email,
       };
 
       // Use the service instead of direct fetch
       await sendSupportMessage(payload);
 
-      setFormState('success');
-      
+      setFormState("success");
+
       // Reset form after 2 seconds and close modal
       setTimeout(() => {
-        setFormData({ message: '', supportType: 'general' });
-        setFormState('idle');
+        setFormData({ message: "", supportType: "general" });
+        setFormState("idle");
         onClose();
       }, 2000);
-
     } catch (error) {
-      setFormState('error');
-      setErrorMessage(error instanceof Error ? error.message : 'An unexpected error occurred');
+      setFormState("error");
+      setErrorMessage(
+        error instanceof Error ? error.message : "An unexpected error occurred",
+      );
     }
   };
 
   const handleClose = () => {
-    if (formState !== 'loading') {
-      setFormData({ message: '', supportType: 'general' });
-      setFormState('idle');
-      setErrorMessage('');
+    if (formState !== "loading") {
+      setFormData({ message: "", supportType: "general" });
+      setFormState("idle");
+      setErrorMessage("");
       onClose();
     }
   };
 
   const renderContent = () => {
     switch (formState) {
-      case 'success':
+      case "success":
         return (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -104,7 +117,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose
           </motion.div>
         );
 
-      case 'error':
+      case "error":
         return (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -117,7 +130,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose
             </h3>
             <p className="text-gray-600 mb-4">{errorMessage}</p>
             <button
-              onClick={() => setFormState('idle')}
+              onClick={() => setFormState("idle")}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
             >
               Try Again
@@ -130,7 +143,10 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Support Type Selection */}
             <div>
-              <label htmlFor="supportType" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="supportType"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Support Type
               </label>
               <select
@@ -139,7 +155,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose
                 value={formData.supportType}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                disabled={formState === 'loading'}
+                disabled={formState === "loading"}
               >
                 <option value="general">General Question</option>
                 <option value="technical">Technical Support</option>
@@ -151,7 +167,10 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose
 
             {/* Message */}
             <div>
-              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="message"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Message <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -162,7 +181,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose
                 placeholder="Please describe your question or issue in detail..."
                 rows={8}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                disabled={formState === 'loading'}
+                disabled={formState === "loading"}
                 required
               />
             </div>
@@ -180,16 +199,16 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose
                 type="button"
                 onClick={handleClose}
                 className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                disabled={formState === 'loading'}
+                disabled={formState === "loading"}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={formState === 'loading'}
+                disabled={formState === "loading"}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {formState === 'loading' ? (
+                {formState === "loading" ? (
                   <>
                     <Loader className="w-4 h-4 animate-spin" />
                     Sending...
@@ -213,12 +232,10 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose
       onClose={handleClose}
       title="Send a Message to Joseph and the Dream Trainer Team"
       size="lg"
-      closeOnOverlayClick={formState !== 'loading'}
-      closeOnEscape={formState !== 'loading'}
+      closeOnOverlayClick={formState !== "loading"}
+      closeOnEscape={formState !== "loading"}
     >
-      <div className="p-6">
-        {renderContent()}
-      </div>
+      <div className="p-6">{renderContent()}</div>
     </Modal>
   );
 };

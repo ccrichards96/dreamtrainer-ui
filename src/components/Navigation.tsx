@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
-import { useAuthContext } from '../contexts';
-import AvatarDropdown from './AvatarDropdown';
+import { Link } from "react-router-dom";
+import { useAuthContext } from "../contexts";
+import AvatarDropdown from "./AvatarDropdown";
 
 export default function Navigation() {
   const { isAuthenticated, login } = useAuthContext();
@@ -11,7 +11,9 @@ export default function Navigation() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <span className="text-xl font-bold text-gray-900 dark:text-black">Dream Trainer</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-black">
+                Dream Trainer
+              </span>
             </Link>
           </div>
 
