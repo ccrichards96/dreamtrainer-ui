@@ -57,7 +57,8 @@ function DashboardContent() {
     loading: courseLoading,
     error: courseError,
     loadCourse,
-    getAllCourses
+    getAllCourses,
+    startTestMode
   } = useCourseContext();
 
   // Load TOEFL Max course on component mount
@@ -390,7 +391,10 @@ function DashboardContent() {
 
           {/* Start Button */}
           <button
-            onClick={() => setWelcomeModalOpen(false)}
+            onClick={() => {
+              setWelcomeModalOpen(false);
+              startTestMode();
+            }}
             className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
           >
             Start My First Test
