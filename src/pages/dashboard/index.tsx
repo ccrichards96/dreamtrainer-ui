@@ -9,6 +9,7 @@ import DreamFlow from '../../components/DreamFlow';
 import Modal from '../../components/modals/Modal';
 import SupportMessageForm from '../../components/SupportMessageForm';
 import { Course } from '../../types/modules';
+import posthog from 'posthog-js';
 
 function DashboardContent() {
   const { user, isAuthenticated } = useAuth0();
@@ -27,6 +28,7 @@ function DashboardContent() {
         if (!hasVisitedBefore || hasVisitedBefore !== 'true') {
           // This is the first login
           setWelcomeModalOpen(true);
+          posthog.capture('First Login', { user });
           // Mark as visited
           localStorage.setItem(storageKey, 'true');
         }
