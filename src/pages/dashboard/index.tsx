@@ -7,7 +7,7 @@ import { CourseProvider } from '../../contexts/CourseContext';
 import { useCourseContext } from '../../contexts/useCourseContext';
 import DreamFlow from '../../components/DreamFlow';
 import Modal from '../../components/modals/Modal';
-import SupportMessageForm from '../../components/SupportMessageForm';
+import SupportMessageForm from '../../components/forms/SupportMessageForm';
 import { Course } from '../../types/modules';
 import posthog from 'posthog-js';
 

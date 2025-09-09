@@ -9,8 +9,8 @@ import {
   ArrowRight, 
   RefreshCw
 } from 'lucide-react';
-import { submitAssessment, type AssessmentSubmission } from '../services/api';
-import { useCourseContext } from '../contexts/useCourseContext';
+import { submitAssessment, type AssessmentSubmission } from '../../services/api';
+import { useCourseContext } from '../../contexts/useCourseContext';
 
 interface AssessmentFormData {
   test_number: string;

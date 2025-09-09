@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, CheckCircle, AlertCircle, Loader } from 'lucide-react';
-import { useApp } from '../contexts/useAppContext';
-import { sendSupportMessage } from '../services/api/users';
-import Modal from './modals/Modal';
+import { useApp } from '../../contexts/useAppContext';
+import { sendSupportMessage } from '../../services/api/users';
+import Modal from '../modals/Modal';
 
 interface SupportMessageFormProps {
   isOpen: boolean;

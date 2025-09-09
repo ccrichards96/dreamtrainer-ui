@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Test } from '../../../types/tests';
-import AssessmentForm from '../../AssessmentForm';
+import AssessmentForm from '../../forms/AssessmentForm';
 
 interface TestContentProps {
   test: Test;
