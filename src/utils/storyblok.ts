@@ -20,7 +20,6 @@ import Hero from '../components/storyblok/Hero';
 import Features from '../components/storyblok/Features';
 import Page from '../components/storyblok/Page';
 import Post from '../components/storyblok/Post';
-// import TestPost from '../components/storyblok/TestPost';
 import Icon from '../components/storyblok/Icon';
 import Section from '../components/storyblok/Section';
 import Spacer from '../components/storyblok/Spacer';
