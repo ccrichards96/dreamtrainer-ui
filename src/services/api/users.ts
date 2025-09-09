@@ -8,6 +8,13 @@ export interface UpdateUserDTO {
   onboardingComplete?: boolean;
 }
 
+export interface SupportMessageDTO {
+  message: string;
+  supportType: 'technical' | 'course-content' | 'billing' | 'general' | 'feedback';
+  userId: string;
+  email: string;
+}
+
 /**
  * Get current user information
  * @returns Promise<User> - Current user data
@@ -41,10 +48,28 @@ export const updateCurrentUser = async (userData: UpdateUserDTO): Promise<User> 
   }
 };
 
+/**
+ * Send support message
+ * @param messageData - Support message data
+ * @returns Promise<void> - Success confirmation
+ */
+export const sendSupportMessage = async (messageData: SupportMessageDTO): Promise<void> => {
+  try {
+    const response = await apiClient.post<APIResponse<void>>('/support/messages', messageData);
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to send support message: ${error.message}`);
+    }
+    throw new Error('An unexpected error occurred while sending support message');
+  }
+};
+
 // Export all user-related functions as a service object
 export const userService = {
   getCurrentUser,
   updateCurrentUser,
+  sendSupportMessage,
 };
 
 export default userService;

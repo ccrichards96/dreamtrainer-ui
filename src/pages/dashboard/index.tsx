@@ -1,20 +1,40 @@
 import { motion } from 'framer-motion';
 import { useAuth0 } from '@auth0/auth0-react';
-import { MessageSquare, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
+import { MessageSquare, RefreshCw, AlertCircle, Calendar, Play, Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDashboardContext, DashboardProvider } from '../../contexts';
 import { CourseProvider } from '../../contexts/CourseContext';
 import { useCourseContext } from '../../contexts/useCourseContext';
 import DreamFlow from '../../components/DreamFlow';
 import Modal from '../../components/modals/Modal';
+import SupportMessageForm from '../../components/SupportMessageForm';
 import { Course } from '../../types/modules';
 
 function DashboardContent() {
-  const { user } = useAuth0();
+  const { user, isAuthenticated } = useAuth0();
   const firstName = user?.given_name || 'there';
   
   // Welcome modal state
   const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
+  const [supportMessageModalOpen, setSupportMessageModalOpen] = useState(false);
+
+  // Check for first login and set welcome modal 
+  useEffect(() => {
+    const checkFirstLogin = () => {
+      if (isAuthenticated) {
+        const storageKey = 'hasVisitedDashboard';
+        const hasVisitedBefore = localStorage.getItem(storageKey);
+        if (!hasVisitedBefore || hasVisitedBefore !== 'true') {
+          // This is the first login
+          setWelcomeModalOpen(true);
+          // Mark as visited
+          localStorage.setItem(storageKey, 'true');
+        }
+      }
+    };
+
+    checkFirstLogin();
+  }, [isAuthenticated]);
 
   // Use Dashboard context instead of dummy data
   const {
@@ -58,7 +78,7 @@ function DashboardContent() {
       }
     };
     fetchCourses();
-  }, [getAllCourses, loadCourse]);
+  }, [getAllCourses, loadCourse, getTestScores]);
 
   const handleCourseComplete = () => {
     console.log('Course completed!');
@@ -202,17 +222,17 @@ function DashboardContent() {
           transition={{ delay: 0.2 }}
           className="bg-white rounded-2xl shadow-lg p-8 mb-8"
         >
-          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold text-gray-900">
               General Announcements
             </h2>
             <button
               onClick={() => setWelcomeModalOpen(true)}
-              className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors"
+              className="text-base font-medium bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors shadow-md flex items-center"
             >
-              View Welcome Video
+              <Play className="w-5 h-5 mr-2" /> Watch Your Welcome Video!
             </button>
-          </div>
+            </div>
           <div className="max-h-80 overflow-y-auto">
             {announcements.length === 0 ? (
               <div className="text-center py-8">
@@ -300,9 +320,12 @@ function DashboardContent() {
             transition={{ delay: 0.4 }}
             className="bg-white rounded-2xl shadow-lg p-8"
           >
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+            <h2 className="text-2xl font-semibold text-gray-900  mb-2">
               Need help/support from Joseph, our trusted expert?
             </h2>
+            <p className="text-gray-600 mb-6">
+               Struggling, confused, or not improving? We'll get you back on track right away:
+            </p>
             <a 
               href="https://calendly.com/notefulljoseph/toefl-course-help" 
               target="_blank" 
@@ -310,8 +333,30 @@ function DashboardContent() {
               className="w-full bg-[#c5a8de] text-white py-4 rounded-lg font-medium hover:bg-[#b399d6] transition-all flex items-center justify-center gap-2 mb-4"
             >
               <Calendar className="w-5 h-5" />
-              Book A Meeting Calendly
+              Schedule a Session with Joseph Here
             </a>
+          </motion.div>
+
+          {/* Send Message */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="bg-white rounded-2xl shadow-lg p-8"
+          >
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Send a Message to Joseph and the Dream Trainer Team
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Have a question or need assistance? Send us a message and we'll get back to you promptly.
+            </p>
+            <button
+              onClick={() => setSupportMessageModalOpen(true)}
+              className="w-full bg-blue-600 text-white py-4 rounded-lg font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+            >
+              <Mail className="w-5 h-5" />
+              Send Message
+            </button>
           </motion.div>
         </div>
       </div>
@@ -350,6 +395,12 @@ function DashboardContent() {
           </button>
         </div>
       </Modal>
+
+      {/* Support Message Modal */}
+      <SupportMessageForm
+        isOpen={supportMessageModalOpen}
+        onClose={() => setSupportMessageModalOpen(false)}
+      />
     </div>
   );
 }
