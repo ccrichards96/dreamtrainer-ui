@@ -78,7 +78,7 @@ export const submitAssessment = async (
 
     // Submit to external webhook
     const response = await fetch(
-      "http://18.118.77.149:5678/webhook/submit-form",
+      "https://automation.thedreamtrainer.com/webhook/submit-form",
       {
         method: "POST",
         headers: {
@@ -89,7 +89,7 @@ export const submitAssessment = async (
     );
 
     // Send to test scorer webhook
-    await fetch("http://18.118.77.149:5678/webhook/test-scorer", {
+    await fetch("https://automation.thedreamtrainer.com/webhook/test-scorer", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
