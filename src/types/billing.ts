@@ -1,10 +1,16 @@
 interface Subscription {
   id: string;
   userId: string;
-  stripeProductId: string;
+  stripeSubscriptionId: string;
   status: "active" | "canceled" | "paused";
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type { Subscription };
+interface BillingData {
+    name: string;
+    status: "active" | "inactive" | "cancelled" | "past_due";
+    amount?: number;
+}
+
+export type { Subscription, BillingData };

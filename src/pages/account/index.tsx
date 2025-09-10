@@ -9,28 +9,18 @@ import {
   User,
 } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
-
+import { generateBillingPortalLink, getUserSubscriptions } from "../../services/api/billing";
+import { BillingData } from "../../types/billing";
 // Phone number validation regex
 const PHONE_REGEX = /^\+?[1-9]\d{1,14}$/; // E.164 format
 
-// Placeholder billing data structure - this will be replaced with API data
-interface BillingData {
-  plan: {
-    current: string;
-    status: "active" | "inactive" | "cancelled" | "past_due";
-    nextBillingDate: string | null;
-    amount?: number;
-    currency?: string;
-  };
-}
+
 
 // Sample data - will be replaced by API call
 const defaultBillingData: BillingData = {
-  plan: {
-    current: "Free Plan",
+    name: "Free Plan",
     status: "active",
-    nextBillingDate: null, // No billing for free plan
-  },
+    amount: 0,
 };
 
 const AccountPage = () => {
@@ -41,8 +31,7 @@ const AccountPage = () => {
   const [profileImage, setProfileImage] = useState<string | null>(
     user?.picture || null,
   );
-  const [billingData, setBillingData] =
-    useState<BillingData>(defaultBillingData);
+  const [billingData, setBillingData] = useState<BillingData | null>(null);
   const [isLoadingBilling, setIsLoadingBilling] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [formData, setFormData] = useState({
@@ -101,53 +90,23 @@ const AccountPage = () => {
       setIsLoadingBilling(true);
 
       try {
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        // Call the real API to get user subscriptions
+        const response = await getUserSubscriptions();
+        
+        if (response.success && response.data.length > 0) {
+          // Use the first active subscription (you might want to handle multiple subscriptions differently)
+          const activeSubscription = response.data.find(sub => sub.status === "active") || response.data[0];
 
-        // TODO: Replace with actual API call
-        // const response = await fetch('/users/info/billing', {
-        //   method: 'GET',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //     'Authorization': `Bearer ${getAccessTokenSilently()}`
-        //   }
-        // });
-        //
-        // if (!response.ok) {
-        //   throw new Error('Failed to fetch billing data');
-        // }
-        //
-        // const data: BillingData = await response.json();
-        // setBillingData(data);
-
-        // For now, simulate different billing scenarios based on user email
-        const mockBillingData: BillingData = user.email?.includes("premium")
-          ? {
-              plan: {
-                current: "Premium Plan",
-                status: "active",
-                nextBillingDate: "2025-10-03",
-                amount: 29.99,
-                currency: "USD",
-              },
-            }
-          : user.email?.includes("pro")
-            ? {
-                plan: {
-                  current: "Pro Plan",
-                  status: "active",
-                  nextBillingDate: "2025-09-15",
-                  amount: 19.99,
-                  currency: "USD",
-                },
-              }
-            : defaultBillingData;
-
-        setBillingData(mockBillingData);
+          console.log(activeSubscription);
+          setBillingData(activeSubscription);
+        } else {
+          // No subscriptions found, user is on free plan
+          setBillingData(null);
+        }
       } catch (error) {
         console.error("Error fetching billing data:", error);
         // Keep default data on error
-        setBillingData(defaultBillingData);
+        setBillingData(null);
       } finally {
         setIsLoadingBilling(false);
       }
@@ -193,32 +152,21 @@ const AccountPage = () => {
     }
   };
 
-  const handleUpgradePlan = async () => {
+  const handleManagePlan = async () => {
     setIsUpgrading(true);
 
-    // Simulate API call to Stripe
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      // TODO: Replace with actual Stripe integration
-      // const response = await fetch('/api/create-checkout-session', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     priceId: 'price_123', // Replace with actual price ID
-      //     successUrl: `${window.location.origin}/account?success=true`,
-      //     cancelUrl: `${window.location.origin}/account?canceled=true`,
-      //   }),
-      // });
-      // const { url } = await response.json();
-      // window.location.href = url;
-
-      // For now, just show a success message
-      alert("This will redirect to Stripe in the future.");
+      // Get the current frontend URL as the return URL
+      const returnUrl = window.location.origin + '/account';
+      
+      // Call the billing portal service
+      const response = await generateBillingPortalLink(returnUrl);
+      
+      // Redirect to the Stripe billing portal
+      window.location.href = response.data.portalUrl;
     } catch (error) {
-      console.error("Error initiating upgrade:", error);
-      alert("Failed to initiate upgrade. Please try again.");
+      console.error("Error opening billing portal:", error);
+      alert("Failed to open billing portal. Please try again.");
     } finally {
       setIsUpgrading(false);
     }
@@ -466,59 +414,65 @@ const AccountPage = () => {
               </div>
               <div className="space-y-4">
                 {/* Plan Info Row */}
-                <div className="overflow-x-auto">
-                  <table className="min-w-full border-separate border-spacing-y-2">
-                    <thead>
-                      <tr className="text-left text-sm text-gray-600">
-                        <th className="pr-6 font-medium">Current Plan</th>
-                        <th className="pr-6 font-medium">Status</th>
-                        <th className="pr-6 font-medium">Next Billing Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="bg-[#f7f4fa] rounded">
-                        <td className="py-2 pr-6 pl-4 text-lg font-medium text-gray-900">
-                          {billingData.plan.current}
-                          {billingData.plan.amount && (
-                            <span className="text-sm text-gray-500 block">
-                              ${billingData.plan.amount}/
-                              {billingData.plan.currency === "USD"
-                                ? "month"
-                                : "mo"}
+                {billingData ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full border-separate border-spacing-y-2">
+                      <thead>
+                        <tr className="text-left text-sm text-gray-600">
+                          <th className="pr-6 font-medium">Current Plan</th>
+                          <th className="pr-6 font-medium">Amount</th>
+                          <th className="pr-6 font-medium">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="bg-[#f7f4fa] rounded">
+                          <td className="py-2 pr-6 pl-4 text-lg font-medium text-gray-900">
+                            {billingData.name}
+                          </td>
+                          <td className="py-2 pr-6 pl-4 text-gray-900">
+                            {billingData.amount && billingData.amount > 0 ? (
+                              <span className="font-medium">
+                                ${billingData.amount}/month
+                              </span>
+                            ) : (
+                              <span className="text-gray-500">Free</span>
+                            )}
+                          </td>
+                          <td className="py-2 pr-6 pl-4">
+                            <span
+                              className={`inline-block px-2 py-1 text-xs font-semibold rounded ${
+                                billingData.status === "active"
+                                  ? "bg-green-100 text-green-700"
+                                  : billingData.status === "past_due"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : billingData.status === "cancelled"
+                                      ? "bg-red-100 text-red-700"
+                                      : "bg-gray-100 text-gray-700"
+                              }`}
+                            >
+                              {billingData.status.charAt(0).toUpperCase() +
+                                billingData.status
+                                  .slice(1)
+                                  .replace("_", " ")}
                             </span>
-                          )}
-                        </td>
-                        <td className="py-2 pr-6 pl-4">
-                          <span
-                            className={`inline-block px-2 py-1 text-xs font-semibold rounded ${
-                              billingData.plan.status === "active"
-                                ? "bg-green-100 text-green-700"
-                                : billingData.plan.status === "past_due"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : billingData.plan.status === "cancelled"
-                                    ? "bg-red-100 text-red-700"
-                                    : "bg-gray-100 text-gray-700"
-                            }`}
-                          >
-                            {billingData.plan.status.charAt(0).toUpperCase() +
-                              billingData.plan.status
-                                .slice(1)
-                                .replace("_", " ")}
-                          </span>
-                        </td>
-                        <td className="py-2 pr-6 pl-4 text-gray-700">
-                          {billingData.plan.nextBillingDate
-                            ? new Date(
-                                billingData.plan.nextBillingDate,
-                              ).toLocaleDateString()
-                            : "-"}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="bg-[#f7f4fa] rounded-lg p-6">
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Free Plan</h3>
+                      <p className="text-gray-600 mb-4">You're currently on our free plan</p>
+                      <span className="inline-block px-3 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">
+                        Active
+                      </span>
+                    </div>
+                  </div>
+                )}
                 <button
-                  onClick={handleUpgradePlan}
+                  onClick={handleManagePlan}
                   disabled={isUpgrading || isLoadingBilling}
                   className="w-full bg-[#c5a8de] text-white py-2 px-4 rounded-md hover:bg-[#7c5e99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
@@ -527,10 +481,10 @@ const AccountPage = () => {
                       <Loader2 className="w-4 h-4 animate-spin" />
                       Please wait...
                     </>
-                  ) : billingData.plan.current === "Free Plan" ? (
-                    "Upgrade Plan"
-                  ) : (
+                  ) : billingData ? (
                     "Manage Plan"
+                  ) : (
+                    "Upgrade Plan"
                   )}
                 </button>
               </div>
