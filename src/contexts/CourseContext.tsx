@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useState, useCallback } from "react";
+import React, { createContext, ReactNode, useState, useCallback, useEffect } from "react";
 import { Course, Module } from "../types/modules";
 import { Test } from "../types/tests";
 import {
@@ -6,49 +6,29 @@ import {
   getAllCourses as fetchAllCourses,
 } from "../services/api/modules";
 
-// Fallback sample data for development
-// const fallbackModules: Module[] = [
-//   {
-//     id: "sample-module-1",
-//     courseId: courseId,
-//     categoryId: null,
-//     topic: "TOEFL: Writing Question 1",
-//     description: "Master the TOEFL Writing Task 1 - Integrated Writing. Learn how to effectively read an academic passage, listen to a lecture, and write a coherent response that demonstrates your ability to synthesize information from multiple sources.",
-//     level: 1,
-//     status: "active",
-//     estimatedTime: 30,
-//     videoUrl: "https://vimeo.com/981374557/52c7d357b3?share=copy",
-//     botIframeUrl: "https://app.vectorshift.ai/chatbots/deployed/67c28ce25d6b7f0ba2b47803",
-//     lessonContent: "Comprehensive lesson content for TOEFL Writing Task 1",
-//     createdBy: "system",
-//     createdAt: new Date(),
-//     updatedAt: new Date()
-//   },
-//   {
-//     id: "sample-module-2",
-//     courseId: courseId,
-//     categoryId: null,
-//     topic: "TOEFL: Writing Question 2",
-//     description: "Master the TOEFL Writing Task 2 - Independent Writing. Learn how to develop your ideas, organize your thoughts, and write a well-structured essay that demonstrates your ability to express and support your opinions effectively.",
-//     level: 2,
-//     status: "active",
-//     estimatedTime: 35,
-//     videoUrl: "https://www.youtube.com/embed/8DaTKVBqUNs",
-//     botIframeUrl: "https://app.vectorshift.ai/chatbots/deployed/67c28ce25d6b7f0ba2b47803",
-//     lessonContent: "Comprehensive lesson content for TOEFL Writing Task 2",
-//     createdBy: "system",
-//     createdAt: new Date(),
-//     updatedAt: new Date()
-//   }
-// ];
 
-// const fallbackCourse = {
-//   id: courseId,
-//   name: "TOEFL Writing Mastery Course",
-//   description: "Complete TOEFL Writing preparation course",
-//   createdAt: new Date(),
-//   updatedAt: new Date()
-// };
+const PROGRESS_KEY = 'course_progress';
+
+const saveProgress = (courseId: string, data: any) => {
+  try {
+    const existing = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+    existing[courseId] = { ...data, lastSaved: Date.now() };
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(existing));
+  } catch (e) {
+    console.warn('Failed to save progress:', e);
+  }
+};
+
+const loadProgress = (courseId: string) => {
+  try {
+    const stored = localStorage.getItem(PROGRESS_KEY);
+    return stored ? JSON.parse(stored)[courseId] : null;
+  } catch (e) {
+    console.warn('Failed to load progress:', e);
+    return null;
+  }
+};
+
 
 export interface CourseContextType {
   currentCourse: Course | null;
@@ -123,30 +103,53 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   const [allModulesCompleted, setAllModulesCompleted] =
     useState<boolean>(false);
 
+  // Auto-save progress when module index or completed modules change
+  useEffect(() => {
+    if (currentCourse && modules.length > 0) {
+      console.log('Auto-saving progress:', {
+        moduleIndex: currentModuleIndex,
+        completed: Array.from(completedModules)
+      });
+      
+      saveProgress(currentCourse.id, {
+        moduleIndex: currentModuleIndex,
+        completed: Array.from(completedModules)
+      });
+    }
+  }, [currentModuleIndex, completedModules, currentCourse, modules.length]);
+
   // Load course data
   const loadCourse = useCallback(async (courseId: string): Promise<void> => {
     setLoading(true);
     setError(null);
     try {
       const response = await getCourseWithModulesById(courseId);
-      // API returns { success: true, data: { course: {...}, modules: [...], tests: [...] }, message: "..." }
       const data = response.data;
 
       setCurrentCourse(data);
       setModules(data.modules || []);
-      // Sort tests by order field to ensure sequential ordering
-      const sortedTests = (data.tests || []).sort(
-        (a: Test, b: Test) => a.order - b.order,
-      );
+      const sortedTests = (data.tests || []).sort((a: Test, b: Test) => a.order - b.order);
       setTests(sortedTests);
       // setTestAttempts(data.testAttempts);
 
-      // Reset module navigation state
-      setCurrentModuleIndexState(0);
-      setCompletedModules(new Set());
-      setCurrentModule(data.modules?.[0] || null);
+      //Load saved progress
+      const saved = loadProgress(courseId);
+      if (saved) {
+        const savedCompleted = new Set<number>(saved.completed || []);
+        setCurrentModuleIndexState(saved.moduleIndex || 0);
+        setCompletedModules(savedCompleted);
+        setCurrentModule(data.modules?.[saved.moduleIndex || 0] || null);
+        
+        // Restore allModulesCompleted state based on saved progress
+        setAllModulesCompleted(savedCompleted.size === data.modules?.length);
+      } else {
+        // Reset to defaults
+        setCurrentModuleIndexState(0);
+        setCompletedModules(new Set());
+        setCurrentModule(data.modules?.[0] || null);
+        setAllModulesCompleted(false);
+      }
 
-      // Reset test state
       setCurrentTestIndex(0);
       setIsTestMode(false);
       setCurrentTest(null);
@@ -185,6 +188,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       if (index >= 0 && index < modules.length) {
         setCurrentModuleIndexState(index);
         setCurrentModule(modules[index]);
+        // Auto-save is handled by useEffect
       }
     },
     [modules],
@@ -195,14 +199,24 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     (index: number): void => {
       setCompletedModules((prev) => {
         const newCompleted = new Set([...prev, index]);
-        // Check if all modules are completed
+        
+        console.log('markModuleAsCompleted:', {
+          index,
+          currentModuleIndex,
+          prevCompleted: Array.from(prev),
+          newCompleted: Array.from(newCompleted)
+        });
+        
+        // Don't auto-save here - let nextModule handle it
+        // This prevents race conditions
+        
         if (newCompleted.size === modules.length) {
           setAllModulesCompleted(true);
         }
         return newCompleted;
       });
     },
-    [modules.length],
+    [modules.length, currentModuleIndex],
   );
 
   // Test-related functions
@@ -261,17 +275,21 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   const nextModule = useCallback((): void => {
     if (currentModuleIndex < modules.length - 1) {
       const newIndex = currentModuleIndex + 1;
-      setCurrentModuleIndex(newIndex);
+      setCurrentModuleIndexState(newIndex);
+      setCurrentModule(modules[newIndex]);
+      // Auto-save is handled by useEffect
     }
-  }, [currentModuleIndex, modules.length, setCurrentModuleIndex]);
+  }, [currentModuleIndex, modules]);
 
   // Navigate to previous module
   const previousModule = useCallback((): void => {
     if (currentModuleIndex > 0) {
       const newIndex = currentModuleIndex - 1;
-      setCurrentModuleIndex(newIndex);
+      setCurrentModuleIndexState(newIndex);
+      setCurrentModule(modules[newIndex]);
+      // Auto-save is handled by useEffect
     }
-  }, [currentModuleIndex, setCurrentModuleIndex]);
+  }, [currentModuleIndex, modules]);
 
   // Get next module
   const getNextModule = useCallback((): Module | null => {

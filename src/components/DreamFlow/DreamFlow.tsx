@@ -39,6 +39,7 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
       // When user clicks "Test Your Skills" on last module, start test mode
       startTestMode();
     } else {
+      // Move to next module after marking current as completed
       nextModule();
     }
   };
