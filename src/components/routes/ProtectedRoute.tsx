@@ -6,9 +6,10 @@ import { RefreshCw, AlertCircle } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  allowedRoles?: string[]; // Optional roles that are allowed to access the route
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
   const { isAuthenticated, isLoading: auth0Loading } = useAuth0();
   const { userProfile, userLoading, userError, appInitialized } = useApp();
   const location = useLocation();
@@ -61,6 +62,26 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           >
             Try Again
           </button>
+        </div>
+      </div>
+    );
+  }
+  // If roles are specified, check if user has one of the allowed roles
+  if (allowedRoles && userProfile && !allowedRoles.includes(userProfile.role)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Access Denied
+          </h2>
+          <p className="text-gray-600 mb-4">You do not have permission to access this page.</p>
+            <button
+            onClick={() => window.history.back()}
+            className="bg-[#c5a8de] text-white px-6 py-2 rounded-lg hover:bg-[#b399d6] transition-colors"
+            >
+            Go Back
+            </button>
         </div>
       </div>
     );

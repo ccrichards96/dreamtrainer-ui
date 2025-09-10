@@ -14,6 +14,7 @@ import Navigation from "./components/Navigation";
 import { AuthProvider, ApiProvider } from "./contexts";
 import { AppProvider } from "./contexts/AppContext";
 import NotFound from "./pages/NotFound";
+import { Role } from "./types/user";
 
 function App() {
   return (
@@ -68,7 +69,7 @@ function App() {
                     <Route
                       path="/admin"
                       element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={[Role.Admin]}>
                           <AdminDashboard />
                         </ProtectedRoute>
                       }
