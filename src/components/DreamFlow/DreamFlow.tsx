@@ -26,9 +26,13 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
     // Test mode properties
     isTestMode,
     currentTest,
+    currentTestIndex,
+    markTestAsCompleted,
     startTestMode,
     exitTestMode,
     resetToFirstModule,
+    getNextTestInSequence,
+    tests,
   } = useCourseContext();
 
   const handleNextModule = () => {
@@ -54,8 +58,21 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
     // TODO: Submit test answers to API
     console.log("Test answers:", answers);
 
-    // Show success page instead of immediately exiting
-    setTestSubmitted(true);
+    // Mark current test as completed
+    if (currentTest) {
+      markTestAsCompleted(currentTest.id);
+    }
+
+    // Check if there are more tests to complete
+    const nextTest = getNextTestInSequence();
+    if (nextTest && currentTestIndex < tests.length - 1) {
+      // Move to next test - the CourseContext will handle updating currentTestIndex
+      // and currentTest based on the completed tests
+      startTestMode(); // This will automatically find the next incomplete test
+    } else {
+      // All tests completed - show success page
+      setTestSubmitted(true);
+    }
   };
 
   const handleReturnToCourse = () => {
@@ -145,12 +162,15 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
         {/* Test Mode Exit Button - Only show when in test (not success page) */}
         {isTestMode && !testSubmitted && (
           <div className="mt-8 pt-6 border-t border-gray-200">
-            <button
-              onClick={handleExitTest}
-              className="bg-gray-600 text-white px-6 py-3 rounded-md font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-            >
-              Exit Test Mode
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+              {/* Exit Button */}
+              <button
+                onClick={handleExitTest}
+                className="bg-gray-600 text-white px-6 py-3 rounded-md font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+              >
+                Exit Test Mode
+              </button>
+            </div>
           </div>
         )}
 

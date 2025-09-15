@@ -9,7 +9,15 @@ import {
 
 const PROGRESS_KEY = 'course_progress';
 
-const saveProgress = (courseId: string, data: any) => {
+interface ProgressData {
+  moduleIndex?: number;
+  completed?: number[];
+  completedTests?: string[];
+  currentTestIndex?: number;
+  lastSaved?: number;
+}
+
+const saveProgress = (courseId: string, data: ProgressData) => {
   try {
     const existing = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
     existing[courseId] = { ...data, lastSaved: Date.now() };
@@ -44,6 +52,7 @@ export interface CourseContextType {
   isTestMode: boolean;
   currentTest: Test | null;
   currentTestIndex: number;
+  completedTests: Set<string>; // Track completed tests by ID
   allModulesCompleted: boolean;
 
   // State management
@@ -55,12 +64,14 @@ export interface CourseContextType {
   getAllCourses: () => Promise<Course[]>;
   setCurrentModuleIndex: (index: number) => void;
   markModuleAsCompleted: (index: number) => void;
+  markTestAsCompleted: (testId: string) => void; // New function to mark tests as completed
   nextModule: () => void;
   previousModule: () => void;
 
   // Test actions
   startTestMode: () => void;
   exitTestMode: () => void;
+  setCurrentTestIndex: (index: number) => void;
   resetToFirstModule: (clearProgress?: boolean) => void;
   getNextTestInSequence: () => Test | null;
   getTestProgress: () => { current: number; total: number };
@@ -93,30 +104,37 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   const [completedModules, setCompletedModules] = useState<Set<number>>(
     new Set(),
   );
+  const [completedTests, setCompletedTests] = useState<Set<string>>(
+    new Set(),
+  );
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   // Test-related state
   const [isTestMode, setIsTestMode] = useState<boolean>(false);
   const [currentTest, setCurrentTest] = useState<Test | null>(null);
-  const [currentTestIndex, setCurrentTestIndex] = useState<number>(0);
+  const [currentTestIndex, setCurrentTestIndexState] = useState<number>(0);
   const [allModulesCompleted, setAllModulesCompleted] =
     useState<boolean>(false);
 
-  // Auto-save progress when module index or completed modules change
+  // Auto-save progress when module index, completed modules, or completed tests change
   useEffect(() => {
     if (currentCourse && modules.length > 0) {
       console.log('Auto-saving progress:', {
         moduleIndex: currentModuleIndex,
-        completed: Array.from(completedModules)
+        completed: Array.from(completedModules),
+        completedTests: Array.from(completedTests),
+        currentTestIndex
       });
       
       saveProgress(currentCourse.id, {
         moduleIndex: currentModuleIndex,
-        completed: Array.from(completedModules)
+        completed: Array.from(completedModules),
+        completedTests: Array.from(completedTests),
+        currentTestIndex
       });
     }
-  }, [currentModuleIndex, completedModules, currentCourse, modules.length]);
+  }, [currentModuleIndex, completedModules, completedTests, currentTestIndex, currentCourse, modules.length]);
 
   // Load course data
   const loadCourse = useCallback(async (courseId: string): Promise<void> => {
@@ -136,9 +154,15 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       const saved = loadProgress(courseId);
       if (saved) {
         const savedCompleted = new Set<number>(saved.completed || []);
+        const savedCompletedTests = new Set<string>(saved.completedTests || []);
         setCurrentModuleIndexState(saved.moduleIndex || 0);
         setCompletedModules(savedCompleted);
+        setCompletedTests(savedCompletedTests);
         setCurrentModule(data.modules?.[saved.moduleIndex || 0] || null);
+        
+        // Restore test index based on completed tests - find first incomplete test
+        const firstIncompleteTestIndex = sortedTests.findIndex((test: Test) => !savedCompletedTests.has(test.id));
+        setCurrentTestIndexState(firstIncompleteTestIndex >= 0 ? firstIncompleteTestIndex : 0);
         
         // Restore allModulesCompleted state based on saved progress
         setAllModulesCompleted(savedCompleted.size === data.modules?.length);
@@ -146,13 +170,11 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
         // Reset to defaults
         setCurrentModuleIndexState(0);
         setCompletedModules(new Set());
+        setCompletedTests(new Set());
         setCurrentModule(data.modules?.[0] || null);
+        setCurrentTestIndexState(0);
         setAllModulesCompleted(false);
       }
-
-      setCurrentTestIndex(0);
-      setIsTestMode(false);
-      setCurrentTest(null);
     } catch (err) {
       console.warn("Course loading failed, using fallback data:", err);
 
@@ -161,8 +183,9 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       setTests([]);
       setCurrentModuleIndexState(0);
       setCompletedModules(new Set());
+      setCompletedTests(new Set());
       setCurrentModule(null);
-      setCurrentTestIndex(0);
+      setCurrentTestIndexState(0);
     } finally {
       setLoading(false);
     }
@@ -219,23 +242,60 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     [modules.length, currentModuleIndex],
   );
 
+  // Mark a test as completed
+  const markTestAsCompleted = useCallback(
+    (testId: string): void => {
+      setCompletedTests((prev) => {
+        const newCompleted = new Set([...prev, testId]);
+        
+        console.log('markTestAsCompleted:', {
+          testId,
+          prevCompleted: Array.from(prev),
+          newCompleted: Array.from(newCompleted)
+        });
+        
+        return newCompleted;
+      });
+    },
+    [],
+  );
+
   // Test-related functions
   const startTestMode = useCallback((): void => {
     if (tests.length > 0) {
-      // Use the current test index to select the test sequentially
-      const testToStart = tests[currentTestIndex];
+      // Find the next incomplete test starting from currentTestIndex
+      let testToStart = tests[currentTestIndex];
+      let searchIndex = currentTestIndex;
+      
+      // If current test is completed, find next incomplete test
+      while (testToStart && completedTests.has(testToStart.id) && searchIndex < tests.length) {
+        searchIndex++;
+        testToStart = tests[searchIndex];
+      }
+      
+      // If we've reached the end, wrap around to find any incomplete tests
+      if (!testToStart || completedTests.has(testToStart.id)) {
+        testToStart = tests.find((test: Test) => !completedTests.has(test.id)) || tests[0];
+        searchIndex = tests.findIndex((test: Test) => test.id === testToStart.id);
+      }
+      
       setCurrentTest(testToStart);
       setIsTestMode(true);
-
-      // Advance to next test for next time, cycling back to 0 if we reach the end
-      setCurrentTestIndex((prevIndex) => (prevIndex + 1) % tests.length);
+      setCurrentTestIndexState(searchIndex);
     }
-  }, [tests, currentTestIndex]);
+  }, [tests, currentTestIndex, completedTests]);
 
   const exitTestMode = useCallback((): void => {
     setIsTestMode(false);
     setCurrentTest(null);
   }, []);
+
+  const setCurrentTestIndex = useCallback((index: number): void => {
+    if (index >= 0 && index < tests.length) {
+      setCurrentTestIndexState(index);
+      setCurrentTest(tests[index]);
+    }
+  }, [tests]);
 
   const resetToFirstModule = useCallback(
     (clearProgress: boolean = false): void => {
@@ -243,12 +303,13 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       setCurrentModule(modules[0] || null);
       setIsTestMode(false);
       setCurrentTest(null);
-      setCurrentTestIndex(0); // Reset test index to start from the beginning
+      setCurrentTestIndexState(0); // Reset test index to start from the beginning
       setAllModulesCompleted(false);
 
-      // Optionally reset completed modules if you want users to go through everything fresh
+      // Optionally reset completed modules and tests if you want users to go through everything fresh
       if (clearProgress) {
         setCompletedModules(new Set());
+        setCompletedTests(new Set());
       }
     },
     [modules],
@@ -345,6 +406,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     isTestMode,
     currentTest,
     currentTestIndex,
+    completedTests,
     allModulesCompleted,
 
     // State management
@@ -356,12 +418,14 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     getAllCourses,
     setCurrentModuleIndex,
     markModuleAsCompleted,
+    markTestAsCompleted,
     nextModule,
     previousModule,
 
     // Test actions
     startTestMode,
     exitTestMode,
+    setCurrentTestIndex,
     resetToFirstModule,
     getNextTestInSequence,
     getTestProgress,
