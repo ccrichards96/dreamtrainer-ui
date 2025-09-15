@@ -11,6 +11,7 @@ import {
 import { useAuth0 } from "@auth0/auth0-react";
 import { generateBillingPortalLink, getUserSubscriptions } from "../../services/api/billing";
 import { BillingData } from "../../types/billing";
+import SupportMessageForm from "../../components/forms/SupportMessageForm";
 // Phone number validation regex
 const PHONE_REGEX = /^\+?[1-9]\d{1,14}$/; // E.164 format
 
@@ -34,6 +35,7 @@ const AccountPage = () => {
   const [billingData, setBillingData] = useState<BillingData | null>(null);
   const [isLoadingBilling, setIsLoadingBilling] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || "",
     phoneNumber: user?.phone_number || "",
@@ -507,9 +509,7 @@ const AccountPage = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() =>
-                    (window.location.href = "mailto:joem@thedreamtrainer.com")
-                  }
+                  onClick={() => setIsSupportModalOpen(true)}
                   className="bg-[#c5a8de] text-white py-2 px-6 rounded-md hover:bg-[#7c5e99] flex items-center justify-center gap-2 transition-colors"
                 >
                   Contact Support
@@ -519,6 +519,12 @@ const AccountPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Support Message Modal */}
+      <SupportMessageForm
+        isOpen={isSupportModalOpen}
+        onClose={() => setIsSupportModalOpen(false)}
+      />
     </div>
   );
 };
