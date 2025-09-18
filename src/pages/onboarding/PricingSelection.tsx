@@ -1,25 +1,44 @@
-import { useState } from "react";
-import { ChevronLeft, Check, Crown, Star } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, Check, Crown, Star, type LucideIcon } from "lucide-react";
 import { OnboardingData } from "./index";
 import ProgressIndicator from "./ProgressIndicator";
-import { createCheckoutSession } from "../../services/api/billing";
+import { createCheckoutSession, getAllProducts } from "../../services/api/billing";
 
-interface PricingSelectionProps {
-  data: OnboardingData;
-  updateData: (data: Partial<OnboardingData>) => void;
-  onPrev: () => void;
-  currentStep?: number;
-  totalSteps?: number;
+// Type for pricing plan with both API and UI fields
+interface PricingPlan {
+  id: string;
+  name: string;
+  price: number;
+  priceId: string;
+  description: string;
+  // UI-specific fields
+  icon: LucideIcon;
+  iconColor: string;
+  bgColor: string;
+  borderColor: string;
+  features: string[];
+  popular?: boolean;
 }
 
-const pricingPlans = [
-  {
-    id: "premium",
-    name: "TOEFL MAX Writing",
-    price: 47,
-    period: "month",
-    priceId: "price_1RslNR1TwH4sDeUMAhEoAPjp", // Replace with actual Stripe price ID
-    description: "Get your dream TOEFL score with personalized AI coachiing",
+// Type for API response plan (without UI fields)
+interface ApiPlan {
+  id: string;
+  name: string;
+  price: number;
+  priceId: string;
+  description: string;
+}
+
+// UI configuration for pricing plans - maps plan IDs to UI-specific properties
+const planUIConfig: Record<string, {
+  icon: LucideIcon;
+  iconColor: string;
+  bgColor: string;
+  borderColor: string;
+  features: string[];
+  popular?: boolean;
+}> = {
+  'TOEFL Max Writing': {
     icon: Crown,
     iconColor: "text-blue-600",
     bgColor: "bg-blue-50",
@@ -34,7 +53,16 @@ const pricingPlans = [
     ],
     popular: true,
   },
-];
+  // Add more plan configurations as needed
+};
+
+interface PricingSelectionProps {
+  data: OnboardingData;
+  updateData: (data: Partial<OnboardingData>) => void;
+  onPrev: () => void;
+  currentStep?: number;
+  totalSteps?: number;
+}
 
 export default function PricingSelection({
   data,
@@ -47,6 +75,53 @@ export default function PricingSelection({
     data.selectedPackage || "premium",
   );
   const [isProcessing, setIsProcessing] = useState(false);
+  const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch pricing plans from API
+  useEffect(() => {
+    const fetchPricingPlans = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const apiPlans = await getAllProducts();
+
+        // Merge API data with UI configuration
+        const enrichedPlans = apiPlans.map((plan: ApiPlan) => {
+          let uiConfig = null;
+          if (plan.name === "TOEFL Max Writing") {
+            uiConfig = planUIConfig['TOEFL Max Writing'];
+          }
+          // Fallback to default config if still no match
+          if (!uiConfig) {
+            uiConfig = {
+              icon: Crown,
+              iconColor: "text-blue-600",
+              bgColor: "bg-blue-50",
+              borderColor: "border-blue-200",
+              features: [],
+              popular: false,
+            };
+          }
+          return {
+            ...plan,
+            ...uiConfig,
+          } as PricingPlan;
+        });
+        setPricingPlans(enrichedPlans);
+      } catch (err) {
+        console.error("Failed to fetch pricing plans:", err);
+        setError("Failed to load pricing plans. Please try again.");
+        setPricingPlans([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPricingPlans();
+  }, []);
 
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
@@ -61,7 +136,7 @@ export default function PricingSelection({
 
       // Find the selected plan to get its price ID
       const selectedPlanData = pricingPlans.find(
-        (plan) => plan.id === selectedPlan,
+        (plan: PricingPlan) => plan.id === selectedPlan,
       );
       if (!selectedPlanData) {
         setIsProcessing(false);
@@ -108,10 +183,27 @@ export default function PricingSelection({
         </p>
       </div>
 
-      <div className="grid md:grid-cols-1 gap-6 mb-8">
-        {pricingPlans.map((plan) => {
-          const IconComponent = plan.icon;
-          return (
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-12">
+          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading pricing plans...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !isLoading && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+          <p className="text-red-700 text-center">{error}</p>
+        </div>
+      )}
+
+      {/* Pricing Plans */}
+      {!isLoading && !error && (
+        <div className="grid md:grid-cols-1 gap-6 mb-8">
+          {pricingPlans.map((plan: PricingPlan) => {
+            const IconComponent = plan.icon;
+            return (
             <div
               key={plan.id}
               onClick={() => handlePlanSelect(plan.id)}
@@ -142,14 +234,14 @@ export default function PricingSelection({
               <div className="text-center mb-6">
                 <div className="flex items-baseline justify-center">
                   <span className="text-3xl font-bold text-gray-900">
-                    ${plan.price}
+                    ${plan.amount}
                   </span>
-                  <span className="text-gray-600 ml-1">/{plan.period}</span>
+                  <span className="text-gray-600 ml-1">/month</span>
                 </div>
               </div>
 
               <ul className="space-y-3 mb-6">
-                {plan.features.map((feature, index) => (
+                {plan.features.map((feature: string, index: number) => (
                   <li key={index} className="flex items-start">
                     <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-gray-700">{feature}</span>
@@ -171,7 +263,8 @@ export default function PricingSelection({
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
 
       {/* Navigation Buttons */}
       <div className="flex justify-between items-center">
@@ -185,7 +278,7 @@ export default function PricingSelection({
 
         <button
           onClick={handleComplete}
-          disabled={!selectedPlan || isProcessing}
+          disabled={!selectedPlan || isProcessing || isLoading}
           className="py-3 px-8 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:pointer-events-none transition-all"
         >
           {isProcessing ? "Processing..." : "Proceed to Checkout"}

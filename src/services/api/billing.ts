@@ -42,8 +42,8 @@ export interface GetUserSubscriptionsResponse {
  */
 export const getAllProducts = async (): Promise<any[]> => {
   try {
-    const response = await apiClient.get<any[]>("/billing/packages");
-    return response.data;
+    const response = await apiClient.get<any[]>("/billing/products");
+    return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to get products: ${error.message}`);
