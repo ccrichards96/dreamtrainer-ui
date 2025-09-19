@@ -8,7 +8,7 @@ import { createCheckoutSession, getAllProducts } from "../../services/api/billin
 interface PricingPlan {
   id: string;
   name: string;
-  price: number;
+  amount: number;
   priceId: string;
   description: string;
   // UI-specific fields
@@ -24,7 +24,7 @@ interface PricingPlan {
 interface ApiPlan {
   id: string;
   name: string;
-  price: number;
+  amount: number;
   priceId: string;
   description: string;
 }
@@ -111,6 +111,16 @@ export default function PricingSelection({
           } as PricingPlan;
         });
         setPricingPlans(enrichedPlans);
+        
+        // Auto-select the first plan if no plan is currently selected
+        if (enrichedPlans.length > 0) {
+          const currentSelection = data.selectedPackage;
+          if (!currentSelection) {
+            const firstPlan = enrichedPlans[0];
+            setSelectedPlan(firstPlan.id);
+            updateData({ selectedPackage: firstPlan.id });
+          }
+        }
       } catch (err) {
         console.error("Failed to fetch pricing plans:", err);
         setError("Failed to load pricing plans. Please try again.");
@@ -121,7 +131,7 @@ export default function PricingSelection({
     };
 
     fetchPricingPlans();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);

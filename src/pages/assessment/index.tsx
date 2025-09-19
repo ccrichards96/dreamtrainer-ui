@@ -167,8 +167,7 @@ export default function Assessment() {
               Assessment Submitted Successfully!
             </h2>
             <p className="text-lg text-gray-600 mb-8">
-              Thank you for your submission. We'll review your assessment and
-              send your score and feedback to your email within 24-48 hours.
+              Thank you for your submission. Refresh your dashboard in 15 minutes, and you'll see your score appear. And, we'll send your personal feedback to your email within 48 hours.
             </p>
             <div className="flex gap-4 justify-center">
               <button

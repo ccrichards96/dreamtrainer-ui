@@ -11,6 +11,7 @@ import BlogPage from "./pages/blog";
 import AdminDashboard from "./pages/admin";
 import CMSRoute from "./components/routes/CMSRoute";
 import Navigation from "./components/Navigation";
+import Footer from "./components/Footer";
 import { AuthProvider, ApiProvider } from "./contexts";
 import { AppProvider } from "./contexts/AppContext";
 import NotFound from "./pages/NotFound";
@@ -82,6 +83,7 @@ function App() {
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </div>
+                <Footer />
               </div>
             </Router>
           </AppProvider>
