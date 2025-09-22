@@ -31,6 +31,7 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
     startTestMode,
     exitTestMode,
     resetToFirstModule,
+    resetCourseProgress,
     getNextTestInSequence,
     tests,
   } = useCourseContext();
@@ -62,6 +63,10 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
     if (currentTest) {
       markTestAsCompleted(currentTest.id);
     }
+
+    // Reset course progress after each test submission
+    // This keeps test progression but resets module progress
+    resetCourseProgress();
 
     // Check if there are more tests to complete
     const nextTest = getNextTestInSequence();

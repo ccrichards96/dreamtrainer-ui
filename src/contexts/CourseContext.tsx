@@ -73,6 +73,7 @@ export interface CourseContextType {
   exitTestMode: () => void;
   setCurrentTestIndex: (index: number) => void;
   resetToFirstModule: (clearProgress?: boolean) => void;
+  resetCourseProgress: () => void;
   getNextTestInSequence: () => Test | null;
   getTestProgress: () => { current: number; total: number };
 
@@ -315,6 +316,24 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     [modules],
   );
 
+  // Reset course progress while maintaining test progression
+  const resetCourseProgress = useCallback((): void => {
+    console.log('Resetting course progress while maintaining test progression');
+    
+    // Reset module progress only - keep test progression
+    setCurrentModuleIndexState(0);
+    setCurrentModule(modules[0] || null);
+    setCompletedModules(new Set());
+    setAllModulesCompleted(false);
+    
+    // Exit test mode temporarily (will re-enter after reset)
+    setIsTestMode(false);
+    setCurrentTest(null);
+    
+    // Note: We don't reset completedTests or currentTestIndex here
+    // as we want to maintain test progression through the learning loop
+  }, [modules]);
+
   // Get the next test in the sequence (useful for preview/information)
   const getNextTestInSequence = useCallback((): Test | null => {
     if (tests.length === 0) return null;
@@ -427,6 +446,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     exitTestMode,
     setCurrentTestIndex,
     resetToFirstModule,
+    resetCourseProgress,
     getNextTestInSequence,
     getTestProgress,
 
