@@ -16,6 +16,7 @@ import DreamFlow from "../../components/DreamFlow";
 import Modal from "../../components/modals/Modal";
 import SupportMessageForm from "../../components/forms/SupportMessageForm";
 import { Course } from "../../types/modules";
+import { sanitizeHtml } from "../../utils/htmlSanitizer";
 import posthog from "posthog-js";
 
 function DashboardContent() {
@@ -43,7 +44,7 @@ function DashboardContent() {
     };
 
     checkFirstLogin();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   // Use Dashboard context instead of dummy data
   const {
@@ -310,9 +311,10 @@ function DashboardContent() {
                             announcement.type.slice(1)}
                         </span>
                       </div>
-                      <p className="text-gray-700 text-sm mb-3">
-                        {announcement.message}
-                      </p>
+                      <div 
+                        className="text-gray-700 text-sm mb-3 [&>h1]:font-semibold [&>h1]:text-base [&>h1]:text-gray-900 [&>h1]:mt-2 [&>h1]:mb-1 [&>h2]:font-semibold [&>h2]:text-sm [&>h2]:text-gray-900 [&>h2]:mt-2 [&>h2]:mb-1 [&>h3]:font-semibold [&>h3]:text-sm [&>h3]:text-gray-900 [&>h3]:mt-2 [&>h3]:mb-1 [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:mb-2 [&>ul]:ml-4 [&>ol]:mb-2 [&>ol]:ml-4 [&>li]:mb-1 [&>strong]:font-semibold [&>em]:italic [&>u]:underline [&>a]:text-blue-600 [&>a]:hover:text-blue-800 [&>a]:underline"
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(announcement.message) }}
+                      />
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>
                           {new Date(announcement.createdAt).toLocaleDateString(

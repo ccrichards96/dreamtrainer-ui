@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Edit3, Trash2, BookOpen, Users, Search, Tag } from "lucide-react";
+import { Edit3, Trash2, BookOpen, Users, Search, Tag, Megaphone } from "lucide-react";
 import { Course, Module } from "../../types/modules";
 import {
   getAllCourses,
@@ -11,6 +11,7 @@ import {
   CourseEditor,
   ModuleManager,
   CategoryManager,
+  AnnouncementManager,
 } from "../../components/admin";
 
 const AdminDashboard: React.FC = () => {
@@ -23,7 +24,7 @@ const AdminDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [view, setView] = useState<
-    "overview" | "course-edit" | "module-manage" | "category-manage"
+    "overview" | "course-edit" | "module-manage" | "category-manage" | "announcement-manage"
   >("overview");
 
   // Load all courses on component mount
@@ -129,6 +130,10 @@ const AdminDashboard: React.FC = () => {
     setView("category-manage");
   };
 
+  const handleManageAnnouncements = () => {
+    setView("announcement-manage");
+  };
+
   const refreshCourses = async () => {
     try {
       const response = await getAllCourses();
@@ -198,6 +203,13 @@ const AdminDashboard: React.FC = () => {
               >
                 <Tag className="w-4 h-4" />
                 Manage Categories
+              </button>
+              <button
+                onClick={handleManageAnnouncements}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+              >
+                <Megaphone className="w-4 h-4" />
+                Manage Announcements
               </button>
             </div>
           </div>
@@ -374,6 +386,9 @@ const AdminDashboard: React.FC = () => {
 
         {/* Category Manager */}
         {view === "category-manage" && <CategoryManager />}
+
+        {/* Announcement Manager */}
+        {view === "announcement-manage" && <AnnouncementManager />}
       </div>
     </div>
   );
