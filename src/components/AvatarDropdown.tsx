@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "../contexts";
+import { useApp } from "../contexts/useAppContext";
+import { Role } from "../types/user";
 
 interface AvatarDropdownProps {
   className?: string;
@@ -10,6 +12,7 @@ export default function AvatarDropdown({
   className = "",
 }: AvatarDropdownProps) {
   const { user, logout } = useAuthContext();
+  const { userProfile } = useApp();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -110,6 +113,17 @@ export default function AvatarDropdown({
             >
               My Account
             </Link>
+
+            {/* Admin Link - Only show for admin users */}
+            {userProfile?.role === Role.Admin && (
+              <Link
+                to="/admin"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                onClick={() => setIsOpen(false)}
+              >
+                Admin
+              </Link>
+            )}
 
             {/* Divider */}
             <div className="border-t border-gray-100 my-1"></div>
