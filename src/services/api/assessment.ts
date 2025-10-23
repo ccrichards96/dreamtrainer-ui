@@ -88,15 +88,6 @@ export const submitAssessment = async (
       },
     );
 
-    // Send to test scorer webhook
-    await fetch("https://automation.thedreamtrainer.com/webhook/test-scorer", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params.toString(),
-    });
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
