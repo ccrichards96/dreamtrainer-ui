@@ -2,7 +2,7 @@ import React from "react";
 
 interface VideoBlok {
   title?: string;
-  link: string; // Vimeo link
+  link: string | { url?: string; cached_url?: string; linktype?: string }; // Vimeo link
   width?: number | string;
   height?: number | string;
   _uid: string;
@@ -13,6 +13,21 @@ const VideoComponent: React.FC<{ blok: VideoBlok }> = ({ blok }) => {
   // Default dimensions
   const defaultWidth = 640;
   const defaultHeight = 360;
+
+  // Helper function to extract URL from Storyblok link
+  const getLinkUrl = (
+    link:
+      | string
+      | { url?: string; cached_url?: string; linktype?: string }
+      | undefined,
+  ): string => {
+    if (!link) return "";
+    if (typeof link === "string") return link;
+    if (typeof link === "object") {
+      return link.url || link.cached_url || "";
+    }
+    return "";
+  };
 
   // Parse width and height, defaulting to numeric values if not provided
   const getWidth = (): string => {
@@ -29,6 +44,8 @@ const VideoComponent: React.FC<{ blok: VideoBlok }> = ({ blok }) => {
 
   // Extract Vimeo video ID from the link
   const getVimeoEmbedUrl = (link: string): string => {
+    if (!link) return "";
+    
     // Handle various Vimeo URL formats
     // https://vimeo.com/123456789
     // https://player.vimeo.com/video/123456789
@@ -48,7 +65,8 @@ const VideoComponent: React.FC<{ blok: VideoBlok }> = ({ blok }) => {
     return link;
   };
 
-  const embedUrl = getVimeoEmbedUrl(blok.link);
+  const linkUrl = getLinkUrl(blok.link);
+  const embedUrl = getVimeoEmbedUrl(linkUrl);
 
   return (
     <div className="video-container">
