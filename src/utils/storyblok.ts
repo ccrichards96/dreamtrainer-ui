@@ -25,6 +25,7 @@ import Section from "../components/storyblok/Section";
 import Spacer from "../components/storyblok/Spacer";
 import Testimonial from "../components/storyblok/Testimonial";
 import Accordion from "../components/storyblok/Accordion";
+import Video from "../components/storyblok/Video";
 
 const components = {
   grid: Grid,
@@ -45,6 +46,7 @@ const components = {
   spacer: Spacer,
   testimonial: Testimonial,
   accordion: Accordion,
+  video: Video
 };
 
 // Initialize Storyblok with preview mode support
