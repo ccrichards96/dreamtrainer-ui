@@ -3,6 +3,7 @@ import { ChevronLeft, Check, Crown, Star, type LucideIcon } from "lucide-react";
 import { OnboardingData } from "./index";
 import ProgressIndicator from "./ProgressIndicator";
 import { createCheckoutSession, getAllProducts } from "../../services/api/billing";
+import { updateCurrentUser } from "../../services/api/users";
 
 // Type for pricing plan with both API and UI fields
 interface PricingPlan {
@@ -144,6 +145,16 @@ export default function PricingSelection({
     try {
       setIsProcessing(true);
 
+      // Submit onboarding data first (if we have required fields)
+      if (data.firstName && data.lastName) {
+        await updateCurrentUser({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          howDidYouHearAboutUs: data.howDidYouHearAboutUs,
+          englishProficiency: data.englishProficiency,
+        });
+      }
+
       // Find the selected plan to get its price ID
       const selectedPlanData = pricingPlans.find(
         (plan: PricingPlan) => plan.id === selectedPlan,
@@ -168,7 +179,7 @@ export default function PricingSelection({
         throw new Error("No checkout URL received from server");
       }
     } catch (error) {
-      console.error("Failed to create checkout session:", error);
+      console.error("Failed to complete onboarding:", error);
       setIsProcessing(false);
       // You can add user-friendly error notification here
       // For example: toast.error('Failed to process checkout. Please try again.');

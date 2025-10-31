@@ -3,7 +3,6 @@ import {
   Loader2,
   Info,
   Save,
-  AlertCircle,
   LifeBuoy,
   Camera,
   User,
@@ -12,20 +11,12 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { generateBillingPortalLink, getUserSubscriptions } from "../../services/api/billing";
 import { BillingData } from "../../types/billing";
 import SupportMessageForm from "../../components/forms/SupportMessageForm";
-// Phone number validation regex
-const PHONE_REGEX = /^\+?[1-9]\d{1,14}$/; // E.164 format
-
-
-
-// Sample data - will be replaced by API call
-const defaultBillingData: BillingData = {
-    name: "Free Plan",
-    status: "active",
-    amount: 0,
-};
+import { useApp } from "../../contexts";
+import { updateCurrentUser } from "../../services/api/users";
 
 const AccountPage = () => {
   const { user, isLoading: isAuthLoading } = useAuth0();
+  const { userProfile, refreshUserProfile } = useApp();
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -37,52 +28,36 @@ const AccountPage = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    phoneNumber: user?.phone_number || "",
-  });
-  const [errors, setErrors] = useState({
-    phoneNumber: "",
+    firstName: userProfile?.firstName || "",
+    lastName: userProfile?.lastName || "",
   });
 
   // Check if user logged in via social provider
-  const isSocialLogin =
-    user?.sub?.includes("oauth2") ||
-    user?.sub?.includes("google") ||
-    user?.sub?.includes("facebook");
-  const socialProvider =
-    user?.sub?.split("|")[0]?.replace("-oauth2", "") || "social provider";
-
-  const validatePhoneNumber = (phone: string) => {
-    if (!phone) return ""; // Empty is valid
-    if (!PHONE_REGEX.test(phone)) {
-      return "Please enter a valid phone number in E.164 format (e.g., +12125551234)";
+  useEffect(() => {
+    if (userProfile) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: userProfile.firstName || "",
+        lastName: userProfile.lastName || "",
+      }));
     }
-    return "";
-  };
+  }, [userProfile]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
-
-    // Validate phone number on change
-    if (field === "phoneNumber") {
-      setErrors((prev) => ({
-        ...prev,
-        phoneNumber: validatePhoneNumber(value),
-      }));
-    }
   };
 
   useEffect(() => {
     // Check if any form fields have been modified from their initial values
     const hasChanges =
-      formData.name !== (user?.name || "") ||
-      formData.phoneNumber !== (user?.phone_number || "");
+      formData.firstName !== (userProfile?.firstName || "") ||
+      formData.lastName !== (userProfile?.lastName || "");
 
-    setHasUnsavedChanges(hasChanges && !errors.phoneNumber);
-  }, [formData, user, errors]);
+    setHasUnsavedChanges(hasChanges);
+  }, [formData, userProfile]);
 
   // Fetch billing information on component mount
   useEffect(() => {
@@ -118,31 +93,17 @@ const AccountPage = () => {
   }, [user]);
 
   const handleSaveChanges = async () => {
-    // Validate all fields before saving
-    const phoneError = validatePhoneNumber(formData.phoneNumber);
-    if (phoneError) {
-      setErrors((prev) => ({ ...prev, phoneNumber: phoneError }));
-      return;
-    }
-
     setIsSaving(true);
 
     try {
-      // Simulate API call to save changes
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Call API to update user information
+      await updateCurrentUser({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      });
 
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/account/update', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${getAccessTokenSilently()}`
-      //   },
-      //   body: JSON.stringify({
-      //     name: formData.name,
-      //     phoneNumber: formData.phoneNumber
-      //   })
-      // });
+      // Refresh user profile to get updated data
+      await refreshUserProfile();
 
       alert("Changes saved successfully!");
       setHasUnsavedChanges(false);
@@ -308,7 +269,9 @@ const AccountPage = () => {
               </div>
               <div>
                 <h3 className="text-lg font-medium text-gray-900">
-                  {user?.name || "User"}
+                  {userProfile 
+                    ? `${userProfile.firstName} ${userProfile.lastName}`.trim() || "User"
+                    : user?.name || "User"}
                 </h3>
                 <p className="text-sm text-gray-500">{user?.email}</p>
                 <button
@@ -324,13 +287,24 @@ const AccountPage = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Full Name
+                  First Name
                 </label>
                 <input
                   type="text"
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  value={formData.firstName}
+                  onChange={(e) => handleInputChange("firstName", e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={formData.lastName}
+                  onChange={(e) => handleInputChange("lastName", e.target.value)}
                 />
               </div>
               <div>
@@ -344,60 +318,11 @@ const AccountPage = () => {
                   defaultValue={user.email || ""}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <input
-                    type="tel"
-                    className={`mt-1 block w-full rounded-md shadow-sm focus:ring-blue-500 ${
-                      errors.phoneNumber
-                        ? "border-red-300 focus:border-red-500"
-                        : "border-gray-300 focus:border-blue-500"
-                    }`}
-                    value={formData.phoneNumber}
-                    onChange={(e) =>
-                      handleInputChange("phoneNumber", e.target.value)
-                    }
-                    placeholder="+12125551234"
-                  />
-                  {errors.phoneNumber && (
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                      <AlertCircle className="h-5 w-5 text-red-500" />
-                    </div>
-                  )}
-                </div>
-                {errors.phoneNumber && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {errors.phoneNumber}
-                  </p>
-                )}
-                <p className="mt-1 text-sm text-gray-500">
-                  Enter your phone number starting with your country code (e.g.,
-                  +1 for US/Canada, +44 for UK). Include your area code and
-                  number without spaces or special characters.
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Info className="w-4 h-4 text-blue-500" />
+                <p>
+                  <span className="font-medium">Change Password:</span> To change your password, logout and head to the login page, then click the reset password link.
                 </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  disabled={isSocialLogin}
-                  className={`text-blue-600 hover:text-blue-800 text-sm ${isSocialLogin ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  Change Password
-                </button>
-                {isSocialLogin && (
-                  <div className="group relative">
-                    <Info className="w-4 h-4 text-gray-400" />
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-64 p-2 bg-gray-800 text-white text-xs rounded shadow-lg">
-                      <p>
-                        You logged in with {socialProvider}. To change your
-                        password, please visit your {socialProvider} account
-                        settings.
-                      </p>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
