@@ -7,7 +7,9 @@ import React, {
 } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { User } from "../types/user";
+import { UserBillingData } from "../types/billing";
 import { userService } from "../services/api/users";
+import { billingService } from "../services/api/billing";
 import { useApiContext } from "./useApiContext";
 
 interface AppContextType {
@@ -16,6 +18,11 @@ interface AppContextType {
   userLoading: boolean;
   userError: string | null;
   refreshUserProfile: () => Promise<void>;
+  // User Billing State
+  userBilling: UserBillingData | null;
+  billingLoading: boolean;
+  billingError: string | null;
+  refreshUserBilling: () => Promise<void>;
   // App initialization state
   appInitialized: boolean;
 }
@@ -36,6 +43,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [userLoading, setUserLoading] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
+
+  // User billing state
+  const [userBilling, setUserBilling] = useState<UserBillingData | null>(null);
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingError, setBillingError] = useState<string | null>(null);
 
   // App-wide state
   const [appInitialized, setAppInitialized] = useState(false);
@@ -81,6 +93,37 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [isAuthenticated, auth0User, apiInitialized]);
 
+  const fetchUserBilling = useCallback(async () => {
+    if (!isAuthenticated || !auth0User || !apiInitialized) {
+      console.log("Skipping user billing fetch:", {
+        isAuthenticated,
+        hasAuth0User: !!auth0User,
+        apiInitialized,
+      });
+      setUserBilling(null);
+      setBillingError(null);
+      return;
+    }
+
+    setBillingLoading(true);
+    setBillingError(null);
+
+    try {
+      console.log("Fetching user billing info for:", auth0User.sub);
+      const billingResponse = await billingService.getUserBillingInfo();
+      setUserBilling(billingResponse.data);
+      console.log("User billing info loaded:", billingResponse.data);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to load billing information";
+      setBillingError(errorMessage);
+      console.error("Failed to fetch user billing info:", err);
+      setUserBilling(null);
+    } finally {
+      setBillingLoading(false);
+    }
+  }, [isAuthenticated, auth0User, apiInitialized]);
+
   // Initialize app when authentication state changes
   useEffect(() => {
     let mounted = true;
@@ -100,6 +143,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
         if (isAuthenticated && apiInitialized) {
           console.log("Conditions met, fetching user profile...");
           await fetchUserProfile();
+          // Fetch billing info alongside profile
+          await fetchUserBilling();
         } else {
           // User is not authenticated or API not ready - clean up state
           console.log(
@@ -109,6 +154,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
             setUserProfile(null);
             setUserError(null);
             setUserLoading(false);
+            setUserBilling(null);
+            setBillingError(null);
+            setBillingLoading(false);
             // Only set as initialized if not authenticated
             if (!isAuthenticated) {
               setAppInitialized(true);
@@ -129,11 +177,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     auth0User,
     apiInitialized,
     fetchUserProfile,
+    fetchUserBilling,
   ]);
 
   const refreshUserProfile = async () => {
     if (isAuthenticated && auth0User && apiInitialized) {
       await fetchUserProfile();
+    }
+  };
+
+  const refreshUserBilling = async () => {
+    if (isAuthenticated && auth0User && apiInitialized) {
+      await fetchUserBilling();
     }
   };
 
@@ -143,6 +198,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     userLoading,
     userError,
     refreshUserProfile,
+
+    // User billing
+    userBilling,
+    billingLoading,
+    billingError,
+    refreshUserBilling,
 
     // App initialization
     appInitialized,

@@ -1,16 +1,37 @@
 interface Subscription {
   id: string;
-  userId: string;
-  stripeSubscriptionId: string;
-  status: "active" | "canceled" | "paused";
-  createdAt: Date;
-  updatedAt: Date;
+  userId?: string;
+  stripeSubscriptionId?: string;
+  name: string;
+  status: "active" | "canceled" | "paused" | "inactive" | "cancelled" | "past_due";
+  amount: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+interface SubscriptionStatus {
+  status: string;
+  hasActiveSubscription: boolean;
+  canAccessProduct: boolean;
+  totalSubscriptions: number;
+  activeSubscriptionsCount: number;
+}
+
+interface UserBillingData {
+  subscription: Subscription;
+  subscriptionStatus: SubscriptionStatus;
+}
+
+interface UserBillingInfoResponse {
+  success: boolean;
+  data: UserBillingData;
+  message: string;
 }
 
 interface BillingData {
-    name: string;
-    status: "active" | "inactive" | "cancelled" | "past_due";
-    amount?: number;
+  name: string;
+  status: "active" | "inactive" | "cancelled" | "past_due";
+  amount?: number;
 }
 
-export type { Subscription, BillingData };
+export type { Subscription, BillingData, SubscriptionStatus, UserBillingData, UserBillingInfoResponse };
