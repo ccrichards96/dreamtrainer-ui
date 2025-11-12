@@ -70,7 +70,6 @@ const VideoComponent: React.FC<{ blok: VideoBlok }> = ({ blok }) => {
 
   return (
     <div className="video-container">
-      <div className="relative overflow-hidden rounded-lg shadow-md">
         <iframe
           src={embedUrl}
           width={getWidth()}
@@ -78,10 +77,8 @@ const VideoComponent: React.FC<{ blok: VideoBlok }> = ({ blok }) => {
           frameBorder="0"
           allow="autoplay; fullscreen; picture-in-picture"
           allowFullScreen
-          className="w-full"
           title={blok.title || "Video"}
         />
-      </div>
     </div>
   );
 };
