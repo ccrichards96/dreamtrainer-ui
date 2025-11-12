@@ -395,16 +395,6 @@ const Post: React.FC<{ blok: PostBlok }> = ({ blok }) => {
 
   const imageUrl = getImageUrl(blok.image);
 
-  // Debug logging for development
-  if (import.meta.env.DEV) {
-    console.log("Post component debug:", {
-      layout_style: blok.layout_style,
-      image: blok.image,
-      imageUrl,
-      title: blok.title,
-    });
-  }
-
   return (
     <motion.div
       key="animation"

@@ -92,14 +92,10 @@ const AdminDashboard: React.FC = () => {
 
       try {
         const response = await getCourseWithModulesById(course.id);
-        console.log("Module management response:", response);
 
         // Handle different possible response structures
         const courseData = response.data || response;
         const modulesData = response.data?.modules || [];
-
-        console.log("Parsed course data:", courseData);
-        console.log("Parsed modules data:", modulesData);
 
         // Use the fetched data if available, otherwise fall back to the original course
         setSelectedCourse(courseData && courseData.id ? courseData : course);

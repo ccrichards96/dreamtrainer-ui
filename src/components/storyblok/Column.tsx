@@ -520,16 +520,6 @@ const Column = ({ blok }: { blok: ColumnBlok }) => {
 
   const finalClasses = baseClasses.filter(Boolean).join(" ");
 
-  // Debug logging for centering issues (remove in production)
-  if (blok.align_items === "center") {
-    console.log("Column centering debug:", {
-      layoutType,
-      flex_direction: blok.flex_direction,
-      align_items: blok.align_items,
-      classes: finalClasses,
-    });
-  }
-
   return (
     <div {...storyblokEditable(blok)} className={finalClasses}>
       {blok.content?.map((nestedBlok) => (

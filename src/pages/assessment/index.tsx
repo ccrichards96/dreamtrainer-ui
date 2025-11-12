@@ -128,13 +128,12 @@ export default function Assessment() {
       };
 
       // Submit to API
-      const response = await submitAssessment(
+      await submitAssessment(
         currentTest?.id || "default-test-id", // testId
         user?.sub || "", // userId
         assessmentData,
       );
 
-      console.log("Assessment submitted successfully:", response);
       setSubmitted(true);
     } catch (error) {
       console.error("Error submitting assessment:", error);

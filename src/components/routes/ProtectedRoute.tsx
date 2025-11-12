@@ -97,7 +97,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check onboarding completion for protected routes that require it
   if (!isOnboardingExempt && userProfile && !userProfile.onboardingComplete) {
-    console.log("User onboarding not complete, redirecting to onboarding");
     return <Navigate to="/onboarding" replace />;
   }
 

@@ -63,7 +63,6 @@ const AccountPage = () => {
   useEffect(() => {
     const fetchBillingData = async () => {
       if (!user) return;
-
       setIsLoadingBilling(true);
 
       try {
@@ -74,7 +73,6 @@ const AccountPage = () => {
           // Use the first active subscription (you might want to handle multiple subscriptions differently)
           const activeSubscription = response.data.find(sub => sub.status === "active") || response.data[0];
 
-          console.log(activeSubscription);
           setBillingData(activeSubscription);
         } else {
           // No subscriptions found, user is on free plan

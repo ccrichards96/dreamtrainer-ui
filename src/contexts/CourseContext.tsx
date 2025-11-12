@@ -121,12 +121,12 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   // Auto-save progress when module index, completed modules, or completed tests change
   useEffect(() => {
     if (currentCourse && modules.length > 0) {
-      console.log('Auto-saving progress:', {
-        moduleIndex: currentModuleIndex,
-        completed: Array.from(completedModules),
-        completedTests: Array.from(completedTests),
-        currentTestIndex
-      });
+      // console.log('Auto-saving progress:', {
+      //   moduleIndex: currentModuleIndex,
+      //   completed: Array.from(completedModules),
+      //   completedTests: Array.from(completedTests),
+      //   currentTestIndex
+      // });
       
       saveProgress(currentCourse.id, {
         moduleIndex: currentModuleIndex,
@@ -224,12 +224,12 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       setCompletedModules((prev) => {
         const newCompleted = new Set([...prev, index]);
         
-        console.log('markModuleAsCompleted:', {
-          index,
-          currentModuleIndex,
-          prevCompleted: Array.from(prev),
-          newCompleted: Array.from(newCompleted)
-        });
+        // console.log('markModuleAsCompleted:', {
+        //   index,
+        //   currentModuleIndex,
+        //   prevCompleted: Array.from(prev),
+        //   newCompleted: Array.from(newCompleted)
+        // });
         
         // Don't auto-save here - let nextModule handle it
         // This prevents race conditions
@@ -248,13 +248,6 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     (testId: string): void => {
       setCompletedTests((prev) => {
         const newCompleted = new Set([...prev, testId]);
-        
-        console.log('markTestAsCompleted:', {
-          testId,
-          prevCompleted: Array.from(prev),
-          newCompleted: Array.from(newCompleted)
-        });
-        
         return newCompleted;
       });
     },
@@ -318,8 +311,6 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
 
   // Reset course progress while maintaining test progression
   const resetCourseProgress = useCallback((): void => {
-    console.log('Resetting course progress while maintaining test progression');
-    
     // Reset module progress only - keep test progression
     setCurrentModuleIndexState(0);
     setCurrentModule(modules[0] || null);
@@ -330,8 +321,6 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     setIsTestMode(false);
     setCurrentTest(null);
     
-    // Note: We don't reset completedTests or currentTestIndex here
-    // as we want to maintain test progression through the learning loop
   }, [modules]);
 
   // Get the next test in the sequence (useful for preview/information)
