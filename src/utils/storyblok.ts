@@ -49,9 +49,17 @@ const components = {
   video: Video
 };
 
-// Initialize Storyblok with preview mode support
+// Determine which token to use based on environment
+// In development/staging (DEV mode), use preview token to get draft stories
+// In production, use delivery token to get published stories only
+const isDevelopment = import.meta.env.DEV;
+const accessToken = isDevelopment 
+  ? import.meta.env.VITE_STORYBLOK_PREVIEW_API_TOKEN 
+  : import.meta.env.VITE_STORYBLOK_DELIVERY_API_TOKEN;
+
+// Initialize Storyblok with environment-specific configuration
 storyblokInit({
-  accessToken: import.meta.env.VITE_STORYBLOK_DELIVERY_API_TOKEN,
+  accessToken,
   use: [apiPlugin],
   apiOptions: {
     region: "eu",
@@ -62,8 +70,13 @@ storyblokInit({
   },
   components,
   enableFallbackComponent: true,
-  bridge: import.meta.env.DEV, // Enable bridge only in development
+  bridge: isDevelopment, // Enable visual editor bridge only in development
 });
+
+// Helper function to get the correct version based on environment
+export const getStoryblokVersion = (): "draft" | "published" => {
+  return import.meta.env.DEV ? "draft" : "published";
+};
 
 // Export commonly used utilities
 export { useStoryblokApi, useStoryblok, storyblokEditable, components };

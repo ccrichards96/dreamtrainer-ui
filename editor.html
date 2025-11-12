@@ -6,8 +6,23 @@
   <body>
     <div id="app"></div>
     <script type="text/javascript">
-      // Configure the preview URL to match HTTPS proxy
-      STORYBLOK_PREVIEW_URL = "https://localhost:3010/";
+      // Dynamically configure preview URL based on environment
+      const hostname = window.location.hostname;
+      let previewUrl;
+
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        // Local development
+        previewUrl = "https://localhost:3010/";
+      } else if (hostname.includes('staging')) {
+        // Staging environment
+        previewUrl = `https://${hostname}/`;
+      } else {
+        // Production environment
+        previewUrl = `https://${hostname}/`;
+      }
+
+      STORYBLOK_PREVIEW_URL = previewUrl;
+      console.log('Storyblok Preview URL:', previewUrl);
     </script>
     <script
       src="https://app.storyblok.com/f/app-latest.js"
