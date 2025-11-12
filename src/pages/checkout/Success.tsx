@@ -19,17 +19,13 @@ export default function CheckoutSuccess() {
     const handleCheckoutSuccess = async () => {
       // Wait for Auth0 and API to be ready before making API calls
       if (auth0Loading || !isAuthenticated || !apiInitialized) {
-        console.log("Waiting for auth/API initialization:", {
-          auth0Loading,
-          isAuthenticated,
-          apiInitialized,
-        });
+        // console.log("Waiting for auth/API initialization:", {
+        //   auth0Loading,
+        //   isAuthenticated,
+        //   apiInitialized,
+        // });
         return;
       }
-
-      console.log(
-        "Checkout success page loaded - marking onboarding as complete",
-      );
 
       try {
         setIsUpdating(true);
@@ -42,8 +38,6 @@ export default function CheckoutSuccess() {
         await userService.updateCurrentUser({
           onboardingComplete: true,
         });
-
-        console.log("User onboarding marked as complete");
 
         // Refresh the user profile in the app context
         await refreshUserProfile();

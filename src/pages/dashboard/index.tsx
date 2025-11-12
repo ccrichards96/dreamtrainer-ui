@@ -74,16 +74,10 @@ function DashboardContent() {
     const fetchCourses = async () => {
       try {
         const courses: Course[] = await getAllCourses();
-        console.log("Fetched courses:", courses);
         if (courses.length > 0) {
-          console.log("Loading first course:", courses[0].id);
           await loadCourse(courses[0].id);
-
-          const testAttempts = await getTestScores(courses[0].id);
-          console.log("Fetched test attempts:", testAttempts);
-        } else {
-          console.warn("No courses found");
-        }
+          await getTestScores(courses[0].id);
+        } 
       } catch (error) {
         console.error("Error fetching courses:", error);
       }

@@ -131,13 +131,12 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
       };
 
       // Submit to API
-      const response = await submitAssessment(
+      await submitAssessment(
         currentTest?.id || "default-test-id", // testId
         user?.sub || "", // userId
         assessmentData,
       );
 
-      console.log("Assessment submitted successfully:", response);
       setSubmitted(true);
 
       // Call parent onSubmit if provided (only form data, personal info handled in background)

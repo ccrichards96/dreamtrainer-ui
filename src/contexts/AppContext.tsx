@@ -54,11 +54,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
 
   const fetchUserProfile = useCallback(async () => {
     if (!isAuthenticated || !auth0User || !apiInitialized) {
-      console.log("Skipping user profile fetch:", {
-        isAuthenticated,
-        hasAuth0User: !!auth0User,
-        apiInitialized,
-      });
       setUserProfile(null);
       setUserError(null);
       // Only set as initialized if not authenticated or API not ready
@@ -70,15 +65,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
 
     // Small delay to ensure token interceptor is fully set up
     await new Promise((resolve) => setTimeout(resolve, 100));
-
     setUserLoading(true);
     setUserError(null);
 
     try {
-      console.log("Fetching user profile for:", auth0User.sub);
       const profile = await userService.getCurrentUser();
       setUserProfile(profile);
-      console.log("User profile loaded:", profile);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to load user profile";
@@ -95,11 +87,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
 
   const fetchUserBilling = useCallback(async () => {
     if (!isAuthenticated || !auth0User || !apiInitialized) {
-      console.log("Skipping user billing fetch:", {
-        isAuthenticated,
-        hasAuth0User: !!auth0User,
-        apiInitialized,
-      });
       setUserBilling(null);
       setBillingError(null);
       return;
@@ -109,10 +96,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
     setBillingError(null);
 
     try {
-      console.log("Fetching user billing info for:", auth0User.sub);
       const billingResponse = await billingService.getUserBillingInfo();
       setUserBilling(billingResponse.data);
-      console.log("User billing info loaded:", billingResponse.data);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to load billing information";
@@ -132,24 +117,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
       // Reset initialization state when auth changes
       setAppInitialized(false);
 
-      console.log("Initializing app:", {
-        auth0Loading,
-        isAuthenticated,
-        apiInitialized,
-        hasAuth0User: !!auth0User,
-      });
-
       if (!auth0Loading) {
         if (isAuthenticated && apiInitialized) {
-          console.log("Conditions met, fetching user profile...");
           await fetchUserProfile();
           // Fetch billing info alongside profile
           await fetchUserBilling();
         } else {
           // User is not authenticated or API not ready - clean up state
-          console.log(
-            "Cleaning up state - user not authenticated or API not ready",
-          );
           if (mounted) {
             setUserProfile(null);
             setUserError(null);

@@ -10,8 +10,6 @@ interface TestPostBlok {
 
 // Simple test post component to debug rendering
 const TestPost: React.FC<{ blok: TestPostBlok }> = ({ blok }) => {
-  console.log("TestPost rendered with blok:", blok);
-
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
