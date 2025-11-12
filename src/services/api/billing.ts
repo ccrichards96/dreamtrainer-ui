@@ -1,5 +1,5 @@
 import apiClient from "./client";
-import { Subscription, BillingData } from "../../types/billing";
+import { Subscription, BillingData, UserBillingInfoResponse } from "../../types/billing";
 
 // Billing related interfaces
 export interface UserBillingInfo {
@@ -54,11 +54,11 @@ export const getAllProducts = async (): Promise<any[]> => {
 
 /**
  * Get the current user's billing information and subscription details
- * @returns Promise<UserBillingInfo> - User's billing and subscription information
+ * @returns Promise<UserBillingInfoResponse> - User's billing and subscription information
  */
-export const getUserBillingInfo = async (): Promise<UserBillingInfo> => {
+export const getUserBillingInfo = async (): Promise<UserBillingInfoResponse> => {
   try {
-    const response = await apiClient.get<UserBillingInfo>("/billing/user");
+    const response = await apiClient.get<UserBillingInfoResponse>("/billing/me");
     return response.data;
   } catch (error) {
     if (error instanceof Error) {

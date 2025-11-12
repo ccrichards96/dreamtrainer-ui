@@ -13,6 +13,7 @@ interface ProgressTrackerProps {
   currentModuleIndex: number;
   completedModules: Set<number>;
   getProgressPercentage: () => number;
+  onModuleClick?: (index: number) => void;
 }
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({
@@ -20,11 +21,34 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   currentModuleIndex,
   completedModules,
   getProgressPercentage,
+  onModuleClick,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
+  };
+
+  // Calculate the highest module reached (current module or any completed module)
+  const getHighestModuleReached = (): number => {
+    let highest = currentModuleIndex;
+    completedModules.forEach(index => {
+      if (index > highest) {
+        highest = index;
+      }
+    });
+    return highest;
+  };
+
+  // Check if a module can be clicked (up to the highest module reached)
+  const canClickModule = (index: number): boolean => {
+    return index <= getHighestModuleReached();
+  };
+
+  const handleModuleClick = (index: number) => {
+    if (canClickModule(index) && onModuleClick) {
+      onModuleClick(index);
+    }
   };
 
   return (
@@ -99,26 +123,34 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
 
                 {/* Compact Module Indicators */}
                 <div className="space-y-2">
-                  {modules.map((_, index) => (
-                    <motion.div
-                      key={index}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors mx-auto ${
-                        completedModules.has(index)
-                          ? "bg-green-500 text-white"
-                          : index === currentModuleIndex
-                            ? "bg-indigo-500 text-white"
-                            : "bg-gray-200 text-gray-500"
-                      }`}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {completedModules.has(index) ? (
-                        <CheckCircle size={14} />
-                      ) : (
-                        index + 1
-                      )}
-                    </motion.div>
-                  ))}
+                  {modules.map((_, index) => {
+                    const isClickable = canClickModule(index);
+                    return (
+                      <motion.div
+                        key={index}
+                        onClick={() => handleModuleClick(index)}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors mx-auto ${
+                          completedModules.has(index)
+                            ? "bg-green-500 text-white"
+                            : index === currentModuleIndex
+                              ? "bg-indigo-500 text-white"
+                              : "bg-gray-200 text-gray-500"
+                        } ${
+                          isClickable
+                            ? "cursor-pointer hover:ring-2 hover:ring-indigo-300"
+                            : "cursor-not-allowed opacity-60"
+                        }`}
+                        whileHover={isClickable ? { scale: 1.05 } : {}}
+                        whileTap={isClickable ? { scale: 0.95 } : {}}
+                      >
+                        {completedModules.has(index) ? (
+                          <CheckCircle size={14} />
+                        ) : (
+                          index + 1
+                        )}
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </motion.div>
             ) : (
@@ -148,65 +180,75 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
 
                 {/* Detailed Module List */}
                 <div className="space-y-4">
-                  {modules.map((module, index) => (
-                    <motion.div
-                      key={index}
-                      className="flex items-start gap-3"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
+                  {modules.map((module, index) => {
+                    const isClickable = canClickModule(index);
+                    return (
                       <motion.div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors flex-shrink-0 ${
-                          completedModules.has(index)
-                            ? "bg-green-500 text-white"
-                            : index === currentModuleIndex
-                              ? "bg-indigo-500 text-white"
-                              : "bg-gray-200 text-gray-500"
+                        key={index}
+                        onClick={() => handleModuleClick(index)}
+                        className={`flex items-start gap-3 ${
+                          isClickable
+                            ? "cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2"
+                            : "cursor-not-allowed opacity-60"
                         }`}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
                       >
-                        {completedModules.has(index) ? (
-                          <CheckCircle size={16} />
-                        ) : (
-                          index + 1
-                        )}
-                      </motion.div>
-                      <div className="flex-1 min-w-0">
-                        <h4
-                          className={`text-sm font-medium truncate ${
-                            index === currentModuleIndex
-                              ? "text-indigo-600"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {module.topic}
-                        </h4>
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                          {module.description}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <div
-                            className={`w-2 h-2 rounded-full ${
-                              completedModules.has(index)
-                                ? "bg-green-500"
-                                : index === currentModuleIndex
-                                  ? "bg-indigo-500"
-                                  : "bg-gray-300"
-                            }`}
-                          />
-                          <span className="text-xs text-gray-500">
-                            {completedModules.has(index)
-                              ? "Completed"
+                        <motion.div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors flex-shrink-0 ${
+                            completedModules.has(index)
+                              ? "bg-green-500 text-white"
                               : index === currentModuleIndex
-                                ? "In Progress"
-                                : "Not Started"}
-                          </span>
+                                ? "bg-indigo-500 text-white"
+                                : "bg-gray-200 text-gray-500"
+                          } ${
+                            isClickable ? "group-hover:ring-2 group-hover:ring-indigo-300" : ""
+                          }`}
+                          whileHover={isClickable ? { scale: 1.05 } : {}}
+                          whileTap={isClickable ? { scale: 0.95 } : {}}
+                        >
+                          {completedModules.has(index) ? (
+                            <CheckCircle size={16} />
+                          ) : (
+                            index + 1
+                          )}
+                        </motion.div>
+                        <div className="flex-1 min-w-0">
+                          <h4
+                            className={`text-sm font-medium truncate ${
+                              index === currentModuleIndex
+                                ? "text-indigo-600"
+                                : "text-gray-700"
+                            }`}
+                          >
+                            {module.topic}
+                          </h4>
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                            {module.description}
+                          </p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                completedModules.has(index)
+                                  ? "bg-green-500"
+                                  : index === currentModuleIndex
+                                    ? "bg-indigo-500"
+                                    : "bg-gray-300"
+                              }`}
+                            />
+                            <span className="text-xs text-gray-500">
+                              {completedModules.has(index)
+                                ? "Completed"
+                                : index === currentModuleIndex
+                                  ? "In Progress"
+                                  : "Not Started"}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </motion.div>
             )}

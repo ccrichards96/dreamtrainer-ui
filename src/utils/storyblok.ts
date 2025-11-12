@@ -25,6 +25,7 @@ import Section from "../components/storyblok/Section";
 import Spacer from "../components/storyblok/Spacer";
 import Testimonial from "../components/storyblok/Testimonial";
 import Accordion from "../components/storyblok/Accordion";
+import Video from "../components/storyblok/Video";
 
 const components = {
   grid: Grid,
@@ -45,11 +46,20 @@ const components = {
   spacer: Spacer,
   testimonial: Testimonial,
   accordion: Accordion,
+  video: Video
 };
 
-// Initialize Storyblok with preview mode support
+// Determine which token to use based on environment
+// In development/staging mode, use preview token to get draft stories
+// In production, use delivery token to get published stories only
+const isDevelopment = import.meta.env.VITE_MODE === "development" || import.meta.env.VITE_MODE === "staging";
+const accessToken = isDevelopment 
+  ? import.meta.env.VITE_STORYBLOK_PREVIEW_API_TOKEN 
+  : import.meta.env.VITE_STORYBLOK_DELIVERY_API_TOKEN;
+
+// Initialize Storyblok with environment-specific configuration
 storyblokInit({
-  accessToken: import.meta.env.VITE_STORYBLOK_DELIVERY_API_TOKEN,
+  accessToken,
   use: [apiPlugin],
   apiOptions: {
     region: "eu",
@@ -60,8 +70,14 @@ storyblokInit({
   },
   components,
   enableFallbackComponent: true,
-  bridge: import.meta.env.DEV, // Enable bridge only in development
+  bridge: isDevelopment, // Enable visual editor bridge in development and staging
 });
+
+// Helper function to get the correct version based on environment
+export const getStoryblokVersion = (): "draft" | "published" => {
+  const mode = import.meta.env.VITE_MODE;
+  return mode === "development" || mode === "staging" ? "draft" : "published";
+};
 
 // Export commonly used utilities
 export { useStoryblokApi, useStoryblok, storyblokEditable, components };

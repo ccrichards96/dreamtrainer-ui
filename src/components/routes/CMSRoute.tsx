@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useLocation } from "react-router-dom";
-import { useStoryblok } from "../../utils/storyblok";
+import { useStoryblok, getStoryblokVersion } from "../../utils/storyblok";
 import { StoryblokComponent } from "@storyblok/react";
 
 const CMSRoute: React.FC = () => {
@@ -18,7 +18,7 @@ const CMSRoute: React.FC = () => {
   }
 
   const story = useStoryblok(fullSlug, {
-    version: import.meta.env.DEV ? "draft" : "published",
+    version: getStoryblokVersion(),
   });
 
   if (!story?.content) {

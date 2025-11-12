@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Camera, Upload } from "lucide-react";
 import { OnboardingData } from "./index";
 import ProgressIndicator from "./ProgressIndicator";
+import { validateName, sanitizeName } from "../../utils/validation";
 
 interface ProfileSetupProps {
   data: OnboardingData;
@@ -31,6 +32,10 @@ export default function ProfileSetup({
   totalSteps = 3,
 }: ProfileSetupProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState(data.firstName || "");
+  const [lastName, setLastName] = useState(data.lastName || "");
+  const [firstNameError, setFirstNameError] = useState<string>("");
+  const [lastNameError, setLastNameError] = useState<string>("");
   const [selectedSource, setSelectedSource] = useState(
     howDidYouHearOptions.find(
       (option) => option.value === data.howDidYouHearAboutUs,
@@ -63,6 +68,34 @@ export default function ProfileSetup({
     }
   };
 
+  const handleFirstNameChange = (value: string) => {
+    setFirstName(value);
+    
+    // Validate the name
+    const validation = validateName(value);
+    if (validation.isValid) {
+      setFirstNameError("");
+      const sanitizedName = sanitizeName(value);
+      updateData({ firstName: sanitizedName });
+    } else {
+      setFirstNameError(validation.error || "Invalid name");
+    }
+  };
+
+  const handleLastNameChange = (value: string) => {
+    setLastName(value);
+    
+    // Validate the name
+    const validation = validateName(value);
+    if (validation.isValid) {
+      setLastNameError("");
+      const sanitizedName = sanitizeName(value);
+      updateData({ lastName: sanitizedName });
+    } else {
+      setLastNameError(validation.error || "Invalid name");
+    }
+  };
+
   const handleSourceChange = (value: string) => {
     setSelectedSource(value);
     if (value === "other") {
@@ -82,7 +115,19 @@ export default function ProfileSetup({
   };
 
   const handleNext = () => {
-    if (selectedSource && (selectedSource !== "other" || customSource.trim())) {
+    // Validate names before proceeding
+    const firstNameValidation = validateName(firstName);
+    const lastNameValidation = validateName(lastName);
+    
+    setFirstNameError(firstNameValidation.isValid ? "" : (firstNameValidation.error || "Invalid name"));
+    setLastNameError(lastNameValidation.isValid ? "" : (lastNameValidation.error || "Invalid name"));
+    
+    if (
+      firstNameValidation.isValid &&
+      lastNameValidation.isValid &&
+      selectedSource &&
+      (selectedSource !== "other" || customSource.trim())
+    ) {
       onNext();
     }
   };
@@ -102,11 +147,57 @@ export default function ProfileSetup({
           Let's Set Up Your Profile
         </h2>
         <p className="text-lg text-gray-600">
-          Add a profile photo and tell us how you discovered DreamTrainer
+          Enter your name, add a profile photo, and tell us how you discovered DreamTrainer
         </p>
       </div>
 
       <div className="max-w-md mx-auto space-y-8">
+        {/* Name Fields */}
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              First Name *
+            </label>
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => handleFirstNameChange(e.target.value)}
+              placeholder="Enter your first name"
+              className={`py-3 px-4 w-full bg-white border rounded-lg text-sm focus:ring-blue-500 ${
+                firstNameError 
+                  ? "border-red-300 focus:border-red-500" 
+                  : "border-gray-200 focus:border-blue-500"
+              }`}
+              maxLength={50}
+              required
+            />
+            {firstNameError && (
+              <p className="mt-1 text-sm text-red-600">{firstNameError}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Last Name *
+            </label>
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => handleLastNameChange(e.target.value)}
+              placeholder="Enter your last name"
+              className={`py-3 px-4 w-full bg-white border rounded-lg text-sm focus:ring-blue-500 ${
+                lastNameError 
+                  ? "border-red-300 focus:border-red-500" 
+                  : "border-gray-200 focus:border-blue-500"
+              }`}
+              maxLength={50}
+              required
+            />
+            {lastNameError && (
+              <p className="mt-1 text-sm text-red-600">{lastNameError}</p>
+            )}
+          </div>
+        </div>
         {/* Profile Image Upload */}
         <div className="text-center">
           <label className="block text-sm font-medium text-gray-700 mb-4">
@@ -215,6 +306,8 @@ export default function ProfileSetup({
           <button
             onClick={handleNext}
             disabled={
+              !firstName.trim() ||
+              !lastName.trim() ||
               !selectedSource ||
               (selectedSource === "other" && !customSource.trim())
             }

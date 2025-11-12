@@ -7,11 +7,16 @@ import { RefreshCw, AlertCircle } from "lucide-react";
 interface ProtectedRouteProps {
   children: ReactNode;
   allowedRoles?: string[]; // Optional roles that are allowed to access the route
+  requireSubscription?: boolean; // Whether an active subscription is required
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children, 
+  allowedRoles, 
+  requireSubscription = false 
+}) => {
   const { isAuthenticated, isLoading: auth0Loading } = useAuth0();
-  const { userProfile, userLoading, userError, appInitialized } = useApp();
+  const { userProfile, userLoading, userError, userBilling, billingLoading, appInitialized } = useApp();
   const location = useLocation();
 
   // Routes that don't require onboarding completion
@@ -34,8 +39,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Show loading while app is initializing (fetching user profile)
-  if (!appInitialized || userLoading) {
+  // Show loading while app is initializing (fetching user profile and billing)
+  if (!appInitialized || userLoading || (requireSubscription && billingLoading)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center">
         <div className="flex items-center gap-3">
@@ -117,6 +122,28 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
         </div>
       </div>
     );
+  }
+
+  // Check subscription requirement if needed
+  if (requireSubscription) {
+    // If no billing info exists at all, allow access (new users who haven't purchased yet)
+    if (!userBilling) {
+      return <>{children}</>;
+    }
+
+    // If billing info exists, check subscription status
+    const hasActiveSubscription = userBilling.subscriptionStatus?.hasActiveSubscription;
+    const canAccessProduct = userBilling.subscriptionStatus?.canAccessProduct;
+
+    // Redirect to subscription required page if:
+    // 1. User has a subscription object (they purchased before)
+    // 2. But the subscription is not active or they can't access the product
+    if (userBilling.subscription && (!hasActiveSubscription || !canAccessProduct)) {
+      // Don't redirect if already on the renew page
+      if (location.pathname !== "/renew") {
+        return <Navigate to="/renew" state={{ from: location }} replace />;
+      }
+    }
   }
 
   return <>{children}</>;

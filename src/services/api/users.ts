@@ -6,6 +6,8 @@ export interface UpdateUserDTO {
   lastName?: string;
   email?: string;
   onboardingComplete?: boolean;
+  howDidYouHearAboutUs?: string;
+  englishProficiency?: string;
 }
 
 export interface SupportMessageDTO {
