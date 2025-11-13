@@ -6,8 +6,9 @@
   <body>
     <div id="app"></div>
     <script type="text/javascript">
-      // Configure the preview URL to match HTTPS proxy
-      STORYBLOK_PREVIEW_URL = "https://localhost:3010/";
+      // Dynamically configure preview URL based on environment
+      const origin = window.location.origin;
+      STORYBLOK_PREVIEW_URL = origin;
     </script>
     <script
       src="https://app.storyblok.com/f/app-latest.js"

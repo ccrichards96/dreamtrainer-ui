@@ -1,19 +1,5 @@
 import React from "react";
-// import { render, NODE_PARAGRAPH, NODE_HEADING, NODE_UL, NODE_OL, NODE_IMAGE, MARK_LINK, NODE_HR, NODE_QUOTE } from "storyblok-rich-text-react-renderer"
 import { storyblokEditable, StoryblokRichText } from "@storyblok/react";
-
-// interface TextBlok extends SbBlokData {
-//   text_align?: string;
-//   padding?: string;
-//   font_weight?: string;
-//   margin_top?: string;
-//   margin_left?: string;
-//   margin_right?: string;
-//   margin_bottom?: string;
-//   color?: string;
-//   size_base?: string;
-//   text: string;
-// }
 
 const defaultTextStyles = {
   text_align: "left",

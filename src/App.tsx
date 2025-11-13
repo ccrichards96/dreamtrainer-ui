@@ -8,7 +8,9 @@ import CheckoutSuccess from "./pages/checkout/Success";
 import ProtectedRoute from "./components/routes/ProtectedRoute";
 import AccountPage from "./pages/account";
 import BlogPage from "./pages/blog";
+// import ExploreCourses from "./pages/explore";
 import AdminDashboard from "./pages/admin";
+import SubscriptionRequired from "./pages/renew";
 import CMSRoute from "./components/routes/CMSRoute";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
@@ -39,6 +41,14 @@ function App() {
                     <Route path="/blog" element={<BlogPage />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
+                    {/* <Route
+                      path="/explore"
+                      element={
+                        <ProtectedRoute requireSubscription={true}>
+                          <ExploreCourses />
+                        </ProtectedRoute>
+                      }
+                    /> */}
                     <Route
                       path="/onboarding"
                       element={
@@ -52,9 +62,17 @@ function App() {
                       element={<CheckoutSuccess />}
                     />
                     <Route
-                      path="/dashboard"
+                      path="/renew"
                       element={
                         <ProtectedRoute>
+                          <SubscriptionRequired />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <ProtectedRoute requireSubscription={true}>
                           <Dashboard />
                         </ProtectedRoute>
                       }

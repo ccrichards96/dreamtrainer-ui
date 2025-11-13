@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
-import { useStoryblokApi } from "../../utils/storyblok";
+import { useStoryblokApi, getStoryblokVersion } from "../../utils/storyblok";
 import type { ISbStoryData } from "@storyblok/react";
 
 interface BlogStory extends ISbStoryData {
@@ -63,7 +63,7 @@ export default function BlogPage() {
 
         // Fetch all stories with component type 'post'
         const { data } = await storyblokApi.get("cdn/stories", {
-          version: import.meta.env.DEV ? "draft" : "published",
+          version: getStoryblokVersion(),
           filter_query: {
             component: {
               in: "post",
