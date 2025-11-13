@@ -11,3 +11,5 @@ export { ApiProvider, ApiContext } from "./ApiContext";
 export { useApiContext } from "./useApiContext";
 export { AppProvider, AppContext } from "./AppContext";
 export { useApp } from "./useAppContext";
+export { CourseProvider, CourseContext, type CourseContextType } from "./CourseContext";
+export { useCourseContext } from "./useCourseContext";

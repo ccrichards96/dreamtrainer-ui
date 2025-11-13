@@ -1,7 +1,21 @@
-import { useState } from "react";
-import { BookOpen, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { BookOpen, ArrowRight, Loader2 } from "lucide-react";
+import { getAllCourses } from "../../services/api/modules";
+import { CourseProvider } from "../../contexts/CourseContext";
+import { useCourseContext } from "../../contexts/useCourseContext";
+import type { Course } from "../../types/modules";
 
-const ExploreCourses = () => {
+interface CourseDisplay extends Course {
+  status: "continue" | "start";
+  image: string;
+  isActive: boolean;
+  progress: number;
+}
+
+const ExploreCoursesContent = () => {
+  const navigate = useNavigate();
+  const { loadCourse } = useCourseContext();
   const [activeTab, setActiveTab] = useState<"explore" | "active" | "completed">("explore");
   const [courseCategory] = useState("TOEFL Mastery");
   const [categoryTag] = useState("Prepare");
@@ -9,44 +23,76 @@ const ExploreCourses = () => {
   const [categoryDescription] = useState(
     "Writing, Reading, Listening, & Speaking - All designed to help you pass the TOEFL exam & get your dream job!"
   );
-  const [allCourses] = useState([
-    {
-      id: "writing",
-      title: "Writing",
-      description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
-      status: "continue" as const,
-      image: "bg-gradient-to-br from-blue-400 to-cyan-300",
-      isActive: true,
-      progress: 45,
-    },
-    {
-      id: "reading",
-      title: "Reading",
-      description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
-      status: "start" as const,
-      image: "bg-gradient-to-br from-blue-400 to-cyan-300",
-      isActive: false,
-      progress: 0,
-    },
-    {
-      id: "listening",
-      title: "Listening",
-      description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
-      status: "start" as const,
-      image: "bg-gradient-to-br from-blue-400 to-cyan-300",
-      isActive: false,
-      progress: 0,
-    },
-    {
-      id: "speaking",
-      title: "Speaking",
-      description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
-      status: "start" as const,
-      image: "bg-gradient-to-br from-blue-400 to-cyan-300",
-      isActive: false,
-      progress: 0,
-    },
-  ]);
+  const [allCourses, setAllCourses] = useState<CourseDisplay[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [loadingCourseId, setLoadingCourseId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Helper function to load course progress from localStorage
+    const loadCourseProgress = (courseId: string) => {
+      try {
+        const stored = localStorage.getItem('course_progress');
+        if (!stored) return null;
+        const progressData = JSON.parse(stored);
+        return progressData[courseId] || null;
+      } catch (e) {
+        console.warn('Failed to load course progress:', e);
+        return null;
+      }
+    };
+
+    // Helper function to calculate progress percentage
+    const calculateProgress = (courseId: string, totalModules: number) => {
+      const progress = loadCourseProgress(courseId);
+      if (!progress || !progress.completed || totalModules === 0) return 0;
+      return Math.round((progress.completed.length / totalModules) * 100);
+    };
+    
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await getAllCourses();
+        
+        // Transform API response to CourseDisplay format
+        const courses = response.data
+          .map((course: Course) => {
+            const courseProgress = loadCourseProgress(course.id);
+            const hasProgress = courseProgress && 
+              (courseProgress.completed?.length > 0 || 
+               courseProgress.completedTests?.length > 0 ||
+               courseProgress.moduleIndex > 0);
+            const totalModules = course.modules?.length || 0;
+            const progressPercentage = calculateProgress(course.id, totalModules);
+            
+            return {
+              ...course,
+              status: hasProgress ? "continue" as const : "start" as const,
+              image: "bg-gray-900",
+              isActive: hasProgress,
+              progress: progressPercentage,
+            };
+          })
+          .sort((a: CourseDisplay, b: CourseDisplay) => {
+            // Sort by createdAt, oldest first
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+            return dateA - dateB;
+          });
+        
+        setAllCourses(courses);
+      } catch (err) {
+        console.error("Error fetching courses:", err);
+        const errorMessage = err instanceof Error ? err.message : "Failed to load courses";
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   // Filter courses based on active tab
   const getDisplayedCourses = () => {
@@ -64,8 +110,23 @@ const ExploreCourses = () => {
   const courses = getDisplayedCourses();
   const activeCoursesCount = allCourses.filter(course => course.isActive).length;
 
+  const handleStartCourse = async (courseId: string) => {
+    try {
+      setLoadingCourseId(courseId);
+      // Store the selected course ID in localStorage
+      localStorage.setItem('selected_course_id', courseId);
+      await loadCourse(courseId);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Failed to load course:', err);
+      // Optionally show an error toast or notification
+    } finally {
+      setLoadingCourseId(null);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb - Hidden for now */}
         {/* <nav className="flex mb-4" aria-label="Breadcrumb">
@@ -111,7 +172,7 @@ const ExploreCourses = () => {
                 onClick={() => setActiveTab("explore")}
                 className={`py-4 px-1 inline-flex items-center gap-2 border-b-2 font-medium text-sm whitespace-nowrap ${
                   activeTab === "explore"
-                    ? "border-blue-600 text-blue-600"
+                    ? "border-[#c5a8de] text-[#fff]"
                     : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -121,12 +182,12 @@ const ExploreCourses = () => {
                 onClick={() => setActiveTab("active")}
                 className={`py-4 px-1 inline-flex items-center gap-2 border-b-2 font-medium text-sm whitespace-nowrap ${
                   activeTab === "active"
-                    ? "border-blue-600 text-blue-600"
+                    ? "border-[#c5a8de] text-[#fff]"
                     : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
                 Active Courses
-                <span className="inline-flex items-center justify-center w-5 h-5 ml-2 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full">
+                <span className="inline-flex items-center justify-center w-5 h-5 ml-2 text-xs font-semibold text-[#c5a8de] bg-[#e6d8f5] rounded-full">
                   {activeCoursesCount}
                 </span>
               </button>
@@ -134,7 +195,7 @@ const ExploreCourses = () => {
                 onClick={() => setActiveTab("completed")}
                 className={`py-4 px-1 inline-flex items-center gap-2 border-b-2 font-medium text-sm whitespace-nowrap ${
                   activeTab === "completed"
-                    ? "border-blue-600 text-blue-600"
+                    ? "border-[#c5a8de] text-[#fff]"
                     : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -145,7 +206,22 @@ const ExploreCourses = () => {
         </div>
 
         {/* Course Cards Grid */}
-        {courses.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-[#c5a8de]" />
+            <span className="ml-3 text-gray-600">Loading courses...</span>
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+            <p className="text-red-600 font-medium">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Retry
+            </button>
+          </div>
+        ) : courses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {courses.map((course) => (
               <div
@@ -165,10 +241,10 @@ const ExploreCourses = () => {
                 {/* Card Body */}
                 <div className="p-4 md:p-5">
                   <h3 className="text-lg font-bold text-gray-800">
-                    {course.title}
+                    {course.name}
                   </h3>
                   <p className="mt-2 text-gray-600 text-sm">
-                    {course.description}
+                    {course.description || "Start learning with this comprehensive course."}
                   </p>
                   
                   {/* Progress Bar - Only show for active courses */}
@@ -180,7 +256,7 @@ const ExploreCourses = () => {
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                          className="bg-[#c5a8de] h-2 rounded-full transition-all duration-300" 
                           style={{ width: `${course.progress}%` }}
                         />
                       </div>
@@ -189,13 +265,37 @@ const ExploreCourses = () => {
                   
                   <div className="mt-5">
                     {course.status === "continue" ? (
-                      <button className="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none">
-                        Continue Course
+                      <button 
+                        onClick={() => handleStartCourse(course.id)}
+                        disabled={loadingCourseId === course.id}
+                        className="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
+                      >
+                        {loadingCourseId === course.id ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          "Continue Course"
+                        )}
                       </button>
                     ) : (
-                      <button className="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-                        Start Course
-                        <ArrowRight className="w-4 h-4" />
+                      <button 
+                        onClick={() => handleStartCourse(course.id)}
+                        disabled={loadingCourseId === course.id}
+                        className="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-[#c5a8de] text-white hover:bg-[#b399d6] disabled:opacity-50 disabled:pointer-events-none"
+                      >
+                        {loadingCourseId === course.id ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          <>
+                            Start Course
+                            <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
                       </button>
                     )}
                   </div>
@@ -221,4 +321,11 @@ const ExploreCourses = () => {
   );
 };
 
-export default ExploreCourses;
+// Wrapper component that provides the Course context
+export default function ExploreCourses() {
+  return (
+    <CourseProvider>
+      <ExploreCoursesContent />
+    </CourseProvider>
+  );
+}
