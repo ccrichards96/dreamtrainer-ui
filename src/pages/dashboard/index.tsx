@@ -62,6 +62,7 @@ function DashboardContent() {
   const {
     modules,
     currentCourse,
+    tests,
     loading: courseLoading,
     error: courseError,
     loadCourse,
@@ -252,8 +253,8 @@ function DashboardContent() {
           </motion.div>
         )}
 
-        {/* Score Progress Section */}
-        {(startingScore !== null || currentScore !== null) && (
+        {/* Score Progress Section - Only show if course has tests */}
+        {tests.length > 0 && (startingScore !== null || currentScore !== null) && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             {/* Starting Score */}
             {startingScore !== null && (
