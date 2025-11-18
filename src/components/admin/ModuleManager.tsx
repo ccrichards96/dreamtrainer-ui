@@ -27,8 +27,6 @@ interface ModuleManagerProps {
 interface ModuleFormData {
   topic: string;
   description: string;
-  level: number;
-  estimatedTime: number;
   videoUrl: string;
   botIframeUrl: string;
   lessonContent: string;
@@ -47,8 +45,6 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
   const [formData, setFormData] = useState<ModuleFormData>({
     topic: "",
     description: "",
-    level: 1,
-    estimatedTime: 30,
     videoUrl: "",
     botIframeUrl: "",
     lessonContent: "",
@@ -59,8 +55,6 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     setFormData({
       topic: "",
       description: "",
-      level: 1,
-      estimatedTime: 30,
       videoUrl: "",
       botIframeUrl: "",
       lessonContent: "",
@@ -94,10 +88,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "level" || name === "estimatedTime"
-          ? parseInt(value) || 0
-          : value,
+      [name]: value,
     }));
   };
 
@@ -120,8 +111,6 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     setFormData({
       topic: module.topic,
       description: module.description,
-      level: module.level,
-      estimatedTime: module.estimatedTime,
       videoUrl: module.videoUrl,
       botIframeUrl: module.botIframeUrl,
       lessonContent: module.lessonContent,
@@ -153,9 +142,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
           courseId: course.id,
           topic: formData.topic,
           description: formData.description,
-          level: formData.level,
           status: "active",
-          estimatedTime: formData.estimatedTime,
           videoUrl: formData.videoUrl,
           botIframeUrl: formData.botIframeUrl,
           lessonContent: formData.lessonContent,
@@ -343,56 +330,13 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                 )}
               </div>
 
-              {/* Level */}
-              <div>
-                <label
-                  htmlFor="level"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Difficulty Level
-                </label>
-                <select
-                  id="level"
-                  name="level"
-                  value={formData.level}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value={1}>Beginner (1)</option>
-                  <option value={2}>Elementary (2)</option>
-                  <option value={3}>Intermediate (3)</option>
-                  <option value={4}>Advanced (4)</option>
-                  <option value={5}>Expert (5)</option>
-                </select>
-              </div>
-
-              {/* Estimated Time */}
-              <div>
-                <label
-                  htmlFor="estimatedTime"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Estimated Time (minutes)
-                </label>
-                <input
-                  type="number"
-                  id="estimatedTime"
-                  name="estimatedTime"
-                  value={formData.estimatedTime}
-                  onChange={handleInputChange}
-                  min="5"
-                  max="240"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
               {/* Video URL */}
               <div>
                 <label
                   htmlFor="videoUrl"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Video URL
+                  Vimeo Video URL
                 </label>
                 <input
                   type="url"
@@ -411,7 +355,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                   htmlFor="botIframeUrl"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Bot iFrame URL
+                 VectorShift Bot iFrame URL
                 </label>
                 <input
                   type="url"
@@ -529,20 +473,8 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                       <h5 className="text-lg font-medium text-gray-900">
                         {module.topic}
                       </h5>
-                      <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                        Level {module.level}
-                      </span>
                     </div>
                     <p className="text-gray-600 mb-3">{module.description}</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span>⏱ {module.estimatedTime} minutes</span>
-                      <span>
-                        📹 {module.videoUrl ? "Video available" : "No video"}
-                      </span>
-                      <span>
-                        🤖 {module.botIframeUrl ? "Bot available" : "No bot"}
-                      </span>
-                    </div>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
                     <button

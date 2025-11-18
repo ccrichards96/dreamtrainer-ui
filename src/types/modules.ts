@@ -16,9 +16,7 @@ interface Module {
   categoryId: string | null;
   topic: string; // e.g., "Introduction to TOEFL Writing"
   description: string;
-  level: number; // 1-5 - difficulty level
   status: string;
-  estimatedTime: number; // Estimated time in minutes
   videoUrl: string; // URL for the video content
   botIframeUrl: string; // URL for the trainer bot
   lessonContent: string; //Rich text content for the lesson

@@ -10,9 +10,7 @@ export interface CreateModuleDTO {
   courseId: string;
   topic: string;
   description: string;
-  level: number;
   status: string;
-  estimatedTime: number;
   videoUrl: string;
   botIframeUrl: string;
   categoryId: string;
