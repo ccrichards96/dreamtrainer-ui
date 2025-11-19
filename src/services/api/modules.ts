@@ -27,6 +27,23 @@ export interface ModulesResponse {
  * Get all courses
  * @returns Promise<any>
  */
+export const getAllCoursesGroups = async (): Promise<any> => {
+  try {
+    const response = await apiClient.get<any>(`/courses/groups`);
+    return response.data;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || "Failed to fetch course groups",
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
+/**
+ * Get all courses
+ * @returns Promise<any>
+ */
 export const getAllCourses = async (): Promise<any> => {
   try {
     const response = await apiClient.get<any>(`/courses`);

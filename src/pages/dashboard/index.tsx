@@ -467,22 +467,35 @@ function DashboardContent() {
             transition={{ delay: 0.4 }}
             className="bg-white rounded-2xl shadow-lg p-8"
           >
-            <h2 className="text-2xl font-semibold text-gray-900  mb-2">
-              Need help/support from Joseph, our trusted expert?
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Struggling, confused, or not improving? We'll get you back on
-              track right away:
-            </p>
-            <a
-              href="https://calendly.com/notefulljoseph/toefl-course-help"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full bg-[#c5a8de] text-white py-4 rounded-lg font-medium hover:bg-[#b399d6] transition-all flex items-center justify-center gap-2 mb-4"
-            >
-              <Calendar className="w-5 h-5" />
-              Schedule a Session with Joseph Here
-            </a>
+            <div className="flex flex-col md:flex-row gap-8 items-center">
+              <div className="md:w-[30%] flex-shrink-0">
+                <div className="relative w-48 h-48 mx-auto">
+                  <img
+                    src="https://i0.wp.com/www.notefull.com/wp-content/uploads/2017/05/NotefullJoseph-2-scaled.jpg?w=2114&ssl=1"
+                    alt="Joseph - TOEFL Expert"
+                    className="w-full h-full rounded-full object-cover shadow-xl ring-4 ring-[#c5a8de]/20"
+                  />
+                </div>
+              </div>
+              <div className="md:w-[70%] flex flex-col">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                  Need help/support from Joseph, our trusted expert?
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Struggling, confused, or not improving? We'll get you back on
+                  track right away:
+                </p>
+                <a
+                  href="https://calendly.com/notefulljoseph/toefl-course-help"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full md:w-auto bg-[#c5a8de] text-white py-4 px-8 rounded-lg font-medium hover:bg-[#b399d6] hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-md"
+                >
+                  <Calendar className="w-5 h-5" />
+                  Schedule a Session with Joseph Here
+                </a>
+              </div>
+            </div>
           </motion.div>
 
           {/* Send Message */}

@@ -1,13 +1,24 @@
 import { Test } from "./tests";
 
+interface CourseGroup {
+  id: string;
+  name: string; //TOEFL Writing Max Course
+  description?: string;
+  image?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface Course {
   id: string;
   name: string; //TOEFL Writing Max Course
   description?: string;
+  courseGroupId: string;
   createdAt: Date;
   updatedAt: Date;
   modules?: Module[];
   tests?: Test[];
+  courseGroup?: CourseGroup;
 }
 
 interface Module {
@@ -25,4 +36,4 @@ interface Module {
   updatedAt?: Date;
 }
 
-export type { Course, Module };
+export type { Course, Module, CourseGroup };
