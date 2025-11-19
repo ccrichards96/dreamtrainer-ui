@@ -29,16 +29,9 @@ export { default as modulesService } from "./modules";
 export type {
   AssessmentSubmission,
   AssessmentResponse,
-  ApiError,
 } from "./assessment";
 export type { UserBillingInfo, CheckoutSessionRequest } from "./billing";
-export type {
-  Category,
-  CreateCategoryDTO,
-  UpdateCategoryDTO,
-} from "./categories";
 export type {
   CourseProgress,
   UpdateProgressDTO,
 } from "../../types/course-progress";
-export type { CreateModuleDTO } from "./modules";

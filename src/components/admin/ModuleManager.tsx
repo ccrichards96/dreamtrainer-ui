@@ -12,12 +12,13 @@ import {
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { Course, Module } from "../../types/modules";
+import { Category } from "../../types/categories";
 import {
   createModule,
   updateModule,
   deleteModule,
 } from "../../services/api/modules";
-import { Category, getAllCategories } from "../../services/api/categories";
+import { getAllCategories } from "../../services/api/categories";
 
 interface ModuleManagerProps {
   course: Course;
