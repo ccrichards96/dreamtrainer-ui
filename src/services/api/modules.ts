@@ -1,27 +1,5 @@
-import apiClient from "./client";
-import type { Module } from "../../types/modules";
-
-export interface ApiError {
-  message: string;
-  status?: number;
-}
-
-export interface CreateModuleDTO {
-  courseId: string;
-  topic: string;
-  description: string;
-  status: string;
-  videoUrl: string;
-  botIframeUrl: string;
-  categoryId: string;
-  lessonContent: string;
-}
-
-export interface ModulesResponse {
-  success: boolean;
-  data: Module[];
-  message: string;
-}
+import apiClient, { APIResponse, ApiError } from "./client";
+import type { Module, DraftModule, UpdateModule } from "../../types/modules";
 
 /**
  * Get all courses
@@ -98,20 +76,22 @@ export const getCourseWithModulesById = async (
 /**
  * Get all modules for a specific course
  * @param courseId - The ID of the course
- * @returns Promise<ModulesResponse>
+ * @returns Promise<Module[]>
  */
 export const getAllModulesByCourse = async (
   courseId: string,
-): Promise<ModulesResponse> => {
+): Promise<Module[]> => {
   try {
-    const response = await apiClient.get<ModulesResponse>(
+    const response = await apiClient.get<APIResponse<Module[]>>(
       `/courses/${courseId}/modules-list`,
     );
-    return response.data;
-  } catch (error: any) {
+    return response.data.data;
+  } catch (error: unknown) {
     const apiError: ApiError = {
-      message: error.response?.data?.message || "Failed to fetch modules",
-      status: error.response?.status,
+      message:
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || "Failed to fetch modules",
+      status: (error as { response?: { status?: number } })?.response?.status,
     };
     throw apiError;
   }
@@ -203,13 +183,10 @@ export const deleteCourse = async (courseId: string): Promise<any> => {
 
 /**
  * Create a new module
- * @param courseId - The ID of the course
  * @param moduleData - The module data
  * @returns Promise<any>
  */
-export const createModule = async (
-  moduleData: CreateModuleDTO,
-): Promise<any> => {
+export const createModule = async (moduleData: DraftModule): Promise<any> => {
   try {
     const response = await apiClient.post<any>(`/modules`, moduleData);
     return response.data;
@@ -230,9 +207,7 @@ export const createModule = async (
  */
 export const updateModule = async (
   moduleId: string,
-  moduleData: Partial<
-    Omit<Module, "id" | "courseId" | "createdAt" | "updatedAt" | "createdBy">
-  >,
+  moduleData: UpdateModule,
 ): Promise<any> => {
   try {
     const response = await apiClient.put<any>(

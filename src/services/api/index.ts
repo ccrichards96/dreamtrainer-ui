@@ -17,23 +17,28 @@ export { default as billingService } from "./billing";
 export * from "./categories";
 export { default as categoriesService } from "./categories";
 
+// Export course progress services
+export * from "./course-progress";
+export { default as courseProgressService } from "./course-progress";
+
 // Export modules services
 export * from "./modules";
 export { default as modulesService } from "./modules";
 
 // Export types
-// export type { Announcement, AnnouncementsResponse } from './announcements';
 export type {
   AssessmentSubmission,
   AssessmentResponse,
   ApiError,
 } from "./assessment";
-export type { UserBillingInfo } from "./billing";
+export type { UserBillingInfo, CheckoutSessionRequest } from "./billing";
 export type {
   Category,
   CreateCategoryDTO,
   UpdateCategoryDTO,
-  CategoryResponse,
-  CategoryListResponse,
 } from "./categories";
-export type { ModulesResponse } from "./modules";
+export type {
+  CourseProgress,
+  UpdateProgressDTO,
+} from "../../types/course-progress";
+export type { CreateModuleDTO } from "./modules";

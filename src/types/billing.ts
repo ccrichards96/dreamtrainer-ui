@@ -22,16 +22,10 @@ interface UserBillingData {
   subscriptionStatus: SubscriptionStatus;
 }
 
-interface UserBillingInfoResponse {
-  success: boolean;
-  data: UserBillingData;
-  message: string;
-}
-
 interface BillingData {
   name: string;
   status: "active" | "inactive" | "cancelled" | "past_due";
   amount?: number;
 }
 
-export type { Subscription, BillingData, SubscriptionStatus, UserBillingData, UserBillingInfoResponse };
+export type { Subscription, BillingData, SubscriptionStatus, UserBillingData };

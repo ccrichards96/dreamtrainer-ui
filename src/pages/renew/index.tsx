@@ -59,8 +59,8 @@ export default function SubscriptionRequired() {
 
       const response = await billingService.createCheckoutSession(checkoutData);
       
-      if (response.success && response.data.checkoutUrl) {
-        window.location.href = response.data.checkoutUrl;
+      if (response.checkoutUrl) {
+        window.location.href = response.checkoutUrl;
       } else {
         throw new Error("Failed to create checkout session");
       }
@@ -84,8 +84,8 @@ export default function SubscriptionRequired() {
       const returnUrl = `${window.location.origin}/dashboard`;
       const response = await billingService.generateBillingPortalLink(returnUrl);
       
-      if (response.success && response.data.portalUrl) {
-        window.location.href = response.data.portalUrl;
+      if (response.portalUrl) {
+        window.location.href = response.portalUrl;
       } else {
         throw new Error("Failed to generate billing portal link");
       }

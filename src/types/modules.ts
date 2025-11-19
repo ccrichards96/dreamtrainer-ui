@@ -36,4 +36,31 @@ interface Module {
   updatedAt?: Date;
 }
 
+// Draft type for creating new modules (excludes auto-generated fields)
+export type DraftModule = Pick<
+  Module,
+  | "courseId"
+  | "categoryId"
+  | "topic"
+  | "description"
+  | "status"
+  | "videoUrl"
+  | "botIframeUrl"
+  | "lessonContent"
+>;
+
+// Update type for modifying existing modules (partial of editable fields)
+export type UpdateModule = Partial<
+  Pick<
+    Module,
+    | "categoryId"
+    | "topic"
+    | "description"
+    | "status"
+    | "videoUrl"
+    | "botIframeUrl"
+    | "lessonContent"
+  >
+>;
+
 export type { Course, Module, CourseGroup };
