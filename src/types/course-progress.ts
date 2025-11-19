@@ -5,10 +5,18 @@ export interface CourseProgress {
   courseId: string;
   progressStatus: "Not Started" | "In Progress" | "Completed";
   percentageComplete: number;
+  currentModuleId: string | null;
+  completedModuleIds: string[];
+  completedTestIds: string[];
+  currentTestId: string | null;
   dateStarted: string | null;
   dateCompleted: string | null;
 }
 
 export interface UpdateProgressDTO {
   percentageComplete: number;
+  currentModuleId?: string | null;
+  completedModuleIds?: string[];
+  completedTestIds?: string[];
+  currentTestId?: string | null;
 }

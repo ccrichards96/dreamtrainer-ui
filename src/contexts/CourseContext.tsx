@@ -5,34 +5,72 @@ import {
   getCourseWithModulesById,
   getAllCourses as fetchAllCourses,
 } from "../services/api/modules";
+import {
+  updateProgress,
+  getUserCourseProgress,
+} from "../services/api/course-progress";
+import type { CourseProgress } from "../types/course-progress";
 
+// Helper to convert module IDs to indices
+const getModuleIndices = (moduleIds: string[], modules: Module[]): Set<number> => {
+  const indices = new Set<number>();
+  moduleIds.forEach(id => {
+    const index = modules.findIndex(m => m.id === id);
+    if (index !== -1) indices.add(index);
+  });
+  return indices;
+};
 
-const PROGRESS_KEY = 'course_progress';
+// Helper to convert module indices to IDs
+const getModuleIds = (indices: Set<number>, modules: Module[]): string[] => {
+  return Array.from(indices)
+    .map(idx => modules[idx]?.id)
+    .filter((id): id is string => id !== undefined);
+};
 
-interface ProgressData {
-  moduleIndex?: number;
-  completed?: number[];
-  completedTests?: string[];
-  currentTestIndex?: number;
-  lastSaved?: number;
-}
-
-const saveProgress = (courseId: string, data: ProgressData) => {
+const saveProgress = async (
+  courseId: string,
+  modules: Module[],
+  tests: Test[],
+  currentModuleIndex: number,
+  completedModules: Set<number>,
+  completedTests: Set<string>,
+  currentTestIndex: number
+) => {
   try {
-    const existing = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
-    existing[courseId] = { ...data, lastSaved: Date.now() };
-    localStorage.setItem(PROGRESS_KEY, JSON.stringify(existing));
+    const currentModuleId = modules[currentModuleIndex]?.id || null;
+    const completedModuleIds = getModuleIds(completedModules, modules);
+    const completedTestIds = Array.from(completedTests);
+    const currentTestId = tests[currentTestIndex]?.id || null;
+    
+    // Calculate percentage: completed modules / total modules
+    const percentageComplete = modules.length > 0 
+      ? Math.round((completedModules.size / modules.length) * 100)
+      : 0;
+    
+    const progressData = {
+      percentageComplete,
+      currentModuleId,
+      completedModuleIds,
+      completedTestIds,
+      currentTestId
+    };
+    
+    console.log('Saving progress data:', progressData);
+    
+    // Save to backend API
+    await updateProgress(courseId, progressData);
   } catch (e) {
     console.warn('Failed to save progress:', e);
   }
 };
 
-const loadProgress = (courseId: string) => {
+const loadProgress = async (courseId: string): Promise<CourseProgress | null> => {
   try {
-    const stored = localStorage.getItem(PROGRESS_KEY);
-    return stored ? JSON.parse(stored)[courseId] : null;
+    const backendProgress = await getUserCourseProgress(courseId);
+    return backendProgress;
   } catch (e) {
-    console.warn('Failed to load progress:', e);
+    console.warn('Failed to load progress from backend:', e);
     return null;
   }
 };
@@ -110,6 +148,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   );
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [progressLoaded, setProgressLoaded] = useState<boolean>(false);
 
   // Test-related state
   const [isTestMode, setIsTestMode] = useState<boolean>(false);
@@ -119,23 +158,23 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     useState<boolean>(false);
 
   // Auto-save progress when module index, completed modules, or completed tests change
+  // Only save after initial progress has been loaded to prevent overwriting on mount
   useEffect(() => {
-    if (currentCourse && modules.length > 0) {
-      // console.log('Auto-saving progress:', {
-      //   moduleIndex: currentModuleIndex,
-      //   completed: Array.from(completedModules),
-      //   completedTests: Array.from(completedTests),
-      //   currentTestIndex
-      // });
-      
-      saveProgress(currentCourse.id, {
-        moduleIndex: currentModuleIndex,
-        completed: Array.from(completedModules),
-        completedTests: Array.from(completedTests),
+    if (currentCourse && modules.length > 0 && progressLoaded) {
+      // Save progress asynchronously with ID-based tracking
+      saveProgress(
+        currentCourse.id,
+        modules,
+        tests,
+        currentModuleIndex,
+        completedModules,
+        completedTests,
         currentTestIndex
+      ).catch(err => {
+        console.error('Failed to auto-save progress:', err);
       });
     }
-  }, [currentModuleIndex, completedModules, completedTests, currentTestIndex, currentCourse, modules.length]);
+  }, [currentModuleIndex, completedModules, completedTests, currentTestIndex, currentCourse, modules, tests, progressLoaded]);
 
   // Load course data
   const loadCourse = useCallback(async (courseId: string): Promise<void> => {
@@ -151,22 +190,29 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       setTests(sortedTests);
       // setTestAttempts(data.testAttempts);
 
-      //Load saved progress
-      const saved = loadProgress(courseId);
+      //Load saved progress from backend
+      const saved = await loadProgress(courseId);
       if (saved) {
-        const savedCompleted = new Set<number>(saved.completed || []);
-        const savedCompletedTests = new Set<string>(saved.completedTests || []);
-        setCurrentModuleIndexState(saved.moduleIndex || 0);
-        setCompletedModules(savedCompleted);
+        // Convert module IDs to indices
+        const savedCompletedIndices = getModuleIndices(saved.completedModuleIds || [], data.modules || []);
+        const savedCompletedTests = new Set<string>(saved.completedTestIds || []);
+        
+        // Find current module index from ID
+        const currentModuleIdx = saved.currentModuleId
+          ? data.modules?.findIndex((m: Module) => m.id === saved.currentModuleId) ?? 0
+          : 0;
+        
+        // Find current test index from ID
+        const currentTestIdx = saved.currentTestId
+          ? sortedTests.findIndex((test: Test) => test.id === saved.currentTestId)
+          : sortedTests.findIndex((test: Test) => !savedCompletedTests.has(test.id));
+        
+        setCurrentModuleIndexState(currentModuleIdx);
+        setCompletedModules(savedCompletedIndices);
         setCompletedTests(savedCompletedTests);
-        setCurrentModule(data.modules?.[saved.moduleIndex || 0] || null);
-        
-        // Restore test index based on completed tests - find first incomplete test
-        const firstIncompleteTestIndex = sortedTests.findIndex((test: Test) => !savedCompletedTests.has(test.id));
-        setCurrentTestIndexState(firstIncompleteTestIndex >= 0 ? firstIncompleteTestIndex : 0);
-        
-        // Restore allModulesCompleted state based on saved progress
-        setAllModulesCompleted(savedCompleted.size === data.modules?.length);
+        setCurrentModule(data.modules?.[currentModuleIdx] || null);
+        setCurrentTestIndexState(currentTestIdx >= 0 ? currentTestIdx : 0);
+        setAllModulesCompleted(savedCompletedIndices.size === data.modules?.length);
       } else {
         // Reset to defaults
         setCurrentModuleIndexState(0);
@@ -176,6 +222,9 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
         setCurrentTestIndexState(0);
         setAllModulesCompleted(false);
       }
+      
+      // Mark progress as loaded to enable auto-save
+      setProgressLoaded(true);
     } catch (err) {
       console.warn("Course loading failed, using fallback data:", err);
 
@@ -240,7 +289,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
         return newCompleted;
       });
     },
-    [modules.length, currentModuleIndex],
+    [modules.length],
   );
 
   // Mark a test as completed

@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, ArrowRight, Loader2 } from "lucide-react";
 import { useCourseContext } from "../../contexts/useCourseContext";
+import { startCourse, getUserAllProgress } from "../../services/api/course-progress";
 import type { Course } from "../../types/modules";
+import type { CourseProgress } from "../../types/course-progress";
 
 interface CourseGroupDetailProps {
   courses: Course[];
@@ -12,18 +14,96 @@ export const CourseGroupDetail = ({ courses }: CourseGroupDetailProps) => {
   const navigate = useNavigate();
   const { loadCourse } = useCourseContext();
   const [loadingCourseId, setLoadingCourseId] = useState<string | null>(null);
+  const [courseProgress, setCourseProgress] = useState<CourseProgress[]>([]);
+  const [loadingProgress, setLoadingProgress] = useState(true);
+
+  // Fetch user's course progress on mount
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        setLoadingProgress(true);
+        const progress = await getUserAllProgress();
+        setCourseProgress(progress);
+      } catch (error) {
+        console.error("Failed to fetch course progress:", error);
+        // Continue with empty progress if fetch fails
+        setCourseProgress([]);
+      } finally {
+        setLoadingProgress(false);
+      }
+    };
+
+    fetchProgress();
+  }, []);
 
   const handleStartCourse = async (courseId: string) => {
     try {
       setLoadingCourseId(courseId);
+      
+      // Check if course is already in progress
+      const existingProgress = courseProgress.find(p => p.courseId === courseId);
+      
+      if (!existingProgress || existingProgress.progressStatus === "Not Started") {
+        // Start course progress tracking on the backend
+        await startCourse(courseId);
+      }
+      
+      // Load course data into context
       await loadCourse(courseId);
+      
+      // Save selected course to localStorage
       localStorage.setItem('selected_course_id', courseId);
+      
+      // Navigate to dashboard
       navigate("/dashboard");
     } catch (error) {
       console.error("Failed to start course:", error);
+      // You could add user-friendly error notification here
+      alert("Failed to start course. Please try again.");
     } finally {
       setLoadingCourseId(null);
     }
+  };
+
+  // Helper function to get course progress status
+  const getCourseProgress = (courseId: string) => {
+    return courseProgress.find(p => p.courseId === courseId);
+  };
+
+  // Helper function to determine button text and style
+  const getButtonConfig = (courseId: string) => {
+    const progress = getCourseProgress(courseId);
+    
+    if (!progress || progress.progressStatus === "Not Started") {
+      return {
+        text: "Start",
+        icon: <ArrowRight className="w-4 h-4" />,
+        variant: "primary"
+      };
+    }
+    
+    if (progress.progressStatus === "In Progress") {
+      return {
+        text: "Continue Course",
+        icon: <ArrowRight className="w-4 h-4" />,
+        variant: "secondary",
+        progress: progress.percentageComplete
+      };
+    }
+    
+    if (progress.progressStatus === "Completed") {
+      return {
+        text: "Review Course",
+        icon: <ArrowRight className="w-4 h-4" />,
+        variant: "completed"
+      };
+    }
+    
+    return {
+      text: "Start",
+      icon: <ArrowRight className="w-4 h-4" />,
+      variant: "primary"
+    };
   };
 
   if (courses.length === 0) {
@@ -62,24 +142,56 @@ export const CourseGroupDetail = ({ courses }: CourseGroupDetailProps) => {
               {course.description || "Start learning with this comprehensive course."}
             </p>
             
-            <div className="mt-5">
-              <button 
-                onClick={() => handleStartCourse(course.id)}
-                disabled={loadingCourseId === course.id}
-                className="py-2 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-[#c5a8de] text-white hover:bg-[#b399d6] hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none disabled:hover:scale-100"
-              >
-                {loadingCourseId === course.id ? (
+            <div className="mt-5 space-y-2">
+              {/* Progress Bar */}
+              {!loadingProgress && (() => {
+                const buttonConfig = getButtonConfig(course.id);
+                const progress = getCourseProgress(course.id);
+                
+                return (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Loading...
+                    {progress && (progress.progressStatus === "In Progress" || progress.progressStatus === "Completed") && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs text-gray-600">
+                          <span>Progress</span>
+                          <span>{Math.round(progress.percentageComplete)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${progress.percentageComplete}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Action Button */}
+                    <button 
+                      onClick={() => handleStartCourse(course.id)}
+                      disabled={loadingCourseId === course.id || loadingProgress}
+                      className={`w-full py-2 px-4 inline-flex items-center justify-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none disabled:hover:scale-100 ${
+                        buttonConfig.variant === "completed" 
+                          ? "bg-green-600 text-white hover:bg-green-700"
+                          : buttonConfig.variant === "secondary"
+                          ? "bg-[#7c5e99] text-white hover:bg-[#6b4d87] hover:scale-105"
+                          : "bg-[#c5a8de] text-white hover:bg-[#b399d6] hover:scale-105"
+                      }`}
+                    >
+                      {loadingCourseId === course.id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          {buttonConfig.text}
+                          {buttonConfig.icon}
+                        </>
+                      )}
+                    </button>
                   </>
-                ) : (
-                  <>
-                    Start
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
+                );
+              })()}
             </div>
           </div>
         </div>
