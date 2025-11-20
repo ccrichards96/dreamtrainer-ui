@@ -74,7 +74,7 @@ export const CourseGroupDetail = ({ courses }: CourseGroupDetailProps) => {
   const getButtonConfig = (courseId: string) => {
     const progress = getCourseProgress(courseId);
     
-    if (!progress || progress.progressStatus === "Not Started") {
+    if (!progress) {
       return {
         text: "Start",
         icon: <ArrowRight className="w-4 h-4" />,
@@ -82,7 +82,7 @@ export const CourseGroupDetail = ({ courses }: CourseGroupDetailProps) => {
       };
     }
     
-    if (progress.progressStatus === "In Progress") {
+    if (progress.progressStatus === "Not Started" || progress.progressStatus === "In Progress") {
       return {
         text: "Continue Course",
         icon: <ArrowRight className="w-4 h-4" />,
@@ -150,7 +150,7 @@ export const CourseGroupDetail = ({ courses }: CourseGroupDetailProps) => {
                 
                 return (
                   <>
-                    {progress && (progress.progressStatus === "In Progress" || progress.progressStatus === "Completed") && (
+                    {progress && (
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs text-gray-600">
                           <span>Progress</span>
