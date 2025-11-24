@@ -185,7 +185,17 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       const data = response.data;
 
       setCurrentCourse(data);
-      setModules(data.modules || []);
+      
+      // Sort modules by order field, then by createdAt if order is the same
+      const sortedModules = (data.modules || []).sort((a: Module, b: Module) => {
+        if (a.order !== b.order) {
+          return a.order - b.order;
+        }
+        // If order is the same, sort by createdAt
+        return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+      });
+      setModules(sortedModules);
+      
       const sortedTests = (data.tests || []).sort((a: Test, b: Test) => a.order - b.order);
       setTests(sortedTests);
       // setTestAttempts(data.testAttempts);
@@ -193,13 +203,13 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       //Load saved progress from backend
       const saved = await loadProgress(courseId);
       if (saved) {
-        // Convert module IDs to indices
-        const savedCompletedIndices = getModuleIndices(saved.completedModuleIds || [], data.modules || []);
+        // Convert module IDs to indices (using sorted modules)
+        const savedCompletedIndices = getModuleIndices(saved.completedModuleIds || [], sortedModules);
         const savedCompletedTests = new Set<string>(saved.completedTestIds || []);
         
-        // Find current module index from ID
+        // Find current module index from ID (in sorted modules)
         const currentModuleIdx = saved.currentModuleId
-          ? data.modules?.findIndex((m: Module) => m.id === saved.currentModuleId) ?? 0
+          ? sortedModules.findIndex((m: Module) => m.id === saved.currentModuleId) ?? 0
           : 0;
         
         // Find current test index from ID
@@ -210,15 +220,15 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
         setCurrentModuleIndexState(currentModuleIdx);
         setCompletedModules(savedCompletedIndices);
         setCompletedTests(savedCompletedTests);
-        setCurrentModule(data.modules?.[currentModuleIdx] || null);
+        setCurrentModule(sortedModules[currentModuleIdx] || null);
         setCurrentTestIndexState(currentTestIdx >= 0 ? currentTestIdx : 0);
-        setAllModulesCompleted(savedCompletedIndices.size === data.modules?.length);
+        setAllModulesCompleted(savedCompletedIndices.size === sortedModules.length);
       } else {
         // Reset to defaults
         setCurrentModuleIndexState(0);
         setCompletedModules(new Set());
         setCompletedTests(new Set());
-        setCurrentModule(data.modules?.[0] || null);
+        setCurrentModule(sortedModules[0] || null);
         setCurrentTestIndexState(0);
         setAllModulesCompleted(false);
       }

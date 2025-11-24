@@ -31,6 +31,7 @@ interface Module {
   videoUrl: string; // URL for the video content
   botIframeUrl: string; // URL for the trainer bot
   lessonContent: string; //Rich text content for the lesson
+  order: number;
   createdBy: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -60,6 +61,7 @@ export type UpdateModule = Partial<
     | "videoUrl"
     | "botIframeUrl"
     | "lessonContent"
+    | "order"
   >
 >;
 
