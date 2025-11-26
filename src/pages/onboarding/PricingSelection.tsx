@@ -173,8 +173,8 @@ export default function PricingSelection({
       });
 
       // Only redirect if we successfully got a checkout session URL
-      if (checkoutSession?.data?.checkoutUrl) {
-        window.location.href = checkoutSession.data.checkoutUrl;
+      if (checkoutSession?.checkoutUrl) {
+        window.location.href = checkoutSession.checkoutUrl;
       } else {
         throw new Error("No checkout URL received from server");
       }

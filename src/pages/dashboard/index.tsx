@@ -62,6 +62,7 @@ function DashboardContent() {
   const {
     modules,
     currentCourse,
+    tests,
     loading: courseLoading,
     error: courseError,
     loadCourse,
@@ -69,21 +70,62 @@ function DashboardContent() {
     startTestMode,
   } = useCourseContext();
 
+  // State for available courses
+  const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
+  const [switchingCourse, setSwitchingCourse] = useState<string | null>(null);
+
   // Load TOEFL Max course on component mount
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const courses: Course[] = await getAllCourses();
-        if (courses.length > 0) {
-          await loadCourse(courses[0].id);
-          await getTestScores(courses[0].id);
-        } 
+        // Sort courses by order field, then by createdAt if order is the same
+        const sortedCourses = courses.sort((a, b) => {
+          if (a.order !== b.order) {
+            return a.order - b.order;
+          }
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateA - dateB;
+        });
+        setAvailableCourses(sortedCourses);
+        
+        // Check if user selected a specific course from the explore page
+        const selectedCourseId = localStorage.getItem('selected_course_id');
+        
+        if (selectedCourseId) {
+          // Load the selected course
+          await loadCourse(selectedCourseId);
+          await getTestScores(selectedCourseId);
+          // Clear the selection after loading
+          localStorage.removeItem('selected_course_id');
+        } else if (sortedCourses.length > 0 && !currentCourse) {
+          // Only load the first course if no course is currently loaded and no selection
+          await loadCourse(sortedCourses[0].id);
+          await getTestScores(sortedCourses[0].id);
+        } else if (currentCourse) {
+          // If a course is already loaded, just fetch its test scores
+          await getTestScores(currentCourse.id);
+        }
       } catch (error) {
         console.error("Error fetching courses:", error);
       }
     };
     fetchCourses();
-  }, [getAllCourses, loadCourse, getTestScores]);
+  }, [getAllCourses, loadCourse, getTestScores, currentCourse]);
+
+  // Handle course switching
+  const handleSwitchCourse = async (courseId: string) => {
+    try {
+      setSwitchingCourse(courseId);
+      await loadCourse(courseId);
+      await getTestScores(courseId);
+    } catch (error) {
+      console.error("Error switching course:", error);
+    } finally {
+      setSwitchingCourse(null);
+    }
+  };
 
   const handleCourseComplete = () => {
     console.log("Course completed!");
@@ -144,12 +186,78 @@ function DashboardContent() {
             Welcome back, {firstName}!
           </h1>
           <p className="text-xl text-gray-600">
-            Let's get you to your dream TOEFL writing score.
+            Let's get you to your dream TOEFL score.
           </p>
         </motion.div>
 
-        {/* Score Progress Section */}
-        {(startingScore !== null || currentScore !== null) && (
+        {/* Available Courses Section */}
+        {availableCourses.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="mb-8"
+          >
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your Course Sections</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {availableCourses.map((course, index) => {
+                const isActive = currentCourse?.id === course.id;
+                const isLoading = switchingCourse === course.id;
+                
+                return (
+                  <motion.button
+                    key={course.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + index * 0.05 }}
+                    onClick={() => !isActive && handleSwitchCourse(course.id)}
+                    disabled={isLoading}
+                    className={`relative p-6 rounded-xl transition-all ${
+                      isActive
+                        ? "bg-gradient-to-br from-[#c5a8de] to-[#b399d6] text-white shadow-lg ring-2 ring-[#c5a8de] ring-offset-2"
+                        : "bg-white text-gray-900 shadow-md hover:shadow-lg hover:scale-105"
+                    } ${isLoading ? "opacity-50 cursor-wait" : "cursor-pointer"}`}
+                  >
+                    {isActive && (
+                      <div className="absolute top-3 right-3">
+                        <div className="bg-white text-[#c5a8de] text-xs font-semibold px-2 py-1 rounded-full">
+                          Active
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex flex-col items-center text-center">
+                      {isLoading ? (
+                        <RefreshCw className="w-8 h-8 mb-3 animate-spin" />
+                      ) : (
+                        <div className={`w-12 h-12 mb-3 rounded-full flex items-center justify-center ${
+                          isActive ? "bg-white/20" : "bg-[#c5a8de]/10"
+                        }`}>
+                          <svg className={`w-6 h-6 ${isActive ? "text-white" : "text-[#c5a8de]"}`} fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
+                          </svg>
+                        </div>
+                      )}
+                      
+                      <h3 className={`font-semibold mb-1 ${isActive ? "text-white" : "text-gray-900"}`}>
+                        {course.name}
+                      </h3>
+                      
+                      {course.description && (
+                        <p className={`text-sm line-clamp-2 ${isActive ? "text-white/90" : "text-gray-600"}`}>
+                          {course.description}
+                        </p>
+                      )}
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Score Progress Section - Only show if course has tests */}
+        {tests.length > 0 && (startingScore !== null || currentScore !== null) && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             {/* Starting Score */}
             {startingScore !== null && (
@@ -362,22 +470,35 @@ function DashboardContent() {
             transition={{ delay: 0.4 }}
             className="bg-white rounded-2xl shadow-lg p-8"
           >
-            <h2 className="text-2xl font-semibold text-gray-900  mb-2">
-              Need help/support from Joseph, our trusted expert?
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Struggling, confused, or not improving? We'll get you back on
-              track right away:
-            </p>
-            <a
-              href="https://calendly.com/notefulljoseph/toefl-course-help"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full bg-[#c5a8de] text-white py-4 rounded-lg font-medium hover:bg-[#b399d6] transition-all flex items-center justify-center gap-2 mb-4"
-            >
-              <Calendar className="w-5 h-5" />
-              Schedule a Session with Joseph Here
-            </a>
+            <div className="flex flex-col md:flex-row gap-8 items-center">
+              <div className="md:w-[30%] flex-shrink-0">
+                <div className="relative w-48 h-48 mx-auto">
+                  <img
+                    src="https://i0.wp.com/www.notefull.com/wp-content/uploads/2017/05/NotefullJoseph-2-scaled.jpg?w=2114&ssl=1"
+                    alt="Joseph - TOEFL Expert"
+                    className="w-full h-full rounded-full object-cover shadow-xl ring-4 ring-[#c5a8de]/20"
+                  />
+                </div>
+              </div>
+              <div className="md:w-[70%] flex flex-col">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                  Need help/support from Joseph, our trusted expert?
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Struggling, confused, or not improving? We'll get you back on
+                  track right away:
+                </p>
+                <a
+                  href="https://calendly.com/notefulljoseph/toefl-course-help"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full md:w-auto bg-[#c5a8de] text-white py-4 px-8 rounded-lg font-medium hover:bg-[#b399d6] hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-md"
+                >
+                  <Calendar className="w-5 h-5" />
+                  Schedule a Session with Joseph Here
+                </a>
+              </div>
+            </div>
           </motion.div>
 
           {/* Send Message */}

@@ -21,4 +21,31 @@ interface User {
   updatedAt: Date | null;
 }
 
+// Update type for modifying user information
+export type UpdateUser = Partial<
+  Pick<
+    User,
+    | "firstName"
+    | "lastName"
+    | "email"
+    | "onboardingComplete"
+  >
+> & {
+  howDidYouHearAboutUs?: string;
+  englishProficiency?: string;
+};
+
+// Draft type for creating support messages
+export type DraftSupportMessage = {
+  message: string;
+  supportType:
+    | "technical"
+    | "course-content"
+    | "billing"
+    | "general"
+    | "feedback";
+  userId: string;
+  email: string;
+};
+
 export type { User };

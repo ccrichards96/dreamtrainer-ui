@@ -13,68 +13,7 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
-export interface APIResponse<T = unknown> {
-  message: string;
-  data: T;
-  success: boolean;
-}
-
-export interface ApiError {
-  message: string;
-  code?: string;
-  details?: Record<string, unknown>;
-}
-
-// Note: Request interceptor for authentication is now handled by ApiProvider
-// This keeps the client clean and allows for proper Auth0 token management
-
-// Response interceptor - for error handling, token refresh, etc.
-// apiClient.interceptors.response.use(
-//   (response: AxiosResponse) => {
-//     // Log responses in development
-//     if (import.meta.env.DEV) {
-//       console.log('API Response:', {
-//         status: response.status,
-//         url: response.config.url,
-//         data: response.data
-//       });
-//     }
-
-//     return response;
-//   },
-//   (error: AxiosError) => {
-//     // Handle common errors
-//     if (error.response) {
-//       const status = error.response.status;
-//       const message = error.response.data || 'An error occurred';
-
-//       switch (status) {
-//         case 401:
-//           console.error('Unauthorized - redirecting to login');
-//           // Handle unauthorized access
-//           localStorage.removeItem('auth_token');
-//           window.location.href = '/login';
-//           break;
-//         case 403:
-//           console.error('Forbidden - insufficient permissions');
-//           break;
-//         case 404:
-//           console.error('Resource not found');
-//           break;
-//         case 500:
-//           console.error('Internal server error');
-//           break;
-//         default:
-//           console.error(`API Error ${status}:`, message);
-//       }
-//     } else if (error.request) {
-//       console.error('Network Error:', error.request);
-//     } else {
-//       console.error('Request Setup Error:', error.message);
-//     }
-
-//     return Promise.reject(error);
-//   }
-// );
+// Re-export types from the centralized types file
+export type { APIResponse, ApiError } from "../../types/api";
 
 export default apiClient;

@@ -26,6 +26,12 @@ export default function Navigation() {
                 >
                   Dashboard
                 </Link>
+                <Link
+                  to="/courses"
+                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Courses
+                </Link>
                 {/* <Link
                   to="/blog"
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"

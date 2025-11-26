@@ -97,18 +97,20 @@ const ModuleContent: React.FC<ModuleContentProps> = ({
             </motion.div>
 
             {/* Video Section */}
-            <motion.div variants={itemVariants} className="px-8 pb-6">
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg">
-                <iframe
-                  src={currentModule.videoUrl}
-                  className="w-full h-full"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title={`${currentModule.topic} Video`}
-                />
-              </div>
-            </motion.div>
+            {currentModule.videoUrl && (
+              <motion.div variants={itemVariants} className="px-8 pb-6">
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg">
+                  <iframe
+                    src={currentModule.videoUrl}
+                    className="w-full h-full"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={`${currentModule.topic} Video`}
+                  />
+                </div>
+              </motion.div>
+            )}
 
             {/* Lesson Content Section */}
             {currentModule.lessonContent && (
@@ -131,22 +133,24 @@ const ModuleContent: React.FC<ModuleContentProps> = ({
             )}
 
             {/* Bot Iframe Section */}
-            <motion.div variants={itemVariants} className="px-8 pb-8">
-              <div className="border-t border-gray-100 pt-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Interactive Tutor
-                </h3>
-                <div className="relative w-full h-[600px] rounded-xl overflow-hidden shadow-lg border border-gray-200">
-                  <iframe
-                    src={currentModule.botIframeUrl}
-                    className="w-full h-full"
-                    frameBorder="0"
-                    scrolling="no"
-                    title={`${currentModule.topic} Tutor`}
-                  />
+            {currentModule.botIframeUrl && (
+              <motion.div variants={itemVariants} className="px-8 pb-8">
+                <div className="border-t border-gray-100 pt-6">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                    Interactive Tutor
+                  </h3>
+                  <div className="relative w-full h-[600px] rounded-xl overflow-hidden shadow-lg border border-gray-200">
+                    <iframe
+                      src={currentModule.botIframeUrl}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      scrolling="no"
+                      title={`${currentModule.topic} Tutor`}
+                    />
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            )}
           </motion.div>
         </motion.div>
       </AnimatePresence>

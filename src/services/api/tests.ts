@@ -6,12 +6,6 @@ export interface TestAttemptData {
   currentAttempt: TestAttempt | null;
 }
 
-export interface ApiError {
-  message: string;
-  code?: string;
-  details?: Record<string, unknown>;
-}
-
 /**
  * Get all test attempts (first and current) for the authenticated user in a course
  * @param courseId - The course ID to get test attempts for

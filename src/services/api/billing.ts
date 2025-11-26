@@ -1,5 +1,5 @@
-import apiClient from "./client";
-import { Subscription, BillingData, UserBillingInfoResponse } from "../../types/billing";
+import apiClient, { APIResponse } from "./client";
+import { Subscription, BillingData, UserBillingData } from "../../types/billing";
 
 // Billing related interfaces
 export interface UserBillingInfo {
@@ -14,35 +14,13 @@ export interface CheckoutSessionRequest {
   mode?: "payment" | "subscription" | "setup";
 }
 
-export interface CheckoutSessionResponse {
-  success: boolean;
-  data: {
-    checkoutUrl: string;
-  };
-  message: string;
-}
-
-export interface BillingPortalResponse {
-  success: boolean;
-  data: {
-    portalUrl: string;
-  };
-  message: string;
-}
-
-export interface GetUserSubscriptionsResponse {
-  success: boolean;
-  data: BillingData[];
-  message: string;
-}
-
 /**
  * Get all available subscription packages
  * @returns Promise<any[]> - List of available subscription packages
  */
 export const getAllProducts = async (): Promise<any[]> => {
   try {
-    const response = await apiClient.get<any[]>("/billing/products");
+    const response = await apiClient.get<APIResponse<any[]>>("/billing/products");
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
@@ -54,12 +32,12 @@ export const getAllProducts = async (): Promise<any[]> => {
 
 /**
  * Get the current user's billing information and subscription details
- * @returns Promise<UserBillingInfoResponse> - User's billing and subscription information
+ * @returns Promise<UserBillingData> - User's billing and subscription information
  */
-export const getUserBillingInfo = async (): Promise<UserBillingInfoResponse> => {
+export const getUserBillingInfo = async (): Promise<UserBillingData> => {
   try {
-    const response = await apiClient.get<UserBillingInfoResponse>("/billing/me");
-    return response.data;
+    const response = await apiClient.get<APIResponse<UserBillingData>>("/billing/me");
+    return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to get user billing info: ${error.message}`);
@@ -73,17 +51,17 @@ export const getUserBillingInfo = async (): Promise<UserBillingInfoResponse> => 
 /**
  * Create a Stripe checkout session
  * @param checkoutData - Checkout session configuration
- * @returns Promise<CheckoutSessionResponse> - Checkout session URL and ID
+ * @returns Promise<{ checkoutUrl: string }> - Checkout session URL
  */
 export const createCheckoutSession = async (
   checkoutData: CheckoutSessionRequest,
-): Promise<CheckoutSessionResponse> => {
+): Promise<{ checkoutUrl: string }> => {
   try {
-    const response = await apiClient.post<CheckoutSessionResponse>(
+    const response = await apiClient.post<APIResponse<{ checkoutUrl: string }>>(
       "/billing/checkout-session",
       checkoutData,
     );
-    return response.data;
+    return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to create checkout session: ${error.message}`);
@@ -96,15 +74,15 @@ export const createCheckoutSession = async (
 
 /**
  * Generate a Stripe billing portal link for account management
- * @returns Promise<BillingPortalResponse> - Billing portal URL
+ * @returns Promise<{ portalUrl: string }> - Billing portal URL
  */
-export const generateBillingPortalLink = async (returnUrl: string): Promise<BillingPortalResponse> => {
+export const generateBillingPortalLink = async (returnUrl: string): Promise<{ portalUrl: string }> => {
   try {
-    const response = await apiClient.post<BillingPortalResponse>(
+    const response = await apiClient.post<APIResponse<{ portalUrl: string }>>(
       "/billing/portal",
       { returnUrl },
     );
-    return response.data;
+    return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to generate billing portal link: ${error.message}`);
@@ -117,14 +95,14 @@ export const generateBillingPortalLink = async (returnUrl: string): Promise<Bill
 
 /**
  * Get all user subscriptions
- * @returns Promise<GetUserSubscriptionsResponse> - List of user subscriptions
+ * @returns Promise<BillingData[]> - List of user subscriptions
  */
-export const getUserSubscriptions = async (): Promise<GetUserSubscriptionsResponse> => {
+export const getUserSubscriptions = async (): Promise<BillingData[]> => {
   try {
-    const response = await apiClient.get<GetUserSubscriptionsResponse>(
+    const response = await apiClient.get<APIResponse<BillingData[]>>(
       "/billing/subscriptions",
     );
-    return response.data;
+    return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to get user subscriptions: ${error.message}`);

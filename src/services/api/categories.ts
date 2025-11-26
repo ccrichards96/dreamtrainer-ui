@@ -1,33 +1,9 @@
-import apiClient from "./client";
-
-// Category types based on API documentation
-export interface Category {
-  id: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string;
-}
-
-export interface CreateCategoryDTO {
-  name: string;
-}
-
-export interface UpdateCategoryDTO {
-  name?: string;
-}
-
-export interface CategoryResponse {
-  success: boolean;
-  data: Category;
-  message: string;
-}
-
-export interface CategoryListResponse {
-  success: boolean;
-  data: Category[];
-  message: string;
-}
+import apiClient, { APIResponse } from "./client";
+import type {
+  Category,
+  DraftCategory,
+  UpdateCategory,
+} from "../../types/categories";
 
 // Categories API service
 export const categoriesApi = {
@@ -37,7 +13,7 @@ export const categoriesApi = {
    */
   async getAllCategories(): Promise<Category[]> {
     try {
-      const response = await apiClient.get<CategoryListResponse>("/categories");
+      const response = await apiClient.get<APIResponse<Category[]>>("/categories");
       return response.data.data || [];
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -51,7 +27,7 @@ export const categoriesApi = {
    */
   async getCategoryById(id: string): Promise<Category> {
     try {
-      const response = await apiClient.get<CategoryResponse>(
+      const response = await apiClient.get<APIResponse<Category>>(
         `/categories/${id}`,
       );
       return response.data.data;
@@ -65,9 +41,9 @@ export const categoriesApi = {
    * Create a new category
    * POST /categories
    */
-  async createCategory(categoryData: CreateCategoryDTO): Promise<Category> {
+  async createCategory(categoryData: DraftCategory): Promise<Category> {
     try {
-      const response = await apiClient.post<CategoryResponse>(
+      const response = await apiClient.post<APIResponse<Category>>(
         "/categories",
         categoryData,
       );
@@ -84,10 +60,10 @@ export const categoriesApi = {
    */
   async updateCategory(
     id: string,
-    categoryData: UpdateCategoryDTO,
+    categoryData: UpdateCategory,
   ): Promise<Category> {
     try {
-      const response = await apiClient.put<CategoryResponse>(
+      const response = await apiClient.put<APIResponse<Category>>(
         `/categories/${id}`,
         categoryData,
       );

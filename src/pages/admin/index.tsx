@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Edit3, Trash2, BookOpen, Users, Search, Tag, Megaphone } from "lucide-react";
+import { Edit3, Trash2, BookOpen, Users, Search, Tag, Megaphone, ChevronUp, ChevronDown } from "lucide-react";
 import { Course, Module } from "../../types/modules";
 import {
   getAllCourses,
   getCourseById,
   getCourseWithModulesById,
+  updateCourse,
 } from "../../services/api/modules";
 import {
   CourseEditor,
@@ -23,6 +24,7 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [reorderingCourseId, setReorderingCourseId] = useState<string | null>(null);
   const [view, setView] = useState<
     "overview" | "course-edit" | "module-manage" | "category-manage" | "announcement-manage"
   >("overview");
@@ -33,7 +35,14 @@ const AdminDashboard: React.FC = () => {
       try {
         setLoading(true);
         const response = await getAllCourses();
-        setCourses(response.data || []);
+        // Sort courses by order field, then by createdAt if order is the same
+        const sortedCourses = (response.data || []).sort((a: Course, b: Course) => {
+          if (a.order !== b.order) {
+            return a.order - b.order;
+          }
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        });
+        setCourses(sortedCourses);
       } catch (err) {
         setError("Failed to load courses");
         console.error("Error fetching courses:", err);
@@ -58,14 +67,9 @@ const AdminDashboard: React.FC = () => {
 
       try {
         const response = await getCourseById(course.id);
-        console.log("Course edit response:", response);
 
-        // Handle different possible response structures
         const courseData = response.data?.course || response.data || response;
         const modulesData = response.data?.modules || [];
-
-        console.log("Parsed course data:", courseData);
-        console.log("Parsed modules data:", modulesData);
 
         // Use the fetched data if available, otherwise fall back to the original course
         setSelectedCourse(courseData && courseData.id ? courseData : course);
@@ -89,24 +93,19 @@ const AdminDashboard: React.FC = () => {
   const handleManageModules = async (course: Course) => {
     try {
       setLoading(true);
-
       try {
         const response = await getCourseWithModulesById(course.id);
 
-        // Handle different possible response structures
         const courseData = response.data || response;
         const modulesData = response.data?.modules || [];
 
-        // Use the fetched data if available, otherwise fall back to the original course
         setSelectedCourse(courseData && courseData.id ? courseData : course);
         setSelectedCourseModules(modulesData);
       } catch (apiError) {
         console.warn("API call failed, using original course data:", apiError);
-        // Fallback to the original course data if API fails
         setSelectedCourse(course);
         setSelectedCourseModules([]);
       }
-
       setView("module-manage");
     } catch (err) {
       setError("Failed to load course modules");
@@ -133,9 +132,55 @@ const AdminDashboard: React.FC = () => {
   const refreshCourses = async () => {
     try {
       const response = await getAllCourses();
-      setCourses(response.data || []);
+      // Sort courses by order field, then by createdAt if order is the same
+      const sortedCourses = (response.data || []).sort((a: Course, b: Course) => {
+        if (a.order !== b.order) {
+          return a.order - b.order;
+        }
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      });
+      setCourses(sortedCourses);
     } catch (err) {
       console.error("Error refreshing courses:", err);
+    }
+  };
+
+  const handleMoveCourse = async (courseId: string, direction: 'up' | 'down') => {
+    const currentIndex = courses.findIndex(c => c.id === courseId);
+    if (currentIndex === -1) return;
+
+    // Prevent moving beyond bounds
+    if (direction === 'up' && currentIndex === 0) return;
+    if (direction === 'down' && currentIndex === courses.length - 1) return;
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const newList = [...courses];
+    
+    // Swap positions
+    [newList[currentIndex], newList[newIndex]] = [newList[newIndex], newList[currentIndex]];
+    
+    // Update order values
+    newList.forEach((course, index) => {
+      course.order = index;
+    });
+
+    // Optimistically update UI
+    setCourses(newList);
+    setReorderingCourseId(courseId);
+
+    try {
+      // Update both courses' order on backend
+      await Promise.all([
+        updateCourse(newList[currentIndex].id, { order: newList[currentIndex].order }),
+        updateCourse(newList[newIndex].id, { order: newList[newIndex].order })
+      ]);
+    } catch (err) {
+      setError("Failed to reorder courses. Please refresh the page.");
+      console.error("Error reordering courses:", err);
+      // Revert on error
+      await refreshCourses();
+    } finally {
+      setReorderingCourseId(null);
     }
   };
 
@@ -227,7 +272,7 @@ const AdminDashboard: React.FC = () => {
                   <BookOpen className="w-8 h-8 text-blue-600" />
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">
-                      Total Courses
+                      Total Course Sections
                     </p>
                     <p className="text-2xl font-semibold text-gray-900">
                       {courses.length}
@@ -276,7 +321,7 @@ const AdminDashboard: React.FC = () => {
             <div className="bg-white rounded-lg shadow overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h3 className="text-lg font-medium text-gray-900">
-                  All Courses
+                  TOEFL Max Course Group - All Courses Sections
                 </h3>
               </div>
               <div className="overflow-x-auto">
@@ -298,14 +343,36 @@ const AdminDashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredCourses.map((course) => (
+                    {filteredCourses.map((course, index) => (
                       <tr key={course.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {course.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            ID: {course.id}
+                          <div className="flex items-start gap-3">
+                            <div className="flex flex-col items-center gap-1 pt-1">
+                              <button
+                                onClick={() => handleMoveCourse(course.id, 'up')}
+                                disabled={index === 0 || reorderingCourseId !== null}
+                                className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                                title="Move up"
+                              >
+                                <ChevronUp className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleMoveCourse(course.id, 'down')}
+                                disabled={index === filteredCourses.length - 1 || reorderingCourseId !== null}
+                                className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                                title="Move down"
+                              >
+                                <ChevronDown className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {course.name}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                ID: {course.id}
+                              </div>
+                            </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -320,19 +387,24 @@ const AdminDashboard: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleEditCourse(course)}
-                              className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                              disabled={reorderingCourseId !== null}
+                              className="text-blue-600 hover:text-blue-900 flex items-center gap-1 disabled:opacity-50"
                             >
                               <Edit3 className="w-4 h-4" />
                               Edit
                             </button>
                             <button
                               onClick={() => handleManageModules(course)}
-                              className="text-green-600 hover:text-green-900 flex items-center gap-1"
+                              disabled={reorderingCourseId !== null}
+                              className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50"
                             >
                               <BookOpen className="w-4 h-4" />
                               Modules
                             </button>
-                            <button className="text-red-600 hover:text-red-900 flex items-center gap-1">
+                            <button 
+                              disabled={reorderingCourseId !== null}
+                              className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"
+                            >
                               <Trash2 className="w-4 h-4" />
                               Delete
                             </button>
