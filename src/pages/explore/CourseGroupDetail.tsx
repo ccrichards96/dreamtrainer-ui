@@ -115,9 +115,17 @@ export const CourseGroupDetail = ({ courses }: CourseGroupDetailProps) => {
     );
   }
 
+  // Sort courses by order field, then by createdAt
+  const sortedCourses = [...courses].sort((a, b) => {
+    if (a.order !== b.order) {
+      return a.order - b.order;
+    }
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  });
+
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {courses.map((course, index) => (
+      {sortedCourses.map((course, index) => (
         <div
           key={course.id}
           className="flex flex-col bg-white border shadow-sm rounded-xl overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"

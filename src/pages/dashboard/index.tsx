@@ -79,8 +79,11 @@ function DashboardContent() {
     const fetchCourses = async () => {
       try {
         const courses: Course[] = await getAllCourses();
-        // Sort courses by createdAt, oldest first
+        // Sort courses by order field, then by createdAt if order is the same
         const sortedCourses = courses.sort((a, b) => {
+          if (a.order !== b.order) {
+            return a.order - b.order;
+          }
           const dateA = new Date(a.createdAt).getTime();
           const dateB = new Date(b.createdAt).getTime();
           return dateA - dateB;
