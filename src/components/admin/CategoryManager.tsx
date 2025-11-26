@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Plus, Edit3, Trash2, X, Save, AlertCircle, Tag } from "lucide-react";
+import type { Category, DraftCategory, UpdateCategory } from "../../types/categories";
 import {
-  Category,
-  CreateCategoryDTO,
   getAllCategories,
   createCategory,
   updateCategory,
   deleteCategory,
 } from "../../services/api/categories";
 
-interface CategoryFormData {
-  name: string;
-}
+type CategoryFormData = DraftCategory;
 
 const CategoryManager: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -112,7 +109,7 @@ const CategoryManager: React.FC = () => {
         // Update existing category
         const updatedCategory = await updateCategory(
           editingCategory.id,
-          formData,
+          formData as UpdateCategory,
         );
         setCategories((prev) =>
           prev.map((category) =>
@@ -121,7 +118,7 @@ const CategoryManager: React.FC = () => {
         );
       } else {
         // Create new category
-        const newCategory = await createCategory(formData as CreateCategoryDTO);
+        const newCategory = await createCategory(formData);
         setCategories((prev) => [...prev, newCategory]);
       }
 

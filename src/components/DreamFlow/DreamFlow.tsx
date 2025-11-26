@@ -42,8 +42,14 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
     markModuleAsCompleted(currentModuleIndex);
 
     if (isLastModule()) {
-      // When user clicks "Test Your Skills" on last module, start test mode
-      startTestMode();
+      // When user clicks "Review Materials Again" or "Test Your Skills" on last module
+      if (tests.length > 0) {
+        // Start test mode if tests are available
+        startTestMode();
+      } else {
+        // Reset to first module and clear progress to review materials again
+        resetToFirstModule(true);
+      }
     } else {
       // Move to next module after marking current as completed
       nextModule();
@@ -176,6 +182,7 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
               onPrevious={handlePreviousModule}
               isLastModule={isLastModule()}
               isFirstModule={isFirstModule()}
+              hasTests={tests.length > 0}
             />
           </div>
         )}

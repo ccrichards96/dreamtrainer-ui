@@ -1,5 +1,9 @@
-import apiClient from "./client";
-import { Announcement, AnnouncementsResponse } from "../../types/announcements";
+import apiClient, { APIResponse } from "./client";
+import {
+  Announcement,
+  DraftAnnouncement,
+  UpdateAnnouncement,
+} from "../../types/announcements";
 
 /**
  * Get all announcements
@@ -8,7 +12,7 @@ import { Announcement, AnnouncementsResponse } from "../../types/announcements";
 export const getAllAnnouncements = async (): Promise<Announcement[]> => {
   try {
     const response =
-      await apiClient.get<AnnouncementsResponse>("/announcements");
+      await apiClient.get<APIResponse<Announcement[]>>("/announcements");
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
@@ -25,9 +29,14 @@ export const getAllAnnouncements = async (): Promise<Announcement[]> => {
  * @param announcementData - The announcement data to create
  * @returns Promise<Announcement> - The created announcement
  */
-export const createAnnouncement = async (announcementData: Omit<Announcement, 'id' | 'createdAt' | 'updatedAt'>): Promise<Announcement> => {
+export const createAnnouncement = async (
+  announcementData: DraftAnnouncement,
+): Promise<Announcement> => {
   try {
-    const response = await apiClient.post<{ data: Announcement }>("/announcements", announcementData);
+    const response = await apiClient.post<APIResponse<Announcement>>(
+      "/announcements",
+      announcementData,
+    );
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
@@ -43,9 +52,12 @@ export const createAnnouncement = async (announcementData: Omit<Announcement, 'i
  * @param announcementData - The updated announcement data
  * @returns Promise<Announcement> - The updated announcement
  */
-export const updateAnnouncement = async (id: string, announcementData: Partial<Omit<Announcement, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Announcement> => {
+export const updateAnnouncement = async (
+  id: string,
+  announcementData: UpdateAnnouncement,
+): Promise<Announcement> => {
   try {
-    const response = await apiClient.put<{ data: Announcement }>(`/announcements/${id}`, announcementData);
+    const response = await apiClient.put<APIResponse<Announcement>>(`/announcements/${id}`, announcementData);
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {

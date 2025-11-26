@@ -21,12 +21,6 @@ export interface AssessmentResponse {
   submittedAt: string;
 }
 
-export interface ApiError {
-  message: string;
-  code?: string;
-  details?: Record<string, unknown>;
-}
-
 /**
  * Submit an assessment for evaluation
  * @param assessmentData - The assessment form data

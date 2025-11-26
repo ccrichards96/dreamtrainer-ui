@@ -1,8 +1,13 @@
-interface Category {
+export interface Category {
   id: string;
   name: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
 }
 
-export type { Category };
+// Draft type for creating new categories
+export type DraftCategory = Pick<Category, "name">;
+
+// Update type for modifying existing categories
+export type UpdateCategory = Partial<DraftCategory>;

@@ -1,26 +1,5 @@
 import apiClient, { APIResponse } from "./client";
-import { User } from "../../types/user";
-
-export interface UpdateUserDTO {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  onboardingComplete?: boolean;
-  howDidYouHearAboutUs?: string;
-  englishProficiency?: string;
-}
-
-export interface SupportMessageDTO {
-  message: string;
-  supportType:
-    | "technical"
-    | "course-content"
-    | "billing"
-    | "general"
-    | "feedback";
-  userId: string;
-  email: string;
-}
+import type { User, UpdateUser, DraftSupportMessage } from "../../types/user";
 
 /**
  * Get current user information
@@ -44,7 +23,7 @@ export const getCurrentUser = async (): Promise<User> => {
  * @returns Promise<User> - Updated user data
  */
 export const updateCurrentUser = async (
-  userData: UpdateUserDTO,
+  userData: UpdateUser,
 ): Promise<User> => {
   try {
     const response = await apiClient.put<APIResponse<User>>(
@@ -66,7 +45,7 @@ export const updateCurrentUser = async (
  * @returns Promise<void> - Success confirmation
  */
 export const sendSupportMessage = async (
-  messageData: SupportMessageDTO,
+  messageData: DraftSupportMessage,
 ): Promise<void> => {
   try {
     const response = await apiClient.post<APIResponse<void>>(

@@ -67,11 +67,11 @@ const AccountPage = () => {
 
       try {
         // Call the real API to get user subscriptions
-        const response = await getUserSubscriptions();
+        const subscriptions = await getUserSubscriptions();
         
-        if (response.success && response.data.length > 0) {
+        if (subscriptions.length > 0) {
           // Use the first active subscription (you might want to handle multiple subscriptions differently)
-          const activeSubscription = response.data.find(sub => sub.status === "active") || response.data[0];
+          const activeSubscription = subscriptions.find(sub => sub.status === "active") || subscriptions[0];
 
           setBillingData(activeSubscription);
         } else {
@@ -124,7 +124,7 @@ const AccountPage = () => {
       const response = await generateBillingPortalLink(returnUrl);
       
       // Redirect to the Stripe billing portal
-      window.location.href = response.data.portalUrl;
+      window.location.href = response.portalUrl;
     } catch (error) {
       console.error("Error opening billing portal:", error);
       alert("Failed to open billing portal. Please try again.");

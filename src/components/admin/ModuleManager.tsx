@@ -8,16 +8,20 @@ import {
   Save,
   AlertCircle,
   BookOpen,
+  ChevronUp,
+  ChevronDown,
+  GripVertical,
 } from "lucide-react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { Course, Module } from "../../types/modules";
+import { Category } from "../../types/categories";
 import {
   createModule,
   updateModule,
   deleteModule,
 } from "../../services/api/modules";
-import { Category, getAllCategories } from "../../services/api/categories";
+import { getAllCategories } from "../../services/api/categories";
 
 interface ModuleManagerProps {
   course: Course;
@@ -27,8 +31,6 @@ interface ModuleManagerProps {
 interface ModuleFormData {
   topic: string;
   description: string;
-  level: number;
-  estimatedTime: number;
   videoUrl: string;
   botIframeUrl: string;
   lessonContent: string;
@@ -36,19 +38,20 @@ interface ModuleFormData {
 }
 
 const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
-  const [moduleList, setModuleList] = useState<Module[]>(modules);
+  const [moduleList, setModuleList] = useState<Module[]>(
+    [...modules].sort((a, b) => a.order - b.order)
+  );
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingModule, setEditingModule] = useState<Module | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [reorderingModuleId, setReorderingModuleId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<ModuleFormData>({
     topic: "",
     description: "",
-    level: 1,
-    estimatedTime: 30,
     videoUrl: "",
     botIframeUrl: "",
     lessonContent: "",
@@ -59,8 +62,6 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     setFormData({
       topic: "",
       description: "",
-      level: 1,
-      estimatedTime: 30,
       videoUrl: "",
       botIframeUrl: "",
       lessonContent: "",
@@ -94,10 +95,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "level" || name === "estimatedTime"
-          ? parseInt(value) || 0
-          : value,
+      [name]: value,
     }));
   };
 
@@ -120,8 +118,6 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     setFormData({
       topic: module.topic,
       description: module.description,
-      level: module.level,
-      estimatedTime: module.estimatedTime,
       videoUrl: module.videoUrl,
       botIframeUrl: module.botIframeUrl,
       lessonContent: module.lessonContent,
@@ -153,9 +149,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
           courseId: course.id,
           topic: formData.topic,
           description: formData.description,
-          level: formData.level,
           status: "active",
-          estimatedTime: formData.estimatedTime,
           videoUrl: formData.videoUrl,
           botIframeUrl: formData.botIframeUrl,
           lessonContent: formData.lessonContent,
@@ -191,6 +185,45 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     } catch (err) {
       setError("Failed to delete module. Please try again.");
       console.error("Error deleting module:", err);
+    }
+  };
+
+  const handleMoveModule = async (moduleId: string, direction: 'up' | 'down') => {
+    const currentIndex = moduleList.findIndex(m => m.id === moduleId);
+    if (currentIndex === -1) return;
+
+    // Prevent moving beyond bounds
+    if (direction === 'up' && currentIndex === 0) return;
+    if (direction === 'down' && currentIndex === moduleList.length - 1) return;
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const newList = [...moduleList];
+    
+    // Swap positions
+    [newList[currentIndex], newList[newIndex]] = [newList[newIndex], newList[currentIndex]];
+    
+    // Update order values
+    newList.forEach((module, index) => {
+      module.order = index;
+    });
+
+    // Optimistically update UI
+    setModuleList(newList);
+    setReorderingModuleId(moduleId);
+
+    try {
+      // Update both modules' order on backend
+      await Promise.all([
+        updateModule(newList[currentIndex].id, { order: newList[currentIndex].order }),
+        updateModule(newList[newIndex].id, { order: newList[newIndex].order })
+      ]);
+    } catch (err) {
+      setError("Failed to reorder modules. Please refresh the page.");
+      console.error("Error reordering modules:", err);
+      // Revert on error
+      setModuleList(moduleList);
+    } finally {
+      setReorderingModuleId(null);
     }
   };
 
@@ -343,56 +376,13 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                 )}
               </div>
 
-              {/* Level */}
-              <div>
-                <label
-                  htmlFor="level"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Difficulty Level
-                </label>
-                <select
-                  id="level"
-                  name="level"
-                  value={formData.level}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value={1}>Beginner (1)</option>
-                  <option value={2}>Elementary (2)</option>
-                  <option value={3}>Intermediate (3)</option>
-                  <option value={4}>Advanced (4)</option>
-                  <option value={5}>Expert (5)</option>
-                </select>
-              </div>
-
-              {/* Estimated Time */}
-              <div>
-                <label
-                  htmlFor="estimatedTime"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Estimated Time (minutes)
-                </label>
-                <input
-                  type="number"
-                  id="estimatedTime"
-                  name="estimatedTime"
-                  value={formData.estimatedTime}
-                  onChange={handleInputChange}
-                  min="5"
-                  max="240"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
               {/* Video URL */}
               <div>
                 <label
                   htmlFor="videoUrl"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Video URL
+                  Vimeo Video URL
                 </label>
                 <input
                   type="url"
@@ -411,7 +401,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                   htmlFor="botIframeUrl"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Bot iFrame URL
+                 VectorShift Bot iFrame URL
                 </label>
                 <input
                   type="url"
@@ -519,8 +509,35 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
         ) : (
           <div className="divide-y divide-gray-200">
             {moduleList.map((module, index) => (
-              <div key={module.id} className="p-6 hover:bg-gray-50">
-                <div className="flex items-start justify-between">
+              <div 
+                key={module.id} 
+                className={`p-6 hover:bg-gray-50 transition-colors ${
+                  reorderingModuleId === module.id ? 'bg-blue-50' : ''
+                }`}
+              >
+                <div className="flex items-start gap-4">
+                  {/* Reorder Controls */}
+                  <div className="flex flex-col items-center gap-1 pt-1">
+                    <button
+                      onClick={() => handleMoveModule(module.id, 'up')}
+                      disabled={index === 0 || reorderingModuleId !== null}
+                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                      title="Move up"
+                    >
+                      <ChevronUp className="w-5 h-5" />
+                    </button>
+                    <GripVertical className="w-5 h-5 text-gray-300" />
+                    <button
+                      onClick={() => handleMoveModule(module.id, 'down')}
+                      disabled={index === moduleList.length - 1 || reorderingModuleId !== null}
+                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                      title="Move down"
+                    >
+                      <ChevronDown className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Module Content */}
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-sm font-medium text-gray-500">
@@ -529,31 +546,28 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                       <h5 className="text-lg font-medium text-gray-900">
                         {module.topic}
                       </h5>
-                      <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                        Level {module.level}
-                      </span>
+                      {reorderingModuleId === module.id && (
+                        <span className="text-xs text-blue-600 animate-pulse">
+                          Updating...
+                        </span>
+                      )}
                     </div>
                     <p className="text-gray-600 mb-3">{module.description}</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span>⏱ {module.estimatedTime} minutes</span>
-                      <span>
-                        📹 {module.videoUrl ? "Video available" : "No video"}
-                      </span>
-                      <span>
-                        🤖 {module.botIframeUrl ? "Bot available" : "No bot"}
-                      </span>
-                    </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleEditModule(module)}
-                      className="text-blue-600 hover:text-blue-800 p-2"
+                      disabled={reorderingModuleId !== null}
+                      className="text-blue-600 hover:text-blue-800 p-2 disabled:opacity-50"
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDeleteModule(module.id)}
-                      className="text-red-600 hover:text-red-800 p-2"
+                      disabled={reorderingModuleId !== null}
+                      className="text-red-600 hover:text-red-800 p-2 disabled:opacity-50"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

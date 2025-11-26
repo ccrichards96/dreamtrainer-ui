@@ -19,11 +19,6 @@ export default function CheckoutSuccess() {
     const handleCheckoutSuccess = async () => {
       // Wait for Auth0 and API to be ready before making API calls
       if (auth0Loading || !isAuthenticated || !apiInitialized) {
-        // console.log("Waiting for auth/API initialization:", {
-        //   auth0Loading,
-        //   isAuthenticated,
-        //   apiInitialized,
-        // });
         return;
       }
 

@@ -7,6 +7,7 @@ interface NavigationButtonProps {
   onPrevious?: () => void;
   isLastModule: boolean;
   isFirstModule?: boolean;
+  hasTests?: boolean;
 }
 
 const NavigationButton: React.FC<NavigationButtonProps> = ({
@@ -14,6 +15,7 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
   onPrevious,
   isLastModule,
   isFirstModule = false,
+  hasTests = true,
 }) => {
   return (
     <motion.div
@@ -54,7 +56,9 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
         whileTap={{ scale: 0.95 }}
         whileInView={{ y: [10, 0] }}
       >
-        <span>{isLastModule ? "Test Your Skills" : "Next"}</span>
+        <span>
+          {isLastModule ? (hasTests ? "Test Your Skills" : "Start Course From Beginning") : "Next"}
+        </span>
         <motion.div
           className="flex items-center justify-center w-6 h-6 bg-white/20 rounded-full"
           animate={{ x: [0, 4, 0] }}
