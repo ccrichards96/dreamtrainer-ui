@@ -56,9 +56,6 @@ const saveProgress = async (
       currentTestId
     };
     
-    console.log('Saving progress data:', progressData);
-    
-    // Save to backend API
     await updateProgress(courseId, progressData);
   } catch (e) {
     console.warn('Failed to save progress:', e);
@@ -282,13 +279,6 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     (index: number): void => {
       setCompletedModules((prev) => {
         const newCompleted = new Set([...prev, index]);
-        
-        // console.log('markModuleAsCompleted:', {
-        //   index,
-        //   currentModuleIndex,
-        //   prevCompleted: Array.from(prev),
-        //   newCompleted: Array.from(newCompleted)
-        // });
         
         // Don't auto-save here - let nextModule handle it
         // This prevents race conditions

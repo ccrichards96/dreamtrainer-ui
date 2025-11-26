@@ -67,14 +67,9 @@ const AdminDashboard: React.FC = () => {
 
       try {
         const response = await getCourseById(course.id);
-        console.log("Course edit response:", response);
 
-        // Handle different possible response structures
         const courseData = response.data?.course || response.data || response;
         const modulesData = response.data?.modules || [];
-
-        console.log("Parsed course data:", courseData);
-        console.log("Parsed modules data:", modulesData);
 
         // Use the fetched data if available, otherwise fall back to the original course
         setSelectedCourse(courseData && courseData.id ? courseData : course);
@@ -98,24 +93,19 @@ const AdminDashboard: React.FC = () => {
   const handleManageModules = async (course: Course) => {
     try {
       setLoading(true);
-
       try {
         const response = await getCourseWithModulesById(course.id);
 
-        // Handle different possible response structures
         const courseData = response.data || response;
         const modulesData = response.data?.modules || [];
 
-        // Use the fetched data if available, otherwise fall back to the original course
         setSelectedCourse(courseData && courseData.id ? courseData : course);
         setSelectedCourseModules(modulesData);
       } catch (apiError) {
         console.warn("API call failed, using original course data:", apiError);
-        // Fallback to the original course data if API fails
         setSelectedCourse(course);
         setSelectedCourseModules([]);
       }
-
       setView("module-manage");
     } catch (err) {
       setError("Failed to load course modules");
