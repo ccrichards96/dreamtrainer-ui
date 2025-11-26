@@ -195,7 +195,7 @@ function DashboardContent() {
             transition={{ delay: 0.05 }}
             className="mb-8"
           >
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your Courses</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your Course Sections</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {availableCourses.map((course, index) => {
                 const isActive = currentCourse?.id === course.id;

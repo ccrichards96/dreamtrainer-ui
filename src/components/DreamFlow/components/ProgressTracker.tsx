@@ -75,7 +75,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                 transition={{ duration: 0.2 }}
               >
                 <h2 className="text-lg font-semibold text-gray-800">
-                  Course Progress
+                  Section Progress
                 </h2>
                 <span className="text-sm text-gray-600">
                   {completedModules.size} of {modules.length} completed

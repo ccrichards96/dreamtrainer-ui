@@ -57,10 +57,10 @@ export const AllCoursesView = ({ courseGroups, onSelectGroup }: AllCoursesViewPr
               {/* Badge and Button row */}
               <div className="flex items-center justify-between">
                 <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                  *New Courses Available
+                  *New Sections Available
                 </span>
                 <button className="px-8 py-3 bg-gray-900 text-white text-base font-medium rounded-lg hover:bg-gray-800 hover:scale-105 transition-all duration-200 inline-flex items-center gap-2">
-                  View Courses
+                  View Sections
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>

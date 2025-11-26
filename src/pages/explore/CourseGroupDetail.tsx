@@ -84,7 +84,7 @@ export const CourseGroupDetail = ({ courses }: CourseGroupDetailProps) => {
     
     if (progress.progressStatus === "Not Started" || progress.progressStatus === "In Progress") {
       return {
-        text: "Continue Course",
+        text: "Continue Section",
         icon: <ArrowRight className="w-4 h-4" />,
         variant: "secondary",
         progress: progress.percentageComplete
@@ -93,7 +93,7 @@ export const CourseGroupDetail = ({ courses }: CourseGroupDetailProps) => {
     
     if (progress.progressStatus === "Completed") {
       return {
-        text: "Review Course",
+        text: "Review Section",
         icon: <ArrowRight className="w-4 h-4" />,
         variant: "completed"
       };

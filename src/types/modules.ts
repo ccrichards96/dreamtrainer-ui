@@ -14,6 +14,7 @@ interface Course {
   name: string; //TOEFL Writing Max Course
   description?: string;
   courseGroupId: string;
+  order: number;
   createdAt: Date;
   updatedAt: Date;
   modules?: Module[];

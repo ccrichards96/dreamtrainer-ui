@@ -125,7 +125,7 @@ export const getModuleById = async (moduleId: string): Promise<Module> => {
  */
 export const updateCourse = async (
   courseId: string,
-  courseData: { name: string; description?: string },
+  courseData: { name?: string; description?: string; order?: number },
 ): Promise<any> => {
   try {
     const response = await apiClient.put<any>(
