@@ -1,9 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import ReactGA from "react-ga4";
 import App from "./App.tsx";
 import "./index.css";
 import "./utils/storyblok";
 import { PostHogProvider } from "posthog-js/react";
+
+// Initialize Google Analytics
+ReactGA.initialize("G-S930B1TCNB");
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

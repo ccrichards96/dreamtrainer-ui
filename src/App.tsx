@@ -18,6 +18,13 @@ import { AuthProvider, ApiProvider } from "./contexts";
 import { AppProvider } from "./contexts/AppContext";
 import NotFound from "./pages/NotFound";
 import { Role } from "./types/user";
+import usePageTracking from "./hooks/usePageTracking";
+
+// Component to handle page tracking (must be inside Router)
+function PageTracker() {
+  usePageTracking();
+  return null;
+}
 
 function App() {
   return (
@@ -33,6 +40,7 @@ function App() {
         <ApiProvider>
           <AppProvider>
             <Router>
+              <PageTracker />
               <div className="min-h-screen bg-gray-100">
                 <Navigation />
                 <div className="pt-16">
