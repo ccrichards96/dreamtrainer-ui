@@ -19,6 +19,65 @@ export const getAllCoursesGroups = async (): Promise<any> => {
 };
 
 /**
+ * Create a new course group
+ * @param groupData - The course group data
+ * @returns Promise<any>
+ */
+export const createCourseGroup = async (groupData: {
+  name: string;
+  description?: string;
+  image?: string;
+}): Promise<any> => {
+  try {
+    const response = await apiClient.post<any>(`/courses/groups`, groupData);
+    return response.data;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || "Failed to create course group",
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
+/**
+ * Add a course to a group
+ * @param courseId - The ID of the course
+ * @param groupId - The ID of the group
+ * @returns Promise<any>
+ */
+export const addCourseToGroup = async (courseId: string, groupId: string): Promise<any> => {
+  try {
+    const response = await apiClient.post<any>(`/courses/${courseId}/group/${groupId}`);
+    return response.data;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || "Failed to add course to group",
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
+/**
+ * Remove a course from its group
+ * @param courseId - The ID of the course
+ * @returns Promise<any>
+ */
+export const removeCourseFromGroup = async (courseId: string): Promise<any> => {
+  try {
+    const response = await apiClient.delete<any>(`/courses/${courseId}/group`);
+    return response.data;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || "Failed to remove course from group",
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
+/**
  * Get all courses
  * @returns Promise<any>
  */

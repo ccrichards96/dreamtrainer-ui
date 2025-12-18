@@ -76,6 +76,8 @@ export default function PricingSelection({
     data.selectedPackage || "premium",
   );
   const [isProcessing, setIsProcessing] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -144,6 +146,7 @@ export default function PricingSelection({
 
     try {
       setIsProcessing(true);
+      setCheckoutError(null);
 
       // Submit onboarding data first (if we have required fields)
       if (data.firstName && data.lastName) {
@@ -170,6 +173,7 @@ export default function PricingSelection({
         successUrl: `${window.location.origin}/checkout/success`,
         cancelUrl: `${window.location.origin}/onboarding`,
         mode: "subscription",
+        ...(promoCode.trim() && { promoCode: promoCode.trim() }),
       });
 
       // Only redirect if we successfully got a checkout session URL
@@ -181,8 +185,8 @@ export default function PricingSelection({
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
       setIsProcessing(false);
-      // You can add user-friendly error notification here
-      // For example: toast.error('Failed to process checkout. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : "Failed to process checkout. Please try again.";
+      setCheckoutError(errorMessage);
     }
   };
 
@@ -284,6 +288,28 @@ export default function PricingSelection({
             </div>
           );
         })}
+        </div>
+      )}
+
+      {/* Promo Code Field */}
+      <div className="mb-8">
+        <label htmlFor="promoCode" className="block text-sm font-medium text-gray-700 mb-2">
+          Promo Code (Optional)
+        </label>
+        <input
+          type="text"
+          id="promoCode"
+          value={promoCode}
+          onChange={(e) => setPromoCode(e.target.value)}
+          placeholder="Enter promo code"
+          className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+        />
+      </div>
+
+      {/* Checkout Error */}
+      {checkoutError && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-700 text-sm">{checkoutError}</p>
         </div>
       )}
 

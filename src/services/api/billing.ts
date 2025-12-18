@@ -1,3 +1,4 @@
+import axios from "axios";
 import apiClient, { APIResponse } from "./client";
 import { Subscription, BillingData, UserBillingData } from "../../types/billing";
 
@@ -12,6 +13,7 @@ export interface CheckoutSessionRequest {
   successUrl: string;
   cancelUrl: string;
   mode?: "payment" | "subscription" | "setup";
+  promoCode?: string;
 }
 
 /**
@@ -63,6 +65,9 @@ export const createCheckoutSession = async (
     );
     return response.data.data;
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    }
     if (error instanceof Error) {
       throw new Error(`Failed to create checkout session: ${error.message}`);
     }

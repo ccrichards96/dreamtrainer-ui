@@ -376,11 +376,16 @@ function DashboardContent() {
             ) : (
               <div className="space-y-4">
                 {announcements
-                  .sort(
-                    (a, b) =>
-                      new Date(b.createdAt).getTime() -
-                      new Date(a.createdAt).getTime(),
-                  )
+                  .sort((a, b) => {
+                    // High priority announcements come first
+                    if (a.priority === "high" && b.priority !== "high") return -1;
+                    if (b.priority === "high" && a.priority !== "high") return 1;
+                    // Low priority announcements come last
+                    if (a.priority === "low" && b.priority !== "low") return 1;
+                    if (b.priority === "low" && a.priority !== "low") return -1;
+                    // Within the same priority, sort by most recent first
+                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                  })
                   .map((announcement) => (
                     <div
                       key={announcement.id}
