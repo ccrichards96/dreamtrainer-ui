@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Edit3, Trash2, BookOpen, Users, Search, Tag, Megaphone, ChevronUp, ChevronDown, Layers, Folder } from "lucide-react";
+import { Edit3, Trash2, BookOpen, Users, Search, Tag, Megaphone, ChevronUp, ChevronDown, Folder, Plus, X, Save } from "lucide-react";
 import { Course, Module, CourseGroup } from "../../types/modules";
 import {
   getAllCourses,
@@ -8,13 +8,15 @@ import {
   getCourseById,
   getCourseWithModulesById,
   updateCourse,
+  createCourse,
+  createCourseGroup,
+  addCourseToGroup,
 } from "../../services/api/modules";
 import {
   CourseEditor,
   ModuleManager,
   CategoryManager,
   AnnouncementManager,
-  CourseGroupManager,
 } from "../../components/admin";
 
 const AdminDashboard: React.FC = () => {
@@ -29,8 +31,27 @@ const AdminDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [reorderingCourseId, setReorderingCourseId] = useState<string | null>(null);
   const [view, setView] = useState<
-    "overview" | "course-edit" | "module-manage" | "category-manage" | "announcement-manage" | "course-group-manage"
+    "overview" | "course-edit" | "module-manage" | "category-manage" | "announcement-manage"
   >("overview");
+
+  // Inline form states for new course
+  const [showNewCourseForm, setShowNewCourseForm] = useState(false);
+  const [newCourseData, setNewCourseData] = useState({
+    name: "",
+    description: "",
+    groupId: "",
+  });
+  const [creatingCourse, setCreatingCourse] = useState(false);
+
+  // Inline form states for new group
+  const [showNewGroupForm, setShowNewGroupForm] = useState(false);
+  const [newGroupData, setNewGroupData] = useState({
+    name: "",
+    description: "",
+    image: "",
+  });
+  const [creatingGroup, setCreatingGroup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Load all courses on component mount
   useEffect(() => {
@@ -149,8 +170,71 @@ const AdminDashboard: React.FC = () => {
     setView("announcement-manage");
   };
 
-  const handleManageCourseGroups = () => {
-    setView("course-group-manage");
+  // Handle creating a new course inline
+  const handleCreateCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCourseData.name.trim()) return;
+
+    try {
+      setCreatingCourse(true);
+      setError(null);
+      const createdCourse = await createCourse({
+        name: newCourseData.name.trim(),
+        description: newCourseData.description.trim() || undefined,
+      });
+
+      // If a group was selected, assign the course to it
+      if (newCourseData.groupId && createdCourse?.data?.id) {
+        await addCourseToGroup(createdCourse.data.id, newCourseData.groupId);
+      }
+
+      setSuccessMessage("Course created successfully!");
+      setNewCourseData({ name: "", description: "", groupId: "" });
+      setShowNewCourseForm(false);
+      await refreshCourses();
+      await refreshGroups();
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to create course";
+      setError(errorMessage);
+    } finally {
+      setCreatingCourse(false);
+    }
+  };
+
+  // Handle creating a new group inline
+  const handleCreateGroup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newGroupData.name.trim()) return;
+
+    try {
+      setCreatingGroup(true);
+      setError(null);
+      await createCourseGroup({
+        name: newGroupData.name.trim(),
+        description: newGroupData.description.trim() || undefined,
+        image: newGroupData.image.trim() || undefined,
+      });
+      setSuccessMessage("Course group created successfully!");
+      setNewGroupData({ name: "", description: "", image: "" });
+      setShowNewGroupForm(false);
+      await refreshGroups();
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to create course group";
+      setError(errorMessage);
+    } finally {
+      setCreatingGroup(false);
+    }
+  };
+
+  const refreshGroups = async () => {
+    try {
+      const response = await getAllCoursesGroups();
+      setCourseGroups(response.data || []);
+    } catch (err) {
+      console.error("Error refreshing groups:", err);
+    }
   };
 
   const refreshCourses = async () => {
@@ -258,23 +342,30 @@ const AdminDashboard: React.FC = () => {
                   Back to Overview
                 </button>
               )}
-              {/* <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                New Course
-              </button> */}
+              {view === "overview" && (
+                <>
+                  <button
+                    onClick={() => setShowNewCourseForm(!showNewCourseForm)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    New Course Section
+                  </button>
+                  <button
+                    onClick={() => setShowNewGroupForm(!showNewGroupForm)}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
+                  >
+                    <Folder className="w-4 h-4" />
+                    New Course
+                  </button>
+                </>
+              )}
               <button
                 onClick={handleManageCategories}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
               >
                 <Tag className="w-4 h-4" />
                 Manage Categories
-              </button>
-              <button
-                onClick={handleManageCourseGroups}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
-              >
-                <Layers className="w-4 h-4" />
-                Manage Courses
               </button>
               <button
                 onClick={handleManageAnnouncements}
@@ -292,6 +383,218 @@ const AdminDashboard: React.FC = () => {
         {/* Overview */}
         {view === "overview" && (
           <>
+            {/* Success Message */}
+            {successMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2"
+              >
+                <div className="text-green-600 font-medium">{successMessage}</div>
+              </motion.div>
+            )}
+
+            {/* Error Message */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between"
+              >
+                <div className="text-red-600 font-medium">{error}</div>
+                <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600">
+                  <X className="w-4 h-4" />
+                </button>
+              </motion.div>
+            )}
+
+            {/* Inline New Course Form */}
+            {showNewCourseForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="bg-white rounded-lg shadow mb-6"
+              >
+                <div className="px-6 py-4 border-b border-gray-200 bg-blue-50">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-gray-900">Create New Course Section</h3>
+                    <button
+                      onClick={() => setShowNewCourseForm(false)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+                <form onSubmit={handleCreateCourse} className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Section Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={newCourseData.name}
+                        onChange={(e) => setNewCourseData({ ...newCourseData, name: e.target.value })}
+                        placeholder="Enter section name"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Description
+                      </label>
+                      <input
+                        type="text"
+                        value={newCourseData.description}
+                        onChange={(e) => setNewCourseData({ ...newCourseData, description: e.target.value })}
+                        placeholder="Enter description"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Assign to Course
+                      </label>
+                      <select
+                        value={newCourseData.groupId}
+                        onChange={(e) => setNewCourseData({ ...newCourseData, groupId: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="">No course (unassigned)</option>
+                        {courseGroups.map((group) => (
+                          <option key={group.id} value={group.id}>
+                            {group.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewCourseForm(false);
+                        setNewCourseData({ name: "", description: "", groupId: "" });
+                      }}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={creatingCourse || !newCourseData.name.trim()}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {creatingCourse ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Creating...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          Create Course Section
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+
+            {/* Inline New Group Form */}
+            {showNewGroupForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="bg-white rounded-lg shadow mb-6"
+              >
+                <div className="px-6 py-4 border-b border-gray-200 bg-indigo-50">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-gray-900">Create New Course</h3>
+                    <button
+                      onClick={() => setShowNewGroupForm(false)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+                <form onSubmit={handleCreateGroup} className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Course Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={newGroupData.name}
+                        onChange={(e) => setNewGroupData({ ...newGroupData, name: e.target.value })}
+                        placeholder="Enter course name"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Description
+                      </label>
+                      <input
+                        type="text"
+                        value={newGroupData.description}
+                        onChange={(e) => setNewGroupData({ ...newGroupData, description: e.target.value })}
+                        placeholder="Enter description"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Image URL
+                      </label>
+                      <input
+                        type="text"
+                        value={newGroupData.image}
+                        onChange={(e) => setNewGroupData({ ...newGroupData, image: e.target.value })}
+                        placeholder="Enter image URL"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewGroupForm(false);
+                        setNewGroupData({ name: "", description: "", image: "" });
+                      }}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={creatingGroup || !newGroupData.name.trim()}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {creatingGroup ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Creating...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          Create Course
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <motion.div
@@ -633,9 +936,6 @@ const AdminDashboard: React.FC = () => {
 
         {/* Announcement Manager */}
         {view === "announcement-manage" && <AnnouncementManager />}
-
-        {/* Course Group Manager */}
-        {view === "course-group-manage" && <CourseGroupManager />}
       </div>
     </div>
   );
