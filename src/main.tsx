@@ -22,5 +22,5 @@ createRoot(document.getElementById("root")!).render(
     >
       <App />
     </PostHogProvider>
-  </StrictMode>,
+  </StrictMode>
 );

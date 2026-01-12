@@ -43,13 +43,9 @@ const TestContent: React.FC<TestContentProps> = ({ test, onSubmit }) => {
 
       {/* Test Section */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-          Assessment: {test.name}
-        </h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4">Assessment: {test.name}</h2>
 
-        {test.description && (
-          <p className="text-gray-600 mb-6">{test.description}</p>
-        )}
+        {test.description && <p className="text-gray-600 mb-6">{test.description}</p>}
 
         {/* External Form Link */}
         {test.formLink ? (
@@ -75,9 +71,7 @@ const TestContent: React.FC<TestContentProps> = ({ test, onSubmit }) => {
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-sm text-gray-600 mb-4">
-              Complete the assessment form below:
-            </p>
+            <p className="text-sm text-gray-600 mb-4">Complete the assessment form below:</p>
             <AssessmentForm
               testName={`Assessment: ${test.name}`}
               onSubmit={handleFormSubmit}

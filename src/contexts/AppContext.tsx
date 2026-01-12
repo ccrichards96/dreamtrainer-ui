@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useEffect,
-  useState,
-  ReactNode,
-  useCallback,
-} from "react";
+import React, { createContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { User } from "../types/user";
 import { UserBillingData } from "../types/billing";
@@ -29,14 +23,8 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const AppProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const {
-    isAuthenticated,
-    user: auth0User,
-    isLoading: auth0Loading,
-  } = useAuth0();
+export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { isAuthenticated, user: auth0User, isLoading: auth0Loading } = useAuth0();
   const { isInitialized: apiInitialized } = useApiContext();
 
   // User profile state
@@ -72,8 +60,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
       const profile = await userService.getCurrentUser();
       setUserProfile(profile);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to load user profile";
+      const errorMessage = err instanceof Error ? err.message : "Failed to load user profile";
       setUserError(errorMessage);
       console.error("Failed to fetch user profile:", err);
 

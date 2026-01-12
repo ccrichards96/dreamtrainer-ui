@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Save, X, AlertCircle } from "lucide-react";
 import { Course, CourseGroup } from "../../types/modules";
-import { updateCourse, getAllCoursesGroups, addCourseToGroup, removeCourseFromGroup } from "../../services/api/modules";
+import {
+  updateCourse,
+  getAllCoursesGroups,
+  addCourseToGroup,
+  removeCourseFromGroup,
+} from "../../services/api/modules";
 
 interface CourseEditorProps {
   course: Course;
@@ -10,11 +15,7 @@ interface CourseEditorProps {
   onCancel: () => void;
 }
 
-const CourseEditor: React.FC<CourseEditorProps> = ({
-  course,
-  onSave,
-  onCancel,
-}) => {
+const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     name: course.name || "",
     description: course.description || "",
@@ -43,7 +44,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({
   }, []);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -99,10 +100,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({
             <h3 className="text-lg font-medium text-gray-900">Edit Course</h3>
             <p className="text-sm text-gray-500">Course ID: {course.id}</p>
           </div>
-          <button
-            onClick={onCancel}
-            className="text-gray-400 hover:text-gray-600"
-          >
+          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -125,10 +123,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({
         <div className="grid grid-cols-1 gap-6">
           {/* Course Name */}
           <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
               Course Name *
             </label>
             <input
@@ -145,10 +140,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({
 
           {/* Course Description */}
           <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
               Course Description
             </label>
             <textarea
@@ -164,10 +156,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({
 
           {/* Course Group Selection */}
           <div>
-            <label
-              htmlFor="courseGroup"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="courseGroup" className="block text-sm font-medium text-gray-700 mb-1">
               Course Group
             </label>
             {loadingGroups ? (
@@ -197,9 +186,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({
           {/* Course Metadata */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Created Date
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Created Date</label>
               <input
                 type="text"
                 value={new Date(course.createdAt).toLocaleDateString()}
@@ -208,9 +195,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Last Updated
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
               <input
                 type="text"
                 value={new Date(course.updatedAt).toLocaleDateString()}

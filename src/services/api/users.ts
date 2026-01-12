@@ -22,14 +22,9 @@ export const getCurrentUser = async (): Promise<User> => {
  * @param userData - User data to update
  * @returns Promise<User> - Updated user data
  */
-export const updateCurrentUser = async (
-  userData: UpdateUser,
-): Promise<User> => {
+export const updateCurrentUser = async (userData: UpdateUser): Promise<User> => {
   try {
-    const response = await apiClient.put<APIResponse<User>>(
-      "/users/me",
-      userData,
-    );
+    const response = await apiClient.put<APIResponse<User>>("/users/me", userData);
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
@@ -44,22 +39,15 @@ export const updateCurrentUser = async (
  * @param messageData - Support message data
  * @returns Promise<void> - Success confirmation
  */
-export const sendSupportMessage = async (
-  messageData: DraftSupportMessage,
-): Promise<void> => {
+export const sendSupportMessage = async (messageData: DraftSupportMessage): Promise<void> => {
   try {
-    const response = await apiClient.post<APIResponse<void>>(
-      "/support/messages",
-      messageData,
-    );
+    const response = await apiClient.post<APIResponse<void>>("/support/messages", messageData);
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to send support message: ${error.message}`);
     }
-    throw new Error(
-      "An unexpected error occurred while sending support message",
-    );
+    throw new Error("An unexpected error occurred while sending support message");
   }
 };
 

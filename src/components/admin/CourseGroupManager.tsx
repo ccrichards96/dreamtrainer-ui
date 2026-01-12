@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  Plus,
-  Save,
-  X,
-  AlertCircle,
-  Folder,
-  Link,
-  Unlink,
-  BookOpen,
-} from "lucide-react";
+import { Plus, Save, X, AlertCircle, Folder, Link, Unlink, BookOpen } from "lucide-react";
 import { Course, CourseGroup } from "../../types/modules";
 import {
   getAllCoursesGroups,
@@ -108,12 +99,12 @@ const CourseGroupManager: React.FC = () => {
         name: newCourseData.name.trim(),
         description: newCourseData.description.trim() || undefined,
       });
-      
+
       // If a group was selected, assign the course to it
       if (newCourseData.groupId && createdCourse?.data?.id) {
         await addCourseToGroup(createdCourse.data.id, newCourseData.groupId);
       }
-      
+
       setSuccess("Course created successfully!");
       setNewCourseData({ name: "", description: "", groupId: "" });
       setShowNewCourseForm(false);
@@ -155,7 +146,8 @@ const CourseGroupManager: React.FC = () => {
       await fetchData();
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to remove course from group";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to remove course from group";
       setError(errorMessage);
     } finally {
       setAssigningCourse(null);
@@ -193,12 +185,8 @@ const CourseGroupManager: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-medium text-gray-900">
-                Courses
-              </h3>
-              <p className="text-sm text-gray-500">
-                Create and manage courses
-              </p>
+              <h3 className="text-lg font-medium text-gray-900">Courses</h3>
+              <p className="text-sm text-gray-500">Create and manage courses</p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -258,33 +246,25 @@ const CourseGroupManager: React.FC = () => {
                   <input
                     type="text"
                     value={newGroupData.name}
-                    onChange={(e) =>
-                      setNewGroupData({ ...newGroupData, name: e.target.value })
-                    }
+                    onChange={(e) => setNewGroupData({ ...newGroupData, name: e.target.value })}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter group name"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Image URL
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
                   <input
                     type="text"
                     value={newGroupData.image}
-                    onChange={(e) =>
-                      setNewGroupData({ ...newGroupData, image: e.target.value })
-                    }
+                    onChange={(e) => setNewGroupData({ ...newGroupData, image: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter image URL (optional)"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   value={newGroupData.description}
                   onChange={(e) =>
@@ -341,9 +321,7 @@ const CourseGroupManager: React.FC = () => {
                   <input
                     type="text"
                     value={newCourseData.name}
-                    onChange={(e) =>
-                      setNewCourseData({ ...newCourseData, name: e.target.value })
-                    }
+                    onChange={(e) => setNewCourseData({ ...newCourseData, name: e.target.value })}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Enter course name"
@@ -387,7 +365,11 @@ const CourseGroupManager: React.FC = () => {
               <div className="flex items-center gap-3">
                 <button
                   type="submit"
-                  disabled={creatingCourse || !newCourseData.name.trim() || !newCourseData.description.trim()}
+                  disabled={
+                    creatingCourse ||
+                    !newCourseData.name.trim() ||
+                    !newCourseData.description.trim()
+                  }
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
                 >
                   {creatingCourse ? (
@@ -438,9 +420,7 @@ const CourseGroupManager: React.FC = () => {
             </div>
             <div className="p-4">
               {getCoursesInGroup(group.id).length === 0 ? (
-                <p className="text-gray-500 text-sm italic">
-                  No courses assigned to this group
-                </p>
+                <p className="text-gray-500 text-sm italic">No courses assigned to this group</p>
               ) : (
                 <ul className="space-y-2">
                   {getCoursesInGroup(group.id).map((course) => (
@@ -449,9 +429,7 @@ const CourseGroupManager: React.FC = () => {
                       className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                     >
                       <div>
-                        <span className="font-medium text-gray-900">
-                          {course.name}
-                        </span>
+                        <span className="font-medium text-gray-900">{course.name}</span>
                         {course.description && (
                           <p className="text-sm text-gray-500 truncate max-w-md">
                             {course.description}
@@ -499,9 +477,7 @@ const CourseGroupManager: React.FC = () => {
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200 bg-yellow-50">
             <h4 className="font-medium text-gray-900">Unassigned Courses</h4>
-            <p className="text-sm text-gray-500">
-              These courses are not assigned to any group
-            </p>
+            <p className="text-sm text-gray-500">These courses are not assigned to any group</p>
           </div>
           <div className="p-4">
             <ul className="space-y-2">
@@ -511,9 +487,7 @@ const CourseGroupManager: React.FC = () => {
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                 >
                   <div>
-                    <span className="font-medium text-gray-900">
-                      {course.name}
-                    </span>
+                    <span className="font-medium text-gray-900">{course.name}</span>
                     {course.description && (
                       <p className="text-sm text-gray-500 truncate max-w-md">
                         {course.description}
@@ -534,12 +508,8 @@ const CourseGroupManager: React.FC = () => {
                       ))}
                     </select>
                     <button
-                      onClick={() =>
-                        handleAssignCourse(course.id, selectedGroupForAssignment)
-                      }
-                      disabled={
-                        !selectedGroupForAssignment || assigningCourse === course.id
-                      }
+                      onClick={() => handleAssignCourse(course.id, selectedGroupForAssignment)}
+                      disabled={!selectedGroupForAssignment || assigningCourse === course.id}
                       className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1 text-sm"
                     >
                       {assigningCourse === course.id ? (

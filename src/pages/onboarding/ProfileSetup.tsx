@@ -37,23 +37,17 @@ export default function ProfileSetup({
   const [firstNameError, setFirstNameError] = useState<string>("");
   const [lastNameError, setLastNameError] = useState<string>("");
   const [selectedSource, setSelectedSource] = useState(
-    howDidYouHearOptions.find(
-      (option) => option.value === data.howDidYouHearAboutUs,
-    )?.value ||
+    howDidYouHearOptions.find((option) => option.value === data.howDidYouHearAboutUs)?.value ||
       (data.howDidYouHearAboutUs &&
-      !howDidYouHearOptions.find(
-        (option) => option.value === data.howDidYouHearAboutUs,
-      )
+      !howDidYouHearOptions.find((option) => option.value === data.howDidYouHearAboutUs)
         ? "other"
-        : ""),
+        : "")
   );
   const [customSource, setCustomSource] = useState(
     data.howDidYouHearAboutUs &&
-      !howDidYouHearOptions.find(
-        (option) => option.value === data.howDidYouHearAboutUs,
-      )
+      !howDidYouHearOptions.find((option) => option.value === data.howDidYouHearAboutUs)
       ? data.howDidYouHearAboutUs
-      : "",
+      : ""
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -70,7 +64,7 @@ export default function ProfileSetup({
 
   const handleFirstNameChange = (value: string) => {
     setFirstName(value);
-    
+
     // Validate the name
     const validation = validateName(value);
     if (validation.isValid) {
@@ -84,7 +78,7 @@ export default function ProfileSetup({
 
   const handleLastNameChange = (value: string) => {
     setLastName(value);
-    
+
     // Validate the name
     const validation = validateName(value);
     if (validation.isValid) {
@@ -118,10 +112,12 @@ export default function ProfileSetup({
     // Validate names before proceeding
     const firstNameValidation = validateName(firstName);
     const lastNameValidation = validateName(lastName);
-    
-    setFirstNameError(firstNameValidation.isValid ? "" : (firstNameValidation.error || "Invalid name"));
-    setLastNameError(lastNameValidation.isValid ? "" : (lastNameValidation.error || "Invalid name"));
-    
+
+    setFirstNameError(
+      firstNameValidation.isValid ? "" : firstNameValidation.error || "Invalid name"
+    );
+    setLastNameError(lastNameValidation.isValid ? "" : lastNameValidation.error || "Invalid name");
+
     if (
       firstNameValidation.isValid &&
       lastNameValidation.isValid &&
@@ -143,9 +139,7 @@ export default function ProfileSetup({
 
       {/* Content */}
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Let's Set Up Your Profile
-        </h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">Let's Set Up Your Profile</h2>
         <p className="text-lg text-gray-600">
           Enter your name, add a profile photo, and tell us how you discovered DreamTrainer
         </p>
@@ -155,47 +149,39 @@ export default function ProfileSetup({
         {/* Name Fields */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              First Name *
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
             <input
               type="text"
               value={firstName}
               onChange={(e) => handleFirstNameChange(e.target.value)}
               placeholder="Enter your first name"
               className={`py-3 px-4 w-full bg-white border rounded-lg text-sm focus:ring-blue-500 ${
-                firstNameError 
-                  ? "border-red-300 focus:border-red-500" 
+                firstNameError
+                  ? "border-red-300 focus:border-red-500"
                   : "border-gray-200 focus:border-blue-500"
               }`}
               maxLength={50}
               required
             />
-            {firstNameError && (
-              <p className="mt-1 text-sm text-red-600">{firstNameError}</p>
-            )}
+            {firstNameError && <p className="mt-1 text-sm text-red-600">{firstNameError}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Last Name *
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
             <input
               type="text"
               value={lastName}
               onChange={(e) => handleLastNameChange(e.target.value)}
               placeholder="Enter your last name"
               className={`py-3 px-4 w-full bg-white border rounded-lg text-sm focus:ring-blue-500 ${
-                lastNameError 
-                  ? "border-red-300 focus:border-red-500" 
+                lastNameError
+                  ? "border-red-300 focus:border-red-500"
                   : "border-gray-200 focus:border-blue-500"
               }`}
               maxLength={50}
               required
             />
-            {lastNameError && (
-              <p className="mt-1 text-sm text-red-600">{lastNameError}</p>
-            )}
+            {lastNameError && <p className="mt-1 text-sm text-red-600">{lastNameError}</p>}
           </div>
         </div>
         {/* Profile Image Upload */}
@@ -240,9 +226,7 @@ export default function ProfileSetup({
             className="hidden"
           />
 
-          <p className="text-xs text-gray-500 mt-2">
-            JPG, PNG or GIF (max. 5MB)
-          </p>
+          <p className="text-xs text-gray-500 mt-2">JPG, PNG or GIF (max. 5MB)</p>
         </div>
 
         {/* How did you hear about us */}

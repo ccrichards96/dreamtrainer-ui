@@ -16,9 +16,7 @@ export const Breadcrumb = ({ items }: BreadcrumbProps) => {
       <ol className="inline-flex items-center space-x-1 md:space-x-3">
         {items.map((item, index) => (
           <li key={index} className="inline-flex items-center">
-            {index > 0 && (
-              <ChevronRight className="w-5 h-5 text-gray-400 mr-1" />
-            )}
+            {index > 0 && <ChevronRight className="w-5 h-5 text-gray-400 mr-1" />}
             {item.onClick ? (
               <button
                 onClick={item.onClick}
@@ -28,9 +26,11 @@ export const Breadcrumb = ({ items }: BreadcrumbProps) => {
                 {item.label}
               </button>
             ) : (
-              <span className={`inline-flex items-center text-sm font-medium ${
-                item.isActive ? "text-[#000]" : "text-gray-500"
-              }`}>
+              <span
+                className={`inline-flex items-center text-sm font-medium ${
+                  item.isActive ? "text-[#000]" : "text-gray-500"
+                }`}
+              >
                 {index === 0 && <BookOpen className="w-4 h-4 mr-2" />}
                 {item.label}
               </span>

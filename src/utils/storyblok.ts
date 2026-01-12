@@ -46,15 +46,16 @@ const components = {
   spacer: Spacer,
   testimonial: Testimonial,
   accordion: Accordion,
-  video: Video
+  video: Video,
 };
 
 // Determine which token to use based on environment
 // In development/staging mode, use preview token to get draft stories
 // In production, use delivery token to get published stories only
-const isDevelopment = import.meta.env.VITE_MODE === "development" || import.meta.env.VITE_MODE === "staging";
-const accessToken = isDevelopment 
-  ? import.meta.env.VITE_STORYBLOK_PREVIEW_API_TOKEN 
+const isDevelopment =
+  import.meta.env.VITE_MODE === "development" || import.meta.env.VITE_MODE === "staging";
+const accessToken = isDevelopment
+  ? import.meta.env.VITE_STORYBLOK_PREVIEW_API_TOKEN
   : import.meta.env.VITE_STORYBLOK_DELIVERY_API_TOKEN;
 
 // Initialize Storyblok with environment-specific configuration

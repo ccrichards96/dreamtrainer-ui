@@ -10,13 +10,14 @@ interface ProtectedRouteProps {
   requireSubscription?: boolean; // Whether an active subscription is required
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  allowedRoles, 
-  requireSubscription = false 
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  allowedRoles,
+  requireSubscription = false,
 }) => {
   const { isAuthenticated, isLoading: auth0Loading } = useAuth0();
-  const { userProfile, userLoading, userError, userBilling, billingLoading, appInitialized } = useApp();
+  const { userProfile, userLoading, userError, userBilling, billingLoading, appInitialized } =
+    useApp();
   const location = useLocation();
 
   // Routes that don't require onboarding completion
@@ -57,9 +58,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Unable to load info
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to load info</h2>
           <p className="text-gray-600 mb-4">{userError}</p>
           <button
             onClick={() => window.location.reload()}
@@ -77,16 +76,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Access Denied
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
           <p className="text-gray-600 mb-4">You do not have permission to access this page.</p>
-            <button
+          <button
             onClick={() => window.history.back()}
             className="bg-[#c5a8de] text-white px-6 py-2 rounded-lg hover:bg-[#b399d6] transition-colors"
-            >
+          >
             Go Back
-            </button>
+          </button>
         </div>
       </div>
     );
@@ -106,9 +103,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Profile Required
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Profile Required</h2>
           <p className="text-gray-600 mb-4">
             Unable to load your user profile. Please try refreshing the page.
           </p>

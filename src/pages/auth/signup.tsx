@@ -58,12 +58,8 @@ export default function Signup() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-[#c5a8de] mb-4">
-            You're already signed up!
-          </h1>
-          <p className="text-[#7c5e99] mb-8">
-            Redirecting you to the dashboard...
-          </p>
+          <h1 className="text-4xl font-bold text-[#c5a8de] mb-4">You're already signed up!</h1>
+          <p className="text-[#7c5e99] mb-8">Redirecting you to the dashboard...</p>
         </div>
       </div>
     );
@@ -80,12 +76,10 @@ export default function Signup() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#e6d8f5] mb-4">
             <UserPlus className="w-8 h-8 text-[#c5a8de]" />
           </div>
-          <h1 className="text-3xl font-bold text-[#7c5e99] mb-2">
-            Create Your Account
-          </h1>
+          <h1 className="text-3xl font-bold text-[#7c5e99] mb-2">Create Your Account</h1>
           <p className="text-[#7c5e99]">
-            Join Dream Trainer to unlock your learning journey, & pass your
-            professional certification tests with ease.
+            Join Dream Trainer to unlock your learning journey, & pass your professional
+            certification tests with ease.
           </p>
         </div>
 
@@ -104,9 +98,7 @@ export default function Signup() {
               <div className="w-full border-t border-[#c5a8de]" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-[#7c5e99]">
-                Or continue with
-              </span>
+              <span className="px-2 bg-white text-[#7c5e99]">Or continue with</span>
             </div>
           </div>
 
@@ -128,10 +120,7 @@ export default function Signup() {
         <div className="mt-8 text-center text-sm text-[#7c5e99]">
           <p>
             Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-[#c5a8de] hover:text-[#7c5e99] font-semibold"
-            >
+            <Link to="/login" className="text-[#c5a8de] hover:text-[#7c5e99] font-semibold">
               Sign in
             </Link>
           </p>

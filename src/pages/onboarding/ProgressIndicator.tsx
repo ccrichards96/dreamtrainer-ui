@@ -25,15 +25,10 @@ export default function ProgressIndicator({
           const isLast = step === totalSteps;
 
           return (
-            <div
-              key={step}
-              className={`flex items-center ${isLast ? "" : "flex-1"}`}
-            >
+            <div key={step} className={`flex items-center ${isLast ? "" : "flex-1"}`}>
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors z-10 ${
-                  step <= currentStep
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-600"
+                  step <= currentStep ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
                 }`}
               >
                 {step}

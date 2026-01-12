@@ -9,25 +9,28 @@
  */
 export const validateName = (name: string): { isValid: boolean; error?: string } => {
   const trimmedName = name.trim();
-  
+
   if (!trimmedName) {
     return { isValid: false, error: "Name is required" };
   }
-  
+
   if (trimmedName.length < 2) {
     return { isValid: false, error: "Name must be at least 2 characters long" };
   }
-  
+
   if (trimmedName.length > 50) {
     return { isValid: false, error: "Name must be less than 50 characters" };
   }
-  
+
   // Check for valid characters (letters, spaces, hyphens, apostrophes)
   const nameRegex = /^[a-zA-Z\s\-']+$/;
   if (!nameRegex.test(trimmedName)) {
-    return { isValid: false, error: "Name can only contain letters, spaces, hyphens, and apostrophes" };
+    return {
+      isValid: false,
+      error: "Name can only contain letters, spaces, hyphens, and apostrophes",
+    };
   }
-  
+
   return { isValid: true };
 };
 
@@ -40,9 +43,9 @@ export const sanitizeName = (name: string): string => {
   return name
     .trim()
     .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 };
 
 /**
@@ -57,7 +60,7 @@ export const validateOnboardingData = (data: {
   englishProficiency?: string;
 }): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
-  
+
   // Validate first name
   if (!data.firstName) {
     errors.push("First name is required");
@@ -67,7 +70,7 @@ export const validateOnboardingData = (data: {
       errors.push(`First name: ${firstNameValidation.error}`);
     }
   }
-  
+
   // Validate last name
   if (!data.lastName) {
     errors.push("Last name is required");
@@ -77,14 +80,14 @@ export const validateOnboardingData = (data: {
       errors.push(`Last name: ${lastNameValidation.error}`);
     }
   }
-  
+
   // Validate how did you hear about us
   if (!data.howDidYouHearAboutUs || !data.howDidYouHearAboutUs.trim()) {
     errors.push("Please tell us how you heard about us");
   }
-  
+
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };

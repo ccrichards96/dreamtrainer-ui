@@ -9,9 +9,7 @@ const Footer: React.FC = () => {
             {/* Logo Section */}
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-2xl font-bold text-gray-900">
-                  Dream Trainer
-                </span>
+                <span className="text-2xl font-bold text-gray-900">Dream Trainer</span>
               </div>
             </div>
 

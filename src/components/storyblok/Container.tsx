@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  storyblokEditable,
-  SbBlokData,
-  StoryblokComponent,
-} from "@storyblok/react";
+import { storyblokEditable, SbBlokData, StoryblokComponent } from "@storyblok/react";
 
 interface ContainerBlok extends SbBlokData {
   content: Array<{
@@ -105,11 +101,7 @@ const Container: React.FC<{ blok: ContainerBlok }> = ({ blok }) => {
 
   // Add margin if specified
   if (blok.margin) {
-    if (
-      blok.margin.includes("px") ||
-      blok.margin.includes("rem") ||
-      blok.margin.includes("%")
-    ) {
+    if (blok.margin.includes("px") || blok.margin.includes("rem") || blok.margin.includes("%")) {
       customStyles.margin = blok.margin;
     } else {
       // Assume it's a Tailwind class

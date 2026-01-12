@@ -12,20 +12,12 @@ interface SupportMessageFormProps {
 
 interface FormData {
   message: string;
-  supportType:
-    | "technical"
-    | "course-content"
-    | "billing"
-    | "general"
-    | "feedback";
+  supportType: "technical" | "course-content" | "billing" | "general" | "feedback";
 }
 
 type FormState = "idle" | "loading" | "success" | "error";
 
-const SupportMessageForm: React.FC<SupportMessageFormProps> = ({
-  isOpen,
-  onClose,
-}) => {
+const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose }) => {
   const { userProfile } = useApp();
   const [formData, setFormData] = useState<FormData>({
     message: "",
@@ -35,9 +27,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -83,9 +73,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({
       }, 2000);
     } catch (error) {
       setFormState("error");
-      setErrorMessage(
-        error instanceof Error ? error.message : "An unexpected error occurred",
-      );
+      setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred");
     }
   };
 
@@ -108,9 +96,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({
             className="text-center py-8"
           >
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Message Sent Successfully!
-            </h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Message Sent Successfully!</h3>
             <p className="text-gray-600">
               Joseph and the Dream Trainer team will get back to you soon.
             </p>
@@ -125,9 +111,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({
             className="text-center py-8"
           >
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Failed to Send Message
-            </h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Failed to Send Message</h3>
             <p className="text-gray-600 mb-4">{errorMessage}</p>
             <button
               onClick={() => setFormState("idle")}
@@ -143,10 +127,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Support Type Selection */}
             <div>
-              <label
-                htmlFor="supportType"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+              <label htmlFor="supportType" className="block text-sm font-medium text-gray-700 mb-2">
                 Support Type
               </label>
               <select
@@ -167,10 +148,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({
 
             {/* Message */}
             <div>
-              <label
-                htmlFor="message"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
                 Message <span className="text-red-500">*</span>
               </label>
               <textarea

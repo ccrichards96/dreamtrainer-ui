@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import type { DreamFlowProps } from "./types";
-import {
-  ProgressTracker,
-  ModuleContent,
-  NavigationButton,
-  TestContent,
-} from "./components";
+import { ProgressTracker, ModuleContent, NavigationButton, TestContent } from "./components";
 import { useCourseContext } from "../../contexts/useCourseContext";
 import { motion } from "framer-motion";
 import { CheckCircle, RotateCcw, Home } from "lucide-react";
@@ -102,12 +97,12 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
   const handleModuleClick = (index: number) => {
     // Calculate the highest module reached
     let highestReached = currentModuleIndex;
-    completedModules.forEach(moduleIndex => {
+    completedModules.forEach((moduleIndex) => {
       if (moduleIndex > highestReached) {
         highestReached = moduleIndex;
       }
     });
-    
+
     // Allow navigation to any module up to the highest reached
     if (index <= highestReached) {
       setCurrentModuleIndex(index);
@@ -130,14 +125,11 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
                 <CheckCircle className="w-10 h-10 text-green-600" />
               </div>
 
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                Assessment Complete!
-              </h2>
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Assessment Complete!</h2>
 
               <p className="text-xl text-gray-600 mb-8">
-                Great job! Your assessment has been submitted successfully. Your
-                score will update, we'll review your work, and send feedback to
-                your email within 24-48 hours.
+                Great job! Your assessment has been submitted successfully. Your score will update,
+                we'll review your work, and send feedback to your email within 24-48 hours.
               </p>
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
@@ -148,9 +140,8 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
                   </span>
                 </div>
                 <p className="text-blue-700 mb-4">
-                  Continue your learning journey by going through the course
-                  modules again to reinforce your skills and knowledge until you
-                  get your dream score!
+                  Continue your learning journey by going through the course modules again to
+                  reinforce your skills and knowledge until you get your dream score!
                 </p>
               </div>
 
@@ -167,10 +158,7 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
           ) : isTestMode && currentTest ? (
             <TestContent test={currentTest} onSubmit={handleTestSubmit} />
           ) : (
-            <ModuleContent
-              modules={modules}
-              currentModuleIndex={currentModuleIndex}
-            />
+            <ModuleContent modules={modules} currentModuleIndex={currentModuleIndex} />
           )}
         </div>
 

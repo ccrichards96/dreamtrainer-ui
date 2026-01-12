@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  BarChart3,
-} from "lucide-react";
+import { CheckCircle, ChevronLeft, ChevronRight, BarChart3 } from "lucide-react";
 import type { Module } from "../types";
 
 interface ProgressTrackerProps {
@@ -32,7 +27,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   // Calculate the highest module reached (current module or any completed module)
   const getHighestModuleReached = (): number => {
     let highest = currentModuleIndex;
-    completedModules.forEach(index => {
+    completedModules.forEach((index) => {
       if (index > highest) {
         highest = index;
       }
@@ -74,9 +69,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.2 }}
               >
-                <h2 className="text-lg font-semibold text-gray-800">
-                  Section Progress
-                </h2>
+                <h2 className="text-lg font-semibold text-gray-800">Section Progress</h2>
                 <span className="text-sm text-gray-600">
                   {completedModules.size} of {modules.length} completed
                 </span>
@@ -143,11 +136,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                         whileHover={isClickable ? { scale: 1.05 } : {}}
                         whileTap={isClickable ? { scale: 0.95 } : {}}
                       >
-                        {completedModules.has(index) ? (
-                          <CheckCircle size={14} />
-                        ) : (
-                          index + 1
-                        )}
+                        {completedModules.has(index) ? <CheckCircle size={14} /> : index + 1}
                       </motion.div>
                     );
                   })}
@@ -202,24 +191,16 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                               : index === currentModuleIndex
                                 ? "bg-indigo-500 text-white"
                                 : "bg-gray-200 text-gray-500"
-                          } ${
-                            isClickable ? "group-hover:ring-2 group-hover:ring-indigo-300" : ""
-                          }`}
+                          } ${isClickable ? "group-hover:ring-2 group-hover:ring-indigo-300" : ""}`}
                           whileHover={isClickable ? { scale: 1.05 } : {}}
                           whileTap={isClickable ? { scale: 0.95 } : {}}
                         >
-                          {completedModules.has(index) ? (
-                            <CheckCircle size={16} />
-                          ) : (
-                            index + 1
-                          )}
+                          {completedModules.has(index) ? <CheckCircle size={16} /> : index + 1}
                         </motion.div>
                         <div className="flex-1 min-w-0">
                           <h4
                             className={`text-sm font-medium truncate ${
-                              index === currentModuleIndex
-                                ? "text-indigo-600"
-                                : "text-gray-700"
+                              index === currentModuleIndex ? "text-indigo-600" : "text-gray-700"
                             }`}
                           >
                             {module.topic}

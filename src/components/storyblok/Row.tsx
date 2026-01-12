@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  storyblokEditable,
-  SbBlokData,
-  StoryblokComponent,
-} from "@storyblok/react";
+import { storyblokEditable, SbBlokData, StoryblokComponent } from "@storyblok/react";
 
 interface RowBlok extends SbBlokData {
   columns: Array<{

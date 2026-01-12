@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  storyblokEditable,
-  SbBlokData,
-  StoryblokComponent,
-} from "@storyblok/react";
+import { storyblokEditable, SbBlokData, StoryblokComponent } from "@storyblok/react";
 
 interface FeatureItem {
   _uid: string;
@@ -93,16 +89,12 @@ const Features: React.FC<{ blok: FeaturesBlok }> = ({ blok }) => {
     },
   ];
 
-  const features =
-    blok.features && blok.features.length > 0 ? blok.features : defaultFeatures;
+  const features = blok.features && blok.features.length > 0 ? blok.features : defaultFeatures;
 
   const FeatureItem: React.FC<{ feature: FeatureItem }> = ({ feature }) => {
-    const iconBgColor =
-      feature.iconBackgroundColor || "bg-gray-50 dark:bg-neutral-800";
-    const iconBorderColor =
-      feature.iconBorderColor || "border-gray-200 dark:border-neutral-700";
-    const iconColor =
-      feature.iconColor || "text-gray-600 dark:text-neutral-400";
+    const iconBgColor = feature.iconBackgroundColor || "bg-gray-50 dark:bg-neutral-800";
+    const iconBorderColor = feature.iconBorderColor || "border-gray-200 dark:border-neutral-700";
+    const iconColor = feature.iconColor || "text-gray-600 dark:text-neutral-400";
 
     return (
       <div className="text-center">
@@ -111,10 +103,7 @@ const Features: React.FC<{ blok: FeaturesBlok }> = ({ blok }) => {
           className={`flex justify-center items-center size-12 ${iconBgColor} border ${iconBorderColor} rounded-full mx-auto`}
         >
           {feature.icon ? (
-            <div
-              className={iconColor}
-              dangerouslySetInnerHTML={{ __html: feature.icon }}
-            />
+            <div className={iconColor} dangerouslySetInnerHTML={{ __html: feature.icon }} />
           ) : (
             // Default icon if none provided
             <svg
@@ -139,14 +128,10 @@ const Features: React.FC<{ blok: FeaturesBlok }> = ({ blok }) => {
         {/* Content */}
         <div className="mt-3">
           {feature.title && (
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-              {feature.title}
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">{feature.title}</h3>
           )}
           {feature.description && (
-            <p className="mt-1 text-gray-600 dark:text-neutral-400">
-              {feature.description}
-            </p>
+            <p className="mt-1 text-gray-600 dark:text-neutral-400">{feature.description}</p>
           )}
         </div>
       </div>

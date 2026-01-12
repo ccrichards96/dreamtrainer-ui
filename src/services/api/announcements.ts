@@ -1,9 +1,5 @@
 import apiClient, { APIResponse } from "./client";
-import {
-  Announcement,
-  DraftAnnouncement,
-  UpdateAnnouncement,
-} from "../../types/announcements";
+import { Announcement, DraftAnnouncement, UpdateAnnouncement } from "../../types/announcements";
 
 /**
  * Get all announcements
@@ -11,16 +7,13 @@ import {
  */
 export const getAllAnnouncements = async (): Promise<Announcement[]> => {
   try {
-    const response =
-      await apiClient.get<APIResponse<Announcement[]>>("/announcements");
+    const response = await apiClient.get<APIResponse<Announcement[]>>("/announcements");
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to get announcements: ${error.message}`);
     }
-    throw new Error(
-      "An unexpected error occurred while fetching announcements",
-    );
+    throw new Error("An unexpected error occurred while fetching announcements");
   }
 };
 
@@ -30,12 +23,12 @@ export const getAllAnnouncements = async (): Promise<Announcement[]> => {
  * @returns Promise<Announcement> - The created announcement
  */
 export const createAnnouncement = async (
-  announcementData: DraftAnnouncement,
+  announcementData: DraftAnnouncement
 ): Promise<Announcement> => {
   try {
     const response = await apiClient.post<APIResponse<Announcement>>(
       "/announcements",
-      announcementData,
+      announcementData
     );
     return response.data.data;
   } catch (error) {
@@ -54,10 +47,13 @@ export const createAnnouncement = async (
  */
 export const updateAnnouncement = async (
   id: string,
-  announcementData: UpdateAnnouncement,
+  announcementData: UpdateAnnouncement
 ): Promise<Announcement> => {
   try {
-    const response = await apiClient.put<APIResponse<Announcement>>(`/announcements/${id}`, announcementData);
+    const response = await apiClient.put<APIResponse<Announcement>>(
+      `/announcements/${id}`,
+      announcementData
+    );
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {

@@ -21,8 +21,7 @@ const proficiencyLevels = [
   {
     value: "0-60",
     label: "0 to 60",
-    description:
-      "Beginning level - Basic understanding of simple conversations",
+    description: "Beginning level - Basic understanding of simple conversations",
   },
   {
     value: "61-80",
@@ -32,14 +31,12 @@ const proficiencyLevels = [
   {
     value: "81-100",
     label: "81 to 100",
-    description:
-      "Advanced level - Good command of English for academic purposes",
+    description: "Advanced level - Good command of English for academic purposes",
   },
   {
     value: "101-120",
     label: "101 to 120",
-    description:
-      "Excellent level - Near-native proficiency in academic English",
+    description: "Excellent level - Near-native proficiency in academic English",
   },
 ];
 
@@ -51,9 +48,7 @@ export default function ProficiencyLevel({
   currentStep = 2,
   totalSteps = 3,
 }: ProficiencyLevelProps) {
-  const [selectedLevel, setSelectedLevel] = useState(
-    data.englishProficiency || "",
-  );
+  const [selectedLevel, setSelectedLevel] = useState(data.englishProficiency || "");
 
   const handleLevelSelect = (level: string) => {
     setSelectedLevel(level);
@@ -76,9 +71,7 @@ export default function ProficiencyLevel({
         <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <BookOpen className="w-8 h-8 text-blue-600" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          What was your last TOEFL score?
-        </h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">What was your last TOEFL score?</h2>
         <p className="text-lg text-gray-600">
           This helps us personalize your TOEFL preparation experience
         </p>
@@ -99,18 +92,14 @@ export default function ProficiencyLevel({
               <div className="flex-1">
                 <h3
                   className={`text-lg font-semibold mb-2 ${
-                    selectedLevel === level.value
-                      ? "text-blue-900"
-                      : "text-gray-900"
+                    selectedLevel === level.value ? "text-blue-900" : "text-gray-900"
                   }`}
                 >
                   {level.label}
                 </h3>
                 <p
                   className={`text-sm ${
-                    selectedLevel === level.value
-                      ? "text-blue-700"
-                      : "text-gray-600"
+                    selectedLevel === level.value ? "text-blue-700" : "text-gray-600"
                   }`}
                 >
                   {level.description}
@@ -119,14 +108,10 @@ export default function ProficiencyLevel({
 
               <div
                 className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-1 ${
-                  selectedLevel === level.value
-                    ? "border-blue-500 bg-blue-500"
-                    : "border-gray-300"
+                  selectedLevel === level.value ? "border-blue-500 bg-blue-500" : "border-gray-300"
                 }`}
               >
-                {selectedLevel === level.value && (
-                  <div className="w-2 h-2 bg-white rounded-full" />
-                )}
+                {selectedLevel === level.value && <div className="w-2 h-2 bg-white rounded-full" />}
               </div>
             </div>
           </div>

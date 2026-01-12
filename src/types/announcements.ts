@@ -10,10 +10,7 @@ export interface Announcement {
 }
 
 // Draft type for creating new announcements
-export type DraftAnnouncement = Pick<
-  Announcement,
-  "name" | "message" | "type" | "priority"
->;
+export type DraftAnnouncement = Pick<Announcement, "name" | "message" | "type" | "priority">;
 
 // Update type for modifying existing announcements
 export type UpdateAnnouncement = Partial<DraftAnnouncement>;

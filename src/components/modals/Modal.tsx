@@ -82,11 +82,7 @@ const Modal: React.FC<ModalProps> = ({
             {/* Header */}
             {(title || showCloseButton) && (
               <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                {title && (
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    {title}
-                  </h2>
-                )}
+                {title && <h2 className="text-xl font-semibold text-gray-900">{title}</h2>}
                 {showCloseButton && (
                   <button
                     onClick={onClose}
@@ -100,9 +96,7 @@ const Modal: React.FC<ModalProps> = ({
             )}
 
             {/* Content */}
-            <div className="overflow-y-auto max-h-[calc(90vh-8rem)]">
-              {children}
-            </div>
+            <div className="overflow-y-auto max-h-[calc(90vh-8rem)]">{children}</div>
           </motion.div>
         </div>
       )}

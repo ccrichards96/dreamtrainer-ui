@@ -117,9 +117,7 @@ export const getCourseById = async (courseId: string): Promise<any> => {
  * @param courseId - The ID of the course
  * @returns Promise<any>
  */
-export const getCourseWithModulesById = async (
-  courseId: string,
-): Promise<any> => {
+export const getCourseWithModulesById = async (courseId: string): Promise<any> => {
   try {
     const response = await apiClient.get<any>(`/courses/${courseId}/modules`);
     return response.data;
@@ -137,19 +135,17 @@ export const getCourseWithModulesById = async (
  * @param courseId - The ID of the course
  * @returns Promise<Module[]>
  */
-export const getAllModulesByCourse = async (
-  courseId: string,
-): Promise<Module[]> => {
+export const getAllModulesByCourse = async (courseId: string): Promise<Module[]> => {
   try {
     const response = await apiClient.get<APIResponse<Module[]>>(
-      `/courses/${courseId}/modules-list`,
+      `/courses/${courseId}/modules-list`
     );
     return response.data.data;
   } catch (error: unknown) {
     const apiError: ApiError = {
       message:
-        (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || "Failed to fetch modules",
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        "Failed to fetch modules",
       status: (error as { response?: { status?: number } })?.response?.status,
     };
     throw apiError;
@@ -184,13 +180,10 @@ export const getModuleById = async (moduleId: string): Promise<Module> => {
  */
 export const updateCourse = async (
   courseId: string,
-  courseData: { name?: string; description?: string; order?: number },
+  courseData: { name?: string; description?: string; order?: number }
 ): Promise<any> => {
   try {
-    const response = await apiClient.put<any>(
-      `/courses/${courseId}`,
-      courseData,
-    );
+    const response = await apiClient.put<any>(`/courses/${courseId}`, courseData);
     return response.data;
   } catch (error: any) {
     const apiError: ApiError = {
@@ -264,15 +257,9 @@ export const createModule = async (moduleData: DraftModule): Promise<any> => {
  * @param moduleData - The module data to update
  * @returns Promise<any>
  */
-export const updateModule = async (
-  moduleId: string,
-  moduleData: UpdateModule,
-): Promise<any> => {
+export const updateModule = async (moduleId: string, moduleData: UpdateModule): Promise<any> => {
   try {
-    const response = await apiClient.put<any>(
-      `/modules/${moduleId}`,
-      moduleData,
-    );
+    const response = await apiClient.put<any>(`/modules/${moduleId}`, moduleData);
     return response.data;
   } catch (error: any) {
     const apiError: ApiError = {

@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, Check, Crown, Star, type LucideIcon } from "lucide-react";
 import { OnboardingData } from "./index";
 import ProgressIndicator from "./ProgressIndicator";
-import { CheckoutSessionRequest, createCheckoutSession, getAllProducts } from "../../services/api/billing";
+import {
+  CheckoutSessionRequest,
+  createCheckoutSession,
+  getAllProducts,
+} from "../../services/api/billing";
 import { updateCurrentUser } from "../../services/api/users";
 
 // Type for pricing plan with both API and UI fields
@@ -31,15 +35,18 @@ interface ApiPlan {
 }
 
 // UI configuration for pricing plans - maps plan IDs to UI-specific properties
-const planUIConfig: Record<string, {
-  icon: LucideIcon;
-  iconColor: string;
-  bgColor: string;
-  borderColor: string;
-  features: string[];
-  popular?: boolean;
-}> = {
-  'TOEFL Max Writing': {
+const planUIConfig: Record<
+  string,
+  {
+    icon: LucideIcon;
+    iconColor: string;
+    bgColor: string;
+    borderColor: string;
+    features: string[];
+    popular?: boolean;
+  }
+> = {
+  "TOEFL Max Writing": {
     icon: Crown,
     iconColor: "text-blue-600",
     bgColor: "bg-blue-50",
@@ -72,9 +79,7 @@ export default function PricingSelection({
   currentStep = 3,
   totalSteps = 3,
 }: PricingSelectionProps) {
-  const [selectedPlan, setSelectedPlan] = useState(
-    data.selectedPackage || "premium",
-  );
+  const [selectedPlan, setSelectedPlan] = useState(data.selectedPackage || "premium");
   const [isProcessing, setIsProcessing] = useState(false);
   const [promoCode, setPromoCode] = useState("");
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
@@ -88,14 +93,14 @@ export default function PricingSelection({
       try {
         setIsLoading(true);
         setError(null);
-        
+
         const apiPlans = await getAllProducts();
 
         // Merge API data with UI configuration
         const enrichedPlans = apiPlans.map((plan: ApiPlan) => {
           let uiConfig = null;
           if (plan.name === "TOEFL Max Writing") {
-            uiConfig = planUIConfig['TOEFL Max Writing'];
+            uiConfig = planUIConfig["TOEFL Max Writing"];
           }
           // Fallback to default config if still no match
           if (!uiConfig) {
@@ -114,7 +119,7 @@ export default function PricingSelection({
           } as PricingPlan;
         });
         setPricingPlans(enrichedPlans);
-        
+
         // Auto-select the first plan if no plan is currently selected
         if (enrichedPlans.length > 0) {
           const currentSelection = data.selectedPackage;
@@ -159,9 +164,7 @@ export default function PricingSelection({
       }
 
       // Find the selected plan to get its price ID
-      const selectedPlanData = pricingPlans.find(
-        (plan: PricingPlan) => plan.id === selectedPlan,
-      );
+      const selectedPlanData = pricingPlans.find((plan: PricingPlan) => plan.id === selectedPlan);
       if (!selectedPlanData) {
         setIsProcessing(false);
         throw new Error("Selected plan not found");
@@ -188,7 +191,8 @@ export default function PricingSelection({
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
       setIsProcessing(false);
-      const errorMessage = error instanceof Error ? error.message : "Failed to process checkout. Please try again.";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to process checkout. Please try again.";
       setCheckoutError(errorMessage);
     }
   };
@@ -203,9 +207,7 @@ export default function PricingSelection({
         <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
           <Star className="w-8 h-8 text-white" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Choose Your Plan
-        </h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Plan</h2>
         <p className="text-lg text-gray-600">
           Select the perfect plan to accelerate your English learning journey
         </p>
@@ -232,65 +234,59 @@ export default function PricingSelection({
           {pricingPlans.map((plan: PricingPlan) => {
             const IconComponent = plan.icon;
             return (
-            <div
-              key={plan.id}
-              onClick={() => handlePlanSelect(plan.id)}
-              className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all hover:shadow-lg ${
-                selectedPlan === plan.id
-                  ? "border-blue-500 shadow-lg ring-2 ring-blue-500 ring-opacity-20"
-                  : plan.borderColor
-              } ${plan.bgColor}`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-xs font-semibold">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-
-              <div className="text-center mb-4">
-                <div
-                  className={`w-12 h-12 ${plan.bgColor} rounded-lg flex items-center justify-center mx-auto mb-3`}
-                >
-                  <IconComponent className={`w-6 h-6 ${plan.iconColor}`} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
-                <p className="text-sm text-gray-600 mt-1">{plan.description}</p>
-              </div>
-
-              <div className="text-center mb-6">
-                <div className="flex items-baseline justify-center">
-                  <span className="text-3xl font-bold text-gray-900">
-                    ${plan.amount}
-                  </span>
-                  <span className="text-gray-600 ml-1">/month</span>
-                </div>
-              </div>
-
-              <ul className="space-y-3 mb-6">
-                {plan.features.map((feature: string, index: number) => (
-                  <li key={index} className="flex items-start">
-                    <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
               <div
-                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mx-auto ${
+                key={plan.id}
+                onClick={() => handlePlanSelect(plan.id)}
+                className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all hover:shadow-lg ${
                   selectedPlan === plan.id
-                    ? "border-blue-500 bg-blue-500"
-                    : "border-gray-300"
-                }`}
+                    ? "border-blue-500 shadow-lg ring-2 ring-blue-500 ring-opacity-20"
+                    : plan.borderColor
+                } ${plan.bgColor}`}
               >
-                {selectedPlan === plan.id && (
-                  <div className="w-2 h-2 bg-white rounded-full" />
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-xs font-semibold">
+                      Most Popular
+                    </span>
+                  </div>
                 )}
+
+                <div className="text-center mb-4">
+                  <div
+                    className={`w-12 h-12 ${plan.bgColor} rounded-lg flex items-center justify-center mx-auto mb-3`}
+                  >
+                    <IconComponent className={`w-6 h-6 ${plan.iconColor}`} />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
+                  <p className="text-sm text-gray-600 mt-1">{plan.description}</p>
+                </div>
+
+                <div className="text-center mb-6">
+                  <div className="flex items-baseline justify-center">
+                    <span className="text-3xl font-bold text-gray-900">${plan.amount}</span>
+                    <span className="text-gray-600 ml-1">/month</span>
+                  </div>
+                </div>
+
+                <ul className="space-y-3 mb-6">
+                  {plan.features.map((feature: string, index: number) => (
+                    <li key={index} className="flex items-start">
+                      <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-gray-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mx-auto ${
+                    selectedPlan === plan.id ? "border-blue-500 bg-blue-500" : "border-gray-300"
+                  }`}
+                >
+                  {selectedPlan === plan.id && <div className="w-2 h-2 bg-white rounded-full" />}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
       )}
 

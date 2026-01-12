@@ -1,12 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Loader2,
-  Info,
-  Save,
-  LifeBuoy,
-  Camera,
-  User,
-} from "lucide-react";
+import { Loader2, Info, Save, LifeBuoy, Camera, User } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { generateBillingPortalLink, getUserSubscriptions } from "../../services/api/billing";
 import { BillingData } from "../../types/billing";
@@ -20,9 +13,7 @@ const AccountPage = () => {
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | null>(
-    user?.picture || null,
-  );
+  const [profileImage, setProfileImage] = useState<string | null>(user?.picture || null);
   const [billingData, setBillingData] = useState<BillingData | null>(null);
   const [isLoadingBilling, setIsLoadingBilling] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -35,7 +26,7 @@ const AccountPage = () => {
   // Check if user logged in via social provider
   useEffect(() => {
     if (userProfile) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         firstName: userProfile.firstName || "",
         lastName: userProfile.lastName || "",
@@ -68,10 +59,11 @@ const AccountPage = () => {
       try {
         // Call the real API to get user subscriptions
         const subscriptions = await getUserSubscriptions();
-        
+
         if (subscriptions.length > 0) {
           // Use the first active subscription (you might want to handle multiple subscriptions differently)
-          const activeSubscription = subscriptions.find(sub => sub.status === "active") || subscriptions[0];
+          const activeSubscription =
+            subscriptions.find((sub) => sub.status === "active") || subscriptions[0];
 
           setBillingData(activeSubscription);
         } else {
@@ -118,11 +110,11 @@ const AccountPage = () => {
 
     try {
       // Get the current frontend URL as the return URL
-      const returnUrl = window.location.origin + '/account';
-      
+      const returnUrl = window.location.origin + "/account";
+
       // Call the billing portal service
       const response = await generateBillingPortalLink(returnUrl);
-      
+
       // Redirect to the Stripe billing portal
       window.location.href = response.portalUrl;
     } catch (error) {
@@ -235,9 +227,7 @@ const AccountPage = () => {
         <div className="space-y-6">
           {/* Profile Section */}
           <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Profile
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Profile</h2>
 
             {/* Profile Image Section */}
             <div className="flex items-center space-x-6 mb-6 pb-6 border-b border-gray-100">
@@ -267,7 +257,7 @@ const AccountPage = () => {
               </div>
               <div>
                 <h3 className="text-lg font-medium text-gray-900">
-                  {userProfile 
+                  {userProfile
                     ? `${userProfile.firstName} ${userProfile.lastName}`.trim() || "User"
                     : user?.name || "User"}
                 </h3>
@@ -284,9 +274,7 @@ const AccountPage = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  First Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700">First Name</label>
                 <input
                   type="text"
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -295,9 +283,7 @@ const AccountPage = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Last Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Last Name</label>
                 <input
                   type="text"
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -306,9 +292,7 @@ const AccountPage = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Email
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
                 <input
                   type="email"
                   disabled
@@ -319,7 +303,8 @@ const AccountPage = () => {
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Info className="w-4 h-4 text-blue-500" />
                 <p>
-                  <span className="font-medium">Change Password:</span> To change your password, logout and head to the login page, then click the reset password link.
+                  <span className="font-medium">Change Password:</span> To change your password,
+                  logout and head to the login page, then click the reset password link.
                 </p>
               </div>
             </div>
@@ -330,12 +315,8 @@ const AccountPage = () => {
             {/* Plan & Usage Section */}
             <div className="bg-white rounded-xl shadow p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Plan & Usage
-                </h2>
-                {isLoadingBilling && (
-                  <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
-                )}
+                <h2 className="text-xl font-semibold text-gray-900">Plan & Usage</h2>
+                {isLoadingBilling && <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />}
               </div>
               <div className="space-y-4">
                 {/* Plan Info Row */}
@@ -356,9 +337,7 @@ const AccountPage = () => {
                           </td>
                           <td className="py-2 pr-6 pl-4 text-gray-900">
                             {billingData.amount && billingData.amount > 0 ? (
-                              <span className="font-medium">
-                                ${billingData.amount}/month
-                              </span>
+                              <span className="font-medium">${billingData.amount}/month</span>
                             ) : (
                               <span className="text-gray-500">Free</span>
                             )}
@@ -376,9 +355,7 @@ const AccountPage = () => {
                               }`}
                             >
                               {billingData.status.charAt(0).toUpperCase() +
-                                billingData.status
-                                  .slice(1)
-                                  .replace("_", " ")}
+                                billingData.status.slice(1).replace("_", " ")}
                             </span>
                           </td>
                         </tr>
@@ -396,25 +373,22 @@ const AccountPage = () => {
                       <Loader2 className="w-4 h-4 animate-spin" />
                       Please wait...
                     </>
-                  ) : "Manage Plan"}
+                  ) : (
+                    "Manage Plan"
+                  )}
                 </button>
               </div>
             </div>
 
             {/* Support Section */}
             <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Support
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Support</h2>
               <div className="flex flex-col items-center text-center py-4 space-y-6">
                 <LifeBuoy className="w-16 h-16 text-blue-500" />
                 <div>
-                  <p className="text-lg font-medium text-gray-800">
-                    Need help with anything?
-                  </p>
+                  <p className="text-lg font-medium text-gray-800">Need help with anything?</p>
                   <p className="text-gray-600 mt-1">
-                    Our support team is here to assist you with any questions or
-                    issues.
+                    Our support team is here to assist you with any questions or issues.
                   </p>
                 </div>
                 <button

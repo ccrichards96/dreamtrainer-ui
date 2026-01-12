@@ -16,10 +16,7 @@ const VideoComponent: React.FC<{ blok: VideoBlok }> = ({ blok }) => {
 
   // Helper function to extract URL from Storyblok link
   const getLinkUrl = (
-    link:
-      | string
-      | { url?: string; cached_url?: string; linktype?: string }
-      | undefined,
+    link: string | { url?: string; cached_url?: string; linktype?: string } | undefined
   ): string => {
     if (!link) return "";
     if (typeof link === "string") return link;
@@ -45,22 +42,22 @@ const VideoComponent: React.FC<{ blok: VideoBlok }> = ({ blok }) => {
   // Extract Vimeo video ID from the link
   const getVimeoEmbedUrl = (link: string): string => {
     if (!link) return "";
-    
+
     // Handle various Vimeo URL formats
     // https://vimeo.com/123456789
     // https://player.vimeo.com/video/123456789
     const vimeoRegex = /(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/;
     const match = link.match(vimeoRegex);
-    
+
     if (match && match[1]) {
       return `https://player.vimeo.com/video/${match[1]}`;
     }
-    
+
     // If already an embed URL, return as is
     if (link.includes("player.vimeo.com")) {
       return link;
     }
-    
+
     // Fallback to the original link
     return link;
   };
@@ -70,15 +67,15 @@ const VideoComponent: React.FC<{ blok: VideoBlok }> = ({ blok }) => {
 
   return (
     <div className="video-container">
-        <iframe
-          src={embedUrl}
-          width={getWidth()}
-          height={getHeight()}
-          frameBorder="0"
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowFullScreen
-          title={blok.title || "Video"}
-        />
+      <iframe
+        src={embedUrl}
+        width={getWidth()}
+        height={getHeight()}
+        frameBorder="0"
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowFullScreen
+        title={blok.title || "Video"}
+      />
     </div>
   );
 };

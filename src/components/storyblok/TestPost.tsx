@@ -18,9 +18,7 @@ const TestPost: React.FC<{ blok: TestPostBlok }> = ({ blok }) => {
         <p>UID: {String(blok._uid)}</p>
       </div>
 
-      <h1 className="text-3xl font-bold mb-4">
-        {blok.title || "Test Post Title"}
-      </h1>
+      <h1 className="text-3xl font-bold mb-4">{blok.title || "Test Post Title"}</h1>
 
       <p className="text-gray-600 mb-4">
         {blok.intro || "This is a test post to verify component rendering."}
@@ -28,9 +26,7 @@ const TestPost: React.FC<{ blok: TestPostBlok }> = ({ blok }) => {
 
       <div className="bg-gray-100 p-4 rounded">
         <h3 className="font-semibold mb-2">Blok Data:</h3>
-        <pre className="text-sm overflow-auto">
-          {JSON.stringify(blok, null, 2)}
-        </pre>
+        <pre className="text-sm overflow-auto">{JSON.stringify(blok, null, 2)}</pre>
       </div>
     </div>
   );

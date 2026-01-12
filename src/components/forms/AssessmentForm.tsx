@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth0 } from "@auth0/auth0-react";
-import {
-  CheckCircle,
-  Clock,
-  Star,
-  TrendingUp,
-  ArrowRight,
-  RefreshCw,
-} from "lucide-react";
-import {
-  submitAssessment,
-  type AssessmentSubmission,
-} from "../../services/api";
+import { CheckCircle, Clock, Star, TrendingUp, ArrowRight, RefreshCw } from "lucide-react";
+import { submitAssessment, type AssessmentSubmission } from "../../services/api";
 import { useCourseContext } from "../../contexts/useCourseContext";
 
 interface AssessmentFormData {
@@ -88,9 +78,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
     }));
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
 
@@ -134,7 +122,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
       await submitAssessment(
         currentTest?.id || "default-test-id", // testId
         user?.sub || "", // userId
-        assessmentData,
+        assessmentData
       );
 
       setSubmitted(true);
@@ -185,7 +173,8 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
           Assessment Submitted Successfully!
         </h2>
         <p className="text-lg text-gray-600 mb-8">
-          Thank you for your submission. Refresh your dashboard in 15 minutes, and you'll see your score appear. And, we'll send your personal feedback to your email within 48 hours.
+          Thank you for your submission. Refresh your dashboard in 15 minutes, and you'll see your
+          score appear. And, we'll send your personal feedback to your email within 48 hours.
         </p>
       </motion.div>
     );
@@ -195,15 +184,10 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
     <div className="w-full">
       {/* Header */}
       {showHeader && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{testName}</h2>
           <p className="text-gray-600">
-            Submit your TOEFL writing test for professional evaluation and
-            feedback.
+            Submit your TOEFL writing test for professional evaluation and feedback.
           </p>
         </motion.div>
       )}
@@ -225,8 +209,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
               htmlFor="homework_completed"
             >
               <CheckCircle className="w-4 h-4 text-gray-400" />
-              Did you complete your full homework since your last test
-              submission? *
+              Did you complete your full homework since your last test submission? *
             </label>
             <input
               id="homework_completed"
@@ -246,8 +229,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
               htmlFor="followed_toefl_timing"
             >
               <Clock className="w-4 h-4 text-gray-400" />
-              Did you complete this practice test according to strict TOEFL
-              timing? *
+              Did you complete this practice test according to strict TOEFL timing? *
             </label>
             <input
               id="followed_toefl_timing"
@@ -275,9 +257,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
               name="essay_question_1"
               value={form.essay_question_1}
               onChange={handleChange}
-              onBlur={(e) =>
-                updateWordCount("essay_question_1", e.target.value)
-              }
+              onBlur={(e) => updateWordCount("essay_question_1", e.target.value)}
               placeholder="[Your essay text here]"
               rows={6}
               required
@@ -298,9 +278,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
               name="essay_question_2"
               value={form.essay_question_2}
               onChange={handleChange}
-              onBlur={(e) =>
-                updateWordCount("essay_question_2", e.target.value)
-              }
+              onBlur={(e) => updateWordCount("essay_question_2", e.target.value)}
               placeholder="[Your essay text here]"
               rows={6}
               required

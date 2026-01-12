@@ -8,7 +8,7 @@ export function useDashboardContext(): DashboardContextType {
   if (context === undefined) {
     throw new Error(
       "useDashboardContext must be used within a DashboardProvider. " +
-        "Make sure to wrap your component tree with <DashboardProvider>.",
+        "Make sure to wrap your component tree with <DashboardProvider>."
     );
   }
 

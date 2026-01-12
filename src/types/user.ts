@@ -23,13 +23,7 @@ interface User {
 
 // Update type for modifying user information
 export type UpdateUser = Partial<
-  Pick<
-    User,
-    | "firstName"
-    | "lastName"
-    | "email"
-    | "onboardingComplete"
-  >
+  Pick<User, "firstName" | "lastName" | "email" | "onboardingComplete">
 > & {
   howDidYouHearAboutUs?: string;
   englishProficiency?: string;
@@ -38,12 +32,7 @@ export type UpdateUser = Partial<
 // Draft type for creating support messages
 export type DraftSupportMessage = {
   message: string;
-  supportType:
-    | "technical"
-    | "course-content"
-    | "billing"
-    | "general"
-    | "feedback";
+  supportType: "technical" | "course-content" | "billing" | "general" | "feedback";
   userId: string;
   email: string;
 };

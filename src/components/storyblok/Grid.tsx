@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  storyblokEditable,
-  SbBlokData,
-  StoryblokComponent,
-} from "@storyblok/react";
+import { storyblokEditable, SbBlokData, StoryblokComponent } from "@storyblok/react";
 
 interface GridBlok extends SbBlokData {
   columns: Array<{
@@ -11,91 +7,14 @@ interface GridBlok extends SbBlokData {
     component: string;
     [key: string]: unknown;
   }>;
-  cols?:
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "11"
-    | "12";
+  cols?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12";
   rows?: "1" | "2" | "3" | "4" | "5" | "6";
-  gap?:
-    | "0"
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "8"
-    | "10"
-    | "12"
-    | "16"
-    | "20"
-    | "24";
-  gapX?:
-    | "0"
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "8"
-    | "10"
-    | "12"
-    | "16"
-    | "20"
-    | "24";
-  gapY?:
-    | "0"
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "8"
-    | "10"
-    | "12"
-    | "16"
-    | "20"
-    | "24";
+  gap?: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "8" | "10" | "12" | "16" | "20" | "24";
+  gapX?: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "8" | "10" | "12" | "16" | "20" | "24";
+  gapY?: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "8" | "10" | "12" | "16" | "20" | "24";
   flow?: "row" | "col" | "row-dense" | "col-dense";
-  padding?:
-    | "0"
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "8"
-    | "10"
-    | "12"
-    | "16"
-    | "20"
-    | "24";
-  margin?:
-    | "0"
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "8"
-    | "10"
-    | "12"
-    | "16"
-    | "20"
-    | "24";
+  padding?: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "8" | "10" | "12" | "16" | "20" | "24";
+  margin?: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "8" | "10" | "12" | "16" | "20" | "24";
 }
 
 const defaultGridStyles = {
@@ -112,9 +31,7 @@ const Grid: React.FC<{ blok: GridBlok }> = ({ blok }) => {
     "grid", // Base grid class
 
     // Grid template columns - use standard Tailwind grid-cols-n pattern
-    blok.cols
-      ? `grid-cols-${blok.cols}`
-      : `grid-cols-${defaultGridStyles.cols}`,
+    blok.cols ? `grid-cols-${blok.cols}` : `grid-cols-${defaultGridStyles.cols}`,
 
     // Grid template rows if specified
     blok.rows && `grid-rows-${blok.rows}`,

@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Edit3, Trash2, BookOpen, Users, Search, Tag, Megaphone, ChevronUp, ChevronDown, Folder, Plus, X, Save } from "lucide-react";
+import {
+  Edit3,
+  Trash2,
+  BookOpen,
+  Users,
+  Search,
+  Tag,
+  Megaphone,
+  ChevronUp,
+  ChevronDown,
+  Folder,
+  Plus,
+  X,
+  Save,
+} from "lucide-react";
 import { Course, Module, CourseGroup } from "../../types/modules";
 import {
   getAllCourses,
@@ -23,9 +37,7 @@ const AdminDashboard: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [courseGroups, setCourseGroups] = useState<CourseGroup[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [selectedCourseModules, setSelectedCourseModules] = useState<Module[]>(
-    [],
-  );
+  const [selectedCourseModules, setSelectedCourseModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -86,7 +98,7 @@ const AdminDashboard: React.FC = () => {
   const filteredCourses = courses.filter(
     (course) =>
       course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.description?.toLowerCase().includes(searchTerm.toLowerCase()),
+      course.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Group courses by their courseGroupId
@@ -253,20 +265,20 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleMoveCourse = async (courseId: string, direction: 'up' | 'down') => {
-    const currentIndex = courses.findIndex(c => c.id === courseId);
+  const handleMoveCourse = async (courseId: string, direction: "up" | "down") => {
+    const currentIndex = courses.findIndex((c) => c.id === courseId);
     if (currentIndex === -1) return;
 
     // Prevent moving beyond bounds
-    if (direction === 'up' && currentIndex === 0) return;
-    if (direction === 'down' && currentIndex === courses.length - 1) return;
+    if (direction === "up" && currentIndex === 0) return;
+    if (direction === "down" && currentIndex === courses.length - 1) return;
 
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
     const newList = [...courses];
-    
+
     // Swap positions
     [newList[currentIndex], newList[newIndex]] = [newList[newIndex], newList[currentIndex]];
-    
+
     // Update order values
     newList.forEach((course, index) => {
       course.order = index;
@@ -280,7 +292,7 @@ const AdminDashboard: React.FC = () => {
       // Update both courses' order on backend
       await Promise.all([
         updateCourse(newList[currentIndex].id, { order: newList[currentIndex].order }),
-        updateCourse(newList[newIndex].id, { order: newList[newIndex].order })
+        updateCourse(newList[newIndex].id, { order: newList[newIndex].order }),
       ]);
     } catch (err) {
       setError("Failed to reorder courses. Please refresh the page.");
@@ -326,12 +338,8 @@ const AdminDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Admin Dashboard
-              </h1>
-              <p className="text-gray-600">
-                Manage courses, modules, and content
-              </p>
+              <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+              <p className="text-gray-600">Manage courses, modules, and content</p>
             </div>
             <div className="flex items-center gap-4">
               {view !== "overview" && (
@@ -435,7 +443,9 @@ const AdminDashboard: React.FC = () => {
                       <input
                         type="text"
                         value={newCourseData.name}
-                        onChange={(e) => setNewCourseData({ ...newCourseData, name: e.target.value })}
+                        onChange={(e) =>
+                          setNewCourseData({ ...newCourseData, name: e.target.value })
+                        }
                         placeholder="Enter section name"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
@@ -448,7 +458,9 @@ const AdminDashboard: React.FC = () => {
                       <input
                         type="text"
                         value={newCourseData.description}
-                        onChange={(e) => setNewCourseData({ ...newCourseData, description: e.target.value })}
+                        onChange={(e) =>
+                          setNewCourseData({ ...newCourseData, description: e.target.value })
+                        }
                         placeholder="Enter description"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
@@ -459,7 +471,9 @@ const AdminDashboard: React.FC = () => {
                       </label>
                       <select
                         value={newCourseData.groupId}
-                        onChange={(e) => setNewCourseData({ ...newCourseData, groupId: e.target.value })}
+                        onChange={(e) =>
+                          setNewCourseData({ ...newCourseData, groupId: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="">No course (unassigned)</option>
@@ -544,7 +558,9 @@ const AdminDashboard: React.FC = () => {
                       <input
                         type="text"
                         value={newGroupData.description}
-                        onChange={(e) => setNewGroupData({ ...newGroupData, description: e.target.value })}
+                        onChange={(e) =>
+                          setNewGroupData({ ...newGroupData, description: e.target.value })
+                        }
                         placeholder="Enter description"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       />
@@ -556,7 +572,9 @@ const AdminDashboard: React.FC = () => {
                       <input
                         type="text"
                         value={newGroupData.image}
-                        onChange={(e) => setNewGroupData({ ...newGroupData, image: e.target.value })}
+                        onChange={(e) =>
+                          setNewGroupData({ ...newGroupData, image: e.target.value })
+                        }
                         placeholder="Enter image URL"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       />
@@ -605,12 +623,8 @@ const AdminDashboard: React.FC = () => {
                 <div className="flex items-center">
                   <BookOpen className="w-8 h-8 text-blue-600" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">
-                      Total Course Sections
-                    </p>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {courses.length}
-                    </p>
+                    <p className="text-sm font-medium text-gray-600">Total Course Sections</p>
+                    <p className="text-2xl font-semibold text-gray-900">{courses.length}</p>
                   </div>
                 </div>
               </motion.div>
@@ -624,9 +638,7 @@ const AdminDashboard: React.FC = () => {
                 <div className="flex items-center">
                   <Users className="w-8 h-8 text-green-600" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">
-                      Active Students
-                    </p>
+                    <p className="text-sm font-medium text-gray-600">Active Students</p>
                     <p className="text-2xl font-semibold text-gray-900">0</p>
                   </div>
                 </div>
@@ -661,9 +673,7 @@ const AdminDashboard: React.FC = () => {
                       <div className="flex items-center gap-3">
                         <Folder className="w-6 h-6 text-blue-600" />
                         <div>
-                          <h3 className="text-lg font-medium text-gray-900">
-                            {group.name}
-                          </h3>
+                          <h3 className="text-lg font-medium text-gray-900">{group.name}</h3>
                           {group.description && (
                             <p className="text-sm text-gray-500">{group.description}</p>
                           )}
@@ -674,9 +684,7 @@ const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
                     {groupCourses.length === 0 ? (
-                      <div className="p-6 text-center text-gray-500">
-                        No courses in this group
-                      </div>
+                      <div className="p-6 text-center text-gray-500">No courses in this group</div>
                     ) : (
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
@@ -703,7 +711,7 @@ const AdminDashboard: React.FC = () => {
                                   <div className="flex items-start gap-3">
                                     <div className="flex flex-col items-center gap-1 pt-1">
                                       <button
-                                        onClick={() => handleMoveCourse(course.id, 'up')}
+                                        onClick={() => handleMoveCourse(course.id, "up")}
                                         disabled={index === 0 || reorderingCourseId !== null}
                                         className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
                                         title="Move up"
@@ -711,8 +719,11 @@ const AdminDashboard: React.FC = () => {
                                         <ChevronUp className="w-4 h-4" />
                                       </button>
                                       <button
-                                        onClick={() => handleMoveCourse(course.id, 'down')}
-                                        disabled={index === groupCourses.length - 1 || reorderingCourseId !== null}
+                                        onClick={() => handleMoveCourse(course.id, "down")}
+                                        disabled={
+                                          index === groupCourses.length - 1 ||
+                                          reorderingCourseId !== null
+                                        }
                                         className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
                                         title="Move down"
                                       >
@@ -723,9 +734,7 @@ const AdminDashboard: React.FC = () => {
                                       <div className="text-sm font-medium text-gray-900">
                                         {course.name}
                                       </div>
-                                      <div className="text-sm text-gray-500">
-                                        ID: {course.id}
-                                      </div>
+                                      <div className="text-sm text-gray-500">ID: {course.id}</div>
                                     </div>
                                   </div>
                                 </td>
@@ -755,7 +764,7 @@ const AdminDashboard: React.FC = () => {
                                       <BookOpen className="w-4 h-4" />
                                       Modules
                                     </button>
-                                    <button 
+                                    <button
                                       disabled={reorderingCourseId !== null}
                                       className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"
                                     >
@@ -781,9 +790,7 @@ const AdminDashboard: React.FC = () => {
                     <div className="flex items-center gap-3">
                       <Folder className="w-6 h-6 text-yellow-600" />
                       <div>
-                        <h3 className="text-lg font-medium text-gray-900">
-                          Unassigned Courses
-                        </h3>
+                        <h3 className="text-lg font-medium text-gray-900">Unassigned Courses</h3>
                         <p className="text-sm text-gray-500">
                           These courses are not assigned to any group
                         </p>
@@ -818,7 +825,7 @@ const AdminDashboard: React.FC = () => {
                               <div className="flex items-start gap-3">
                                 <div className="flex flex-col items-center gap-1 pt-1">
                                   <button
-                                    onClick={() => handleMoveCourse(course.id, 'up')}
+                                    onClick={() => handleMoveCourse(course.id, "up")}
                                     disabled={index === 0 || reorderingCourseId !== null}
                                     className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
                                     title="Move up"
@@ -826,8 +833,11 @@ const AdminDashboard: React.FC = () => {
                                     <ChevronUp className="w-4 h-4" />
                                   </button>
                                   <button
-                                    onClick={() => handleMoveCourse(course.id, 'down')}
-                                    disabled={index === getUnassignedCourses().length - 1 || reorderingCourseId !== null}
+                                    onClick={() => handleMoveCourse(course.id, "down")}
+                                    disabled={
+                                      index === getUnassignedCourses().length - 1 ||
+                                      reorderingCourseId !== null
+                                    }
                                     className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
                                     title="Move down"
                                   >
@@ -838,9 +848,7 @@ const AdminDashboard: React.FC = () => {
                                   <div className="text-sm font-medium text-gray-900">
                                     {course.name}
                                   </div>
-                                  <div className="text-sm text-gray-500">
-                                    ID: {course.id}
-                                  </div>
+                                  <div className="text-sm text-gray-500">ID: {course.id}</div>
                                 </div>
                               </div>
                             </td>
@@ -870,7 +878,7 @@ const AdminDashboard: React.FC = () => {
                                   <BookOpen className="w-4 h-4" />
                                   Modules
                                 </button>
-                                <button 
+                                <button
                                   disabled={reorderingCourseId !== null}
                                   className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"
                                 >
@@ -918,10 +926,7 @@ const AdminDashboard: React.FC = () => {
         {/* Module Manager */}
         {view === "module-manage" &&
           (selectedCourse ? (
-            <ModuleManager
-              course={selectedCourse}
-              modules={selectedCourseModules}
-            />
+            <ModuleManager course={selectedCourse} modules={selectedCourseModules} />
           ) : (
             <div className="bg-white rounded-lg shadow p-8">
               <div className="text-center">

@@ -38,9 +38,7 @@ export default function CheckoutSuccess() {
         await refreshUserProfile();
       } catch (error) {
         console.error("Failed to update user onboarding status:", error);
-        setUpdateError(
-          error instanceof Error ? error.message : "Failed to update profile",
-        );
+        setUpdateError(error instanceof Error ? error.message : "Failed to update profile");
       } finally {
         setIsUpdating(false);
       }
@@ -63,13 +61,9 @@ export default function CheckoutSuccess() {
             <RefreshCw className="w-10 h-10 text-blue-600 animate-spin" />
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Initializing...
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Initializing...</h1>
 
-          <p className="text-gray-600">
-            Please wait while we prepare your account setup.
-          </p>
+          <p className="text-gray-600">Please wait while we prepare your account setup.</p>
         </div>
       </div>
     );
@@ -84,13 +78,9 @@ export default function CheckoutSuccess() {
             <RefreshCw className="w-10 h-10 text-blue-600 animate-spin" />
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Setting up your account...
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Setting up your account...</h1>
 
-          <p className="text-gray-600">
-            Please wait while we complete your subscription setup.
-          </p>
+          <p className="text-gray-600">Please wait while we complete your subscription setup.</p>
         </div>
       </div>
     );
@@ -103,23 +93,18 @@ export default function CheckoutSuccess() {
           <CheckCircle className="w-10 h-10 text-green-600" />
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          Payment Successful!
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Payment Successful!</h1>
 
         <p className="text-gray-600 mb-8">
-          Welcome to TOEFL MAX Writing! Your subscription has been activated and
-          you're ready to start your English learning journey.
+          Welcome to TOEFL MAX Writing! Your subscription has been activated and you're ready to
+          start your English learning journey.
         </p>
 
         {updateError && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-600 text-sm">
-              ⚠️ Profile update failed: {updateError}
-            </p>
+            <p className="text-red-600 text-sm">⚠️ Profile update failed: {updateError}</p>
             <p className="text-red-500 text-xs mt-1">
-              Don't worry, your payment was successful. You can continue to your
-              dashboard.
+              Don't worry, your payment was successful. You can continue to your dashboard.
             </p>
           </div>
         )}
