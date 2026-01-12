@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  storyblokEditable,
-  SbBlokData,
-  StoryblokComponent,
-} from "@storyblok/react";
+import { storyblokEditable, SbBlokData, StoryblokComponent } from "@storyblok/react";
 
 interface HeroBlok extends SbBlokData {
   content: Array<{
@@ -60,11 +56,7 @@ const Hero: React.FC<{ blok: HeroBlok }> = ({ blok }) => {
     : {};
 
   return (
-    <div
-      {...storyblokEditable(blok)}
-      className={containerClasses}
-      style={style}
-    >
+    <div {...storyblokEditable(blok)} className={containerClasses} style={style}>
       {/* Gradients - only show if enabled */}
       {blok.showGradients !== false && (
         <div
@@ -100,9 +92,7 @@ const Hero: React.FC<{ blok: HeroBlok }> = ({ blok }) => {
             {/* Description */}
             {blok.description && (
               <div className="mt-5 max-w-3xl">
-                <p className="text-lg text-gray-600 dark:text-neutral-400">
-                  {blok.description}
-                </p>
+                <p className="text-lg text-gray-600 dark:text-neutral-400">{blok.description}</p>
               </div>
             )}
 

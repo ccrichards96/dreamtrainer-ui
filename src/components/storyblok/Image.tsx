@@ -134,9 +134,7 @@ const ImageComponent: React.FC<{ blok: ImageBlok }> = ({ blok }) => {
         "absolute",
         "inset-0",
         "bg-black",
-        blok.overlayOpacity
-          ? `bg-opacity-${blok.overlayOpacity}`
-          : "bg-opacity-30",
+        blok.overlayOpacity ? `bg-opacity-${blok.overlayOpacity}` : "bg-opacity-30",
         blok.overlayColor && `bg-${blok.overlayColor}`,
         "transition-opacity",
         "duration-300",

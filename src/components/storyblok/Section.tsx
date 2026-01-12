@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  storyblokEditable,
-  SbBlokData,
-  StoryblokComponent,
-} from "@storyblok/react";
+import { storyblokEditable, SbBlokData, StoryblokComponent } from "@storyblok/react";
 
 interface SectionBlok extends SbBlokData {
   content: Array<{
@@ -200,11 +196,7 @@ const Section: React.FC<{ blok: SectionBlok }> = ({ blok }) => {
   const classes = baseClasses.filter(Boolean).join(" ");
 
   return (
-    <section
-      {...storyblokEditable(blok)}
-      className={classes}
-      style={customStyles}
-    >
+    <section {...storyblokEditable(blok)} className={classes} style={customStyles}>
       {blok.content?.map((nestedBlok) => (
         <StoryblokComponent blok={nestedBlok} key={nestedBlok._uid} />
       ))}

@@ -73,9 +73,7 @@ const AnnouncementManager: React.FC = () => {
   }, []);
 
   const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -121,15 +119,16 @@ const AnnouncementManager: React.FC = () => {
 
       if (editingAnnouncement) {
         // Update existing announcement via API
-        const updatedAnnouncement = await updateAnnouncement(editingAnnouncement.id, sanitizedFormData);
+        const updatedAnnouncement = await updateAnnouncement(
+          editingAnnouncement.id,
+          sanitizedFormData
+        );
 
         // Update local state
         setAnnouncements((prev) =>
           prev.map((announcement) =>
-            announcement.id === editingAnnouncement.id
-              ? updatedAnnouncement
-              : announcement,
-          ),
+            announcement.id === editingAnnouncement.id ? updatedAnnouncement : announcement
+          )
         );
       } else {
         // Create new announcement via API
@@ -172,8 +171,8 @@ const AnnouncementManager: React.FC = () => {
   };
 
   const isFormValid =
-    formData.name.trim().length > 0 && 
-    formData.message.trim().length > 0 && 
+    formData.name.trim().length > 0 &&
+    formData.message.trim().length > 0 &&
     getPlainTextLength(formData.message) > 0; // Check if there's actual content beyond HTML tags
 
   const getTypeIcon = (type: string) => {
@@ -237,9 +236,7 @@ const AnnouncementManager: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-medium text-gray-900">
-                Manage Announcements
-              </h3>
+              <h3 className="text-lg font-medium text-gray-900">Manage Announcements</h3>
               <p className="text-sm text-gray-500">
                 Create and manage system announcements for users
               </p>
@@ -262,9 +259,7 @@ const AnnouncementManager: React.FC = () => {
               <p className="text-sm font-medium text-gray-900">
                 Total Announcements: {announcements.length}
               </p>
-              <p className="text-sm text-gray-500">
-                Active announcements visible to users
-              </p>
+              <p className="text-sm text-gray-500">Active announcements visible to users</p>
             </div>
           </div>
         </div>
@@ -290,10 +285,7 @@ const AnnouncementManager: React.FC = () => {
               <h4 className="text-lg font-medium text-gray-900">
                 {editingAnnouncement ? "Edit Announcement" : "Add New Announcement"}
               </h4>
-              <button
-                onClick={handleCancel}
-                className="text-gray-400 hover:text-gray-600"
-              >
+              <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -303,10 +295,7 @@ const AnnouncementManager: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Announcement Name */}
               <div className="md:col-span-2">
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                   Announcement Title *
                 </label>
                 <input
@@ -323,10 +312,7 @@ const AnnouncementManager: React.FC = () => {
 
               {/* Type */}
               <div>
-                <label
-                  htmlFor="type"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
                   Type *
                 </label>
                 <select
@@ -346,10 +332,7 @@ const AnnouncementManager: React.FC = () => {
 
               {/* Priority */}
               <div>
-                <label
-                  htmlFor="priority"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
                   Priority *
                 </label>
                 <select
@@ -368,10 +351,7 @@ const AnnouncementManager: React.FC = () => {
 
               {/* Message */}
               <div className="md:col-span-2">
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
                   Message *
                 </label>
                 <div className="border border-gray-300 rounded-lg overflow-hidden">
@@ -464,28 +444,26 @@ const AnnouncementManager: React.FC = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h5 className="text-lg font-medium text-gray-900">
-                        {announcement.name}
-                      </h5>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1 ${getTypeColor(announcement.type)}`}>
+                      <h5 className="text-lg font-medium text-gray-900">{announcement.name}</h5>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1 ${getTypeColor(announcement.type)}`}
+                      >
                         {getTypeIcon(announcement.type)}
                         {announcement.type}
                       </span>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(announcement.priority)}`}>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(announcement.priority)}`}
+                      >
                         {announcement.priority} priority
                       </span>
                     </div>
-                    <div 
+                    <div
                       className="text-gray-600 mb-3 prose prose-sm max-w-none [&>*]:mb-2 [&>h1]:text-lg [&>h2]:text-base [&>h3]:text-sm [&>p]:text-sm [&>ul]:text-sm [&>ol]:text-sm [&>strong]:font-semibold [&>em]:italic [&>u]:underline"
                       dangerouslySetInnerHTML={{ __html: sanitizeHtml(announcement.message) }}
                     />
                     <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span>
-                        Created: {new Date(announcement.createdAt).toLocaleDateString()}
-                      </span>
-                      <span>
-                        Updated: {new Date(announcement.updatedAt).toLocaleDateString()}
-                      </span>
+                      <span>Created: {new Date(announcement.createdAt).toLocaleDateString()}</span>
+                      <span>Updated: {new Date(announcement.updatedAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-4">

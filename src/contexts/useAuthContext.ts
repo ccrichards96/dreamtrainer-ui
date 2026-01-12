@@ -8,7 +8,7 @@ export function useAuthContext(): AuthContextType {
   if (context === undefined) {
     throw new Error(
       "useAuthContext must be used within an AuthProvider. " +
-        "Make sure to wrap your component tree with <AuthProvider>.",
+        "Make sure to wrap your component tree with <AuthProvider>."
     );
   }
 

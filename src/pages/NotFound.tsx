@@ -12,9 +12,7 @@ const NotFound: React.FC = () => {
         {/* Main Content */}
         <div className="text-center py-10 px-4 sm:px-6 lg:px-8">
           {/* 404 Number */}
-          <h1 className="block text-7xl font-bold text-gray-800 sm:text-9xl">
-            404
-          </h1>
+          <h1 className="block text-7xl font-bold text-gray-800 sm:text-9xl">404</h1>
 
           {/* Error Messages */}
           <p className="mt-3 text-gray-600">Oops, something went wrong.</p>
@@ -43,9 +41,7 @@ const NotFound: React.FC = () => {
         {/* Footer */}
         <footer className="mt-auto text-center py-5">
           <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-sm text-gray-500">
-              © 2025 Dream Trainer. All rights reserved.
-            </p>
+            <p className="text-sm text-gray-500">© 2025 Dream Trainer. All rights reserved.</p>
           </div>
         </footer>
       </div>

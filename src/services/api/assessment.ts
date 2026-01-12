@@ -29,7 +29,7 @@ export interface AssessmentResponse {
 export const submitAssessment = async (
   testId: string,
   userId: string,
-  assessmentData: AssessmentSubmission,
+  assessmentData: AssessmentSubmission
 ): Promise<AssessmentResponse> => {
   try {
     // Prepare data as x-www-form-urlencoded
@@ -38,24 +38,12 @@ export const submitAssessment = async (
     params.append("last_name", assessmentData.last_name || "");
     params.append("email", assessmentData.email || "");
     params.append("test_number", assessmentData.test_number || "");
-    params.append(
-      "homework_completed",
-      assessmentData.homework_completed || "",
-    );
-    params.append(
-      "followed_toefl_timing",
-      assessmentData.followed_toefl_timing || "",
-    );
+    params.append("homework_completed", assessmentData.homework_completed || "");
+    params.append("followed_toefl_timing", assessmentData.followed_toefl_timing || "");
     params.append("essay_question_1", assessmentData.essay_question_1 || "");
-    params.append(
-      "essay_question_1_word_count",
-      assessmentData.essay_question_1_word_count || "",
-    );
+    params.append("essay_question_1_word_count", assessmentData.essay_question_1_word_count || "");
     params.append("essay_question_2", assessmentData.essay_question_2 || "");
-    params.append(
-      "essay_question_2_word_count",
-      assessmentData.essay_question_2_word_count || "",
-    );
+    params.append("essay_question_2_word_count", assessmentData.essay_question_2_word_count || "");
 
     const draftTestAttempt: DraftTestAttempt = {
       testId: testId,
@@ -65,22 +53,19 @@ export const submitAssessment = async (
 
     const testAttemptResponse = await apiClient.post<APIResponse<TestAttempt>>(
       "/test-attempts",
-      draftTestAttempt,
+      draftTestAttempt
     );
 
     params.append("testAttemptId", testAttemptResponse.data.data?.id || "");
 
     // Submit to external webhook
-    const response = await fetch(
-      "https://automation.thedreamtrainer.com/webhook/submit-form",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: params.toString(),
+    const response = await fetch("https://automation.thedreamtrainer.com/webhook/submit-form", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-    );
+      body: params.toString(),
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -101,9 +86,7 @@ export const submitAssessment = async (
     if (error instanceof Error) {
       throw new Error(`Failed to submit assessment: ${error.message}`);
     }
-    throw new Error(
-      "An unexpected error occurred while submitting the assessment",
-    );
+    throw new Error("An unexpected error occurred while submitting the assessment");
   }
 };
 

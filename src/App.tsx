@@ -65,10 +65,7 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
-                    <Route
-                      path="/checkout/success"
-                      element={<CheckoutSuccess />}
-                    />
+                    <Route path="/checkout/success" element={<CheckoutSuccess />} />
                     <Route
                       path="/renew"
                       element={

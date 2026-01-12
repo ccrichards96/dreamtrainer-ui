@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  storyblokEditable,
-  SbBlokData,
-  StoryblokComponent,
-} from "@storyblok/react";
+import { storyblokEditable, SbBlokData, StoryblokComponent } from "@storyblok/react";
 
 interface ColumnBlok extends SbBlokData {
   content: Array<{
@@ -22,129 +18,24 @@ interface ColumnBlok extends SbBlokData {
   flex_direction?: "row" | "column" | "row-reverse" | "column-reverse";
 
   // Grid-based Column Properties
-  grid_cols?:
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "11"
-    | "12";
-  grid_col_span?:
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "11"
-    | "12"
-    | "full";
-  grid_col_start?:
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "11"
-    | "12"
-    | "13";
-  grid_col_end?:
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "11"
-    | "12"
-    | "13";
+  grid_cols?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12";
+  grid_col_span?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "full";
+  grid_col_start?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13";
+  grid_col_end?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13";
   grid_rows?: "1" | "2" | "3" | "4" | "5" | "6";
   grid_row_span?: "1" | "2" | "3" | "4" | "5" | "6" | "full";
   grid_row_start?: "1" | "2" | "3" | "4" | "5" | "6" | "7";
   grid_row_end?: "1" | "2" | "3" | "4" | "5" | "6" | "7";
 
   // Responsive Properties
-  sm_cols?:
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "11"
-    | "12";
-  md_cols?:
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "11"
-    | "12";
-  lg_cols?:
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "11"
-    | "12";
-  xl_cols?:
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | "10"
-    | "11"
-    | "12";
+  sm_cols?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12";
+  md_cols?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12";
+  lg_cols?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12";
+  xl_cols?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12";
 
   // Alignment Properties (following Preline patterns)
   align_items?: "start" | "center" | "end" | "stretch" | "baseline";
-  justify_content?:
-    | "start"
-    | "center"
-    | "end"
-    | "between"
-    | "around"
-    | "evenly";
+  justify_content?: "start" | "center" | "end" | "between" | "around" | "evenly";
   align_self?: "auto" | "start" | "center" | "end" | "stretch" | "baseline";
 
   // Spacing Properties (following Preline patterns)
@@ -250,14 +141,7 @@ interface ColumnBlok extends SbBlokData {
     | "32";
 
   // Display Properties
-  display?:
-    | "block"
-    | "inline-block"
-    | "flex"
-    | "inline-flex"
-    | "grid"
-    | "inline-grid"
-    | "hidden";
+  display?: "block" | "inline-block" | "flex" | "inline-flex" | "grid" | "inline-grid" | "hidden";
 
   // Sizing Properties
   width?:
@@ -361,9 +245,7 @@ const Column = ({ blok }: { blok: ColumnBlok }) => {
 
     if (blok.grid_col_span) {
       baseClasses.push(
-        blok.grid_col_span === "full"
-          ? "col-span-full"
-          : `col-span-${blok.grid_col_span}`,
+        blok.grid_col_span === "full" ? "col-span-full" : `col-span-${blok.grid_col_span}`
       );
     }
 
@@ -377,9 +259,7 @@ const Column = ({ blok }: { blok: ColumnBlok }) => {
 
     if (blok.grid_row_span) {
       baseClasses.push(
-        blok.grid_row_span === "full"
-          ? "row-span-full"
-          : `row-span-${blok.grid_row_span}`,
+        blok.grid_row_span === "full" ? "row-span-full" : `row-span-${blok.grid_row_span}`
       );
     }
 
@@ -465,44 +345,34 @@ const Column = ({ blok }: { blok: ColumnBlok }) => {
     baseClasses.push(
       blok.background_color.startsWith("bg-")
         ? blok.background_color
-        : `bg-${blok.background_color}`,
+        : `bg-${blok.background_color}`
     );
   }
 
   if (blok.text_color) {
     baseClasses.push(
-      blok.text_color.startsWith("text-")
-        ? blok.text_color
-        : `text-${blok.text_color}`,
+      blok.text_color.startsWith("text-") ? blok.text_color : `text-${blok.text_color}`
     );
   }
 
   if (blok.border_width) {
-    baseClasses.push(
-      blok.border_width === "0" ? "border-0" : `border-${blok.border_width}`,
-    );
+    baseClasses.push(blok.border_width === "0" ? "border-0" : `border-${blok.border_width}`);
   }
 
   if (blok.border_color) {
     baseClasses.push(
-      blok.border_color.startsWith("border-")
-        ? blok.border_color
-        : `border-${blok.border_color}`,
+      blok.border_color.startsWith("border-") ? blok.border_color : `border-${blok.border_color}`
     );
   }
 
   if (blok.border_radius) {
     baseClasses.push(
-      blok.border_radius === "none"
-        ? "rounded-none"
-        : `rounded-${blok.border_radius}`,
+      blok.border_radius === "none" ? "rounded-none" : `rounded-${blok.border_radius}`
     );
   }
 
   if (blok.shadow) {
-    baseClasses.push(
-      blok.shadow === "none" ? "shadow-none" : `shadow-${blok.shadow}`,
-    );
+    baseClasses.push(blok.shadow === "none" ? "shadow-none" : `shadow-${blok.shadow}`);
   }
 
   // Overflow classes

@@ -8,9 +8,7 @@ interface AvatarDropdownProps {
   className?: string;
 }
 
-export default function AvatarDropdown({
-  className = "",
-}: AvatarDropdownProps) {
+export default function AvatarDropdown({ className = "" }: AvatarDropdownProps) {
   const { user, logout } = useAuthContext();
   const { userProfile } = useApp();
   const [isOpen, setIsOpen] = useState(false);
@@ -19,10 +17,7 @@ export default function AvatarDropdown({
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
@@ -82,12 +77,7 @@ export default function AvatarDropdown({
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
@@ -97,12 +87,8 @@ export default function AvatarDropdown({
           <div className="py-1">
             {/* User Info Section */}
             <div className="px-4 py-3 border-b border-gray-100">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {displayName}
-              </p>
-              {user?.email && (
-                <p className="text-sm text-gray-500 truncate">{user.email}</p>
-              )}
+              <p className="text-sm font-medium text-gray-900 truncate">{displayName}</p>
+              {user?.email && <p className="text-sm text-gray-500 truncate">{user.email}</p>}
             </div>
 
             {/* Menu Items */}

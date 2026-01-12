@@ -203,13 +203,7 @@ const Spacer: React.FC<{ blok: SpacerBlok }> = ({ blok }) => {
 
   const classes = baseClasses.filter(Boolean).join(" ");
 
-  return (
-    <div
-      {...storyblokEditable(blok)}
-      className={classes}
-      style={customStyles}
-    />
-  );
+  return <div {...storyblokEditable(blok)} className={classes} style={customStyles} />;
 };
 
 export default Spacer;

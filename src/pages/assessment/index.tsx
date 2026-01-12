@@ -15,10 +15,7 @@ import {
   ArrowLeft,
   RefreshCw,
 } from "lucide-react";
-import {
-  submitAssessment,
-  type AssessmentSubmission,
-} from "../../services/api";
+import { submitAssessment, type AssessmentSubmission } from "../../services/api";
 import { useCourseContext } from "../../contexts/useCourseContext";
 
 interface AssessmentForm {
@@ -68,9 +65,7 @@ export default function Assessment() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
 
@@ -131,7 +126,7 @@ export default function Assessment() {
       await submitAssessment(
         currentTest?.id || "default-test-id", // testId
         user?.sub || "", // userId
-        assessmentData,
+        assessmentData
       );
 
       setSubmitted(true);
@@ -166,7 +161,9 @@ export default function Assessment() {
               Assessment Submitted Successfully!
             </h2>
             <p className="text-lg text-gray-600 mb-8">
-              Thank you for your submission. Refresh your dashboard in 15 minutes, and you'll see your score appear. And, we'll send your personal feedback to your email within 48 hours.
+              Thank you for your submission. Refresh your dashboard in 15 minutes, and you'll see
+              your score appear. And, we'll send your personal feedback to your email within 48
+              hours.
             </p>
             <div className="flex gap-4 justify-center">
               <button
@@ -206,8 +203,7 @@ export default function Assessment() {
             </button>
           </div>
           <p className="text-xl text-gray-600">
-            Submit your TOEFL writing test for professional evaluation and
-            feedback.
+            Submit your TOEFL writing test for professional evaluation and feedback.
           </p>
         </motion.div>
 
@@ -241,9 +237,7 @@ export default function Assessment() {
                   }`}
                 />
                 {errors.first_name && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.first_name}
-                  </p>
+                  <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
                 )}
               </div>
 
@@ -267,9 +261,7 @@ export default function Assessment() {
                   }`}
                 />
                 {errors.last_name && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.last_name}
-                  </p>
+                  <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>
                 )}
               </div>
             </div>
@@ -293,9 +285,7 @@ export default function Assessment() {
                   errors.email ? "border-red-300" : "border-gray-300"
                 }`}
               />
-              {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-              )}
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               <p className="text-sm text-gray-500 mt-1">
                 We'll send your score and feedback to this email address
               </p>
@@ -328,8 +318,7 @@ export default function Assessment() {
                 htmlFor="homework_completed"
               >
                 <CheckCircle className="w-4 h-4 text-gray-400" />
-                Did you complete your full homework since your last test
-                submission? *
+                Did you complete your full homework since your last test submission? *
               </label>
               <input
                 id="homework_completed"
@@ -349,8 +338,7 @@ export default function Assessment() {
                 htmlFor="followed_toefl_timing"
               >
                 <Clock className="w-4 h-4 text-gray-400" />
-                Did you complete this practice test according to strict TOEFL
-                timing? *
+                Did you complete this practice test according to strict TOEFL timing? *
               </label>
               <input
                 id="followed_toefl_timing"

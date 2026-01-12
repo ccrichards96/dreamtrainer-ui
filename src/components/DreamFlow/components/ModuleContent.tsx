@@ -8,10 +8,7 @@ interface ModuleContentProps {
   currentModuleIndex: number;
 }
 
-const ModuleContent: React.FC<ModuleContentProps> = ({
-  modules,
-  currentModuleIndex,
-}) => {
+const ModuleContent: React.FC<ModuleContentProps> = ({ modules, currentModuleIndex }) => {
   const currentModule = modules[currentModuleIndex];
 
   // Animation variants
@@ -88,12 +85,8 @@ const ModuleContent: React.FC<ModuleContentProps> = ({
                   {currentModuleIndex + 1} of {modules.length}
                 </span>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                {currentModule.topic}
-              </h1>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                {currentModule.description}
-              </p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">{currentModule.topic}</h1>
+              <p className="text-lg text-gray-600 leading-relaxed">{currentModule.description}</p>
             </motion.div>
 
             {/* Video Section */}
@@ -116,9 +109,7 @@ const ModuleContent: React.FC<ModuleContentProps> = ({
             {currentModule.lessonContent && (
               <motion.div variants={itemVariants} className="px-8 pb-6">
                 <div className="border-t border-gray-100 pt-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    Lesson Content
-                  </h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Lesson Content</h3>
                   <div
                     className="ql-editor prose prose-lg max-w-none text-gray-700 leading-relaxed"
                     dangerouslySetInnerHTML={{
@@ -136,9 +127,7 @@ const ModuleContent: React.FC<ModuleContentProps> = ({
             {currentModule.botIframeUrl && (
               <motion.div variants={itemVariants} className="px-8 pb-8">
                 <div className="border-t border-gray-100 pt-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    Interactive Tutor
-                  </h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Interactive Tutor</h3>
                   <div className="relative w-full h-[600px] rounded-xl overflow-hidden shadow-lg border border-gray-200">
                     <iframe
                       src={currentModule.botIframeUrl}

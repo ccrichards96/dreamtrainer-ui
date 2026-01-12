@@ -277,10 +277,7 @@ const StickyShare: React.FC<{
 };
 
 // Breadcrumb Component
-const Breadcrumb: React.FC<{ category?: string; title?: string }> = ({
-  category,
-  title,
-}) => {
+const Breadcrumb: React.FC<{ category?: string; title?: string }> = ({ category, title }) => {
   if (!category && !title) return null;
 
   return (
@@ -312,9 +309,7 @@ const Breadcrumb: React.FC<{ category?: string; title?: string }> = ({
 };
 
 // Tag Component
-const TagList: React.FC<{ tags?: Array<{ name: string; url?: string }> }> = ({
-  tags,
-}) => {
+const TagList: React.FC<{ tags?: Array<{ name: string; url?: string }> }> = ({ tags }) => {
   if (!tags?.length) return null;
 
   return (
@@ -335,25 +330,15 @@ const TagList: React.FC<{ tags?: Array<{ name: string; url?: string }> }> = ({
           >
             {tag.name}
           </span>
-        ),
+        )
       )}
     </div>
   );
 };
 
 const ChevronRight: React.FC = () => (
-  <svg
-    className="w-5 h-5 text-gray-500 mx-1"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M9 5l7 7-7 7"
-    />
+  <svg className="w-5 h-5 text-gray-500 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
   </svg>
 );
 
@@ -378,9 +363,7 @@ const Post: React.FC<{ blok: PostBlok }> = ({ blok }) => {
   };
 
   // Helper function to get image URL from Storyblok asset
-  const getImageUrl = (
-    image: string | { filename: string } | null | undefined,
-  ): string | null => {
+  const getImageUrl = (image: string | { filename: string } | null | undefined): string | null => {
     if (!image) return null;
     if (typeof image === "string") return image;
     if (typeof image === "object" && image.filename) return image.filename;
@@ -436,14 +419,10 @@ const Post: React.FC<{ blok: PostBlok }> = ({ blok }) => {
       )}
 
       {/* Article Content */}
-      <div
-        className={`${getContainerMaxWidth()} px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto`}
-      >
+      <div className={`${getContainerMaxWidth()} px-4 pt-6 lg:pt-10 pb-12 sm:px-6 lg:px-8 mx-auto`}>
         <div className="max-w-2xl">
           {/* Breadcrumbs */}
-          {blok.show_breadcrumbs && (
-            <Breadcrumb category={blok.category} title={blok.title} />
-          )}
+          {blok.show_breadcrumbs && <Breadcrumb category={blok.category} title={blok.title} />}
 
           {/* Enhanced Author Section */}
           <BlogAuthor
@@ -457,13 +436,9 @@ const Post: React.FC<{ blok: PostBlok }> = ({ blok }) => {
           {blok.layout_style !== "hero" && (
             <div className="space-y-5 md:space-y-8 mb-8">
               <div className="space-y-3">
-                <h1 className="text-2xl font-bold md:text-3xl dark:text-white">
-                  {blok.title}
-                </h1>
+                <h1 className="text-2xl font-bold md:text-3xl dark:text-white">{blok.title}</h1>
                 {blok.intro && (
-                  <p className="text-lg text-gray-800 dark:text-neutral-200">
-                    {blok.intro}
-                  </p>
+                  <p className="text-lg text-gray-800 dark:text-neutral-200">{blok.intro}</p>
                 )}
               </div>
               {/* Featured Image for Simple Layout */}

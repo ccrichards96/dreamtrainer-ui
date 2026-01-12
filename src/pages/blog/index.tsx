@@ -26,9 +26,7 @@ export default function BlogPage() {
   const storyblokApi = useStoryblokApi();
 
   // Helper function to get image URL from Storyblok asset
-  const getImageUrl = (
-    image: string | { filename: string } | null | undefined,
-  ): string => {
+  const getImageUrl = (image: string | { filename: string } | null | undefined): string => {
     if (!image)
       return "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=560&q=80";
     if (typeof image === "string") return image;
@@ -134,8 +132,8 @@ export default function BlogPage() {
             Dream Trainer <span className="text-green-400">Insights</span>
           </h1>
           <p className="text-xl text-white leading-relaxed">
-            Stay in the know with insights from industry experts on goal
-            achievement, personal development, and AI-powered coaching.
+            Stay in the know with insights from industry experts on goal achievement, personal
+            development, and AI-powered coaching.
           </p>
         </div>
       </section>
@@ -144,12 +142,9 @@ export default function BlogPage() {
       <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
         {/* Title */}
         <div className="max-w-2xl mx-auto text-center mb-10 lg:mb-14">
-          <h2 className="text-2xl font-bold md:text-4xl md:leading-tight">
-            Latest Articles
-          </h2>
+          <h2 className="text-2xl font-bold md:text-4xl md:leading-tight">Latest Articles</h2>
           <p className="mt-1 text-gray-600 dark:text-neutral-400">
-            Discover strategies, tips, and success stories to help you achieve
-            your dreams.
+            Discover strategies, tips, and success stories to help you achieve your dreams.
           </p>
           {stories.length > 0 && (
             <p className="mt-2 text-sm text-gray-500">
@@ -179,9 +174,7 @@ export default function BlogPage() {
                   >
                     <div className="flex-auto p-4 md:p-6">
                       <h3 className="text-xl text-white/90 group-hover:text-white">
-                        <span className="font-bold">
-                          {story.content.title || story.name}
-                        </span>
+                        <span className="font-bold">{story.content.title || story.name}</span>
                         {story.content.intro && (
                           <span className="block mt-2 text-base font-normal">
                             {truncateText(story.content.intro, 100)}
@@ -238,15 +231,11 @@ export default function BlogPage() {
                     {/* Author and Date */}
                     {(story.content.author || story.content.date) && (
                       <div className="mt-3 flex items-center text-sm text-gray-500 dark:text-neutral-400">
-                        {story.content.author && (
-                          <span>By {story.content.author}</span>
-                        )}
+                        {story.content.author && <span>By {story.content.author}</span>}
                         {story.content.author && story.content.date && (
                           <span className="mx-2">•</span>
                         )}
-                        {story.content.date && (
-                          <span>{formatDate(story.content.date)}</span>
-                        )}
+                        {story.content.date && <span>{formatDate(story.content.date)}</span>}
                       </div>
                     )}
 
@@ -262,9 +251,7 @@ export default function BlogPage() {
         ) : (
           <div className="text-center py-12">
             <div className="text-gray-400 text-6xl mb-4">📝</div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              No blog posts yet
-            </h3>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">No blog posts yet</h3>
             <p className="text-gray-500">
               Check back later for insights and updates from our team.
             </p>
@@ -291,9 +278,7 @@ export default function BlogPage() {
               Subscribe
             </button>
           </div>
-          <p className="text-blue-100 text-sm mt-4">
-            No spam, unsubscribe anytime.
-          </p>
+          <p className="text-blue-100 text-sm mt-4">No spam, unsubscribe anytime.</p>
         </div>
       </section>
     </motion.div>

@@ -16,11 +16,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { Course, Module } from "../../types/modules";
 import { Category } from "../../types/categories";
-import {
-  createModule,
-  updateModule,
-  deleteModule,
-} from "../../services/api/modules";
+import { createModule, updateModule, deleteModule } from "../../services/api/modules";
 import { getAllCategories } from "../../services/api/categories";
 
 interface ModuleManagerProps {
@@ -88,9 +84,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
   }, []);
 
   const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -140,8 +134,8 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
           prev.map((module) =>
             module.id === editingModule.id
               ? { ...module, ...formData, updatedAt: new Date() }
-              : module,
-          ),
+              : module
+          )
         );
       } else {
         // Create new module via API
@@ -188,20 +182,20 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     }
   };
 
-  const handleMoveModule = async (moduleId: string, direction: 'up' | 'down') => {
-    const currentIndex = moduleList.findIndex(m => m.id === moduleId);
+  const handleMoveModule = async (moduleId: string, direction: "up" | "down") => {
+    const currentIndex = moduleList.findIndex((m) => m.id === moduleId);
     if (currentIndex === -1) return;
 
     // Prevent moving beyond bounds
-    if (direction === 'up' && currentIndex === 0) return;
-    if (direction === 'down' && currentIndex === moduleList.length - 1) return;
+    if (direction === "up" && currentIndex === 0) return;
+    if (direction === "down" && currentIndex === moduleList.length - 1) return;
 
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
     const newList = [...moduleList];
-    
+
     // Swap positions
     [newList[currentIndex], newList[newIndex]] = [newList[newIndex], newList[currentIndex]];
-    
+
     // Update order values
     newList.forEach((module, index) => {
       module.order = index;
@@ -215,7 +209,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
       // Update both modules' order on backend
       await Promise.all([
         updateModule(newList[currentIndex].id, { order: newList[currentIndex].order }),
-        updateModule(newList[newIndex].id, { order: newList[newIndex].order })
+        updateModule(newList[newIndex].id, { order: newList[newIndex].order }),
       ]);
     } catch (err) {
       setError("Failed to reorder modules. Please refresh the page.");
@@ -233,8 +227,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     resetForm();
   };
 
-  const isFormValid =
-    formData.topic.trim().length > 0 && formData.description.trim().length > 0;
+  const isFormValid = formData.topic.trim().length > 0 && formData.description.trim().length > 0;
 
   return (
     <motion.div
@@ -247,9 +240,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-medium text-gray-900">
-                Manage Modules
-              </h3>
+              <h3 className="text-lg font-medium text-gray-900">Manage Modules</h3>
               <p className="text-sm text-gray-500">Course: {course.name}</p>
             </div>
             <button
@@ -294,10 +285,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
               <h4 className="text-lg font-medium text-gray-900">
                 {editingModule ? "Edit Module" : "Add New Module"}
               </h4>
-              <button
-                onClick={handleCancel}
-                className="text-gray-400 hover:text-gray-600"
-              >
+              <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -307,10 +295,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Module Topic */}
               <div className="md:col-span-2">
-                <label
-                  htmlFor="topic"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="topic" className="block text-sm font-medium text-gray-700 mb-1">
                   Module Topic *
                 </label>
                 <input
@@ -370,18 +355,13 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                   ))}
                 </select>
                 {categoriesLoading && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    Loading categories...
-                  </p>
+                  <p className="text-sm text-gray-500 mt-1">Loading categories...</p>
                 )}
               </div>
 
               {/* Video URL */}
               <div>
-                <label
-                  htmlFor="videoUrl"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700 mb-1">
                   Vimeo Video URL
                 </label>
                 <input
@@ -401,7 +381,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                   htmlFor="botIframeUrl"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                 VectorShift Bot iFrame URL
+                  VectorShift Bot iFrame URL
                 </label>
                 <input
                   type="url"
@@ -494,32 +474,28 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
       {/* Modules List */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h4 className="text-lg font-medium text-gray-900">
-            Modules ({moduleList.length})
-          </h4>
+          <h4 className="text-lg font-medium text-gray-900">Modules ({moduleList.length})</h4>
         </div>
 
         {moduleList.length === 0 ? (
           <div className="p-8 text-center">
             <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">
-              No modules found. Add your first module to get started.
-            </p>
+            <p className="text-gray-500">No modules found. Add your first module to get started.</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
             {moduleList.map((module, index) => (
-              <div 
-                key={module.id} 
+              <div
+                key={module.id}
                 className={`p-6 hover:bg-gray-50 transition-colors ${
-                  reorderingModuleId === module.id ? 'bg-blue-50' : ''
+                  reorderingModuleId === module.id ? "bg-blue-50" : ""
                 }`}
               >
                 <div className="flex items-start gap-4">
                   {/* Reorder Controls */}
                   <div className="flex flex-col items-center gap-1 pt-1">
                     <button
-                      onClick={() => handleMoveModule(module.id, 'up')}
+                      onClick={() => handleMoveModule(module.id, "up")}
                       disabled={index === 0 || reorderingModuleId !== null}
                       className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
                       title="Move up"
@@ -528,7 +504,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                     </button>
                     <GripVertical className="w-5 h-5 text-gray-300" />
                     <button
-                      onClick={() => handleMoveModule(module.id, 'down')}
+                      onClick={() => handleMoveModule(module.id, "down")}
                       disabled={index === moduleList.length - 1 || reorderingModuleId !== null}
                       className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
                       title="Move down"
@@ -540,16 +516,10 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
                   {/* Module Content */}
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-sm font-medium text-gray-500">
-                        #{index + 1}
-                      </span>
-                      <h5 className="text-lg font-medium text-gray-900">
-                        {module.topic}
-                      </h5>
+                      <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
+                      <h5 className="text-lg font-medium text-gray-900">{module.topic}</h5>
                       {reorderingModuleId === module.id && (
-                        <span className="text-xs text-blue-600 animate-pulse">
-                          Updating...
-                        </span>
+                        <span className="text-xs text-blue-600 animate-pulse">Updating...</span>
                       )}
                     </div>
                     <p className="text-gray-600 mb-3">{module.description}</p>

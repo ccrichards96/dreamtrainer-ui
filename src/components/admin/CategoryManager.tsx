@@ -66,7 +66,7 @@ const CategoryManager: React.FC = () => {
 
   // Filter categories based on search term
   const filteredCategories = categories.filter((category) =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const resetForm = () => {
@@ -75,9 +75,7 @@ const CategoryManager: React.FC = () => {
     });
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -109,12 +107,10 @@ const CategoryManager: React.FC = () => {
         // Update existing category
         const updatedCategory = await updateCategory(
           editingCategory.id,
-          formData as UpdateCategory,
+          formData as UpdateCategory
         );
         setCategories((prev) =>
-          prev.map((category) =>
-            category.id === editingCategory.id ? updatedCategory : category,
-          ),
+          prev.map((category) => (category.id === editingCategory.id ? updatedCategory : category))
         );
       } else {
         // Create new category
@@ -134,20 +130,14 @@ const CategoryManager: React.FC = () => {
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this category? This action cannot be undone.",
-      )
-    )
+    if (!confirm("Are you sure you want to delete this category? This action cannot be undone."))
       return;
 
     try {
       // Delete category via API
       await deleteCategory(categoryId);
       // Remove from local state
-      setCategories((prev) =>
-        prev.filter((category) => category.id !== categoryId),
-      );
+      setCategories((prev) => prev.filter((category) => category.id !== categoryId));
     } catch (err) {
       setError("Failed to delete category. Please try again.");
       console.error("Error deleting category:", err);
@@ -184,12 +174,8 @@ const CategoryManager: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-medium text-gray-900">
-                Manage Categories
-              </h3>
-              <p className="text-sm text-gray-500">
-                Create and manage content categories
-              </p>
+              <h3 className="text-lg font-medium text-gray-900">Manage Categories</h3>
+              <p className="text-sm text-gray-500">Create and manage content categories</p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -237,10 +223,7 @@ const CategoryManager: React.FC = () => {
               <h4 className="text-lg font-medium text-gray-900">
                 {editingCategory ? "Edit Category" : "Add New Category"}
               </h4>
-              <button
-                onClick={handleCancel}
-                className="text-gray-400 hover:text-gray-600"
-              >
+              <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -250,10 +233,7 @@ const CategoryManager: React.FC = () => {
             <div className="grid grid-cols-1 gap-6">
               {/* Category Name */}
               <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                   Category Name *
                 </label>
                 <input
@@ -340,12 +320,8 @@ const CategoryManager: React.FC = () => {
                       <div className="flex items-center">
                         <Tag className="w-5 h-5 text-gray-400 mr-3" />
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {category.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            ID: {category.id}
-                          </div>
+                          <div className="text-sm font-medium text-gray-900">{category.name}</div>
+                          <div className="text-sm text-gray-500">ID: {category.id}</div>
                         </div>
                       </div>
                     </td>

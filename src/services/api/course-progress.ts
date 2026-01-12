@@ -1,8 +1,5 @@
 import apiClient, { APIResponse, ApiError } from "./client";
-import type {
-  CourseProgress,
-  UpdateProgressDTO,
-} from "../../types/course-progress";
+import type { CourseProgress, UpdateProgressDTO } from "../../types/course-progress";
 
 // Course Progress API service
 export const courseProgressApi = {
@@ -12,15 +9,13 @@ export const courseProgressApi = {
    */
   async getUserAllProgress(): Promise<CourseProgress[]> {
     try {
-      const response = await apiClient.get<APIResponse<CourseProgress[]>>(
-        "/progress",
-      );
+      const response = await apiClient.get<APIResponse<CourseProgress[]>>("/progress");
       return response.data.data || [];
     } catch (error: unknown) {
       const apiError: ApiError = {
         message:
-          (error as { response?: { data?: { message?: string } } })?.response
-            ?.data?.message || "Failed to fetch progress",
+          (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          "Failed to fetch progress",
         status: (error as { response?: { status?: number } })?.response?.status,
       };
       throw apiError;
@@ -33,15 +28,13 @@ export const courseProgressApi = {
    */
   async getUserCourseProgress(courseId: string): Promise<CourseProgress> {
     try {
-      const response = await apiClient.get<APIResponse<CourseProgress>>(
-        `/progress/${courseId}`,
-      );
+      const response = await apiClient.get<APIResponse<CourseProgress>>(`/progress/${courseId}`);
       return response.data.data;
     } catch (error: unknown) {
       const apiError: ApiError = {
         message:
-          (error as { response?: { data?: { message?: string } } })?.response
-            ?.data?.message || "Failed to fetch course progress",
+          (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          "Failed to fetch course progress",
         status: (error as { response?: { status?: number } })?.response?.status,
       };
       throw apiError;
@@ -55,14 +48,14 @@ export const courseProgressApi = {
   async startCourse(courseId: string): Promise<CourseProgress> {
     try {
       const response = await apiClient.post<APIResponse<CourseProgress>>(
-        `/progress/${courseId}/start`,
+        `/progress/${courseId}/start`
       );
       return response.data.data;
     } catch (error: unknown) {
       const apiError: ApiError = {
         message:
-          (error as { response?: { data?: { message?: string } } })?.response
-            ?.data?.message || "Failed to start course",
+          (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          "Failed to start course",
         status: (error as { response?: { status?: number } })?.response?.status,
       };
       throw apiError;
@@ -73,21 +66,18 @@ export const courseProgressApi = {
    * Update course progress
    * PUT /progress/{courseId}
    */
-  async updateProgress(
-    courseId: string,
-    progressData: UpdateProgressDTO,
-  ): Promise<CourseProgress> {
+  async updateProgress(courseId: string, progressData: UpdateProgressDTO): Promise<CourseProgress> {
     try {
       const response = await apiClient.put<APIResponse<CourseProgress>>(
         `/progress/${courseId}`,
-        progressData,
+        progressData
       );
       return response.data.data;
     } catch (error: unknown) {
       const apiError: ApiError = {
         message:
-          (error as { response?: { data?: { message?: string } } })?.response
-            ?.data?.message || "Failed to update progress",
+          (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          "Failed to update progress",
         status: (error as { response?: { status?: number } })?.response?.status,
       };
       throw apiError;
@@ -101,14 +91,14 @@ export const courseProgressApi = {
   async completeCourse(courseId: string): Promise<CourseProgress> {
     try {
       const response = await apiClient.post<APIResponse<CourseProgress>>(
-        `/progress/${courseId}/complete`,
+        `/progress/${courseId}/complete`
       );
       return response.data.data;
     } catch (error: unknown) {
       const apiError: ApiError = {
         message:
-          (error as { response?: { data?: { message?: string } } })?.response
-            ?.data?.message || "Failed to complete course",
+          (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          "Failed to complete course",
         status: (error as { response?: { status?: number } })?.response?.status,
       };
       throw apiError;

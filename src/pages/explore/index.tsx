@@ -24,7 +24,7 @@ const ExploreCoursesContent = () => {
         setError(null);
         const [groupsResponse, coursesResponse] = await Promise.all([
           getAllCoursesGroups(),
-          getAllCourses()
+          getAllCourses(),
         ]);
 
         // Group courses by courseGroupId
@@ -32,8 +32,9 @@ const ExploreCoursesContent = () => {
           .map((group: CourseGroup) => {
             const groupCourses = coursesResponse.data
               .filter((course: Course) => course.courseGroupId === group.id)
-              .sort((a: Course, b: Course) => 
-                new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+              .sort(
+                (a: Course, b: Course) =>
+                  new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
               );
 
             return {
@@ -41,10 +42,11 @@ const ExploreCoursesContent = () => {
               courses: groupCourses,
             };
           })
-          .sort((a: CourseGroupWithCourses, b: CourseGroupWithCourses) => 
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          .sort(
+            (a: CourseGroupWithCourses, b: CourseGroupWithCourses) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
           );
-        
+
         setCourseGroups(groupedData);
       } catch (err) {
         console.error("Error fetching course groups:", err);
@@ -95,9 +97,9 @@ const ExploreCoursesContent = () => {
       <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
           <Breadcrumb items={[{ label: "All Courses", isActive: true }]} />
-          
-          <AllCoursesView 
-            courseGroups={courseGroups} 
+
+          <AllCoursesView
+            courseGroups={courseGroups}
             onSelectGroup={(group) => setSelectedGroup(group as CourseGroupWithCourses)}
           />
         </div>
@@ -109,20 +111,18 @@ const ExploreCoursesContent = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
-        <Breadcrumb 
+        <Breadcrumb
           items={[
             { label: "All Courses", onClick: () => setSelectedGroup(null) },
-            { label: selectedGroup.name, isActive: true }
-          ]} 
+            { label: selectedGroup.name, isActive: true },
+          ]}
         />
 
         {/* Header Section */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                {selectedGroup.name}
-              </h1>
+              <h1 className="text-3xl font-bold text-gray-900">{selectedGroup.name}</h1>
               <p className="text-gray-600 mt-2">
                 {selectedGroup.description || "Select a course to begin"}
               </p>

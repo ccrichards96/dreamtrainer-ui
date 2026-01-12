@@ -35,7 +35,7 @@ const Testimonial: React.FC<{ blok: TestimonialBlok }> = ({ blok }) => {
         "shadow-lg",
         "hover:shadow-xl",
         "transform",
-        "hover:-translate-y-2",
+        "hover:-translate-y-2"
       );
       break;
     default:
@@ -45,7 +45,7 @@ const Testimonial: React.FC<{ blok: TestimonialBlok }> = ({ blok }) => {
         "shadow-lg",
         "hover:shadow-xl",
         "border",
-        "border-gray-100",
+        "border-gray-100"
       );
       break;
   }

@@ -13,6 +13,7 @@ export type OnboardingData = {
   howDidYouHearAboutUs?: string;
   englishProficiency?: string;
   selectedPackage?: string;
+  referralId?: string;
 };
 
 export default function Onboarding() {
@@ -28,15 +29,19 @@ export default function Onboarding() {
     const initializeUserData = async () => {
       try {
         setIsLoadingUserData(true);
-        
+
+        // Retrieve referralId from localStorage (set during signup)
+        const referralId = localStorage.getItem("rewardful_referral_id") || undefined;
+
         // Check if user is authenticated with Google (social login)
-        const isGoogleLogin = user?.sub?.startsWith('google-oauth2|');
-        
+        const isGoogleLogin = user?.sub?.startsWith("google-oauth2|");
+
         if (isGoogleLogin && user) {
           // Use Auth0 given_name and family_name for Google logins
           setOnboardingData({
             firstName: user.given_name || "",
             lastName: user.family_name || "",
+            referralId,
           });
         } else {
           // For non-Google logins, fetch existing user data from backend
@@ -45,11 +50,12 @@ export default function Onboarding() {
             setOnboardingData({
               firstName: userData.firstName || "",
               lastName: userData.lastName || "",
+              referralId,
             });
           } catch (error) {
             console.error("Failed to fetch user data:", error);
-            // If fetch fails, leave fields empty
-            setOnboardingData({});
+            // If fetch fails, still set referralId
+            setOnboardingData({ referralId });
           }
         }
       } finally {
@@ -111,42 +117,42 @@ export default function Onboarding() {
               </motion.div>
             )}
 
-          {currentStep === 2 && (
-            <motion.div
-              key="step2"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.3 }}
-            >
-              <ProficiencyLevel
-                data={onboardingData}
-                updateData={updateData}
-                onNext={nextStep}
-                onPrev={prevStep}
-                currentStep={currentStep}
-                totalSteps={totalSteps}
-              />
-            </motion.div>
-          )}
+            {currentStep === 2 && (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ProficiencyLevel
+                  data={onboardingData}
+                  updateData={updateData}
+                  onNext={nextStep}
+                  onPrev={prevStep}
+                  currentStep={currentStep}
+                  totalSteps={totalSteps}
+                />
+              </motion.div>
+            )}
 
-          {currentStep === 3 && (
-            <motion.div
-              key="step3"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.3 }}
-            >
-              <PricingSelection
-                data={onboardingData}
-                updateData={updateData}
-                onPrev={prevStep}
-                currentStep={currentStep}
-                totalSteps={totalSteps}
-              />
-            </motion.div>
-          )}
+            {currentStep === 3 && (
+              <motion.div
+                key="step3"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.3 }}
+              >
+                <PricingSelection
+                  data={onboardingData}
+                  updateData={updateData}
+                  onPrev={prevStep}
+                  currentStep={currentStep}
+                  totalSteps={totalSteps}
+                />
+              </motion.div>
+            )}
           </AnimatePresence>
         )}
       </div>

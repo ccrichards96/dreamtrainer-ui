@@ -51,10 +51,7 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
               }
             }
           } catch (error) {
-            console.warn(
-              "Failed to get Auth0 token, falling back to localStorage:",
-              error,
-            );
+            console.warn("Failed to get Auth0 token, falling back to localStorage:", error);
 
             // Fallback to localStorage token
             const token = localStorage.getItem("auth_token");
@@ -78,7 +75,7 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
         (error) => {
           console.error("Request Error:", error);
           return Promise.reject(error);
-        },
+        }
       );
     };
 
@@ -99,7 +96,5 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
     isInitialized: !isLoading,
   };
 
-  return (
-    <ApiContext.Provider value={contextValue}>{children}</ApiContext.Provider>
-  );
+  return <ApiContext.Provider value={contextValue}>{children}</ApiContext.Provider>;
 };

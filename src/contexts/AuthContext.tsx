@@ -16,13 +16,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const {
-    isAuthenticated,
-    user,
-    loginWithRedirect,
-    logout: auth0Logout,
-    isLoading,
-  } = useAuth0();
+  const { isAuthenticated, user, loginWithRedirect, logout: auth0Logout, isLoading } = useAuth0();
 
   const login = () => {
     loginWithRedirect();

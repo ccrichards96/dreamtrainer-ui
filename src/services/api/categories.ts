@@ -1,9 +1,5 @@
 import apiClient, { APIResponse } from "./client";
-import type {
-  Category,
-  DraftCategory,
-  UpdateCategory,
-} from "../../types/categories";
+import type { Category, DraftCategory, UpdateCategory } from "../../types/categories";
 
 // Categories API service
 export const categoriesApi = {
@@ -27,9 +23,7 @@ export const categoriesApi = {
    */
   async getCategoryById(id: string): Promise<Category> {
     try {
-      const response = await apiClient.get<APIResponse<Category>>(
-        `/categories/${id}`,
-      );
+      const response = await apiClient.get<APIResponse<Category>>(`/categories/${id}`);
       return response.data.data;
     } catch (error) {
       console.error("Error fetching category:", error);
@@ -43,10 +37,7 @@ export const categoriesApi = {
    */
   async createCategory(categoryData: DraftCategory): Promise<Category> {
     try {
-      const response = await apiClient.post<APIResponse<Category>>(
-        "/categories",
-        categoryData,
-      );
+      const response = await apiClient.post<APIResponse<Category>>("/categories", categoryData);
       return response.data.data;
     } catch (error) {
       console.error("Error creating category:", error);
@@ -58,14 +49,11 @@ export const categoriesApi = {
    * Update a category
    * PUT /categories/{id}
    */
-  async updateCategory(
-    id: string,
-    categoryData: UpdateCategory,
-  ): Promise<Category> {
+  async updateCategory(id: string, categoryData: UpdateCategory): Promise<Category> {
     try {
       const response = await apiClient.put<APIResponse<Category>>(
         `/categories/${id}`,
-        categoryData,
+        categoryData
       );
       return response.data.data;
     } catch (error) {
@@ -89,12 +77,7 @@ export const categoriesApi = {
 };
 
 // Export individual functions for convenience
-export const {
-  getAllCategories,
-  getCategoryById,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-} = categoriesApi;
+export const { getAllCategories, getCategoryById, createCategory, updateCategory, deleteCategory } =
+  categoriesApi;
 
 export default categoriesApi;

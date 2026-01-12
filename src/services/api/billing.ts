@@ -14,6 +14,7 @@ export interface CheckoutSessionRequest {
   cancelUrl: string;
   mode?: "payment" | "subscription" | "setup";
   promoCode?: string;
+  referralId?: string; //Referral ID for affliates
 }
 
 /**
@@ -44,9 +45,7 @@ export const getUserBillingInfo = async (): Promise<UserBillingData> => {
     if (error instanceof Error) {
       throw new Error(`Failed to get user billing info: ${error.message}`);
     }
-    throw new Error(
-      "An unexpected error occurred while fetching billing information",
-    );
+    throw new Error("An unexpected error occurred while fetching billing information");
   }
 };
 
@@ -56,12 +55,12 @@ export const getUserBillingInfo = async (): Promise<UserBillingData> => {
  * @returns Promise<{ checkoutUrl: string }> - Checkout session URL
  */
 export const createCheckoutSession = async (
-  checkoutData: CheckoutSessionRequest,
+  checkoutData: CheckoutSessionRequest
 ): Promise<{ checkoutUrl: string }> => {
   try {
     const response = await apiClient.post<APIResponse<{ checkoutUrl: string }>>(
       "/billing/checkout-session",
-      checkoutData,
+      checkoutData
     );
     return response.data.data;
   } catch (error) {
@@ -71,9 +70,7 @@ export const createCheckoutSession = async (
     if (error instanceof Error) {
       throw new Error(`Failed to create checkout session: ${error.message}`);
     }
-    throw new Error(
-      "An unexpected error occurred while creating checkout session",
-    );
+    throw new Error("An unexpected error occurred while creating checkout session");
   }
 };
 
@@ -81,20 +78,19 @@ export const createCheckoutSession = async (
  * Generate a Stripe billing portal link for account management
  * @returns Promise<{ portalUrl: string }> - Billing portal URL
  */
-export const generateBillingPortalLink = async (returnUrl: string): Promise<{ portalUrl: string }> => {
+export const generateBillingPortalLink = async (
+  returnUrl: string
+): Promise<{ portalUrl: string }> => {
   try {
-    const response = await apiClient.post<APIResponse<{ portalUrl: string }>>(
-      "/billing/portal",
-      { returnUrl },
-    );
+    const response = await apiClient.post<APIResponse<{ portalUrl: string }>>("/billing/portal", {
+      returnUrl,
+    });
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to generate billing portal link: ${error.message}`);
     }
-    throw new Error(
-      "An unexpected error occurred while generating billing portal link",
-    );
+    throw new Error("An unexpected error occurred while generating billing portal link");
   }
 };
 
@@ -104,17 +100,13 @@ export const generateBillingPortalLink = async (returnUrl: string): Promise<{ po
  */
 export const getUserSubscriptions = async (): Promise<BillingData[]> => {
   try {
-    const response = await apiClient.get<APIResponse<BillingData[]>>(
-      "/billing/subscriptions",
-    );
+    const response = await apiClient.get<APIResponse<BillingData[]>>("/billing/subscriptions");
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to get user subscriptions: ${error.message}`);
     }
-    throw new Error(
-      "An unexpected error occurred while fetching user subscriptions",
-    );
+    throw new Error("An unexpected error occurred while fetching user subscriptions");
   }
 };
 

@@ -1,13 +1,6 @@
 import { motion } from "framer-motion";
 import { useAuth0 } from "@auth0/auth0-react";
-import {
-  MessageSquare,
-  RefreshCw,
-  AlertCircle,
-  Calendar,
-  Play,
-  Mail,
-} from "lucide-react";
+import { MessageSquare, RefreshCw, AlertCircle, Calendar, Play, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDashboardContext, DashboardProvider } from "../../contexts";
 import { CourseProvider } from "../../contexts/CourseContext";
@@ -89,16 +82,16 @@ function DashboardContent() {
           return dateA - dateB;
         });
         setAvailableCourses(sortedCourses);
-        
+
         // Check if user selected a specific course from the explore page
-        const selectedCourseId = localStorage.getItem('selected_course_id');
-        
+        const selectedCourseId = localStorage.getItem("selected_course_id");
+
         if (selectedCourseId) {
           // Load the selected course
           await loadCourse(selectedCourseId);
           await getTestScores(selectedCourseId);
           // Clear the selection after loading
-          localStorage.removeItem('selected_course_id');
+          localStorage.removeItem("selected_course_id");
         } else if (sortedCourses.length > 0 && !currentCourse) {
           // Only load the first course if no course is currently loaded and no selection
           await loadCourse(sortedCourses[0].id);
@@ -144,9 +137,7 @@ function DashboardContent() {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="flex items-center gap-3">
               <RefreshCw className="w-6 h-6 animate-spin text-[#c5a8de]" />
-              <span className="text-lg text-gray-600">
-                Loading your dashboard...
-              </span>
+              <span className="text-lg text-gray-600">Loading your dashboard...</span>
             </div>
           </div>
         </div>
@@ -162,9 +153,7 @@ function DashboardContent() {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
               <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Unable to load dashboard
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to load dashboard</h2>
               <p className="text-gray-600 mb-4">{error}</p>
             </div>
           </div>
@@ -182,12 +171,8 @@ function DashboardContent() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-2xl shadow-lg p-8 mb-8"
         >
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {firstName}!
-          </h1>
-          <p className="text-xl text-gray-600">
-            Let's get you to your dream TOEFL score.
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {firstName}!</h1>
+          <p className="text-xl text-gray-600">Let's get you to your dream TOEFL score.</p>
         </motion.div>
 
         {/* Available Courses Section */}
@@ -203,7 +188,7 @@ function DashboardContent() {
               {availableCourses.map((course, index) => {
                 const isActive = currentCourse?.id === course.id;
                 const isLoading = switchingCourse === course.id;
-                
+
                 return (
                   <motion.button
                     key={course.id}
@@ -225,26 +210,36 @@ function DashboardContent() {
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="flex flex-col items-center text-center">
                       {isLoading ? (
                         <RefreshCw className="w-8 h-8 mb-3 animate-spin" />
                       ) : (
-                        <div className={`w-12 h-12 mb-3 rounded-full flex items-center justify-center ${
-                          isActive ? "bg-white/20" : "bg-[#c5a8de]/10"
-                        }`}>
-                          <svg className={`w-6 h-6 ${isActive ? "text-white" : "text-[#c5a8de]"}`} fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
+                        <div
+                          className={`w-12 h-12 mb-3 rounded-full flex items-center justify-center ${
+                            isActive ? "bg-white/20" : "bg-[#c5a8de]/10"
+                          }`}
+                        >
+                          <svg
+                            className={`w-6 h-6 ${isActive ? "text-white" : "text-[#c5a8de]"}`}
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
                           </svg>
                         </div>
                       )}
-                      
-                      <h3 className={`font-semibold mb-1 ${isActive ? "text-white" : "text-gray-900"}`}>
+
+                      <h3
+                        className={`font-semibold mb-1 ${isActive ? "text-white" : "text-gray-900"}`}
+                      >
                         {course.name}
                       </h3>
-                      
+
                       {course.description && (
-                        <p className={`text-sm line-clamp-2 ${isActive ? "text-white/90" : "text-gray-600"}`}>
+                        <p
+                          className={`text-sm line-clamp-2 ${isActive ? "text-white/90" : "text-gray-600"}`}
+                        >
                           {course.description}
                         </p>
                       )}
@@ -267,16 +262,10 @@ function DashboardContent() {
                 transition={{ delay: 0.1 }}
                 className="bg-white rounded-2xl shadow-lg p-8"
               >
-                <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                  Starting Score
-                </h2>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6">Starting Score</h2>
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-[#c5a8de] mb-4">
-                    {startingScore}
-                  </div>
-                  <div className="text-gray-600 text-lg">
-                    Initial Assessment
-                  </div>
+                  <div className="text-4xl font-bold text-[#c5a8de] mb-4">{startingScore}</div>
+                  <div className="text-gray-600 text-lg">Initial Assessment</div>
                   <div className="text-sm text-gray-500 mt-2">
                     Your baseline score when you started
                   </div>
@@ -302,13 +291,9 @@ function DashboardContent() {
                 transition={{ delay: 0.15 }}
                 className="bg-white rounded-2xl shadow-lg p-8"
               >
-                <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                  Current Score
-                </h2>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6">Current Score</h2>
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-green-600 mb-4">
-                    {currentScore}
-                  </div>
+                  <div className="text-4xl font-bold text-green-600 mb-4">{currentScore}</div>
                   <div className="text-gray-600 text-lg">Latest Assessment</div>
                   {startingScore !== null && (
                     <div className="mt-4">
@@ -357,9 +342,7 @@ function DashboardContent() {
           className="bg-white rounded-2xl shadow-lg p-8 mb-8"
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-gray-900">
-              General Announcements
-            </h2>
+            <h2 className="text-2xl font-semibold text-gray-900">General Announcements</h2>
             <button
               onClick={() => setWelcomeModalOpen(true)}
               className="text-base font-medium bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors shadow-md flex items-center"
@@ -400,9 +383,7 @@ function DashboardContent() {
                       }`}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-gray-900 text-sm">
-                          {announcement.name}
-                        </h3>
+                        <h3 className="font-semibold text-gray-900 text-sm">{announcement.name}</h3>
                         <span
                           className={`text-xs px-2 py-1 rounded-full ${
                             announcement.type === "general"
@@ -414,24 +395,20 @@ function DashboardContent() {
                                   : "bg-gray-100 text-gray-800"
                           }`}
                         >
-                          {announcement.type.charAt(0).toUpperCase() +
-                            announcement.type.slice(1)}
+                          {announcement.type.charAt(0).toUpperCase() + announcement.type.slice(1)}
                         </span>
                       </div>
-                      <div 
+                      <div
                         className="text-gray-700 text-sm mb-3 [&>h1]:font-semibold [&>h1]:text-base [&>h1]:text-gray-900 [&>h1]:mt-2 [&>h1]:mb-1 [&>h2]:font-semibold [&>h2]:text-sm [&>h2]:text-gray-900 [&>h2]:mt-2 [&>h2]:mb-1 [&>h3]:font-semibold [&>h3]:text-sm [&>h3]:text-gray-900 [&>h3]:mt-2 [&>h3]:mb-1 [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:mb-2 [&>ul]:ml-4 [&>ol]:mb-2 [&>ol]:ml-4 [&>li]:mb-1 [&>strong]:font-semibold [&>em]:italic [&>u]:underline [&>a]:text-blue-600 [&>a]:hover:text-blue-800 [&>a]:underline"
                         dangerouslySetInnerHTML={{ __html: sanitizeHtml(announcement.message) }}
                       />
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>
-                          {new Date(announcement.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            },
-                          )}
+                          {new Date(announcement.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
                         </span>
                       </div>
                     </div>
@@ -490,8 +467,7 @@ function DashboardContent() {
                   Need help/support from Joseph, our trusted expert?
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  Struggling, confused, or not improving? We'll get you back on
-                  track right away:
+                  Struggling, confused, or not improving? We'll get you back on track right away:
                 </p>
                 <a
                   href="https://calendly.com/notefulljoseph/toefl-course-help"
@@ -517,8 +493,8 @@ function DashboardContent() {
               Send a Message to Joseph and the Dream Trainer Team
             </h2>
             <p className="text-gray-600 mb-6">
-              Have a question or need assistance? Send us a message and we'll
-              get back to you promptly.
+              Have a question or need assistance? Send us a message and we'll get back to you
+              promptly.
             </p>
             <button
               onClick={() => setSupportMessageModalOpen(true)}

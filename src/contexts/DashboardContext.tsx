@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  ReactNode,
-  useState,
-  useCallback,
-  useEffect,
-} from "react";
+import React, { createContext, ReactNode, useState, useCallback, useEffect } from "react";
 import { Announcement } from "../types/announcements";
 import { getAllAnnouncements } from "../services/api/announcements";
 import { getTestAttemptsByCourse } from "../services/api/tests";
@@ -31,18 +25,14 @@ export interface DashboardContextType {
 }
 
 // Create the context with undefined as default
-const DashboardContext = createContext<DashboardContextType | undefined>(
-  undefined,
-);
+const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 // DashboardProvider component that manages dashboard state
 interface DashboardProviderProps {
   children: ReactNode;
 }
 
-export const DashboardProvider: React.FC<DashboardProviderProps> = ({
-  children,
-}) => {
+export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }) => {
   const [startingScore, setStartingScore] = useState<number | null>(null);
   const [startingScoreDate, setStartingScoreDate] = useState<Date | null>(null);
   const [currentScore, setCurrentScore] = useState<number | null>(null);
@@ -119,11 +109,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     getTestScores,
   };
 
-  return (
-    <DashboardContext.Provider value={value}>
-      {children}
-    </DashboardContext.Provider>
-  );
+  return <DashboardContext.Provider value={value}>{children}</DashboardContext.Provider>;
 };
 
 // Export the context for advanced use cases (optional)

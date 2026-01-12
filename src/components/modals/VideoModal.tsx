@@ -26,9 +26,7 @@ const VideoModal: React.FC<VideoModalProps> = ({
       closeOnEscape={true}
     >
       <div className="p-6">
-        {description && (
-          <p className="text-gray-600 mb-6 text-center">{description}</p>
-        )}
+        {description && <p className="text-gray-600 mb-6 text-center">{description}</p>}
 
         <div
           className="relative w-full"

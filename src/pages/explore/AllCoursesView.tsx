@@ -23,7 +23,7 @@ export const AllCoursesView = ({ courseGroups, onSelectGroup }: AllCoursesViewPr
           key={group.id}
           onClick={() => onSelectGroup(group)}
           className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md hover:scale-[1.01] transition-all duration-300 cursor-pointer min-h-[300px] animate-in slide-in-from-bottom-4 fade-in"
-          style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'both' }}
+          style={{ animationDelay: `${index * 100}ms`, animationFillMode: "both" }}
         >
           <div className="flex flex-col md:flex-row h-full">
             {/* Left side - Image with overlay */}
@@ -34,8 +34,8 @@ export const AllCoursesView = ({ courseGroups, onSelectGroup }: AllCoursesViewPr
                 </div>
               </div>
               {group.image && (
-                <img 
-                  src={group.image} 
+                <img
+                  src={group.image}
                   alt={group.name}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -46,9 +46,7 @@ export const AllCoursesView = ({ courseGroups, onSelectGroup }: AllCoursesViewPr
             <div className="flex-1 p-6 flex flex-col justify-center">
               {/* Title and subtitle */}
               <div className="mb-4">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  {group.name}
-                </h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">{group.name}</h2>
                 <p className="text-sm text-gray-600">
                   {group.description || "A comprehensive course group to master your skills"}
                 </p>

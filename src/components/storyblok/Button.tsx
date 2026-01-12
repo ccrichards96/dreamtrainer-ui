@@ -4,15 +4,7 @@ interface ButtonBlok {
   text: string;
   link?: string | { url?: string; cached_url?: string; linktype?: string };
   variant?: "solid" | "outline" | "ghost" | "soft" | "white" | "link";
-  color?:
-    | "blue"
-    | "gray"
-    | "red"
-    | "yellow"
-    | "green"
-    | "indigo"
-    | "purple"
-    | "pink";
+  color?: "blue" | "gray" | "red" | "yellow" | "green" | "indigo" | "purple" | "pink";
   size?: "sm" | "md" | "lg";
   shape?: "default" | "pill" | "square";
   block?: boolean;
@@ -39,10 +31,7 @@ interface ButtonBlok {
 const ButtonComponent = ({ blok }: { blok: ButtonBlok }) => {
   // Helper function to extract URL from Storyblok link
   const getLinkUrl = (
-    link:
-      | string
-      | { url?: string; cached_url?: string; linktype?: string }
-      | undefined,
+    link: string | { url?: string; cached_url?: string; linktype?: string } | undefined
   ): string | undefined => {
     if (!link) return undefined;
     if (typeof link === "string") return link;
@@ -332,14 +321,7 @@ const ButtonComponent = ({ blok }: { blok: ButtonBlok }) => {
       fill="none"
       viewBox="0 0 24 24"
     >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path
         className="opacity-75"
         fill="currentColor"
@@ -349,13 +331,7 @@ const ButtonComponent = ({ blok }: { blok: ButtonBlok }) => {
   );
 
   // Icon component (you can replace this with your preferred icon library)
-  const Icon = ({
-    name,
-    className = "h-4 w-4",
-  }: {
-    name: string;
-    className?: string;
-  }) => {
+  const Icon = ({ name, className = "h-4 w-4" }: { name: string; className?: string }) => {
     // This is a placeholder - replace with your actual icon implementation
     return <span className={`icon-${name} ${className}`} />;
   };

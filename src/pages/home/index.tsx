@@ -33,9 +33,7 @@ export default function Home() {
             <div className="text-left">
               <div className="inline-flex items-center bg-gradient-to-r from-blue-100 to-[#e6d8f5] rounded-full px-4 py-2 mb-6">
                 <Zap className="h-4 w-4 text-blue-600 mr-2" />
-                <span className="text-sm font-medium text-blue-800">
-                  AI-Powered Training
-                </span>
+                <span className="text-sm font-medium text-blue-800">AI-Powered Training</span>
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
@@ -46,9 +44,8 @@ export default function Home() {
               </h1>
 
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Personalized AI coaching that adapts to your goals, tracks your
-                progress, and guides you to success. Join thousands who've
-                already achieved their dreams.
+                Personalized AI coaching that adapts to your goals, tracks your progress, and guides
+                you to success. Join thousands who've already achieved their dreams.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
@@ -104,23 +101,15 @@ export default function Home() {
                     <Trophy className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">
-                      Goal Achievement
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      Track your progress daily
-                    </p>
+                    <h3 className="font-semibold text-gray-900">Goal Achievement</h3>
+                    <p className="text-gray-600 text-sm">Track your progress daily</p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">
-                      Weekly Progress
-                    </span>
-                    <span className="text-sm font-semibold text-green-600">
-                      +24%
-                    </span>
+                    <span className="text-sm text-gray-600">Weekly Progress</span>
+                    <span className="text-sm font-semibold text-green-600">+24%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div className="bg-gradient-to-r from-green-400 to-emerald-400 h-2 rounded-full w-3/4 transition-all duration-1000"></div>
@@ -132,15 +121,11 @@ export default function Home() {
                       <div className="text-xs text-gray-500">Days Active</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-[#c5a8de]">
-                        12
-                      </div>
+                      <div className="text-2xl font-bold text-[#c5a8de]">12</div>
                       <div className="text-xs text-gray-500">Goals Met</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">
-                        98%
-                      </div>
+                      <div className="text-2xl font-bold text-green-600">98%</div>
                       <div className="text-xs text-gray-500">Success Rate</div>
                     </div>
                   </div>
@@ -165,8 +150,8 @@ export default function Home() {
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our AI-powered platform combines personalized coaching, progress
-              tracking, and community support to help you achieve any goal.
+              Our AI-powered platform combines personalized coaching, progress tracking, and
+              community support to help you achieve any goal.
             </p>
           </div>
 
@@ -224,12 +209,8 @@ export default function Home() {
                 >
                   <feature.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {feature.description}
-                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -237,10 +218,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section
-        id="testimonials"
-        className="py-20 bg-gradient-to-br from-gray-50 to-blue-50"
-      >
+      <section id="testimonials" className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -250,8 +228,8 @@ export default function Home() {
               </span>
             </h2>
             <p className="text-xl text-gray-600">
-              See how Dream Trainer has transformed lives and helped people
-              achieve their biggest goals.
+              See how Dream Trainer has transformed lives and helped people achieve their biggest
+              goals.
             </p>
           </div>
 
@@ -291,9 +269,7 @@ export default function Home() {
                     className={`w-12 h-12 bg-gradient-to-r ${testimonial.avatar} rounded-full mr-4`}
                   ></div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">
-                      {testimonial.name}
-                    </h4>
+                    <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
                     <p className="text-gray-600 text-sm">{testimonial.role}</p>
                   </div>
                 </div>
@@ -304,9 +280,7 @@ export default function Home() {
                   ))}
                 </div>
 
-                <p className="text-gray-700 leading-relaxed">
-                  {testimonial.content}
-                </p>
+                <p className="text-gray-700 leading-relaxed">{testimonial.content}</p>
               </div>
             ))}
           </div>
@@ -324,8 +298,7 @@ export default function Home() {
               </span>
             </h2>
             <p className="text-xl text-gray-600">
-              Choose the plan that fits your goals and budget. Upgrade or
-              downgrade anytime.
+              Choose the plan that fits your goals and budget. Upgrade or downgrade anytime.
             </p>
           </div>
 
@@ -335,8 +308,7 @@ export default function Home() {
                 name: "Starter",
                 price: "$29",
                 period: "per month",
-                description:
-                  "Perfect for getting started with goal achievement",
+                description: "Perfect for getting started with goal achievement",
                 features: [
                   "AI Goal Setting",
                   "Basic Progress Tracking",
@@ -390,14 +362,10 @@ export default function Home() {
                 )}
 
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                    {plan.name}
-                  </h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                   <p className="text-gray-600 mb-4">{plan.description}</p>
                   <div className="flex items-baseline justify-center">
-                    <span className="text-4xl font-bold text-gray-900">
-                      {plan.price}
-                    </span>
+                    <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
                     <span className="text-gray-600 ml-2">{plan.period}</span>
                   </div>
                 </div>
@@ -429,8 +397,8 @@ export default function Home() {
             Ready to Turn Your Dreams Into Reality?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join thousands of successful individuals who've already achieved
-            their goals with Dream Trainer.
+            Join thousands of successful individuals who've already achieved their goals with Dream
+            Trainer.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 font-semibold text-lg flex items-center justify-center group">
@@ -441,9 +409,7 @@ export default function Home() {
               Schedule Demo
             </button>
           </div>
-          <p className="text-blue-100 text-sm mt-4">
-            No credit card required • 14-day free trial
-          </p>
+          <p className="text-blue-100 text-sm mt-4">No credit card required • 14-day free trial</p>
         </div>
       </section>
 

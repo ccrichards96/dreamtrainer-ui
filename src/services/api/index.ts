@@ -26,12 +26,6 @@ export * from "./modules";
 export { default as modulesService } from "./modules";
 
 // Export types
-export type {
-  AssessmentSubmission,
-  AssessmentResponse,
-} from "./assessment";
+export type { AssessmentSubmission, AssessmentResponse } from "./assessment";
 export type { UserBillingInfo, CheckoutSessionRequest } from "./billing";
-export type {
-  CourseProgress,
-  UpdateProgressDTO,
-} from "../../types/course-progress";
+export type { CourseProgress, UpdateProgressDTO } from "../../types/course-progress";

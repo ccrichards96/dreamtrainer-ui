@@ -10,19 +10,19 @@
  * @returns Sanitized HTML string
  */
 export const sanitizeHtml = (html: string): string => {
-  if (!html) return '';
-  
+  if (!html) return "";
+
   // Remove script tags and their content
-  html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  
+  html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+
   // Remove dangerous event handlers
-  html = html.replace(/\son\w+\s*=\s*"[^"]*"/gi, '');
-  html = html.replace(/\son\w+\s*=\s*'[^']*'/gi, '');
-  html = html.replace(/\son\w+\s*=\s*[^\s>]*/gi, '');
-  
+  html = html.replace(/\son\w+\s*=\s*"[^"]*"/gi, "");
+  html = html.replace(/\son\w+\s*=\s*'[^']*'/gi, "");
+  html = html.replace(/\son\w+\s*=\s*[^\s>]*/gi, "");
+
   // Remove javascript: links
-  html = html.replace(/javascript:/gi, '');
-  
+  html = html.replace(/javascript:/gi, "");
+
   return html;
 };
 
@@ -32,8 +32,8 @@ export const sanitizeHtml = (html: string): string => {
  * @returns Plain text string
  */
 export const stripHtml = (html: string): string => {
-  if (!html) return '';
-  return html.replace(/<[^>]*>/g, '').trim();
+  if (!html) return "";
+  return html.replace(/<[^>]*>/g, "").trim();
 };
 
 /**
@@ -48,5 +48,5 @@ export const getPlainTextLength = (html: string): number => {
 export default {
   sanitizeHtml,
   stripHtml,
-  getPlainTextLength
+  getPlainTextLength,
 };

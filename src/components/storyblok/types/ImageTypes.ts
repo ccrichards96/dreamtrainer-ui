@@ -57,12 +57,7 @@ export interface ImageBlok {
 }
 
 // Type definitions for dropdown options
-export type ObjectFitOption =
-  | "cover"
-  | "contain"
-  | "fill"
-  | "scale-down"
-  | "none";
+export type ObjectFitOption = "cover" | "contain" | "fill" | "scale-down" | "none";
 
 export type AspectRatioOption = "square" | "video" | "photo" | "auto";
 
@@ -76,16 +71,7 @@ export type LoadingOption = "lazy" | "eager";
 
 export type DisplayModeOption = "block" | "inline";
 
-export type OpacityOption =
-  | "10"
-  | "20"
-  | "30"
-  | "40"
-  | "50"
-  | "60"
-  | "70"
-  | "80"
-  | "90";
+export type OpacityOption = "10" | "20" | "30" | "40" | "50" | "60" | "70" | "80" | "90";
 
 /**
  * Props for the Image component
@@ -117,7 +103,7 @@ export type CreateImageBlok = (
   config: {
     image_url: { filename: string };
     alt?: string;
-  } & Partial<Omit<ImageBlok, "image_url" | "alt">>,
+  } & Partial<Omit<ImageBlok, "image_url" | "alt">>
 ) => ImageBlok;
 
 /**

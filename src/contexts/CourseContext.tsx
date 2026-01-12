@@ -5,17 +5,14 @@ import {
   getCourseWithModulesById,
   getAllCourses as fetchAllCourses,
 } from "../services/api/modules";
-import {
-  updateProgress,
-  getUserCourseProgress,
-} from "../services/api/course-progress";
+import { updateProgress, getUserCourseProgress } from "../services/api/course-progress";
 import type { CourseProgress } from "../types/course-progress";
 
 // Helper to convert module IDs to indices
 const getModuleIndices = (moduleIds: string[], modules: Module[]): Set<number> => {
   const indices = new Set<number>();
-  moduleIds.forEach(id => {
-    const index = modules.findIndex(m => m.id === id);
+  moduleIds.forEach((id) => {
+    const index = modules.findIndex((m) => m.id === id);
     if (index !== -1) indices.add(index);
   });
   return indices;
@@ -24,7 +21,7 @@ const getModuleIndices = (moduleIds: string[], modules: Module[]): Set<number> =
 // Helper to convert module indices to IDs
 const getModuleIds = (indices: Set<number>, modules: Module[]): string[] => {
   return Array.from(indices)
-    .map(idx => modules[idx]?.id)
+    .map((idx) => modules[idx]?.id)
     .filter((id): id is string => id !== undefined);
 };
 
@@ -42,23 +39,22 @@ const saveProgress = async (
     const completedModuleIds = getModuleIds(completedModules, modules);
     const completedTestIds = Array.from(completedTests);
     const currentTestId = tests[currentTestIndex]?.id || null;
-    
+
     // Calculate percentage: completed modules / total modules
-    const percentageComplete = modules.length > 0 
-      ? Math.round((completedModules.size / modules.length) * 100)
-      : 0;
-    
+    const percentageComplete =
+      modules.length > 0 ? Math.round((completedModules.size / modules.length) * 100) : 0;
+
     const progressData = {
       percentageComplete,
       currentModuleId,
       completedModuleIds,
       completedTestIds,
-      currentTestId
+      currentTestId,
     };
-    
+
     await updateProgress(courseId, progressData);
   } catch (e) {
-    console.warn('Failed to save progress:', e);
+    console.warn("Failed to save progress:", e);
   }
 };
 
@@ -67,11 +63,10 @@ const loadProgress = async (courseId: string): Promise<CourseProgress | null> =>
     const backendProgress = await getUserCourseProgress(courseId);
     return backendProgress;
   } catch (e) {
-    console.warn('Failed to load progress from backend:', e);
+    console.warn("Failed to load progress from backend:", e);
     return null;
   }
 };
-
 
 export interface CourseContextType {
   currentCourse: Course | null;
@@ -137,12 +132,8 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   const [modules, setModules] = useState<Module[]>([]);
   const [tests, setTests] = useState<Test[]>([]);
   const [currentModuleIndex, setCurrentModuleIndexState] = useState<number>(0);
-  const [completedModules, setCompletedModules] = useState<Set<number>>(
-    new Set(),
-  );
-  const [completedTests, setCompletedTests] = useState<Set<string>>(
-    new Set(),
-  );
+  const [completedModules, setCompletedModules] = useState<Set<number>>(new Set());
+  const [completedTests, setCompletedTests] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [progressLoaded, setProgressLoaded] = useState<boolean>(false);
@@ -151,8 +142,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   const [isTestMode, setIsTestMode] = useState<boolean>(false);
   const [currentTest, setCurrentTest] = useState<Test | null>(null);
   const [currentTestIndex, setCurrentTestIndexState] = useState<number>(0);
-  const [allModulesCompleted, setAllModulesCompleted] =
-    useState<boolean>(false);
+  const [allModulesCompleted, setAllModulesCompleted] = useState<boolean>(false);
 
   // Auto-save progress when module index, completed modules, or completed tests change
   // Only save after initial progress has been loaded to prevent overwriting on mount
@@ -167,11 +157,20 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
         completedModules,
         completedTests,
         currentTestIndex
-      ).catch(err => {
-        console.error('Failed to auto-save progress:', err);
+      ).catch((err) => {
+        console.error("Failed to auto-save progress:", err);
       });
     }
-  }, [currentModuleIndex, completedModules, completedTests, currentTestIndex, currentCourse, modules, tests, progressLoaded]);
+  }, [
+    currentModuleIndex,
+    completedModules,
+    completedTests,
+    currentTestIndex,
+    currentCourse,
+    modules,
+    tests,
+    progressLoaded,
+  ]);
 
   // Load course data
   const loadCourse = useCallback(async (courseId: string): Promise<void> => {
@@ -182,7 +181,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       const data = response.data;
 
       setCurrentCourse(data);
-      
+
       // Sort modules by order field, then by createdAt if order is the same
       const sortedModules = (data.modules || []).sort((a: Module, b: Module) => {
         if (a.order !== b.order) {
@@ -192,7 +191,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
         return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
       });
       setModules(sortedModules);
-      
+
       const sortedTests = (data.tests || []).sort((a: Test, b: Test) => a.order - b.order);
       setTests(sortedTests);
       // setTestAttempts(data.testAttempts);
@@ -201,19 +200,22 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       const saved = await loadProgress(courseId);
       if (saved) {
         // Convert module IDs to indices (using sorted modules)
-        const savedCompletedIndices = getModuleIndices(saved.completedModuleIds || [], sortedModules);
+        const savedCompletedIndices = getModuleIndices(
+          saved.completedModuleIds || [],
+          sortedModules
+        );
         const savedCompletedTests = new Set<string>(saved.completedTestIds || []);
-        
+
         // Find current module index from ID (in sorted modules)
         const currentModuleIdx = saved.currentModuleId
-          ? sortedModules.findIndex((m: Module) => m.id === saved.currentModuleId) ?? 0
+          ? (sortedModules.findIndex((m: Module) => m.id === saved.currentModuleId) ?? 0)
           : 0;
-        
+
         // Find current test index from ID
         const currentTestIdx = saved.currentTestId
           ? sortedTests.findIndex((test: Test) => test.id === saved.currentTestId)
           : sortedTests.findIndex((test: Test) => !savedCompletedTests.has(test.id));
-        
+
         setCurrentModuleIndexState(currentModuleIdx);
         setCompletedModules(savedCompletedIndices);
         setCompletedTests(savedCompletedTests);
@@ -229,7 +231,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
         setCurrentTestIndexState(0);
         setAllModulesCompleted(false);
       }
-      
+
       // Mark progress as loaded to enable auto-save
       setProgressLoaded(true);
     } catch (err) {
@@ -271,7 +273,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
         // Auto-save is handled by useEffect
       }
     },
-    [modules],
+    [modules]
   );
 
   // Mark a module as completed
@@ -279,29 +281,26 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     (index: number): void => {
       setCompletedModules((prev) => {
         const newCompleted = new Set([...prev, index]);
-        
+
         // Don't auto-save here - let nextModule handle it
         // This prevents race conditions
-        
+
         if (newCompleted.size === modules.length) {
           setAllModulesCompleted(true);
         }
         return newCompleted;
       });
     },
-    [modules.length],
+    [modules.length]
   );
 
   // Mark a test as completed
-  const markTestAsCompleted = useCallback(
-    (testId: string): void => {
-      setCompletedTests((prev) => {
-        const newCompleted = new Set([...prev, testId]);
-        return newCompleted;
-      });
-    },
-    [],
-  );
+  const markTestAsCompleted = useCallback((testId: string): void => {
+    setCompletedTests((prev) => {
+      const newCompleted = new Set([...prev, testId]);
+      return newCompleted;
+    });
+  }, []);
 
   // Test-related functions
   const startTestMode = useCallback((): void => {
@@ -309,19 +308,19 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       // Find the next incomplete test starting from currentTestIndex
       let testToStart = tests[currentTestIndex];
       let searchIndex = currentTestIndex;
-      
+
       // If current test is completed, find next incomplete test
       while (testToStart && completedTests.has(testToStart.id) && searchIndex < tests.length) {
         searchIndex++;
         testToStart = tests[searchIndex];
       }
-      
+
       // If we've reached the end, wrap around to find any incomplete tests
       if (!testToStart || completedTests.has(testToStart.id)) {
         testToStart = tests.find((test: Test) => !completedTests.has(test.id)) || tests[0];
         searchIndex = tests.findIndex((test: Test) => test.id === testToStart.id);
       }
-      
+
       setCurrentTest(testToStart);
       setIsTestMode(true);
       setCurrentTestIndexState(searchIndex);
@@ -333,12 +332,15 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     setCurrentTest(null);
   }, []);
 
-  const setCurrentTestIndex = useCallback((index: number): void => {
-    if (index >= 0 && index < tests.length) {
-      setCurrentTestIndexState(index);
-      setCurrentTest(tests[index]);
-    }
-  }, [tests]);
+  const setCurrentTestIndex = useCallback(
+    (index: number): void => {
+      if (index >= 0 && index < tests.length) {
+        setCurrentTestIndexState(index);
+        setCurrentTest(tests[index]);
+      }
+    },
+    [tests]
+  );
 
   const resetToFirstModule = useCallback(
     (clearProgress: boolean = false): void => {
@@ -355,7 +357,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
         setCompletedTests(new Set());
       }
     },
-    [modules],
+    [modules]
   );
 
   // Reset course progress while maintaining test progression
@@ -365,11 +367,10 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     setCurrentModule(modules[0] || null);
     setCompletedModules(new Set());
     setAllModulesCompleted(false);
-    
+
     // Exit test mode temporarily (will re-enter after reset)
     setIsTestMode(false);
     setCurrentTest(null);
-    
   }, [modules]);
 
   // Get the next test in the sequence (useful for preview/information)
@@ -425,8 +426,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   const getProgressPercentage = useCallback((): number => {
     if (modules.length === 0) return 0;
     return (
-      ((completedModules.size +
-        (currentModuleIndex > completedModules.size ? 1 : 0)) /
+      ((completedModules.size + (currentModuleIndex > completedModules.size ? 1 : 0)) /
         modules.length) *
       100
     );
@@ -497,9 +497,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     refetchCourse,
   };
 
-  return (
-    <CourseContext.Provider value={value}>{children}</CourseContext.Provider>
-  );
+  return <CourseContext.Provider value={value}>{children}</CourseContext.Provider>;
 };
 
 export { CourseContext };

@@ -155,7 +155,7 @@ export type CreatePostBlok = (
   config: {
     title: string;
     long_text: PostBlok["long_text"];
-  } & Partial<Omit<PostBlok, "title" | "long_text">>,
+  } & Partial<Omit<PostBlok, "title" | "long_text">>
 ) => PostBlok;
 
 /**
@@ -181,11 +181,7 @@ export const PostPresets = {
     }),
 
   /** Featured article with hero layout */
-  featured: (
-    title: string,
-    content: PostBlok["long_text"],
-    image: string,
-  ): PostBlok =>
+  featured: (title: string, content: PostBlok["long_text"], image: string): PostBlok =>
     createPostBlok({
       title,
       long_text: content,
@@ -197,11 +193,7 @@ export const PostPresets = {
     }),
 
   /** News/announcement post */
-  news: (
-    title: string,
-    content: PostBlok["long_text"],
-    category: string,
-  ): PostBlok =>
+  news: (title: string, content: PostBlok["long_text"], category: string): PostBlok =>
     createPostBlok({
       title,
       long_text: content,
@@ -213,11 +205,7 @@ export const PostPresets = {
     }),
 
   /** Tutorial/guide content */
-  tutorial: (
-    title: string,
-    content: PostBlok["long_text"],
-    readTime: string,
-  ): PostBlok =>
+  tutorial: (title: string, content: PostBlok["long_text"], readTime: string): PostBlok =>
     createPostBlok({
       title,
       long_text: content,
@@ -244,7 +232,7 @@ export const AuthorPresets = {
     image: string,
     bio: string,
     articles: string,
-    followers: string,
+    followers: string
   ): AuthorBlok => ({
     name,
     image: { filename: image },
@@ -258,7 +246,7 @@ export const AuthorPresets = {
     name: string,
     image: string,
     bio: string,
-    socialLinks: Array<SocialLinkBlok>,
+    socialLinks: Array<SocialLinkBlok>
   ): AuthorBlok => ({
     name,
     image: { filename: image },
@@ -282,11 +270,7 @@ export const SocialInteractions = {
   },
 
   /** Generate social share URLs */
-  getShareUrl: (
-    platform: SocialPlatform,
-    url: string,
-    title?: string,
-  ): string => {
+  getShareUrl: (platform: SocialPlatform, url: string, title?: string): string => {
     const encodedUrl = encodeURIComponent(url);
     const encodedTitle = encodeURIComponent(title || "");
 
@@ -308,9 +292,7 @@ export const SocialInteractions = {
  */
 export const PostValidation = {
   /** Validate required fields for publication */
-  validateForPublication: (
-    blok: PostBlok,
-  ): { isValid: boolean; errors: string[] } => {
+  validateForPublication: (blok: PostBlok): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
 
     if (!blok.title?.trim()) {

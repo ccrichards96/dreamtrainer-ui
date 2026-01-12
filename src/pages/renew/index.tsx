@@ -16,11 +16,16 @@ export default function SubscriptionRequired() {
   const { userBilling, refreshUserBilling } = useApp();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [products, setProducts] = useState<Array<{ priceId?: string; id: string; name?: string }>>([]);
+  const [products, setProducts] = useState<Array<{ priceId?: string; id: string; name?: string }>>(
+    []
+  );
 
   const subscriptionStatus = userBilling?.subscriptionStatus.status || "unknown";
   const isPaused = subscriptionStatus === "paused";
-  const isCancelled = subscriptionStatus === "canceled" || subscriptionStatus === "cancelled" || subscriptionStatus === "inactive";
+  const isCancelled =
+    subscriptionStatus === "canceled" ||
+    subscriptionStatus === "cancelled" ||
+    subscriptionStatus === "inactive";
 
   // Fetch available products on mount
   useEffect(() => {
@@ -58,7 +63,7 @@ export default function SubscriptionRequired() {
       };
 
       const response = await billingService.createCheckoutSession(checkoutData);
-      
+
       if (response.checkoutUrl) {
         window.location.href = response.checkoutUrl;
       } else {
@@ -66,9 +71,7 @@ export default function SubscriptionRequired() {
       }
     } catch (err) {
       const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Failed to start renewal process. Please try again.";
+        err instanceof Error ? err.message : "Failed to start renewal process. Please try again.";
       setError(errorMessage);
       console.error("Error creating checkout session:", err);
     } finally {
@@ -83,7 +86,7 @@ export default function SubscriptionRequired() {
     try {
       const returnUrl = `${window.location.origin}/dashboard`;
       const response = await billingService.generateBillingPortalLink(returnUrl);
-      
+
       if (response.portalUrl) {
         window.location.href = response.portalUrl;
       } else {
@@ -91,9 +94,7 @@ export default function SubscriptionRequired() {
       }
     } catch (err) {
       const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Failed to open billing portal. Please try again.";
+        err instanceof Error ? err.message : "Failed to open billing portal. Please try again.";
       setError(errorMessage);
       console.error("Error opening billing portal:", err);
     } finally {
@@ -107,7 +108,7 @@ export default function SubscriptionRequired() {
 
     try {
       await refreshUserBilling();
-      
+
       // Check if subscription is now active
       setTimeout(() => {
         setIsLoading(false);
@@ -156,11 +157,10 @@ export default function SubscriptionRequired() {
               <div className="flex items-start gap-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
                 <XCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    Access Restricted
-                  </h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">Access Restricted</h3>
                   <p className="text-gray-600 mb-4">
-                    Your subscription status: <span className="font-semibold capitalize">{subscriptionStatus}</span>
+                    Your subscription status:{" "}
+                    <span className="font-semibold capitalize">{subscriptionStatus}</span>
                   </p>
                   <p className="text-gray-600">
                     To continue accessing your courses, assessments, and all premium features,
@@ -173,16 +173,15 @@ export default function SubscriptionRequired() {
             {/* Current Subscription Info */}
             {userBilling?.subscription && (
               <div className="mb-8 p-6 bg-purple-50 rounded-lg border border-purple-200">
-                <h3 className="font-semibold text-gray-900 mb-3">
-                  Your Previous Subscription
-                </h3>
+                <h3 className="font-semibold text-gray-900 mb-3">Your Previous Subscription</h3>
                 <div className="space-y-2 text-gray-700">
                   <p>
                     <span className="font-medium">Plan:</span> {userBilling.subscription.name}
                   </p>
                   {userBilling.subscription.amount && (
                     <p>
-                      <span className="font-medium">Price:</span> ${userBilling.subscription.amount.toFixed(2)}/month
+                      <span className="font-medium">Price:</span> $
+                      {userBilling.subscription.amount.toFixed(2)}/month
                     </p>
                   )}
                 </div>
@@ -254,8 +253,8 @@ export default function SubscriptionRequired() {
                 Need Help?
               </h3>
               <p className="text-gray-600 mb-4">
-                If you're having trouble reactivating your subscription or have questions,
-                our support team is here to help.
+                If you're having trouble reactivating your subscription or have questions, our
+                support team is here to help.
               </p>
               <a
                 href="mailto:support@dreamtrainer.com"
@@ -268,9 +267,7 @@ export default function SubscriptionRequired() {
 
             {/* Reactivation Benefits */}
             <div className="mt-8 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
-              <h3 className="font-semibold text-gray-900 mb-4">
-                What You'll Get Back:
-              </h3>
+              <h3 className="font-semibold text-gray-900 mb-4">What You'll Get Back:</h3>
               <ul className="space-y-3">
                 {[
                   "Full access to all courses and modules",
