@@ -10,7 +10,7 @@ const CMSRoute: React.FC = () => {
 
   // Capture referralId from URL and store in localStorage for affiliate tracking
   useEffect(() => {
-    const referralId = searchParams.get("referralId");
+    const referralId = searchParams.get("via");
     if (referralId) {
       localStorage.setItem("rewardful_referral_id", referralId);
     }
