@@ -6,9 +6,16 @@ import { useApp } from "../../contexts/useAppContext";
 import { useApiContext } from "../../contexts/useApiContext";
 import { userService } from "../../services/api/users";
 
+// Declare the global rewardful function for TypeScript
+declare global {
+  interface Window {
+    rewardful?: (method: string, options?: { email: string }) => void;
+  }
+}
+
 export default function CheckoutSuccess() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading: auth0Loading } = useAuth0();
+  const { isAuthenticated, isLoading: auth0Loading, user } = useAuth0();
   const { isInitialized: apiInitialized } = useApiContext();
   const { refreshUserProfile } = useApp();
 
@@ -29,6 +36,11 @@ export default function CheckoutSuccess() {
         // Small delay to ensure token interceptor is fully set up
         await new Promise((resolve) => setTimeout(resolve, 200));
 
+        // Track conversion with Rewardful for affiliate attribution
+        if (user?.email && typeof window.rewardful === "function") {
+          window.rewardful("convert", { email: user.email });
+        }
+
         // Mark onboarding as complete since user has successfully subscribed
         await userService.updateCurrentUser({
           onboardingComplete: true,
@@ -36,6 +48,9 @@ export default function CheckoutSuccess() {
 
         // Refresh the user profile in the app context
         await refreshUserProfile();
+
+        // Clear the referral ID from localStorage after successful conversion
+        localStorage.removeItem("rewardful_referral_id");
       } catch (error) {
         console.error("Failed to update user onboarding status:", error);
         setUpdateError(error instanceof Error ? error.message : "Failed to update profile");
@@ -45,7 +60,7 @@ export default function CheckoutSuccess() {
     };
 
     handleCheckoutSuccess();
-  }, [auth0Loading, isAuthenticated, apiInitialized]);
+  }, [auth0Loading, isAuthenticated, apiInitialized, user?.email]);
 
   const handleContinue = () => {
     // Navigate to dashboard after successful payment
