@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, Check, Crown, Star, type LucideIcon } from "lucide-react";
 import { OnboardingData } from "./index";
 import ProgressIndicator from "./ProgressIndicator";
-import { createCheckoutSession, getAllProducts } from "../../services/api/billing";
+import { CheckoutSessionRequest, createCheckoutSession, getAllProducts } from "../../services/api/billing";
 import { updateCurrentUser } from "../../services/api/users";
 
 // Type for pricing plan with both API and UI fields
@@ -167,14 +167,17 @@ export default function PricingSelection({
         throw new Error("Selected plan not found");
       }
 
-      // Create checkout session
-      const checkoutSession = await createCheckoutSession({
+      const checkoutParams: CheckoutSessionRequest = {
         priceIds: [selectedPlanData.priceId],
         successUrl: `${window.location.origin}/checkout/success`,
         cancelUrl: `${window.location.origin}/onboarding`,
         mode: "subscription",
         ...(promoCode.trim() && { promoCode: promoCode.trim() }),
-      });
+        ...(data.referralId && { referralId: data.referralId }),
+      };
+
+      // Create checkout session
+      const checkoutSession = await createCheckoutSession(checkoutParams);
 
       // Only redirect if we successfully got a checkout session URL
       if (checkoutSession?.checkoutUrl) {

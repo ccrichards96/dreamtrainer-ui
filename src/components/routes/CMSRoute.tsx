@@ -1,11 +1,20 @@
-import React from "react";
-import { useParams, useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useParams, useLocation, useSearchParams } from "react-router-dom";
 import { useStoryblok, getStoryblokVersion } from "../../utils/storyblok";
 import { StoryblokComponent } from "@storyblok/react";
 
 const CMSRoute: React.FC = () => {
   const { "*": wildcard } = useParams<{ "*": string }>();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+
+  // Capture referralId from URL and store in localStorage for affiliate tracking
+  useEffect(() => {
+    const referralId = searchParams.get("referralId");
+    if (referralId) {
+      localStorage.setItem("rewardful_referral_id", referralId);
+    }
+  }, [searchParams]);
 
   let fullSlug = "home"; // Default to home
 

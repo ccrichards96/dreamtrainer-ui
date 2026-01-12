@@ -14,6 +14,7 @@ export interface CheckoutSessionRequest {
   cancelUrl: string;
   mode?: "payment" | "subscription" | "setup";
   promoCode?: string;
+  referralId?: string;  //Referral ID for affliates
 }
 
 /**

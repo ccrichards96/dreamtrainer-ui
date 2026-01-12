@@ -13,6 +13,7 @@ export type OnboardingData = {
   howDidYouHearAboutUs?: string;
   englishProficiency?: string;
   selectedPackage?: string;
+  referralId?: string;
 };
 
 export default function Onboarding() {
@@ -29,6 +30,9 @@ export default function Onboarding() {
       try {
         setIsLoadingUserData(true);
         
+        // Retrieve referralId from localStorage (set during signup)
+        const referralId = localStorage.getItem("rewardful_referral_id") || undefined;
+        
         // Check if user is authenticated with Google (social login)
         const isGoogleLogin = user?.sub?.startsWith('google-oauth2|');
         
@@ -37,6 +41,7 @@ export default function Onboarding() {
           setOnboardingData({
             firstName: user.given_name || "",
             lastName: user.family_name || "",
+            referralId,
           });
         } else {
           // For non-Google logins, fetch existing user data from backend
@@ -45,11 +50,12 @@ export default function Onboarding() {
             setOnboardingData({
               firstName: userData.firstName || "",
               lastName: userData.lastName || "",
+              referralId,
             });
           } catch (error) {
             console.error("Failed to fetch user data:", error);
-            // If fetch fails, leave fields empty
-            setOnboardingData({});
+            // If fetch fails, still set referralId
+            setOnboardingData({ referralId });
           }
         }
       } finally {

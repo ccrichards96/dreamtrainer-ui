@@ -1,12 +1,21 @@
 import { motion } from "framer-motion";
 import { useAuth0, RedirectLoginOptions } from "@auth0/auth0-react";
 import { ArrowRight, UserPlus } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 
 export default function Signup() {
   const { loginWithRedirect, isAuthenticated, isLoading } = useAuth0();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Capture referralId from URL and store in localStorage for affiliate tracking
+  useEffect(() => {
+    const referralId = searchParams.get("referralId");
+    if (referralId) {
+      localStorage.setItem("rewardful_referral_id", referralId);
+    }
+  }, [searchParams]);
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
