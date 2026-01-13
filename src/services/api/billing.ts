@@ -2,7 +2,6 @@ import axios from "axios";
 import apiClient, { APIResponse } from "./client";
 import { Subscription, BillingData, UserBillingData } from "../../types/billing";
 
-// Billing related interfaces
 export interface UserBillingInfo {
   userId: string;
   subscription: Subscription;
@@ -110,7 +109,6 @@ export const getUserSubscriptions = async (): Promise<BillingData[]> => {
   }
 };
 
-// Export all billing-related functions as a service object
 export const billingService = {
   getAllProducts,
   getUserBillingInfo,
