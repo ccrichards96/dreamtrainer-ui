@@ -462,9 +462,7 @@ const AdminDashboard: React.FC = () => {
                     <BookOpen className="w-6 h-6 text-blue-600" />
                     <div>
                       <h3 className="text-lg font-medium text-gray-900">All Courses</h3>
-                      <p className="text-sm text-gray-500">
-                        Manage courses and their sections
-                      </p>
+                      <p className="text-sm text-gray-500">Manage courses and their sections</p>
                     </div>
                     <span className="ml-auto text-sm text-gray-500">
                       {filteredCourses.length} course(s)
@@ -474,7 +472,9 @@ const AdminDashboard: React.FC = () => {
                 {filteredCourses.length === 0 ? (
                   <div className="p-8 text-center">
                     <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">No courses found. Create your first course to get started.</p>
+                    <p className="text-gray-500">
+                      No courses found. Create your first course to get started.
+                    </p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -525,7 +525,9 @@ const AdminDashboard: React.FC = () => {
                                   <div className="text-sm font-medium text-gray-900">
                                     {course.name}
                                   </div>
-                                  <div className="text-sm text-gray-500">ID: {course.id.slice(0, 8)}...</div>
+                                  <div className="text-sm text-gray-500">
+                                    ID: {course.id.slice(0, 8)}...
+                                  </div>
                                 </div>
                               </div>
                             </td>

@@ -70,7 +70,7 @@ function DashboardContent() {
   // State for available sections within the current course
   const [availableSections, setAvailableSections] = useState<Section[]>([]);
   const [switchingSection, setSwitchingSection] = useState<string | null>(null);
-  
+
   // Ref to track if initialization has been done to prevent duplicate calls
   const isInitialized = useRef(false);
   const lastCourseId = useRef<string | null>(null);
@@ -80,7 +80,7 @@ function DashboardContent() {
     const initializeDashboard = async () => {
       // Use courseId from URL params, fallback to localStorage for backward compatibility
       const targetCourseId = courseId || localStorage.getItem("selected_course_id");
-      
+
       // Skip if no course ID or if we've already initialized with this course
       if (!targetCourseId || (isInitialized.current && lastCourseId.current === targetCourseId)) {
         return;
@@ -89,7 +89,7 @@ function DashboardContent() {
       try {
         isInitialized.current = true;
         lastCourseId.current = targetCourseId;
-        
+
         const selectedSectionId = localStorage.getItem("selected_section_id");
 
         // Load the course from URL or localStorage
@@ -102,7 +102,7 @@ function DashboardContent() {
         setAvailableSections(sortedSections);
 
         // Load modules for the active section
-        if (selectedSectionId && sortedSections.some(s => s.id === selectedSectionId)) {
+        if (selectedSectionId && sortedSections.some((s) => s.id === selectedSectionId)) {
           await loadSectionModules(selectedSectionId);
         } else if (sortedSections.length > 0) {
           await loadSectionModules(sortedSections[0].id);
@@ -116,7 +116,7 @@ function DashboardContent() {
         isInitialized.current = false; // Allow retry on error
       }
     };
-    
+
     initializeDashboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]); // Only depend on courseId - functions are stable via useCallback in context

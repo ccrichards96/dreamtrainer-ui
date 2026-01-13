@@ -88,8 +88,6 @@ export type DraftSection = Pick<Section, "courseId" | "name"> & {
 };
 
 // Update type for modifying existing sections
-export type UpdateSection = Partial<
-  Pick<Section, "name" | "description" | "imageUrl" | "order">
->;
+export type UpdateSection = Partial<Pick<Section, "name" | "description" | "imageUrl" | "order">>;
 
 export type { Course, Module, Section };

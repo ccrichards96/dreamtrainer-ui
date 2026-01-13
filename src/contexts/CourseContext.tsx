@@ -190,8 +190,10 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
 
       // Extract modules from sections (new API structure: Course → Section → Module)
       // Sort sections by order, then extract and flatten modules from each section
-      const sortedSections = (data.sections || []).sort((a: Section, b: Section) => a.order - b.order);
-      
+      const sortedSections = (data.sections || []).sort(
+        (a: Section, b: Section) => a.order - b.order
+      );
+
       // Flatten modules from all sections, maintaining section order, then module order within sections
       const allModules: Module[] = [];
       sortedSections.forEach((section: Section) => {
@@ -204,7 +206,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
         });
         allModules.push(...sectionModules);
       });
-      
+
       const sortedModules = allModules;
       setModules(sortedModules);
       setSections(sortedSections);
@@ -274,7 +276,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     setError(null);
     try {
       const sectionWithModules = await getSectionWithModules(sectionId);
-      
+
       // Sort modules by order field
       const sortedModules = (sectionWithModules.modules || []).sort((a: Module, b: Module) => {
         if (a.order !== b.order) {
@@ -285,13 +287,13 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
 
       setCurrentSectionId(sectionId);
       setModules(sortedModules);
-      
+
       // Reset module navigation state for the new section
       setCurrentModuleIndexState(0);
       setCurrentModule(sortedModules[0] || null);
       setCompletedModules(new Set());
       setAllModulesCompleted(false);
-      
+
       // TODO: Load section-specific progress if available
     } catch (err) {
       console.warn("Failed to load section modules:", err);

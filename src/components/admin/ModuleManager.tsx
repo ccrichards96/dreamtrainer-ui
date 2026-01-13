@@ -107,9 +107,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
         // Update local state
         setModuleList((prev) =>
           prev.map((module) =>
-            module.id === editingModule.id
-              ? { ...module, ...updatedModule }
-              : module
+            module.id === editingModule.id ? { ...module, ...updatedModule } : module
           )
         );
       } else {
@@ -233,9 +231,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
               <p className="text-sm font-medium text-gray-900">{section.name}</p>
               <p className="text-sm text-gray-500">{section.description}</p>
             </div>
-            <span className="ml-auto text-sm text-gray-500">
-              {moduleList.length} module(s)
-            </span>
+            <span className="ml-auto text-sm text-gray-500">{moduleList.length} module(s)</span>
           </div>
         </div>
       </div>

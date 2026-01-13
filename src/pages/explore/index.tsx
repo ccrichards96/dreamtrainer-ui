@@ -21,14 +21,12 @@ const ExploreCoursesContent = () => {
         const coursesResponse = await getAllCourses();
 
         // Sort courses by order field, then by createdAt
-        const sortedCourses = (coursesResponse.data || []).sort(
-          (a: Course, b: Course) => {
-            if (a.order !== b.order) {
-              return a.order - b.order;
-            }
-            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        const sortedCourses = (coursesResponse.data || []).sort((a: Course, b: Course) => {
+          if (a.order !== b.order) {
+            return a.order - b.order;
           }
-        );
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        });
 
         setCourses(sortedCourses);
       } catch (err) {

@@ -75,9 +75,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
     fetchSections();
   }, [course.id]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -117,9 +115,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
 
         // Update local state
         setSectionList((prev) =>
-          prev.map((section) =>
-            section.id === editingSection.id ? updatedSection : section
-          )
+          prev.map((section) => (section.id === editingSection.id ? updatedSection : section))
         );
       } else {
         // Create new section via API
@@ -148,7 +144,12 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
 
   const handleDeleteSection = async (sectionId: string) => {
     const section = sectionList.find((s) => s.id === sectionId);
-    if (!confirm(`Are you sure you want to delete "${section?.name}"? This section must have no modules.`)) return;
+    if (
+      !confirm(
+        `Are you sure you want to delete "${section?.name}"? This section must have no modules.`
+      )
+    )
+      return;
 
     try {
       await deleteSection(sectionId);
@@ -261,9 +262,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
               <p className="text-sm font-medium text-gray-900">{course.name}</p>
               <p className="text-sm text-gray-500">{course.description}</p>
             </div>
-            <span className="ml-auto text-sm text-gray-500">
-              {sectionList.length} section(s)
-            </span>
+            <span className="ml-auto text-sm text-gray-500">{sectionList.length} section(s)</span>
           </div>
         </div>
       </div>
@@ -340,10 +339,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
 
               {/* Image URL */}
               <div className="md:col-span-2">
-                <label
-                  htmlFor="imageUrl"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
                   Image URL
                 </label>
                 <input
@@ -394,7 +390,9 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
         {sectionList.length === 0 ? (
           <div className="p-8 text-center">
             <Layers className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">No sections yet. Create your first section to get started.</p>
+            <p className="text-gray-500">
+              No sections yet. Create your first section to get started.
+            </p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
@@ -430,9 +428,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <Layers className="w-5 h-5 text-blue-500" />
-                      <h4 className="text-sm font-medium text-gray-900 truncate">
-                        {section.name}
-                      </h4>
+                      <h4 className="text-sm font-medium text-gray-900 truncate">{section.name}</h4>
                     </div>
                     {section.description && (
                       <p className="text-sm text-gray-500 mt-1 line-clamp-2">
@@ -448,7 +444,9 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleManageModules(section)}
-                      disabled={reorderingSectionId !== null || loadingModulesForSection === section.id}
+                      disabled={
+                        reorderingSectionId !== null || loadingModulesForSection === section.id
+                      }
                       className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50 px-3 py-1.5 border border-green-200 rounded-lg hover:bg-green-50"
                     >
                       {loadingModulesForSection === section.id ? (
