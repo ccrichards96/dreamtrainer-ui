@@ -1,18 +1,21 @@
 import { motion } from "framer-motion";
 import { useAuth0 } from "@auth0/auth0-react";
 import { MessageSquare, RefreshCw, AlertCircle, Calendar, Play, Mail } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useParams } from "react-router-dom";
 import { useDashboardContext, DashboardProvider } from "../../contexts";
 import { CourseProvider } from "../../contexts/CourseContext";
 import { useCourseContext } from "../../contexts/useCourseContext";
 import DreamFlow from "../../components/DreamFlow";
 import Modal from "../../components/modals/Modal";
 import SupportMessageForm from "../../components/forms/SupportMessageForm";
-import { Course } from "../../types/modules";
+import { Section } from "../../types/modules";
+import { getCourseSections } from "../../services/api/modules";
 import { sanitizeHtml } from "../../utils/htmlSanitizer";
 import posthog from "posthog-js";
 
 function DashboardContent() {
+  const { courseId } = useParams<{ courseId: string }>();
   const { user, isAuthenticated } = useAuth0();
   const firstName = user?.given_name || "there";
 
@@ -55,68 +58,79 @@ function DashboardContent() {
   const {
     modules,
     currentCourse,
+    currentSectionId,
     tests,
     loading: courseLoading,
     error: courseError,
     loadCourse,
-    getAllCourses,
+    loadSectionModules,
     startTestMode,
   } = useCourseContext();
 
-  // State for available courses
-  const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
-  const [switchingCourse, setSwitchingCourse] = useState<string | null>(null);
+  // State for available sections within the current course
+  const [availableSections, setAvailableSections] = useState<Section[]>([]);
+  const [switchingSection, setSwitchingSection] = useState<string | null>(null);
+  
+  // Ref to track if initialization has been done to prevent duplicate calls
+  const isInitialized = useRef(false);
+  const lastCourseId = useRef<string | null>(null);
 
-  // Load TOEFL Max course on component mount
+  // Load course and sections on component mount or when courseId changes
   useEffect(() => {
-    const fetchCourses = async () => {
+    const initializeDashboard = async () => {
+      // Use courseId from URL params, fallback to localStorage for backward compatibility
+      const targetCourseId = courseId || localStorage.getItem("selected_course_id");
+      
+      // Skip if no course ID or if we've already initialized with this course
+      if (!targetCourseId || (isInitialized.current && lastCourseId.current === targetCourseId)) {
+        return;
+      }
+
       try {
-        const courses: Course[] = await getAllCourses();
-        // Sort courses by order field, then by createdAt if order is the same
-        const sortedCourses = courses.sort((a, b) => {
-          if (a.order !== b.order) {
-            return a.order - b.order;
-          }
-          const dateA = new Date(a.createdAt).getTime();
-          const dateB = new Date(b.createdAt).getTime();
-          return dateA - dateB;
-        });
-        setAvailableCourses(sortedCourses);
+        isInitialized.current = true;
+        lastCourseId.current = targetCourseId;
+        
+        const selectedSectionId = localStorage.getItem("selected_section_id");
 
-        // Check if user selected a specific course from the explore page
-        const selectedCourseId = localStorage.getItem("selected_course_id");
+        // Load the course from URL or localStorage
+        await loadCourse(targetCourseId);
+        await getTestScores(targetCourseId);
 
-        if (selectedCourseId) {
-          // Load the selected course
-          await loadCourse(selectedCourseId);
-          await getTestScores(selectedCourseId);
-          // Clear the selection after loading
-          localStorage.removeItem("selected_course_id");
-        } else if (sortedCourses.length > 0 && !currentCourse) {
-          // Only load the first course if no course is currently loaded and no selection
-          await loadCourse(sortedCourses[0].id);
-          await getTestScores(sortedCourses[0].id);
-        } else if (currentCourse) {
-          // If a course is already loaded, just fetch its test scores
-          await getTestScores(currentCourse.id);
+        // Fetch sections for this course
+        const sections = await getCourseSections(targetCourseId);
+        const sortedSections = sections.sort((a, b) => a.order - b.order);
+        setAvailableSections(sortedSections);
+
+        // Load modules for the active section
+        if (selectedSectionId && sortedSections.some(s => s.id === selectedSectionId)) {
+          await loadSectionModules(selectedSectionId);
+        } else if (sortedSections.length > 0) {
+          await loadSectionModules(sortedSections[0].id);
         }
+
+        // Clear localStorage selection after loading
+        localStorage.removeItem("selected_course_id");
+        localStorage.removeItem("selected_section_id");
       } catch (error) {
-        console.error("Error fetching courses:", error);
+        console.error("Error initializing dashboard:", error);
+        isInitialized.current = false; // Allow retry on error
       }
     };
-    fetchCourses();
-  }, [getAllCourses, loadCourse, getTestScores, currentCourse]);
+    
+    initializeDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseId]); // Only depend on courseId - functions are stable via useCallback in context
 
-  // Handle course switching
-  const handleSwitchCourse = async (courseId: string) => {
+  // Handle section switching
+  const handleSwitchSection = async (sectionId: string) => {
     try {
-      setSwitchingCourse(courseId);
-      await loadCourse(courseId);
-      await getTestScores(courseId);
+      setSwitchingSection(sectionId);
+      // Load modules for the selected section from context
+      await loadSectionModules(sectionId);
     } catch (error) {
-      console.error("Error switching course:", error);
+      console.error("Error switching section:", error);
     } finally {
-      setSwitchingCourse(null);
+      setSwitchingSection(null);
     }
   };
 
@@ -175,27 +189,28 @@ function DashboardContent() {
           <p className="text-xl text-gray-600">Let's get you to your dream TOEFL score.</p>
         </motion.div>
 
-        {/* Available Courses Section */}
-        {availableCourses.length > 0 && (
+        {/* Available Sections - Only show if course is loaded and has sections */}
+        {currentCourse && availableSections.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
             className="mb-8"
           >
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your Course Sections</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">{currentCourse.name}</h2>
+            <p className="text-gray-600 mb-4">Select a section to continue learning</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {availableCourses.map((course, index) => {
-                const isActive = currentCourse?.id === course.id;
-                const isLoading = switchingCourse === course.id;
+              {availableSections.map((section, index) => {
+                const isActive = currentSectionId === section.id;
+                const isLoading = switchingSection === section.id;
 
                 return (
                   <motion.button
-                    key={course.id}
+                    key={section.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 + index * 0.05 }}
-                    onClick={() => !isActive && handleSwitchCourse(course.id)}
+                    onClick={() => !isActive && handleSwitchSection(section.id)}
                     disabled={isLoading}
                     className={`relative p-6 rounded-xl transition-all ${
                       isActive
@@ -233,14 +248,14 @@ function DashboardContent() {
                       <h3
                         className={`font-semibold mb-1 ${isActive ? "text-white" : "text-gray-900"}`}
                       >
-                        {course.name}
+                        {section.name}
                       </h3>
 
-                      {course.description && (
+                      {section.description && (
                         <p
                           className={`text-sm line-clamp-2 ${isActive ? "text-white/90" : "text-gray-600"}`}
                         >
-                          {course.description}
+                          {section.description}
                         </p>
                       )}
                     </div>

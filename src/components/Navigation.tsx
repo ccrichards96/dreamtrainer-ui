@@ -19,12 +19,6 @@ export default function Navigation() {
             {isAuthenticated ? (
               <>
                 <Link
-                  to="/dashboard"
-                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Dashboard
-                </Link>
-                <Link
                   to="/courses"
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
                 >

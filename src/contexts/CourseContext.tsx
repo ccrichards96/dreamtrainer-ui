@@ -1,9 +1,10 @@
 import React, { createContext, ReactNode, useState, useCallback, useEffect } from "react";
-import { Course, Module } from "../types/modules";
+import { Course, Module, Section } from "../types/modules";
 import { Test } from "../types/tests";
 import {
   getCourseWithModulesById,
   getAllCourses as fetchAllCourses,
+  getSectionWithModules,
 } from "../services/api/modules";
 import { updateProgress, getUserCourseProgress } from "../services/api/course-progress";
 import type { CourseProgress } from "../types/course-progress";
@@ -71,7 +72,9 @@ const loadProgress = async (courseId: string): Promise<CourseProgress | null> =>
 export interface CourseContextType {
   currentCourse: Course | null;
   currentModule: Module | null;
+  currentSectionId: string | null;
   modules: Module[];
+  sections: Section[];
   tests: Test[];
 
   // Module navigation
@@ -91,6 +94,7 @@ export interface CourseContextType {
 
   // Actions
   loadCourse: (courseId: string) => Promise<void>;
+  loadSectionModules: (sectionId: string) => Promise<void>;
   getAllCourses: () => Promise<Course[]>;
   setCurrentModuleIndex: (index: number) => void;
   markModuleAsCompleted: (index: number) => void;
@@ -129,7 +133,9 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   // State variables
   const [currentCourse, setCurrentCourse] = useState<Course | null>(null);
   const [currentModule, setCurrentModule] = useState<Module | null>(null);
+  const [currentSectionId, setCurrentSectionId] = useState<string | null>(null);
   const [modules, setModules] = useState<Module[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [tests, setTests] = useState<Test[]>([]);
   const [currentModuleIndex, setCurrentModuleIndexState] = useState<number>(0);
   const [completedModules, setCompletedModules] = useState<Set<number>>(new Set());
@@ -182,15 +188,26 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
 
       setCurrentCourse(data);
 
-      // Sort modules by order field, then by createdAt if order is the same
-      const sortedModules = (data.modules || []).sort((a: Module, b: Module) => {
-        if (a.order !== b.order) {
-          return a.order - b.order;
-        }
-        // If order is the same, sort by createdAt
-        return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+      // Extract modules from sections (new API structure: Course → Section → Module)
+      // Sort sections by order, then extract and flatten modules from each section
+      const sortedSections = (data.sections || []).sort((a: Section, b: Section) => a.order - b.order);
+      
+      // Flatten modules from all sections, maintaining section order, then module order within sections
+      const allModules: Module[] = [];
+      sortedSections.forEach((section: Section) => {
+        const sectionModules = (section.modules || []).sort((a: Module, b: Module) => {
+          if (a.order !== b.order) {
+            return a.order - b.order;
+          }
+          // If order is the same, sort by createdAt
+          return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+        });
+        allModules.push(...sectionModules);
       });
+      
+      const sortedModules = allModules;
       setModules(sortedModules);
+      setSections(sortedSections);
 
       const sortedTests = (data.tests || []).sort((a: Test, b: Test) => a.order - b.order);
       setTests(sortedTests);
@@ -239,12 +256,48 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
 
       setCurrentCourse(null);
       setModules([]);
+      setSections([]);
       setTests([]);
       setCurrentModuleIndexState(0);
       setCompletedModules(new Set());
       setCompletedTests(new Set());
       setCurrentModule(null);
       setCurrentTestIndexState(0);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Load modules for a specific section
+  const loadSectionModules = useCallback(async (sectionId: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const sectionWithModules = await getSectionWithModules(sectionId);
+      
+      // Sort modules by order field
+      const sortedModules = (sectionWithModules.modules || []).sort((a: Module, b: Module) => {
+        if (a.order !== b.order) {
+          return a.order - b.order;
+        }
+        return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+      });
+
+      setCurrentSectionId(sectionId);
+      setModules(sortedModules);
+      
+      // Reset module navigation state for the new section
+      setCurrentModuleIndexState(0);
+      setCurrentModule(sortedModules[0] || null);
+      setCompletedModules(new Set());
+      setAllModulesCompleted(false);
+      
+      // TODO: Load section-specific progress if available
+    } catch (err) {
+      console.warn("Failed to load section modules:", err);
+      setError("Failed to load section modules");
+      setModules([]);
+      setCurrentModule(null);
     } finally {
       setLoading(false);
     }
@@ -452,7 +505,9 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     // Current course and modules
     currentCourse,
     currentModule,
+    currentSectionId,
     modules,
+    sections,
     tests,
 
     // Module navigation
@@ -472,6 +527,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
 
     // Actions
     loadCourse,
+    loadSectionModules,
     getAllCourses,
     setCurrentModuleIndex,
     markModuleAsCompleted,

@@ -10,17 +10,18 @@ import {
   BookOpen,
   ChevronUp,
   ChevronDown,
+  Layers,
   GripVertical,
 } from "lucide-react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { Course, Module } from "../../types/modules";
+import { Section, Module } from "../../types/modules";
 import { Category } from "../../types/categories";
 import { createModule, updateModule, deleteModule } from "../../services/api/modules";
 import { getAllCategories } from "../../services/api/categories";
 
 interface ModuleManagerProps {
-  course: Course;
+  section: Section;
   modules: Module[];
 }
 
@@ -33,7 +34,7 @@ interface ModuleFormData {
   categoryId: string;
 }
 
-const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
+const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
   const [moduleList, setModuleList] = useState<Module[]>(
     [...modules].sort((a, b) => a.order - b.order)
   );
@@ -127,30 +128,29 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
     try {
       if (editingModule) {
         // Update existing module via API
-        await updateModule(editingModule.id, formData);
+        const updatedModule = await updateModule(editingModule.id, formData);
 
         // Update local state
         setModuleList((prev) =>
           prev.map((module) =>
             module.id === editingModule.id
-              ? { ...module, ...formData, updatedAt: new Date() }
+              ? { ...module, ...updatedModule }
               : module
           )
         );
       } else {
-        // Create new module via API
+        // Create new module via API - now uses sectionId instead of courseId
         const moduleData = {
-          courseId: course.id,
+          sectionId: section.id,
           topic: formData.topic,
           description: formData.description,
-          status: "active",
+          status: "published",
           videoUrl: formData.videoUrl,
           botIframeUrl: formData.botIframeUrl,
           lessonContent: formData.lessonContent,
           categoryId: formData.categoryId,
         };
-        const response = await createModule(moduleData);
-        const newModule = response.data;
+        const newModule = await createModule(moduleData);
 
         // Add to local state
         setModuleList((prev) => [...prev, newModule]);
@@ -241,7 +241,6 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Manage Modules</h3>
-              <p className="text-sm text-gray-500">Course: {course.name}</p>
             </div>
             <button
               onClick={handleAddModule}
@@ -253,14 +252,17 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
           </div>
         </div>
 
-        {/* Course Info */}
+        {/* Section Info */}
         <div className="px-6 py-4 bg-gray-50">
           <div className="flex items-center gap-3">
-            <BookOpen className="w-5 h-5 text-gray-400" />
+            <Layers className="w-5 h-5 text-gray-400" />
             <div>
-              <p className="text-sm font-medium text-gray-900">{course.name}</p>
-              <p className="text-sm text-gray-500">{course.description}</p>
+              <p className="text-sm font-medium text-gray-900">{section.name}</p>
+              <p className="text-sm text-gray-500">{section.description}</p>
             </div>
+            <span className="ml-auto text-sm text-gray-500">
+              {moduleList.length} module(s)
+            </span>
           </div>
         </div>
       </div>
@@ -270,6 +272,12 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ course, modules }) => {
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-red-500" />
           <span className="text-red-700">{error}</span>
+          <button
+            onClick={() => setError(null)}
+            className="ml-auto text-red-400 hover:text-red-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 

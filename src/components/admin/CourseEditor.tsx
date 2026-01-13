@@ -1,13 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Save, X, AlertCircle } from "lucide-react";
-import { Course, CourseGroup } from "../../types/modules";
-import {
-  updateCourse,
-  getAllCoursesGroups,
-  addCourseToGroup,
-  removeCourseFromGroup,
-} from "../../services/api/modules";
+import { Course } from "../../types/modules";
+import { updateCourse } from "../../services/api/modules";
 
 interface CourseEditorProps {
   course: Course;
@@ -20,28 +15,9 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     name: course.name || "",
     description: course.description || "",
   });
-  const [selectedGroupId, setSelectedGroupId] = useState<string>(course.courseGroupId || "");
-  const [courseGroups, setCourseGroups] = useState<CourseGroup[]>([]);
-  const [loadingGroups, setLoadingGroups] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-
-  // Fetch course groups on mount
-  useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        setLoadingGroups(true);
-        const response = await getAllCoursesGroups();
-        setCourseGroups(response.data || []);
-      } catch (err) {
-        console.error("Error fetching course groups:", err);
-      } finally {
-        setLoadingGroups(false);
-      }
-    };
-    fetchGroups();
-  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -61,18 +37,6 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     try {
       // Update course via API
       await updateCourse(course.id, formData);
-
-      // Handle course group assignment
-      const currentGroupId = course.courseGroupId || "";
-      if (selectedGroupId !== currentGroupId) {
-        if (selectedGroupId) {
-          // Assign to new group
-          await addCourseToGroup(course.id, selectedGroupId);
-        } else if (currentGroupId) {
-          // Remove from current group
-          await removeCourseFromGroup(course.id);
-        }
-      }
 
       setSuccess(true);
       setTimeout(() => {
@@ -152,35 +116,6 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter course description"
             />
-          </div>
-
-          {/* Course Group Selection */}
-          <div>
-            <label htmlFor="courseGroup" className="block text-sm font-medium text-gray-700 mb-1">
-              Course Group
-            </label>
-            {loadingGroups ? (
-              <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500">
-                Loading groups...
-              </div>
-            ) : (
-              <select
-                id="courseGroup"
-                value={selectedGroupId}
-                onChange={(e) => setSelectedGroupId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">No group (unassigned)</option>
-                {courseGroups.map((group) => (
-                  <option key={group.id} value={group.id}>
-                    {group.name}
-                  </option>
-                ))}
-              </select>
-            )}
-            <p className="mt-1 text-sm text-gray-500">
-              Assign this course to a group for better organization
-            </p>
           </div>
 
           {/* Course Metadata */}

@@ -58,6 +58,14 @@ function App() {
                       }
                     />
                     <Route
+                      path="/courses/:courseId/dashboard"
+                      element={
+                        <ProtectedRoute requireSubscription={true}>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
                       path="/onboarding"
                       element={
                         <ProtectedRoute>
