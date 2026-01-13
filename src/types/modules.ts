@@ -41,7 +41,6 @@ interface Course {
 interface Module {
   id: string;
   sectionId: string; // Changed from courseId
-  categoryId: string | null;
   topic: string; // e.g., "Introduction to TOEFL Writing"
   description: string;
   status: string;
@@ -59,7 +58,6 @@ interface Module {
 export type DraftModule = Pick<
   Module,
   | "sectionId" // Changed from courseId
-  | "categoryId"
   | "topic"
   | "description"
   | "status"
@@ -71,7 +69,6 @@ export type DraftModule = Pick<
 export type UpdateModule = Partial<
   Pick<
     Module,
-    | "categoryId"
     | "topic"
     | "description"
     | "status"

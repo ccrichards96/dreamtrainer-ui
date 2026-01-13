@@ -6,7 +6,6 @@ import {
   BookOpen,
   Users,
   Search,
-  Tag,
   Megaphone,
   ChevronUp,
   ChevronDown,
@@ -26,7 +25,6 @@ import {
 import {
   CourseEditor,
   ModuleManager,
-  CategoryManager,
   AnnouncementManager,
   SectionManager,
 } from "../../components/admin";
@@ -41,7 +39,7 @@ const AdminDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [reorderingCourseId, setReorderingCourseId] = useState<string | null>(null);
   const [view, setView] = useState<
-    "overview" | "course-edit" | "section-manage" | "module-manage" | "category-manage" | "announcement-manage"
+    "overview" | "course-edit" | "section-manage" | "module-manage" | "announcement-manage"
   >("overview");
 
   // Inline form states for new course
@@ -130,10 +128,6 @@ const AdminDashboard: React.FC = () => {
     setView("section-manage");
     setSelectedSection(null);
     setSelectedSectionModules([]);
-  };
-
-  const handleManageCategories = () => {
-    setView("category-manage");
   };
 
   const handleManageAnnouncements = () => {
@@ -286,13 +280,6 @@ const AdminDashboard: React.FC = () => {
                   New Course
                 </button>
               )}
-              <button
-                onClick={handleManageCategories}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
-              >
-                <Tag className="w-4 h-4" />
-                Manage Categories
-              </button>
               <button
                 onClick={handleManageAnnouncements}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
@@ -633,9 +620,6 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           ))}
-
-        {/* Category Manager */}
-        {view === "category-manage" && <CategoryManager />}
 
         {/* Announcement Manager */}
         {view === "announcement-manage" && <AnnouncementManager />}

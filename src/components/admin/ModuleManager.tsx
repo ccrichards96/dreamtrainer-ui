@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -16,9 +16,7 @@ import {
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { Section, Module } from "../../types/modules";
-import { Category } from "../../types/categories";
 import { createModule, updateModule, deleteModule } from "../../services/api/modules";
-import { getAllCategories } from "../../services/api/categories";
 
 interface ModuleManagerProps {
   section: Section;
@@ -31,7 +29,6 @@ interface ModuleFormData {
   videoUrl: string;
   botIframeUrl: string;
   lessonContent: string;
-  categoryId: string;
 }
 
 const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
@@ -42,8 +39,6 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
   const [editingModule, setEditingModule] = useState<Module | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [reorderingModuleId, setReorderingModuleId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<ModuleFormData>({
@@ -52,7 +47,6 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
     videoUrl: "",
     botIframeUrl: "",
     lessonContent: "",
-    categoryId: "",
   });
 
   const resetForm = () => {
@@ -62,27 +56,8 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
       videoUrl: "",
       botIframeUrl: "",
       lessonContent: "",
-      categoryId: "",
     });
   };
-
-  // Load categories on component mount
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        const categoriesData = await getAllCategories();
-        setCategories(categoriesData || []);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-        setError("Failed to load categories");
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -116,7 +91,6 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
       videoUrl: module.videoUrl,
       botIframeUrl: module.botIframeUrl,
       lessonContent: module.lessonContent,
-      categoryId: module.categoryId || "",
     });
   };
 
@@ -148,7 +122,6 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
           videoUrl: formData.videoUrl,
           botIframeUrl: formData.botIframeUrl,
           lessonContent: formData.lessonContent,
-          categoryId: formData.categoryId,
         };
         const newModule = await createModule(moduleData);
 
@@ -336,35 +309,6 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Describe what students will learn in this module"
                 />
-              </div>
-
-              {/* Category */}
-              <div className="md:col-span-2">
-                <label
-                  htmlFor="categoryId"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Category *
-                </label>
-                <select
-                  id="categoryId"
-                  name="categoryId"
-                  value={formData.categoryId}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={categoriesLoading}
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-                {categoriesLoading && (
-                  <p className="text-sm text-gray-500 mt-1">Loading categories...</p>
-                )}
               </div>
 
               {/* Video URL */}
