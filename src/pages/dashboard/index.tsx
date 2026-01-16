@@ -536,11 +536,10 @@ function DashboardContent() {
           <button
             onClick={() => {
               setWelcomeModalOpen(false);
-              startTestMode();
             }}
             className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
           >
-            Start My First Test
+            Continue To Your Course
           </button>
         </div>
       </Modal>
