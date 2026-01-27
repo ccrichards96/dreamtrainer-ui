@@ -27,20 +27,21 @@ const TextComponent: React.FC<{ blok: any }> = ({ blok }) => {
     size_base: blok.size_base || defaultTextStyles.size_base,
   };
 
-  const classes = [
-    `text-${styles.text_align}`,
-    `p-[${styles.padding}]`,
-    `font-[${styles.font_weight}]`,
-    `mt-[${styles.margin_top}]`,
-    `ml-[${styles.margin_left}]`,
-    `mr-[${styles.margin_right}]`,
-    `mb-[${styles.margin_bottom}]`,
-    `text-[${styles.color}]`,
-    `text-[${styles.size_base}]`,
-  ].join(" ");
+  const classes = `text-${styles.text_align}`;
+
+  const style = {
+    padding: styles.padding,
+    fontWeight: styles.font_weight,
+    marginTop: styles.margin_top,
+    marginLeft: styles.margin_left,
+    marginRight: styles.margin_right,
+    marginBottom: styles.margin_bottom,
+    color: styles.color,
+    fontSize: styles.size_base,
+  };
 
   return (
-    <p {...storyblokEditable(blok)} className={classes}>
+    <p {...storyblokEditable(blok)} className={classes} style={style}>
       {blok.name}
     </p>
   );

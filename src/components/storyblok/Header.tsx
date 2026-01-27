@@ -9,7 +9,6 @@ interface HeaderBlok {
 const Header = ({ blok }: { blok: HeaderBlok }) => {
   const HeaderTag = blok.headerType;
   const classes = [
-    blok.color ? `text-[${blok.color}]` : "",
     blok.size_base || "text-2xl",
     blok.text_align ? `text-${blok.text_align}` : "text-left",
     "font-bold",
@@ -17,7 +16,13 @@ const Header = ({ blok }: { blok: HeaderBlok }) => {
     .filter(Boolean)
     .join(" ");
 
-  return <HeaderTag className={classes}>{blok.text}</HeaderTag>;
+  const style = blok.color ? { color: blok.color } : undefined;
+
+  return (
+    <HeaderTag className={classes} style={style}>
+      {blok.text}
+    </HeaderTag>
+  );
 };
 
 export default Header;
