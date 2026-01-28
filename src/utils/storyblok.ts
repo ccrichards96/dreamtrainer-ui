@@ -77,6 +77,7 @@ storyblokInit({
 // Helper function to get the correct version based on environment
 export const getStoryblokVersion = (): "draft" | "published" => {
   const mode = import.meta.env.VITE_MODE;
+  console.log("Storyblok mode:", mode);
   return mode === "development" || mode === "staging" ? "draft" : "published";
 };
 

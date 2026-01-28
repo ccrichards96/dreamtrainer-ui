@@ -100,12 +100,8 @@ const ImageComponent: React.FC<{ blok: ImageBlok }> = ({ blok }) => {
   const imageClasses = [
     // Display mode (Preline default is block)
     getDisplayClass(),
-    // Dimensions - legacy support + new patterns
-    blok.boxsize_base && `w-[${blok.boxsize_base}] h-[${blok.boxsize_base}]`,
-    blok.width && `w-[${blok.width}]`,
-    blok.height && `h-[${blok.height}]`,
-    // Max width constraint
-    blok.maxWidth ? `max-w-[${blok.maxWidth}]` : "max-w-full",
+    // Max width constraint (only use class if not dynamic)
+    !blok.maxWidth && "max-w-full",
     // Aspect ratio
     getAspectRatioClass(),
     // Object fit for responsive behavior
@@ -119,6 +115,14 @@ const ImageComponent: React.FC<{ blok: ImageBlok }> = ({ blok }) => {
   ]
     .filter(Boolean)
     .join(" ");
+
+  // Use inline styles for dynamic dimension values
+  const imageStyle: React.CSSProperties = {
+    ...(blok.boxsize_base && { width: blok.boxsize_base, height: blok.boxsize_base }),
+    ...(blok.width && { width: blok.width }),
+    ...(blok.height && { height: blok.height }),
+    ...(blok.maxWidth && { maxWidth: blok.maxWidth }),
+  };
 
   const containerClasses = [
     "relative",
@@ -151,6 +155,7 @@ const ImageComponent: React.FC<{ blok: ImageBlok }> = ({ blok }) => {
           src={blok.image_url.filename}
           alt={blok.alt || ""}
           className={imageClasses}
+          style={imageStyle}
           loading={blok.loading || "lazy"}
         />
         {blok.overlay && <div className={overlayClasses} />}
@@ -164,6 +169,7 @@ const ImageComponent: React.FC<{ blok: ImageBlok }> = ({ blok }) => {
       src={blok.image_url.filename}
       alt={blok.alt || ""}
       className={imageClasses}
+      style={imageStyle}
       loading={blok.loading || "lazy"}
     />
   );

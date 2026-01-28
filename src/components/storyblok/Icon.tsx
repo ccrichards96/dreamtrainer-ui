@@ -42,7 +42,9 @@ const IconComponent = ({ blok }: { blok: IconBlok }) => {
   }
 
   if (blok.name !== "") {
-    return <span style={{ fontSize: blok.size, color: blok.color }}>{icon}</span>;
+    return (
+      <span style={{ fontSize: blok.size, color: blok.color, margin: "0px auto" }}>{icon}</span>
+    );
   } else {
     return <span style={{ fontSize: blok.size, color: blok.color }}></span>;
   }

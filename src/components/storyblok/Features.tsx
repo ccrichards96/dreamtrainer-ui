@@ -43,15 +43,12 @@ const Features: React.FC<{ blok: FeaturesBlok }> = ({ blok }) => {
   const alignment = blok.alignment || "items-center";
   const padding = blok.padding || "px-4 py-10 sm:px-6 lg:px-8 lg:py-14";
 
-  const containerClasses = [
-    maxWidth,
-    padding,
-    "mx-auto",
-    blok.backgroundColor && `bg-[${blok.backgroundColor}]`,
-    blok.margin && `m-[${blok.margin}]`,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const containerClasses = [maxWidth, padding, "mx-auto"].filter(Boolean).join(" ");
+
+  const containerStyle: React.CSSProperties = {
+    ...(blok.backgroundColor && { backgroundColor: blok.backgroundColor }),
+    ...(blok.margin && { margin: blok.margin }),
+  };
 
   const gridClasses = ["grid", columns, smColumns, lgColumns, alignment, gap]
     .filter(Boolean)
@@ -139,7 +136,7 @@ const Features: React.FC<{ blok: FeaturesBlok }> = ({ blok }) => {
   };
 
   return (
-    <div {...storyblokEditable(blok)} className={containerClasses}>
+    <div {...storyblokEditable(blok)} className={containerClasses} style={containerStyle}>
       <div className={gridClasses}>
         {/* Render features */}
         {features.map((feature) => (
