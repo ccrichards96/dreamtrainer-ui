@@ -12,9 +12,9 @@ interface HeroBlok extends SbBlokData {
   title?: string;
   description?: string;
   primaryButtonText?: string;
-  primaryButtonLink?: string;
+  primaryButtonLink?: string | { url: string };
   secondaryButtonText?: string;
-  secondaryButtonLink?: string;
+  secondaryButtonLink?: string | { url: string };
   secondaryButtonIcon?: string;
   // Layout customization
   backgroundColor?: string;
@@ -33,6 +33,8 @@ interface HeroBlok extends SbBlokData {
 }
 
 const Hero: React.FC<{ blok: HeroBlok }> = ({ blok }) => {
+
+  console.log("Hero blok:", blok);
   const containerClasses = [
     "relative overflow-hidden",
     blok.display && `${blok.display}`,
@@ -106,7 +108,7 @@ const Hero: React.FC<{ blok: HeroBlok }> = ({ blok }) => {
                 {blok.primaryButtonText && (
                   <a
                     className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none"
-                    href={blok.primaryButtonLink || "#"}
+                    href={typeof blok.primaryButtonLink === "string" ? blok.primaryButtonLink : blok.primaryButtonLink?.url || "#"}
                   >
                     {blok.primaryButtonText}
                     <svg
@@ -130,7 +132,7 @@ const Hero: React.FC<{ blok: HeroBlok }> = ({ blok }) => {
                 {blok.secondaryButtonText && (
                   <a
                     className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
-                    href={blok.secondaryButtonLink || "#"}
+                    href={typeof blok.secondaryButtonLink === "string" ? blok.secondaryButtonLink : blok.secondaryButtonLink?.url || "#"}
                   >
                     {blok.secondaryButtonIcon && (
                       <div
