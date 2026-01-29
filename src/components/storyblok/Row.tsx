@@ -18,7 +18,7 @@ interface RowBlok extends SbBlokData {
 }
 
 const Row: React.FC<{ blok: RowBlok }> = ({ blok }) => {
-  const baseClasses = ["flex"];
+  const baseClasses = ["flex", "flex-wrap", "md:flex-nowrap"]; // Wrap on mobile, nowrap on sm+
   const customStyles: React.CSSProperties = {};
 
   // Handle gap - support both CSS values and Tailwind classes
