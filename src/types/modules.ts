@@ -1,6 +1,59 @@
 import { Test } from "./tests";
 
 /**
+ * Course status enum
+ */
+export enum CourseStatus {
+  DRAFT = 'draft',
+  PENDING_REVIEW = 'pending_review',
+  PUBLISHED = 'published',
+  ARCHIVED = 'archived',
+}
+
+/**
+ * Course listing status enum
+ */
+export enum ListingStatus {
+  PUBLIC = 'public',
+  PRIVATE = 'private',
+}
+
+/**
+ * Expert social links - optional URLs to expert's social profiles
+ */
+export interface ExpertSocialLinks {
+  linkedin?: string;
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
+  tiktok?: string;
+  twitter?: string;
+  website?: string;
+}
+
+/**
+ * Expert profile - instructor/creator profile for courses
+ */
+export interface ExpertProfile {
+  id: string;
+  userId: string;
+  displayName: string;
+  bio: string | null;
+  slug: string;
+  avatarUrl: string | null;
+  expertise: Record<string, string>;
+  socialLinks: ExpertSocialLinks;
+  approvalStatus: 'pending' | 'approved' | 'rejected';
+  listingStatus: ListingStatus;
+  stripeConnectId: string | null;
+  approvedAt: string | null;
+  calendarLink: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+/**
  * Section - Intermediate layer between Course and Module
  * New hierarchy: Course → Section → Module
  */
@@ -11,6 +64,7 @@ interface Section {
   imageUrl: string | null;
   order: number;
   courseId: string;
+  status: string;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -24,7 +78,15 @@ interface Section {
 interface Course {
   id: string;
   name: string;
-  description?: string;
+  description: string;
+  imageUrl: string | null;
+  slug: string;
+  expertProfileId: string | null;
+  expertProfile?: ExpertProfile; // Nested expert profile data
+  status: CourseStatus;
+  price: number;
+  stripeProductId: string | null;
+  listingStatus: ListingStatus;
   order: number;
   numberOfSections?: number; // Returned from /courses endpoint
   createdAt: string;

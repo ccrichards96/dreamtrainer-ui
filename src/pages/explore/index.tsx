@@ -4,11 +4,9 @@ import { getAllCourses } from "../../services/api/modules";
 import { CourseProvider } from "../../contexts/CourseContext";
 import type { Course } from "../../types/modules";
 import { Breadcrumb } from "../../components/Breadcrumb";
-import { CourseDetail } from "./CourseDetail";
 import { AllCoursesView } from "./AllCoursesView";
 
 const ExploreCoursesContent = () => {
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,47 +70,12 @@ const ExploreCoursesContent = () => {
     );
   }
 
-  // Main view - All courses
-  if (!selectedCourse) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
-          <Breadcrumb items={[{ label: "All Courses", isActive: true }]} />
-
-          <AllCoursesView
-            courses={courses}
-            onSelectCourse={(course) => setSelectedCourse(course)}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // Detail view - Selected course
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
-        <Breadcrumb
-          items={[
-            { label: "All Courses", onClick: () => setSelectedCourse(null) },
-            { label: selectedCourse.name, isActive: true },
-          ]}
-        />
+        <Breadcrumb items={[{ label: "All Courses", isActive: true }]} />
 
-        {/* Header Section */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{selectedCourse.name}</h1>
-              <p className="text-gray-600 mt-2">
-                {selectedCourse.description || "Select a section to begin"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Course Detail Content - shows sections */}
-        <CourseDetail course={selectedCourse} />
+        <AllCoursesView courses={courses} />
       </div>
     </div>
   );

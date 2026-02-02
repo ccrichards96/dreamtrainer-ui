@@ -192,6 +192,25 @@ export const getCourseById = async (courseId: string): Promise<APIResponse<Cours
 };
 
 /**
+ * Get a course by slug
+ * GET /courses/slug/:slug
+ * @param slug - The slug of the course
+ * @returns Promise<APIResponse<Course>>
+ */
+export const getCourseBySlug = async (slug: string): Promise<APIResponse<Course>> => {
+  try {
+    const response = await apiClient.get<APIResponse<Course>>(`/courses/slug/${slug}`);
+    return response.data;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || 'Failed to fetch course',
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
+/**
  * Get course with full content (sections with nested modules)
  * GET /courses/:id/modules
  * @param courseId - The ID of the course

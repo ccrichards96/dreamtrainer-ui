@@ -9,6 +9,7 @@ import ProtectedRoute from "./components/routes/ProtectedRoute";
 import AccountPage from "./pages/account";
 import BlogPage from "./pages/blog";
 import ExploreCourses from "./pages/explore";
+import { CourseProfilePage, CourseCheckout } from "./pages/courses";
 import AdminDashboard from "./pages/admin";
 import SubscriptionRequired from "./pages/renew";
 import CMSRoute from "./components/routes/CMSRoute";
@@ -54,6 +55,22 @@ function App() {
                       element={
                         <ProtectedRoute requireSubscription={true}>
                           <ExploreCourses />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/courses/:slug"
+                      element={
+                        <ProtectedRoute requireSubscription={true}>
+                          <CourseProfilePage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/courses/:slug/checkout"
+                      element={
+                        <ProtectedRoute requireSubscription={true}>
+                          <CourseCheckout />
                         </ProtectedRoute>
                       }
                     />
