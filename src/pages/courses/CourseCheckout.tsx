@@ -43,6 +43,7 @@ export default function CourseCheckout() {
           successUrl: `${window.location.origin}/checkout/success?type=course&courseId=${checkoutData.course.id}`,
           cancelUrl: `${window.location.origin}/courses/${checkoutData.course.slug}`,
           mode: pricing.type === 'recurring' ? 'subscription' : 'payment',
+          courseId: checkoutData.course.id,
         });
 
         // Redirect to Stripe checkout

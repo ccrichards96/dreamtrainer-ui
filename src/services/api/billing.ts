@@ -14,6 +14,7 @@ export interface CheckoutSessionRequest {
   mode?: "payment" | "subscription" | "setup";
   promoCode?: string;
   referralId?: string; //Referral ID for affliates
+  courseId?: string; // Course ID for course purchases (stored in Stripe metadata)
 }
 
 /**

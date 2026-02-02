@@ -1,22 +1,30 @@
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { getAllCourses } from "../../services/api/modules";
+import { getUserEnrollments } from "../../services/api/enrollment";
 import { CourseProvider } from "../../contexts/CourseContext";
 import type { Course } from "../../types/modules";
+import type { CourseEnrollment } from "../../types/enrollment";
 import { Breadcrumb } from "../../components/Breadcrumb";
 import { AllCoursesView } from "./AllCoursesView";
 
 const ExploreCoursesContent = () => {
   const [courses, setCourses] = useState<Course[]>([]);
+  const [enrollments, setEnrollments] = useState<CourseEnrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
-        const coursesResponse = await getAllCourses();
+
+        // Fetch courses and enrollments in parallel
+        const [coursesResponse, enrollmentsData] = await Promise.all([
+          getAllCourses(),
+          getUserEnrollments()
+        ]);
 
         // Sort courses by order field, then by createdAt
         const sortedCourses = (coursesResponse.data || []).sort((a: Course, b: Course) => {
@@ -25,8 +33,8 @@ const ExploreCoursesContent = () => {
           }
           return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
         });
-
         setCourses(sortedCourses);
+        setEnrollments(enrollmentsData);
       } catch (err) {
         console.error("Error fetching courses:", err);
         const errorMessage = err instanceof Error ? err.message : "Failed to load courses";
@@ -35,8 +43,7 @@ const ExploreCoursesContent = () => {
         setLoading(false);
       }
     };
-
-    fetchCourses();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -74,8 +81,7 @@ const ExploreCoursesContent = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
         <Breadcrumb items={[{ label: "All Courses", isActive: true }]} />
-
-        <AllCoursesView courses={courses} />
+        <AllCoursesView courses={courses} enrollments={enrollments} />
       </div>
     </div>
   );

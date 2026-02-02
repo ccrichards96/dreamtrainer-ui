@@ -71,11 +71,16 @@ const loadProgress = async (courseId: string): Promise<CourseProgress | null> =>
 
 export interface CourseContextType {
   currentCourse: Course | null;
-  currentModule: Module | null;
   currentSectionId: string | null;
-  modules: Module[];
+  currentModule: Module | null;
+  
   sections: Section[];
+  modules: Module[];
   tests: Test[];
+
+  // Module navigation
+  currentSectionIndex: number;
+  completedSections: Set<number>;
 
   // Module navigation
   currentModuleIndex: number;
