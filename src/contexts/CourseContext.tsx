@@ -73,14 +73,13 @@ export interface CourseContextType {
   currentCourse: Course | null;
   currentSectionId: string | null;
   currentModule: Module | null;
-  
+
   sections: Section[];
   modules: Module[];
   tests: Test[];
 
   // Module navigation
-  currentSectionIndex: number;
-  completedSections: Set<number>;
+  completedSections: Set<string>;
 
   // Module navigation
   currentModuleIndex: number;
@@ -145,6 +144,8 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   const [currentModuleIndex, setCurrentModuleIndexState] = useState<number>(0);
   const [completedModules, setCompletedModules] = useState<Set<number>>(new Set());
   const [completedTests, setCompletedTests] = useState<Set<string>>(new Set());
+  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [progressLoaded, setProgressLoaded] = useState<boolean>(false);
@@ -260,12 +261,12 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       setProgressLoaded(true);
     } catch (err) {
       console.warn("Course loading failed, using fallback data:", err);
-
       setCurrentCourse(null);
       setModules([]);
       setSections([]);
       setTests([]);
       setCurrentModuleIndexState(0);
+      setCompletedSections(new Set());
       setCompletedModules(new Set());
       setCompletedTests(new Set());
       setCurrentModule(null);
@@ -516,6 +517,8 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     modules,
     sections,
     tests,
+
+    completedSections,
 
     // Module navigation
     currentModuleIndex,

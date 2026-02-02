@@ -167,7 +167,6 @@ export default function CourseProfilePage() {
                 {/* Price */}
                 <div className="mb-6">
                   <div className="flex items-baseline gap-2 mb-2">
-                    <DollarSign className="w-6 h-6 text-gray-600" />
                     {loadingPricing ? (
                       <div className="flex items-center gap-2">
                         <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
@@ -193,7 +192,9 @@ export default function CourseProfilePage() {
                   {!loadingPricing && pricing && (
                     <p className="text-sm text-gray-600">
                       {pricing.type === 'recurring' && pricing.recurring
-                        ? `Billed ${pricing.recurring.intervalCount > 1 ? `every ${pricing.recurring.intervalCount} ` : ''}${pricing.recurring.interval}${pricing.recurring.intervalCount > 1 ? 's' : ''}`
+                        ? pricing.recurring.intervalCount === 1
+                          ? `Billed ${pricing.recurring.interval}ly`
+                          : `Billed every ${pricing.recurring.intervalCount} ${pricing.recurring.interval}s`
                         : pricing.amount > 0
                           ? 'One-time purchase'
                           : null}
