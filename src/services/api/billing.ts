@@ -1,6 +1,6 @@
 import axios from "axios";
 import apiClient, { APIResponse } from "./client";
-import { Subscription, BillingData, UserBillingData } from "../../types/billing";
+import { Subscription, BillingData, UserBillingData, CoursePricing } from "../../types/billing";
 
 export interface UserBillingInfo {
   userId: string;
@@ -109,12 +109,30 @@ export const getUserSubscriptions = async (): Promise<BillingData[]> => {
   }
 };
 
+/**
+ * Get pricing information for a specific course
+ * @param courseId - The course ID to get pricing for
+ * @returns Promise<CoursePricing> - Course pricing information from Stripe
+ */
+export const getCoursePricing = async (courseId: string): Promise<CoursePricing> => {
+  try {
+    const response = await apiClient.get<APIResponse<CoursePricing>>(`/courses/${courseId}/pricing`);
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to get course pricing: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while fetching course pricing");
+  }
+};
+
 export const billingService = {
   getAllProducts,
   getUserBillingInfo,
   createCheckoutSession,
   generateBillingPortalLink,
   getUserSubscriptions,
+  getCoursePricing,
 };
 
 export default billingService;

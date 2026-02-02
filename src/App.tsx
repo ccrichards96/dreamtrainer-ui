@@ -15,7 +15,7 @@ import SubscriptionRequired from "./pages/renew";
 import CMSRoute from "./components/routes/CMSRoute";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
-import { AuthProvider, ApiProvider } from "./contexts";
+import { AuthProvider, ApiProvider, CheckoutProvider } from "./contexts";
 import { AppProvider } from "./contexts/AppContext";
 import NotFound from "./pages/NotFound";
 import { Role } from "./types/user";
@@ -40,7 +40,8 @@ function App() {
       <AuthProvider>
         <ApiProvider>
           <AppProvider>
-            <Router>
+            <CheckoutProvider>
+              <Router>
               <PageTracker />
               <div className="min-h-screen bg-gray-100">
                 <Navigation />
@@ -133,7 +134,8 @@ function App() {
                 </div>
                 <Footer />
               </div>
-            </Router>
+              </Router>
+            </CheckoutProvider>
           </AppProvider>
         </ApiProvider>
       </AuthProvider>

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { getCourseBySlug } from '../../services/api/modules';
 import { createCheckoutSession } from '../../services/api/billing';
+import { useCheckoutContext } from '../../contexts';
 import type { Course } from '../../types/modules';
 
 export default function CourseCheckout() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { activeCheckout, loadCheckoutData } = useCheckoutContext();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,22 +25,24 @@ export default function CourseCheckout() {
         setLoading(true);
         setError(null);
 
-        // Fetch course details
-        const response = await getCourseBySlug(slug);
-        const courseData = response.data;
-        setCourse(courseData);
+        // Use cached checkout data if available, otherwise fetch it
+        const checkoutData = activeCheckout?.course.slug === slug
+          ? activeCheckout
+          : await loadCheckoutData(slug);
 
-        // Validate course has Stripe product ID
-        if (!courseData.stripeProductId) {
+        setCourse(checkoutData.course);
+        const pricing = checkoutData.pricing;
+
+        if (!pricing.priceId) {
           throw new Error('This course is not available for purchase. No payment method configured.');
         }
 
-        // Create checkout session using existing billing service
+        // Create checkout session using the price ID from pricing endpoint
         const { checkoutUrl } = await createCheckoutSession({
-          priceIds: [courseData.stripeProductId],
-          successUrl: `${window.location.origin}/checkout/success?type=course&courseId=${courseData.id}`,
-          cancelUrl: `${window.location.origin}/courses/${courseData.slug}`,
-          mode: 'payment', // One-time payment for courses
+          priceIds: [pricing.priceId],
+          successUrl: `${window.location.origin}/checkout/success?type=course&courseId=${checkoutData.course.id}`,
+          cancelUrl: `${window.location.origin}/courses/${checkoutData.course.slug}`,
+          mode: pricing.type === 'recurring' ? 'subscription' : 'payment',
         });
 
         // Redirect to Stripe checkout
@@ -52,7 +55,7 @@ export default function CourseCheckout() {
     };
 
     initiateCheckout();
-  }, [slug]);
+  }, [slug, activeCheckout, loadCheckoutData]);
 
   const handleBackToCourse = () => {
     if (course?.slug) {

@@ -28,4 +28,18 @@ interface BillingData {
   amount?: number;
 }
 
-export type { Subscription, BillingData, SubscriptionStatus, UserBillingData };
+/**
+ * Course pricing information from Stripe
+ */
+interface CoursePricing {
+  priceId: string;
+  amount: number; // In dollars (converted from cents)
+  currency: string;
+  type: 'one_time' | 'recurring';
+  recurring?: {
+    interval: string; // 'month', 'year', etc.
+    intervalCount: number;
+  };
+}
+
+export type { Subscription, BillingData, SubscriptionStatus, UserBillingData, CoursePricing };

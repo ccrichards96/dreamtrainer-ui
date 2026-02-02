@@ -1,20 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, BookOpen, DollarSign, ArrowRight, CheckCircle } from 'lucide-react';
-import { getCourseBySlug } from '../../services/api/modules';
 import { isEnrolledInCourse } from '../../services/api/enrollment';
+import { useCheckoutContext } from '../../contexts';
 import ExpertProfileCard from '../../components/ExpertProfileCard';
 import CourseSectionsPreview from '../../components/CourseSectionsPreview';
 import type { Course } from '../../types/modules';
+import type { CoursePricing } from '../../types/billing';
 
 export default function CourseProfilePage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { loadCheckoutData } = useCheckoutContext();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [checkingEnrollment, setCheckingEnrollment] = useState(true);
+  const [pricing, setPricing] = useState<CoursePricing | null>(null);
+  const [loadingPricing, setLoadingPricing] = useState(false);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -22,25 +26,31 @@ export default function CourseProfilePage() {
 
       try {
         setLoading(true);
+        setLoadingPricing(true);
         setError(null);
-        const response = await getCourseBySlug(slug);
-        setCourse(response.data);
+
+        // Load course and pricing through checkout context (caches data for checkout page)
+        const checkoutData = await loadCheckoutData(slug);
+        setCourse(checkoutData.course);
+        setPricing(checkoutData.pricing);
+        setLoadingPricing(false);
 
         // Check if user is already enrolled
         setCheckingEnrollment(true);
-        const enrolled = await isEnrolledInCourse(response.data.id);
+        const enrolled = await isEnrolledInCourse(checkoutData.course.id);
         setIsEnrolled(enrolled);
       } catch (err) {
         console.error('Error fetching course:', err);
         setError(err instanceof Error ? err.message : 'Failed to load course');
       } finally {
         setLoading(false);
+        setLoadingPricing(false);
         setCheckingEnrollment(false);
       }
     };
 
     fetchCourse();
-  }, [slug]);
+  }, [slug, loadCheckoutData]);
 
   const handleJoinCourse = () => {
     if (!course) return;
@@ -158,12 +168,36 @@ export default function CourseProfilePage() {
                 <div className="mb-6">
                   <div className="flex items-baseline gap-2 mb-2">
                     <DollarSign className="w-6 h-6 text-gray-600" />
-                    <span className="text-4xl font-bold text-gray-900">
-                      {course.price > 0 ? course.price.toFixed(2) : 'Free'}
-                    </span>
+                    {loadingPricing ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                        <span className="text-lg text-gray-400">Loading price...</span>
+                      </div>
+                    ) : (
+                      <span className="text-4xl font-bold text-gray-900">
+                        {pricing ? (
+                          pricing.amount > 0 ? (
+                            <>
+                              {pricing.currency === 'usd' ? '$' : pricing.currency.toUpperCase() + ' '}
+                              {pricing.amount.toFixed(2)}
+                            </>
+                          ) : (
+                            'Free'
+                          )
+                        ) : (
+                          'Free'
+                        )}
+                      </span>
+                    )}
                   </div>
-                  {course.price > 0 && (
-                    <p className="text-sm text-gray-600">One-time purchase</p>
+                  {!loadingPricing && pricing && (
+                    <p className="text-sm text-gray-600">
+                      {pricing.type === 'recurring' && pricing.recurring
+                        ? `Billed ${pricing.recurring.intervalCount > 1 ? `every ${pricing.recurring.intervalCount} ` : ''}${pricing.recurring.interval}${pricing.recurring.intervalCount > 1 ? 's' : ''}`
+                        : pricing.amount > 0
+                          ? 'One-time purchase'
+                          : null}
+                    </p>
                   )}
                 </div>
 
