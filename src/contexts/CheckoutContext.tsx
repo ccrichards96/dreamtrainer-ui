@@ -37,35 +37,38 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
    * Load course and pricing data for checkout
    * Returns cached data if already loaded for the same course slug
    */
-  const loadCheckoutData = useCallback(async (slug: string): Promise<ActiveCheckoutData> => {
-    // Return cached data if we already have it for this course
-    if (activeCheckout && activeCheckout.course.slug === slug) {
-      return activeCheckout;
-    }
+  const loadCheckoutData = useCallback(
+    async (slug: string): Promise<ActiveCheckoutData> => {
+      // Return cached data if we already have it for this course
+      if (activeCheckout && activeCheckout.course.slug === slug) {
+        return activeCheckout;
+      }
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
-      // Fetch course details
-      const courseResponse = await getCourseBySlug(slug);
-      const course = courseResponse.data;
+      try {
+        // Fetch course details
+        const courseResponse = await getCourseBySlug(slug);
+        const course = courseResponse.data;
 
-      // Fetch pricing information
-      const pricing = await getCoursePricing(course.id);
+        // Fetch pricing information
+        const pricing = await getCoursePricing(course.id);
 
-      const checkoutData: ActiveCheckoutData = { course, pricing };
-      setActiveCheckout(checkoutData);
+        const checkoutData: ActiveCheckoutData = { course, pricing };
+        setActiveCheckout(checkoutData);
 
-      return checkoutData;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load checkout data';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [activeCheckout]);
+        return checkoutData;
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to load checkout data";
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [activeCheckout]
+  );
 
   /**
    * Clear checkout data (e.g., after successful purchase or navigation away)
@@ -83,11 +86,7 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
     clearCheckout,
   };
 
-  return (
-    <CheckoutContext.Provider value={value}>
-      {children}
-    </CheckoutContext.Provider>
-  );
+  return <CheckoutContext.Provider value={value}>{children}</CheckoutContext.Provider>;
 }
 
 export { CheckoutContext };

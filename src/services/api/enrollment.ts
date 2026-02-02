@@ -1,5 +1,5 @@
-import apiClient, { APIResponse } from './client';
-import type { CourseEnrollment } from '../../types/enrollment';
+import apiClient, { APIResponse } from "./client";
+import type { CourseEnrollment } from "../../types/enrollment";
 
 /**
  * Get all enrollments for the current user
@@ -7,10 +7,10 @@ import type { CourseEnrollment } from '../../types/enrollment';
  */
 export const getUserEnrollments = async (): Promise<CourseEnrollment[]> => {
   try {
-    const response = await apiClient.get<APIResponse<CourseEnrollment[]>>('/enrollments/me');
+    const response = await apiClient.get<APIResponse<CourseEnrollment[]>>("/enrollments/me");
     return response.data.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Failed to fetch enrollments');
+    throw new Error(error.response?.data?.message || "Failed to fetch enrollments");
   }
 };
 
@@ -25,7 +25,7 @@ export const isEnrolledInCourse = async (courseId: string): Promise<boolean> => 
     );
     return response.data.data.enrolled;
   } catch (error: any) {
-    console.error('Failed to check enrollment:', error);
+    console.error("Failed to check enrollment:", error);
     return false;
   }
 };
@@ -41,7 +41,7 @@ export const enrollInCourse = async (courseId: string): Promise<CourseEnrollment
     );
     return response.data.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Failed to enroll in course');
+    throw new Error(error.response?.data?.message || "Failed to enroll in course");
   }
 };
 

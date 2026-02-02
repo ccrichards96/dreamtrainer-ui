@@ -1,5 +1,5 @@
-import { BookOpen } from 'lucide-react';
-import type { Section } from '../types/modules';
+import { BookOpen } from "lucide-react";
+import type { Section } from "../types/modules";
 
 interface CourseSectionsPreviewProps {
   sections?: Section[];
@@ -28,23 +28,17 @@ export default function CourseSectionsPreview({ sections }: CourseSectionsPrevie
           >
             {/* Section number */}
             <div className="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-              <span className="text-purple-600 font-semibold text-sm">
-                {index + 1}
-              </span>
+              <span className="text-purple-600 font-semibold text-sm">{index + 1}</span>
             </div>
 
             {/* Section content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-purple-600 flex-shrink-0" />
-                <h3 className="font-semibold text-gray-900 truncate">
-                  {section.name}
-                </h3>
+                <h3 className="font-semibold text-gray-900 truncate">{section.name}</h3>
               </div>
               {section.description && (
-                <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-                  {section.description}
-                </p>
+                <p className="mt-1 text-sm text-gray-600 line-clamp-2">{section.description}</p>
               )}
             </div>
           </div>

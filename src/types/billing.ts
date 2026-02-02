@@ -35,7 +35,7 @@ interface CoursePricing {
   priceId: string;
   amount: number; // In dollars (converted from cents)
   currency: string;
-  type: 'one_time' | 'recurring';
+  type: "one_time" | "recurring";
   recurring?: {
     interval: string; // 'month', 'year', etc.
     intervalCount: number;

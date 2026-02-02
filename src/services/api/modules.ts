@@ -203,7 +203,7 @@ export const getCourseBySlug = async (slug: string): Promise<APIResponse<Course>
     return response.data;
   } catch (error: any) {
     const apiError: ApiError = {
-      message: error.response?.data?.message || 'Failed to fetch course',
+      message: error.response?.data?.message || "Failed to fetch course",
       status: error.response?.status,
     };
     throw apiError;

@@ -1,14 +1,5 @@
-import {
-  Linkedin,
-  Facebook,
-  Instagram,
-  Youtube,
-  Twitter,
-  Globe,
-  Music,
-  User,
-} from 'lucide-react';
-import type { ExpertProfile, ExpertSocialLinks } from '../types/modules';
+import { Linkedin, Facebook, Instagram, Youtube, Twitter, Globe, Music, User } from "lucide-react";
+import type { ExpertProfile, ExpertSocialLinks } from "../types/modules";
 
 interface ExpertProfileCardProps {
   expertProfile?: ExpertProfile | null;
@@ -59,13 +50,13 @@ function SocialLinks({ socialLinks }: { socialLinks: ExpertSocialLinks }) {
     icon: React.ComponentType<{ className?: string }>;
     label: string;
   }> = [
-    { key: 'linkedin', icon: Linkedin, label: 'LinkedIn' },
-    { key: 'twitter', icon: Twitter, label: 'Twitter' },
-    { key: 'facebook', icon: Facebook, label: 'Facebook' },
-    { key: 'instagram', icon: Instagram, label: 'Instagram' },
-    { key: 'youtube', icon: Youtube, label: 'YouTube' },
-    { key: 'tiktok', icon: Music, label: 'TikTok' },
-    { key: 'website', icon: Globe, label: 'Website' },
+    { key: "linkedin", icon: Linkedin, label: "LinkedIn" },
+    { key: "twitter", icon: Twitter, label: "Twitter" },
+    { key: "facebook", icon: Facebook, label: "Facebook" },
+    { key: "instagram", icon: Instagram, label: "Instagram" },
+    { key: "youtube", icon: Youtube, label: "YouTube" },
+    { key: "tiktok", icon: Music, label: "TikTok" },
+    { key: "website", icon: Globe, label: "Website" },
   ];
 
   const activeLinks = links.filter((link) => socialLinks[link.key]);
@@ -117,9 +108,7 @@ export default function ExpertProfileCard({ expertProfile }: ExpertProfileCardPr
           ) : (
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center border-2 border-purple-100">
               {displayName ? (
-                <span className="text-white font-bold text-lg">
-                  {getInitials(displayName)}
-                </span>
+                <span className="text-white font-bold text-lg">{getInitials(displayName)}</span>
               ) : (
                 <User className="w-8 h-8 text-white" />
               )}
@@ -127,12 +116,8 @@ export default function ExpertProfileCard({ expertProfile }: ExpertProfileCardPr
           )}
         </div>
         <div className="flex-1 min-w-0">
-        <h4 className="text-lg font-semibold text-gray-900 truncate">
-            {displayName}
-        </h4>
-         {bio && (
-            <p className="text-sm text-gray-600 leading-relaxed">{bio}</p>
-         )}
+          <h4 className="text-lg font-semibold text-gray-900 truncate">{displayName}</h4>
+          {bio && <p className="text-sm text-gray-600 leading-relaxed">{bio}</p>}
         </div>
       </div>
       {socialLinks && <SocialLinks socialLinks={socialLinks} />}

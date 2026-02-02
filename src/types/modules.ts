@@ -4,18 +4,18 @@ import { Test } from "./tests";
  * Course status enum
  */
 export enum CourseStatus {
-  DRAFT = 'draft',
-  PENDING_REVIEW = 'pending_review',
-  PUBLISHED = 'published',
-  ARCHIVED = 'archived',
+  DRAFT = "draft",
+  PENDING_REVIEW = "pending_review",
+  PUBLISHED = "published",
+  ARCHIVED = "archived",
 }
 
 /**
  * Course listing status enum
  */
 export enum ListingStatus {
-  PUBLIC = 'public',
-  PRIVATE = 'private',
+  PUBLIC = "public",
+  PRIVATE = "private",
 }
 
 /**
@@ -43,7 +43,7 @@ export interface ExpertProfile {
   avatarUrl: string | null;
   expertise: Record<string, string>;
   socialLinks: ExpertSocialLinks;
-  approvalStatus: 'pending' | 'approved' | 'rejected';
+  approvalStatus: "pending" | "approved" | "rejected";
   listingStatus: ListingStatus;
   stripeConnectId: string | null;
   approvedAt: string | null;

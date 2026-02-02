@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Loader2, AlertCircle } from 'lucide-react';
-import { createCheckoutSession } from '../../services/api/billing';
-import { useCheckoutContext } from '../../contexts';
-import type { Course } from '../../types/modules';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Loader2, AlertCircle } from "lucide-react";
+import { createCheckoutSession } from "../../services/api/billing";
+import { useCheckoutContext } from "../../contexts";
+import type { Course } from "../../types/modules";
 
 export default function CourseCheckout() {
   const { slug } = useParams<{ slug: string }>();
@@ -16,7 +16,7 @@ export default function CourseCheckout() {
   useEffect(() => {
     const initiateCheckout = async () => {
       if (!slug) {
-        setError('No course specified');
+        setError("No course specified");
         setLoading(false);
         return;
       }
@@ -26,15 +26,16 @@ export default function CourseCheckout() {
         setError(null);
 
         // Use cached checkout data if available, otherwise fetch it
-        const checkoutData = activeCheckout?.course.slug === slug
-          ? activeCheckout
-          : await loadCheckoutData(slug);
+        const checkoutData =
+          activeCheckout?.course.slug === slug ? activeCheckout : await loadCheckoutData(slug);
 
         setCourse(checkoutData.course);
         const pricing = checkoutData.pricing;
 
         if (!pricing.priceId) {
-          throw new Error('This course is not available for purchase. No payment method configured.');
+          throw new Error(
+            "This course is not available for purchase. No payment method configured."
+          );
         }
 
         // Create checkout session using the price ID from pricing endpoint
@@ -42,15 +43,15 @@ export default function CourseCheckout() {
           priceIds: [pricing.priceId],
           successUrl: `${window.location.origin}/checkout/success?type=course&courseId=${checkoutData.course.id}`,
           cancelUrl: `${window.location.origin}/courses/${checkoutData.course.slug}`,
-          mode: pricing.type === 'recurring' ? 'subscription' : 'payment',
+          mode: pricing.type === "recurring" ? "subscription" : "payment",
           courseId: checkoutData.course.id,
         });
 
         // Redirect to Stripe checkout
         window.location.href = checkoutUrl;
       } catch (err) {
-        console.error('Error creating checkout session:', err);
-        setError(err instanceof Error ? err.message : 'Failed to create checkout session');
+        console.error("Error creating checkout session:", err);
+        setError(err instanceof Error ? err.message : "Failed to create checkout session");
         setLoading(false);
       }
     };
@@ -62,7 +63,7 @@ export default function CourseCheckout() {
     if (course?.slug) {
       navigate(`/courses/${course.slug}`);
     } else {
-      navigate('/courses');
+      navigate("/courses");
     }
   };
 

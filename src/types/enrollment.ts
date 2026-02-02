@@ -1,4 +1,4 @@
-import type { Course } from './modules';
+import type { Course } from "./modules";
 
 export interface CourseEnrollment {
   id: string;

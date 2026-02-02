@@ -117,7 +117,9 @@ export const getUserSubscriptions = async (): Promise<BillingData[]> => {
  */
 export const getCoursePricing = async (courseId: string): Promise<CoursePricing> => {
   try {
-    const response = await apiClient.get<APIResponse<CoursePricing>>(`/courses/${courseId}/pricing`);
+    const response = await apiClient.get<APIResponse<CoursePricing>>(
+      `/courses/${courseId}/pricing`
+    );
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {

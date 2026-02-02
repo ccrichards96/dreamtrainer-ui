@@ -1,2 +1,2 @@
-export { default as CourseProfilePage } from './CourseProfilePage';
-export { default as CourseCheckout } from './CourseCheckout';
+export { default as CourseProfilePage } from "./CourseProfilePage";
+export { default as CourseCheckout } from "./CourseCheckout";

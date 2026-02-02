@@ -42,98 +42,98 @@ function App() {
           <AppProvider>
             <CheckoutProvider>
               <Router>
-              <PageTracker />
-              <div className="min-h-screen bg-gray-100">
-                <Navigation />
-                <div className="pt-16">
-                  <Routes>
-                    <Route path="/" element={<CMSRoute />} />
-                    <Route path="/blog" element={<BlogPage />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route
-                      path="/courses"
-                      element={
-                        <ProtectedRoute requireSubscription={true}>
-                          <ExploreCourses />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/courses/:slug"
-                      element={
-                        <ProtectedRoute requireSubscription={true}>
-                          <CourseProfilePage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/courses/:slug/checkout"
-                      element={
-                        <ProtectedRoute requireSubscription={true}>
-                          <CourseCheckout />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/courses/:courseId/dashboard"
-                      element={
-                        <ProtectedRoute requireSubscription={true}>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/onboarding"
-                      element={
-                        <ProtectedRoute>
-                          <Onboarding />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                    <Route
-                      path="/renew"
-                      element={
-                        <ProtectedRoute>
-                          <SubscriptionRequired />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <ProtectedRoute requireSubscription={true}>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/account"
-                      element={
-                        <ProtectedRoute>
-                          <AccountPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin"
-                      element={
-                        <ProtectedRoute allowedRoles={[Role.Admin]}>
-                          <AdminDashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    {/* CMS Routes */}
-                    <Route path="/site/*" element={<CMSRoute />} />
-                    <Route path="/site" element={<CMSRoute />} />
+                <PageTracker />
+                <div className="min-h-screen bg-gray-100">
+                  <Navigation />
+                  <div className="pt-16">
+                    <Routes>
+                      <Route path="/" element={<CMSRoute />} />
+                      <Route path="/blog" element={<BlogPage />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/signup" element={<Signup />} />
+                      <Route
+                        path="/courses"
+                        element={
+                          <ProtectedRoute requireSubscription={true}>
+                            <ExploreCourses />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/courses/:slug"
+                        element={
+                          <ProtectedRoute requireSubscription={true}>
+                            <CourseProfilePage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/courses/:slug/checkout"
+                        element={
+                          <ProtectedRoute requireSubscription={true}>
+                            <CourseCheckout />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/courses/:courseId/dashboard"
+                        element={
+                          <ProtectedRoute requireSubscription={true}>
+                            <Dashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/onboarding"
+                        element={
+                          <ProtectedRoute>
+                            <Onboarding />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                      <Route
+                        path="/renew"
+                        element={
+                          <ProtectedRoute>
+                            <SubscriptionRequired />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dashboard"
+                        element={
+                          <ProtectedRoute requireSubscription={true}>
+                            <Dashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/account"
+                        element={
+                          <ProtectedRoute>
+                            <AccountPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin"
+                        element={
+                          <ProtectedRoute allowedRoles={[Role.Admin]}>
+                            <AdminDashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      {/* CMS Routes */}
+                      <Route path="/site/*" element={<CMSRoute />} />
+                      <Route path="/site" element={<CMSRoute />} />
 
-                    {/* 404 Catch-all route - must be last */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
+                      {/* 404 Catch-all route - must be last */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </div>
+                  <Footer />
                 </div>
-                <Footer />
-              </div>
               </Router>
             </CheckoutProvider>
           </AppProvider>

@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { BookOpen, ArrowRight, Play } from "lucide-react";
 import type { Course } from "../../types/modules";
 import type { CourseEnrollment } from "../../types/enrollment";
@@ -14,9 +14,7 @@ export const AllCoursesView = ({ courses, enrollments = [] }: AllCoursesViewProp
   // Create a Set of enrolled course IDs for quick lookup
   // An enrollment exists if it has a courseId and is not deleted
   const enrolledCourseIds = new Set(
-    enrollments
-      .filter((e) => e.courseId && !e.deletedAt)
-      .map((e) => e.courseId)
+    enrollments.filter((e) => e.courseId && !e.deletedAt).map((e) => e.courseId)
   );
 
   const handleCourseClick = (course: Course) => {

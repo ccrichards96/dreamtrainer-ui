@@ -23,7 +23,7 @@ const ExploreCoursesContent = () => {
         // Fetch courses and enrollments in parallel
         const [coursesResponse, enrollmentsData] = await Promise.all([
           getAllCourses(),
-          getUserEnrollments()
+          getUserEnrollments(),
         ]);
 
         // Sort courses by order field, then by createdAt
