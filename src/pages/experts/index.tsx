@@ -263,7 +263,9 @@ export default function ExpertProfilePage() {
         {/* Courses Section */}
         {courses.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Courses by {expert.displayName}</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Courses by {expert.displayName}
+            </h2>
             <div className="space-y-4">
               {courses.map((course) => (
                 <ExpertCourseCard

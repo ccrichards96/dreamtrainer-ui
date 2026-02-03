@@ -117,13 +117,7 @@ interface Module {
 // Draft type for creating new modules (excludes auto-generated fields)
 export type DraftModule = Pick<
   Module,
-  | "sectionId"
-  | "topic"
-  | "description"
-  | "status"
-  | "videoUrl"
-  | "botIframeUrl"
-  | "lessonContent"
+  "sectionId" | "topic" | "description" | "status" | "videoUrl" | "botIframeUrl" | "lessonContent"
 >;
 
 export type UpdateModule = Partial<

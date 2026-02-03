@@ -9,9 +9,7 @@ import type { ExpertProfile } from "../../types/modules";
  */
 export const getExpertBySlug = async (slug: string): Promise<ExpertProfile> => {
   try {
-    const response = await apiClient.get<APIResponse<ExpertProfile>>(
-      `/experts/${slug}/public`
-    );
+    const response = await apiClient.get<APIResponse<ExpertProfile>>(`/experts/${slug}/public`);
     return response.data.data;
   } catch (error: any) {
     const apiError: ApiError = {
@@ -23,7 +21,7 @@ export const getExpertBySlug = async (slug: string): Promise<ExpertProfile> => {
 };
 
 const expertsService = {
-  getExpertBySlug
+  getExpertBySlug,
 };
 
 export default expertsService;

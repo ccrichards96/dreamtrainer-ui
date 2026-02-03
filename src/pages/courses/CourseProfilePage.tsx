@@ -112,7 +112,6 @@ export default function CourseProfilePage() {
         <div className="grid md:grid-cols-3 gap-8">
           {/* Main Content - Left Side */}
           <div className="md:col-span-2 space-y-6">
-
             {/* Course Details */}
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-4">{course.name}</h1>
@@ -221,7 +220,7 @@ export default function CourseProfilePage() {
                   </div>
                 )}
               </div>
-            
+
               {/* Course Stats */}
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">What You'll Get</h2>
@@ -243,7 +242,6 @@ export default function CourseProfilePage() {
 
               {/* Course Sections Preview */}
               <CourseSectionsPreview sections={course.sections} />
-        
             </div>
           </div>
         </div>
