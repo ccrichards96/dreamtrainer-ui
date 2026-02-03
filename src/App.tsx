@@ -10,6 +10,7 @@ import AccountPage from "./pages/account";
 import BlogPage from "./pages/blog";
 import ExploreCourses from "./pages/explore";
 import { CourseProfilePage, CourseCheckout } from "./pages/courses";
+import ExpertProfilePage from "./pages/experts";
 import AdminDashboard from "./pages/admin";
 import SubscriptionRequired from "./pages/renew";
 import CMSRoute from "./components/routes/CMSRoute";
@@ -83,6 +84,7 @@ function App() {
                           </ProtectedRoute>
                         }
                       />
+                      <Route path="/experts/:slug" element={<ExpertProfilePage />} />
                       <Route
                         path="/onboarding"
                         element={

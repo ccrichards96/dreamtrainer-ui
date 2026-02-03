@@ -112,6 +112,15 @@ export default function CourseProfilePage() {
         <div className="grid md:grid-cols-3 gap-8">
           {/* Main Content - Left Side */}
           <div className="md:col-span-2 space-y-6">
+
+            {/* Course Details */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">{course.name}</h1>
+              <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap">
+                {course.description}
+              </p>
+            </div>
+
             {/* Course Image */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className="h-64 bg-gradient-to-br from-[#c5a8de] to-[#b399d6] flex items-center justify-center">
@@ -129,35 +138,8 @@ export default function CourseProfilePage() {
               </div>
             </div>
 
-            {/* Course Details */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{course.name}</h1>
-              <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap">
-                {course.description}
-              </p>
-            </div>
-
-            {/* Course Stats */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">What You'll Get</h2>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <BookOpen className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">
-                      {course.sections?.length ?? course.numberOfSections ?? 0} Section
-                      {(course.sections?.length ?? course.numberOfSections ?? 0) !== 1 ? "s" : ""}
-                    </p>
-                    <p className="text-sm text-gray-600">Comprehensive curriculum</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Course Sections Preview */}
-            <CourseSectionsPreview sections={course.sections} />
+            {/* Expert Profile Card */}
+            {course.expertProfile && <ExpertProfileCard expertProfile={course.expertProfile} />}
           </div>
 
           {/* Sidebar - Right Side */}
@@ -239,9 +221,29 @@ export default function CourseProfilePage() {
                   </div>
                 )}
               </div>
+            
+              {/* Course Stats */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">What You'll Get</h2>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <BookOpen className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        {course.sections?.length ?? course.numberOfSections ?? 0} Section
+                        {(course.sections?.length ?? course.numberOfSections ?? 0) !== 1 ? "s" : ""}
+                      </p>
+                      <p className="text-sm text-gray-600">Comprehensive curriculum</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-              {/* Expert Profile Card */}
-              {course.expertProfile && <ExpertProfileCard expertProfile={course.expertProfile} />}
+              {/* Course Sections Preview */}
+              <CourseSectionsPreview sections={course.sections} />
+        
             </div>
           </div>
         </div>

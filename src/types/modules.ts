@@ -51,11 +51,11 @@ export interface ExpertProfile {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  courses?: Course[];
 }
 
 /**
- * Section - Intermediate layer between Course and Module
- * New hierarchy: Course → Section → Module
+ * Section - Middle layer between Course and Module
  */
 interface Section {
   id: string;
@@ -73,7 +73,6 @@ interface Section {
 
 /**
  * Course - Top level container
- * Contains Sections which contain Modules
  */
 interface Course {
   id: string;
@@ -98,7 +97,6 @@ interface Course {
 
 /**
  * Module - Learning unit within a Section
- * Now belongs to a Section instead of directly to a Course
  */
 interface Module {
   id: string;
@@ -119,7 +117,7 @@ interface Module {
 // Draft type for creating new modules (excludes auto-generated fields)
 export type DraftModule = Pick<
   Module,
-  | "sectionId" // Changed from courseId
+  | "sectionId"
   | "topic"
   | "description"
   | "status"
@@ -138,18 +136,16 @@ export type UpdateModule = Partial<
     | "botIframeUrl"
     | "lessonContent"
     | "order"
-    | "sectionId" // Can move module to different section
+    | "sectionId"
   >
 >;
 
-// Draft type for creating new sections
 export type DraftSection = Pick<Section, "courseId" | "name"> & {
   description?: string;
   imageUrl?: string;
   order?: number;
 };
 
-// Update type for modifying existing sections
 export type UpdateSection = Partial<Pick<Section, "name" | "description" | "imageUrl" | "order">>;
 
 export type { Course, Module, Section };

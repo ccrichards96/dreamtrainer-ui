@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Linkedin, Facebook, Instagram, Youtube, Twitter, Globe, Music, User } from "lucide-react";
 import type { ExpertProfile, ExpertSocialLinks } from "../types/modules";
 
@@ -88,7 +89,7 @@ export default function ExpertProfileCard({ expertProfile }: ExpertProfileCardPr
     return null;
   }
 
-  const { displayName, bio, avatarUrl, socialLinks } = expertProfile;
+  const { displayName, bio, avatarUrl, socialLinks, slug } = expertProfile;
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
@@ -96,7 +97,10 @@ export default function ExpertProfileCard({ expertProfile }: ExpertProfileCardPr
         Your Instructor
       </h3>
 
-      <div className="flex items-center gap-4">
+      <Link
+        to={`/experts/${slug}`}
+        className="flex items-center gap-4 hover:opacity-80 transition-opacity"
+      >
         {/* Avatar */}
         <div className="flex-shrink-0">
           {avatarUrl ? (
@@ -116,10 +120,15 @@ export default function ExpertProfileCard({ expertProfile }: ExpertProfileCardPr
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-lg font-semibold text-gray-900 truncate">{displayName}</h4>
-          {bio && <p className="text-sm text-gray-600 leading-relaxed">{bio}</p>}
+          <h4 className="text-lg font-semibold text-gray-900 truncate hover:text-purple-600 transition-colors">
+            {displayName}
+          </h4>
         </div>
-      </div>
+      </Link>
+
+      {/* Bio - outside the link */}
+      {bio && <p className="mt-3 text-sm text-gray-600 leading-relaxed">{bio}</p>}
+
       {socialLinks && <SocialLinks socialLinks={socialLinks} />}
     </div>
   );
