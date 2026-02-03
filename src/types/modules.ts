@@ -32,6 +32,22 @@ export interface ExpertSocialLinks {
 }
 
 /**
+ * Expert review - student review for an expert
+ */
+export interface ExpertReview {
+  id: string;
+  rating: number;
+  comment: string | null;
+  commentReply: string | null;
+  createdAt: string;
+  studentUser: {
+    firstName: string;
+    lastName: string;
+    avatarUrl: string | null;
+  };
+}
+
+/**
  * Expert profile - instructor/creator profile for courses
  */
 export interface ExpertProfile {
@@ -52,6 +68,12 @@ export interface ExpertProfile {
   updatedAt: string;
   deletedAt: string | null;
   courses?: Course[];
+  reviews?: ExpertReview[];
+  user?: {
+    firstName: string;
+    lastName: string;
+    avatarUrl: string | null;
+  };
 }
 
 /**

@@ -13,9 +13,10 @@ import {
   Calendar,
   BookOpen,
   ArrowRight,
+  Star,
 } from "lucide-react";
 import { getExpertBySlug } from "../../services/api/experts";
-import type { ExpertProfile, ExpertSocialLinks, Course } from "../../types/modules";
+import type { ExpertProfile, ExpertSocialLinks, ExpertReview, Course } from "../../types/modules";
 
 /**
  * Get initials from a display name for avatar fallback
@@ -127,11 +128,93 @@ function ExpertCourseCard({ course, onClick }: { course: Course; onClick: () => 
   );
 }
 
+/**
+ * Star rating display component
+ */
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`w-4 h-4 ${
+            star <= rating
+              ? "text-yellow-400 fill-yellow-400"
+              : "text-gray-300"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Review card for expert reviews
+ */
+function ReviewCard({ review }: { review: ExpertReview }) {
+  const studentName = review.studentUser
+    ? `${review.studentUser.firstName} ${review.studentUser.lastName}`.trim()
+    : "Anonymous Student";
+
+  const formattedDate = new Date(review.createdAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  return (
+    <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
+      {/* Header: Avatar, Name, Date, Rating */}
+      <div className="flex items-start gap-3 mb-3">
+        {/* Avatar */}
+        <div className="flex-shrink-0">
+          {review.studentUser?.avatarUrl ? (
+            <img
+              src={review.studentUser.avatarUrl}
+              alt={studentName}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+              <span className="text-white font-medium text-sm">
+                {studentName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Name, Date, Rating */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <h4 className="font-medium text-gray-900 truncate">{studentName}</h4>
+            <StarRating rating={review.rating} />
+          </div>
+          <p className="text-sm text-gray-500">{formattedDate}</p>
+        </div>
+      </div>
+
+      {/* Review Comment */}
+      {review.comment && (
+        <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+      )}
+
+      {/* Instructor Reply */}
+      {review.commentReply && (
+        <div className="mt-4 pl-4 border-l-2 border-purple-200 bg-purple-50/50 rounded-r-lg p-3">
+          <p className="text-sm font-medium text-purple-700 mb-1">Instructor Reply</p>
+          <p className="text-sm text-gray-700">{review.commentReply}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ExpertProfilePage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [expert, setExpert] = useState<ExpertProfile | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [reviews, setReviews] = useState<ExpertReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -147,13 +230,11 @@ export default function ExpertProfilePage() {
         const expertData = await getExpertBySlug(slug);
         setExpert(expertData);
 
-        // Fetch expert's courses
-        try {
-          setCourses(expertData.courses || []);
-        } catch (err) {
-          // Non-blocking - expert might not have courses yet
-          console.error("Error fetching expert courses:", err);
-        }
+        // Set courses from expert data
+        setCourses(expertData.courses || []);
+
+        // Set reviews from expert data
+        setReviews(expertData.reviews || []);
       } catch (err) {
         console.error("Error fetching expert:", err);
         setError(err instanceof Error ? err.message : "Failed to load expert profile");
@@ -273,6 +354,30 @@ export default function ExpertProfilePage() {
                   course={course}
                   onClick={() => navigate(`/courses/${course.slug}`)}
                 />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Reviews Section */}
+        {reviews.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                Student Reviews
+              </h2>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                <span>
+                  {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)} average
+                </span>
+                <span className="text-gray-400">·</span>
+                <span>{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
+              </div>
+            </div>
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
               ))}
             </div>
           </div>
