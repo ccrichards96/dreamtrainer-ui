@@ -20,18 +20,18 @@ export const Breadcrumb = ({ items }: BreadcrumbProps) => {
             {item.onClick ? (
               <button
                 onClick={item.onClick}
-                className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-[#c5a8de]"
+                className="inline-flex items-center text-xl font-semibold text-gray-700 hover:text-[#c5a8de]"
               >
-                {index === 0 && <BookOpen className="w-4 h-4 mr-2" />}
+                {index === 0 && <BookOpen className="w-6 h-6 mr-2" />}
                 {item.label}
               </button>
             ) : (
               <span
-                className={`inline-flex items-center text-sm font-medium ${
+                className={`inline-flex items-center text-xl font-semibold ${
                   item.isActive ? "text-[#000]" : "text-gray-500"
                 }`}
               >
-                {index === 0 && <BookOpen className="w-4 h-4 mr-2" />}
+                {index === 0 && <BookOpen className="w-6 h-6 mr-2" />}
                 {item.label}
               </span>
             )}
