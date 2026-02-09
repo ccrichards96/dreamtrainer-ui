@@ -21,6 +21,7 @@ export default function CheckoutSuccess() {
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const [courseSlug, setCourseSlug] = useState<string | null>(null);
 
   useEffect(() => {
     const handleCheckoutSuccess = async () => {
@@ -28,6 +29,10 @@ export default function CheckoutSuccess() {
       if (auth0Loading || !isAuthenticated || !apiInitialized) {
         return;
       }
+
+      // Capture course slug before clearing localStorage
+      const storedCourseSlug = localStorage.getItem("signup_course_slug");
+      setCourseSlug(storedCourseSlug);
 
       try {
         setIsUpdating(true);
@@ -49,8 +54,9 @@ export default function CheckoutSuccess() {
         // Refresh the user profile in the app context
         await refreshUserProfile();
 
-        // Clear the referral ID from localStorage after successful conversion
+        // Clear the referral ID and course slug from localStorage after successful conversion
         localStorage.removeItem("rewardful_referral_id");
+        localStorage.removeItem("signup_course_slug");
       } catch (error) {
         console.error("Failed to update user onboarding status:", error);
         setUpdateError(error instanceof Error ? error.message : "Failed to update profile");
@@ -63,8 +69,12 @@ export default function CheckoutSuccess() {
   }, [auth0Loading, isAuthenticated, apiInitialized, user?.email]);
 
   const handleContinue = () => {
-    // Navigate to dashboard after successful payment
-    navigate("/dashboard");
+    // Navigate to course-specific dashboard if we have a slug, otherwise default dashboard
+    if (courseSlug) {
+      navigate(`/courses/${courseSlug}/dashboard`);
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   // Show loading state while Auth0 is loading or API not ready
@@ -111,13 +121,13 @@ export default function CheckoutSuccess() {
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Payment Successful!</h1>
 
         <p className="text-gray-600 mb-8">
-          Welcome to TOEFL MAX Writing! Your subscription has been activated and you're ready to
-          start your English learning journey.
+          Your subscription has been activated and you're ready to
+          start your learning journey.
         </p>
 
         {updateError && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-600 text-sm">⚠️ Profile update failed: {updateError}</p>
+            <p className="text-red-600 text-sm">⚠️ - Profile update failed: {updateError}</p>
             <p className="text-red-500 text-xs mt-1">
               Don't worry, your payment was successful. You can continue to your dashboard.
             </p>

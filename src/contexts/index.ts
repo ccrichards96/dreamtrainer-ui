@@ -20,3 +20,15 @@ export {
   type ActiveCheckoutData,
 } from "./CheckoutContext";
 export { useCheckoutContext } from "./useCheckoutContext";
+export {
+  ExpertDashboardProvider,
+  ExpertDashboardContext,
+  type ExpertDashboardContextType,
+  type CourseManageData,
+  type CoursePlanFormData,
+  type GoalsOutcomesFormData,
+  type PricingFormData,
+  type CurriculumFormData,
+  type ResourcesFormData,
+} from "./ExpertDashboardContext";
+export { useExpertDashboardContext } from "./useExpertDashboardContext";

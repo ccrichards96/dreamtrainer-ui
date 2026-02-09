@@ -7,7 +7,7 @@ import type { ExpertProfile } from "../../types/modules";
  * @param slug - The slug of the expert profile
  * @returns Promise<ExpertProfile>
  */
-export const getExpertBySlug = async (slug: string): Promise<ExpertProfile> => {
+export const getExpertBySlug = async (slug: string): Promise<ExpertProfile | ApiError> => {
   try {
     const response = await apiClient.get<APIResponse<ExpertProfile>>(`/experts/${slug}/public`);
     return response.data.data;

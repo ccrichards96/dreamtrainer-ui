@@ -33,6 +33,26 @@ export const getAllProducts = async (): Promise<any[]> => {
   }
 };
 
+
+/**
+ * Get all available subscription packages for a specific slug
+ * @returns Promise<any[]> - List of available subscription packages
+ */
+export const getProductBySlug = async (slug: string): Promise<any> => {
+  try {
+    const response = await apiClient.get<APIResponse<any>>(
+       `/courses/${slug}/product`
+    );
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to get products: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while fetching products");
+  }
+};
+
+
 /**
  * Get the current user's billing information and subscription details
  * @returns Promise<UserBillingData> - User's billing and subscription information
@@ -131,6 +151,7 @@ export const getCoursePricing = async (courseId: string): Promise<CoursePricing>
 
 export const billingService = {
   getAllProducts,
+  getProductBySlug,
   getUserBillingInfo,
   createCheckoutSession,
   generateBillingPortalLink,

@@ -27,6 +27,7 @@ import {
   ModuleManager,
   AnnouncementManager,
   SectionManager,
+  UsersManager,
 } from "../../components/admin";
 
 const AdminDashboard: React.FC = () => {
@@ -39,7 +40,7 @@ const AdminDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [reorderingCourseId, setReorderingCourseId] = useState<string | null>(null);
   const [view, setView] = useState<
-    "overview" | "course-edit" | "section-manage" | "module-manage" | "announcement-manage"
+    "overview" | "course-edit" | "section-manage" | "module-manage" | "announcement-manage" | "user-manage"
   >("overview");
 
   // Inline form states for new course
@@ -132,6 +133,10 @@ const AdminDashboard: React.FC = () => {
 
   const handleManageAnnouncements = () => {
     setView("announcement-manage");
+  };
+
+  const handleManageUsers = () => {
+    setView("user-manage");
   };
 
   // Handle creating a new course inline
@@ -250,7 +255,7 @@ const AdminDashboard: React.FC = () => {
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600">Manage courses, sections, and modules</p>
+              <p className="text-gray-600">Manage courses, sections, modules, and users</p>
             </div>
             <div className="flex items-center gap-4">
               {view === "module-manage" && selectedSection && (
@@ -280,6 +285,13 @@ const AdminDashboard: React.FC = () => {
                   New Course
                 </button>
               )}
+              <button
+                onClick={handleManageUsers}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+              >
+                <Users className="w-4 h-4" />
+                Manage Users
+              </button>
               <button
                 onClick={handleManageAnnouncements}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
@@ -625,6 +637,9 @@ const AdminDashboard: React.FC = () => {
 
         {/* Announcement Manager */}
         {view === "announcement-manage" && <AnnouncementManager />}
+
+        {/* Users Manager */}
+        {view === "user-manage" && <UsersManager />}
       </div>
     </div>
   );

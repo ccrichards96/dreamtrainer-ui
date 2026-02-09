@@ -1,10 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth0 } from "@auth0/auth0-react";
 import { ArrowRight, LogIn } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 export default function Login() {
   const { loginWithRedirect, isAuthenticated, isLoading } = useAuth0();
+  const [searchParams] = useSearchParams();
+
+  // Capture referralId and course slug from URL and store in localStorage
+  useEffect(() => {
+    const referralId = searchParams.get("via");
+    if (referralId) {
+      localStorage.setItem("rewardful_referral_id", referralId);
+    }
+    const courseSlug = searchParams.get("course");
+    if (courseSlug) {
+      localStorage.setItem("signup_course_slug", courseSlug);
+    }
+  }, [searchParams]);
 
   if (isLoading) {
     return (

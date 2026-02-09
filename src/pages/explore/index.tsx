@@ -15,7 +15,7 @@ const ExploreCoursesContent = () => {
   const [enrollments, setEnrollments] = useState<CourseEnrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>("my-courses");
+  const [activeTab, setActiveTab] = useState<TabType>("explore");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -144,6 +144,16 @@ const ExploreCoursesContent = () => {
         {/* Tabs */}
         <div className="mb-6">
           <div className="flex space-x-1 bg-white/50 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-gray-200">
+           <button
+              onClick={() => setActiveTab("explore")}
+              className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
+                activeTab === "explore"
+                  ? "bg-white text-purple-700 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+              }`}
+            >
+              Explore New Courses
+            </button>
             <button
               onClick={() => setActiveTab("my-courses")}
               className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
@@ -153,16 +163,6 @@ const ExploreCoursesContent = () => {
               }`}
             >
               My Courses
-            </button>
-            <button
-              onClick={() => setActiveTab("explore")}
-              className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
-                activeTab === "explore"
-                  ? "bg-white text-purple-700 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-              }`}
-            >
-              Explore New Courses
             </button>
           </div>
         </div>

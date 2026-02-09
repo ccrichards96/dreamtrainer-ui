@@ -2,7 +2,7 @@ import { createContext, ReactNode, useState, useCallback } from "react";
 import type { Course } from "../types/modules";
 import type { CoursePricing } from "../types/billing";
 import { getCourseBySlug } from "../services/api/modules";
-import { getCoursePricing } from "../services/api/billing";
+import { getProductBySlug } from "../services/api/billing";
 
 /**
  * Active checkout data - stores course and pricing info for checkout flow
@@ -53,7 +53,7 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
         const course = courseResponse.data;
 
         // Fetch pricing information
-        const pricing = await getCoursePricing(course.id);
+        const pricing = await getProductBySlug(course.slug);
 
         const checkoutData: ActiveCheckoutData = { course, pricing };
         setActiveCheckout(checkoutData);

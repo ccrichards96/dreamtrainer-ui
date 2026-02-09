@@ -37,4 +37,11 @@ export type DraftSupportMessage = {
   email: string;
 };
 
+export type AdminCreateUser = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  userType: "student" | "expert";
+};
+
 export type { User };

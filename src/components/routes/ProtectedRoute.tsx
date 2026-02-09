@@ -21,7 +21,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const location = useLocation();
 
   // Routes that don't require onboarding completion
-  const onboardingExemptRoutes = ["/onboarding", "/checkout/success"];
+  const onboardingExemptRoutes = ["/onboarding", "/checkout/success", "/teach"];
 
   // Show loading while Auth0 is loading
   if (auth0Loading) {
@@ -94,7 +94,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check onboarding completion for protected routes that require it
   if (!isOnboardingExempt && userProfile && !userProfile.onboardingComplete) {
-    return <Navigate to="/onboarding" replace />;
+    const storedCourseSlug = localStorage.getItem("signup_course_slug");
+    const onboardingPath = storedCourseSlug
+      ? `/onboarding?course=${storedCourseSlug}`
+      : "/onboarding";
+    return <Navigate to={onboardingPath} replace />;
   }
 
   // If we require onboarding but don't have user profile, something went wrong

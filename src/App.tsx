@@ -9,14 +9,17 @@ import ProtectedRoute from "./components/routes/ProtectedRoute";
 import AccountPage from "./pages/account";
 import BlogPage from "./pages/blog";
 import ExploreCourses from "./pages/explore";
+import ExpertDashboard from "./pages/expert-dashboard";
+import CourseManage from "./pages/expert-dashboard/CourseManage";
 import { CourseProfilePage, CourseCheckout } from "./pages/courses";
 import ExpertProfilePage from "./pages/experts";
 import AdminDashboard from "./pages/admin";
+import TeachOnDreamTrainer from "./pages/teach";
 import SubscriptionRequired from "./pages/renew";
 import CMSRoute from "./components/routes/CMSRoute";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
-import { AuthProvider, ApiProvider, CheckoutProvider } from "./contexts";
+import { AuthProvider, ApiProvider, CheckoutProvider, ExpertDashboardProvider } from "./contexts";
 import { AppProvider } from "./contexts/AppContext";
 import NotFound from "./pages/NotFound";
 import { Role } from "./types/user";
@@ -84,6 +87,30 @@ function App() {
                           </ProtectedRoute>
                         }
                       />
+
+                      <Route path="/expert">
+                        <Route
+                          path="/expert/dashboard/:tab?"
+                          element={
+                            <ProtectedRoute>
+                              <ExpertDashboardProvider>
+                                <ExpertDashboard />
+                              </ExpertDashboardProvider>
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/expert/dashboard/courses/:id/manage"
+                          element={
+                            <ProtectedRoute>
+                              <ExpertDashboardProvider>
+                                <CourseManage />
+                              </ExpertDashboardProvider>
+                            </ProtectedRoute>
+                          }
+                        />
+                      </Route>
+             
                       <Route path="/experts/:slug" element={<ExpertProfilePage />} />
                       <Route
                         path="/onboarding"
@@ -123,6 +150,14 @@ function App() {
                         element={
                           <ProtectedRoute allowedRoles={[Role.Admin]}>
                             <AdminDashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/teach"
+                        element={
+                          <ProtectedRoute>
+                            <TeachOnDreamTrainer />
                           </ProtectedRoute>
                         }
                       />
