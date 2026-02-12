@@ -110,7 +110,6 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
       const loadedCourse = response.data;
       setCourse(loadedCourse);
 
-      // Hydrate courseManageData from the loaded course
       const objectives = loadedCourse.learningObjectives ?? [];
       const prereqs = loadedCourse.prerequisites ?? [];
       const audience = loadedCourse.targetAudiences ?? [];
