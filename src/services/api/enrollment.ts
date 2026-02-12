@@ -1,5 +1,10 @@
 import apiClient, { APIResponse } from "./client";
-import type { CourseEnrollment } from "../../types/enrollment";
+import type {
+  CourseEnrollment,
+  CourseStudent,
+  ListCourseStudentsParams,
+  PaginatedCourseStudentsResponse,
+} from "../../types/enrollment";
 
 /**
  * Get all enrollments for the current user
@@ -45,10 +50,27 @@ export const enrollInCourse = async (courseId: string): Promise<CourseEnrollment
   }
 };
 
+export const listCourseStudents = async (
+  courseId: string,
+  params?: ListCourseStudentsParams
+): Promise<PaginatedCourseStudentsResponse> => {
+  try {
+    const response = await apiClient.get<{
+      success: boolean;
+      data: CourseStudent[];
+      meta: { page: number; limit: number; total: number; totalPages: number };
+    }>(`/courses/${courseId}/students`, { params });
+    return { data: response.data.data, meta: response.data.meta };
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to fetch course students");
+  }
+};
+
 const enrollmentService = {
   getUserEnrollments,
   isEnrolledInCourse,
   enrollInCourse,
+  listCourseStudents,
 };
 
 export default enrollmentService;

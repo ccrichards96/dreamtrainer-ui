@@ -12,6 +12,7 @@ import {
   Group,
   Megaphone,
   BriefcaseIcon,
+  Users,
 } from "lucide-react";
 import DashboardLayout, { type SidebarSection } from "./DashboardLayout";
 import {
@@ -25,6 +26,7 @@ import {
 } from "./manage";
 import Affiliates from "./manage/Affliates";
 import CourseAnnouncements from "./manage/CourseAnnouncements";
+import CourseStudents from "./manage/CourseStudents";
 import Expert from "./manage/Expert";
 import Stakeholders from "./manage/Stakeholders";
 import { useExpertDashboardContext } from "../../contexts";
@@ -39,6 +41,7 @@ type ManageTab =
   | "stakeholders"
   | "affiliates"
   | "announcements"
+  | "students"
   | "review"
   | "preview"
   | "launch";
@@ -81,6 +84,7 @@ const sidebarSections: SidebarSection[] = [
     label: "Course Management",
     items: [
       { id: "announcements", label: "Announcements", icon: Megaphone },
+      { id: "students", label: "Students", icon: Users },
     ],
   },
   {
@@ -108,7 +112,7 @@ export default function CourseManage() {
   const activeLabel =
     sidebarSections.flatMap((s) => s.items).find((t) => t.id === activeTab)?.label ?? "";
 
-  const tabsWithOwnHeader: ManageTab[] = ["plan", "announcements"];
+  const tabsWithOwnHeader: ManageTab[] = ["plan", "announcements", "students"];
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -130,6 +134,8 @@ export default function CourseManage() {
         return <Affiliates />;
       case "announcements":
         return <CourseAnnouncements />;
+      case "students":
+        return <CourseStudents />;
       case "review":
         return <Review />;
       case "launch":
