@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   ClipboardList,
@@ -27,6 +27,7 @@ import Affiliates from "./manage/Affliates";
 import CourseAnnouncements from "./manage/CourseAnnouncements";
 import Expert from "./manage/Expert";
 import Stakeholders from "./manage/Stakeholders";
+import { useExpertDashboardContext } from "../../contexts";
 
 type ManageTab =
   | "plan"
@@ -94,10 +95,20 @@ const sidebarSections: SidebarSection[] = [
 
 export default function CourseManage() {
   const navigate = useNavigate();
+  const { id: courseId } = useParams<{ id: string }>();
+  const { loadCourse, isLoadingCourse } = useExpertDashboardContext();
   const [activeTab, setActiveTab] = useState<ManageTab>("plan");
+
+  useEffect(() => {
+    if (courseId) {
+      loadCourse(courseId);
+    }
+  }, [courseId, loadCourse]);
 
   const activeLabel =
     sidebarSections.flatMap((s) => s.items).find((t) => t.id === activeTab)?.label ?? "";
+
+  const tabsWithOwnHeader: ManageTab[] = ["plan", "announcements"];
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -147,9 +158,16 @@ export default function CourseManage() {
         </div>
       }
     >
-      <h1 className="text-2xl font-bold text-gray-800">{activeLabel}</h1>
-
-      <div className="mt-6">{renderTabContent()}</div>
+      {isLoadingCourse ? (
+        <div className="text-center py-12 text-sm text-gray-500">Loading course...</div>
+      ) : (
+        <>
+          {!tabsWithOwnHeader.includes(activeTab) && (
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">{activeLabel}</h1>
+          )}
+          {renderTabContent()}
+        </>
+      )}
     </DashboardLayout>
   );
 }

@@ -118,6 +118,9 @@ interface Course {
   stripeProductId: string | null;
   listingStatus: ListingStatus;
   order: number;
+  learningObjectives?: string[];
+  prerequisites?: string[];
+  targetAudiences?: string[];
   numberOfSections?: number; // Returned from /courses endpoint
   createdAt: string;
   updatedAt: string;

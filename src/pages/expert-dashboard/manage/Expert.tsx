@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { Check, X, Mail } from "lucide-react";
 import Modal from "../../../components/modals/Modal";
+import { inviteSupportExperts } from "../../../services/api/course-invites";
 
 export default function Expert() {
+  const { id: courseId } = useParams<{ id: string }>();
   const [emailInput, setEmailInput] = useState("");
   const [emails, setEmails] = useState<string[]>([]);
   const [isInviting, setIsInviting] = useState(false);
@@ -37,15 +40,14 @@ export default function Expert() {
   const handleInvite = async () => {
     if (emails.length === 0) return;
 
+    if (!courseId) return;
+
     setIsInviting(true);
     try {
-      // TODO: API call to invite experts
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Inviting experts:", emails);
-
+      const data = await inviteSupportExperts(courseId, emails);
       setInviteResult({
         success: true,
-        message: `Successfully sent invitations to ${emails.length} expert${emails.length > 1 ? "s" : ""}.`,
+        message: `Successfully sent ${data.length} invitation${data.length > 1 ? "s" : ""}.`,
       });
       setEmails([]);
     } catch (err) {

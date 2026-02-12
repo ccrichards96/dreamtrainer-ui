@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/admin";
 import TeachOnDreamTrainer from "./pages/teach";
 import SubscriptionRequired from "./pages/renew";
 import CMSRoute from "./components/routes/CMSRoute";
+import InviteAccept from "./pages/invite/InviteAccept";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import { AuthProvider, ApiProvider, CheckoutProvider, ExpertDashboardProvider } from "./contexts";
@@ -24,10 +25,17 @@ import { AppProvider } from "./contexts/AppContext";
 import NotFound from "./pages/NotFound";
 import { Role } from "./types/user";
 import usePageTracking from "./hooks/usePageTracking";
+import usePendingInvite from "./hooks/usePendingInvite";
 
 // Component to handle page tracking (must be inside Router)
 function PageTracker() {
   usePageTracking();
+  return null;
+}
+
+// Checks for pending invite in sessionStorage after auth redirect
+function PendingInviteHandler() {
+  usePendingInvite();
   return null;
 }
 
@@ -47,6 +55,7 @@ function App() {
             <CheckoutProvider>
               <Router>
                 <PageTracker />
+                <PendingInviteHandler />
                 <div className="min-h-screen bg-gray-100">
                   <Navigation />
                   <div className="pt-16">
@@ -55,6 +64,7 @@ function App() {
                       <Route path="/blog" element={<BlogPage />} />
                       <Route path="/login" element={<Login />} />
                       <Route path="/signup" element={<Signup />} />
+                      <Route path="/invite/accept" element={<InviteAccept />} />
                       <Route
                         path="/courses"
                         element={

@@ -279,7 +279,14 @@ export const getModuleById = async (moduleId: string): Promise<Module> => {
  */
 export const updateCourse = async (
   courseId: string,
-  courseData: { name?: string; description?: string; order?: number }
+  courseData: {
+    name?: string;
+    description?: string;
+    order?: number;
+    learningObjectives?: string[];
+    prerequisites?: string[];
+    targetAudiences?: string[];
+  }
 ): Promise<Course> => {
   try {
     const response = await apiClient.put<APIResponse<Course>>(`/courses/${courseId}`, courseData);

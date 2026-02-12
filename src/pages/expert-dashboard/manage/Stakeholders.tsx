@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Check, X, Mail } from "lucide-react";
 import Modal from "../../../components/modals/Modal";
+import { inviteStakeholders, StakeholderRole } from "../../../services/api/course-invites";
 
 export default function Stakeholders() {
   const { id: courseId } = useParams<{ id: string }>();
   const [emailInput, setEmailInput] = useState("");
   const [emails, setEmails] = useState<string[]>([]);
+  const [stakeholderRole, setStakeholderRole] = useState<StakeholderRole>("viewer");
   const [isInviting, setIsInviting] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [inviteResult, setInviteResult] = useState<{ success: boolean; message: string } | null>(
@@ -39,15 +41,14 @@ export default function Stakeholders() {
   const handleInvite = async () => {
     if (emails.length === 0) return;
 
+    if (!courseId) return;
+
     setIsInviting(true);
     try {
-      // TODO: API call to invite stakeholders
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Inviting stakeholders:", emails);
-
+      const data = await inviteStakeholders(courseId, emails, stakeholderRole);
       setInviteResult({
         success: true,
-        message: `Successfully sent invitations to ${emails.length} stakeholder${emails.length > 1 ? "s" : ""}.`,
+        message: `Successfully sent ${data.length} invitation${data.length > 1 ? "s" : ""}.`,
       });
       setEmails([]);
     } catch (err) {
@@ -71,6 +72,23 @@ export default function Stakeholders() {
             <p className="mt-1 text-sm text-gray-500">
               Enter email addresses to invite stakeholders who need to be connected to course performance.
             </p>
+          </div>
+
+          {/* Stakeholder Role */}
+          <div>
+            <label htmlFor="stakeholder-role" className="block text-sm font-medium text-gray-900 mb-1.5">
+              Role
+            </label>
+            <select
+              id="stakeholder-role"
+              value={stakeholderRole}
+              onChange={(e) => setStakeholderRole(e.target.value as StakeholderRole)}
+              className="w-full sm:w-64 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+            >
+              <option value="viewer">Viewer</option>
+              <option value="reviewer">Reviewer</option>
+              <option value="collaborator">Collaborator</option>
+            </select>
           </div>
 
           {/* Email Tag Input */}

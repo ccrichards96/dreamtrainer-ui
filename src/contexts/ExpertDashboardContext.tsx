@@ -1,6 +1,7 @@
 import React, { createContext, ReactNode, useState, useCallback } from "react";
 import { Announcement } from "../types/announcements";
-import { ExpertProfile } from "../types/modules";
+import { Course, ExpertProfile } from "../types/modules";
+import { getCourseById } from "../services/api/modules";
 import { useApp } from "./useAppContext";
 
 // Form data interfaces for each manage tab
@@ -60,6 +61,11 @@ export interface ExpertDashboardContextType {
   // Expert profile from user data
   expertProfile: ExpertProfile | null;
 
+  // Loaded course
+  course: Course | null;
+  isLoadingCourse: boolean;
+  loadCourse: (courseId: string) => Promise<void>;
+
   // Course management data
   courseManageData: CourseManageData;
 
@@ -92,8 +98,38 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
   const { userProfile } = useApp();
   const expertProfile = userProfile?.expertProfile ?? null;
 
+  const [course, setCourse] = useState<Course | null>(null);
+  const [isLoadingCourse, setIsLoadingCourse] = useState(false);
   const [courseManageData, setCourseManageData] = useState<CourseManageData>(initialCourseManageData);
   const [isSaving] = useState(false);
+
+  const loadCourse = useCallback(async (courseId: string) => {
+    setIsLoadingCourse(true);
+    try {
+      const response = await getCourseById(courseId);
+      const loadedCourse = response.data;
+      setCourse(loadedCourse);
+
+      // Hydrate courseManageData from the loaded course
+      const objectives = loadedCourse.learningObjectives ?? [];
+      const prereqs = loadedCourse.prerequisites ?? [];
+      const audience = loadedCourse.targetAudiences ?? [];
+
+      setCourseManageData((prev) => ({
+        ...prev,
+        coursePlan: {
+          learningObjectives: objectives.length >= 3 ? objectives : [...objectives, ...Array(3 - objectives.length).fill("")],
+          prerequisites: prereqs.length >= 1 ? prereqs : [""],
+          targetAudience: audience.length >= 1 ? audience : [""],
+        },
+        pricing: { price: loadedCourse.price?.toString() ?? "" },
+      }));
+    } catch {
+      // Course load failed — keep defaults
+    } finally {
+      setIsLoadingCourse(false);
+    }
+  }, []);
 
   const updateCoursePlan = useCallback((data: Partial<CoursePlanFormData>) => {
     setCourseManageData((prev) => ({
@@ -143,6 +179,9 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
 
   const value: ExpertDashboardContextType = {
     expertProfile,
+    course,
+    isLoadingCourse,
+    loadCourse,
     courseManageData,
     updateCoursePlan,
     updateGoalsOutcomes,
