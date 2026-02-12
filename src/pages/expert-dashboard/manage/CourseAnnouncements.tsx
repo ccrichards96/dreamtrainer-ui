@@ -1,13 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { Plus, Send, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
+import { Plus, Send, Save, ChevronLeft, ChevronRight, AlertCircle, Pencil, Trash2 } from "lucide-react";
 import { useExpertDashboardContext } from "../../../contexts";
 import {
   createCourseAnnouncement,
   listCourseAnnouncements,
-} from "../../../services/api/course-announcements";
+  updateAnnouncement,
+  deleteAnnouncement,
+} from "../../../services/api/announcements";
 import { Announcement, CreateCourseAnnouncementPayload } from "../../../types/announcements";
 import ManagePageHeader from "./ManagePageHeader";
+import Modal from "../../../components/modals/Modal";
+
+const emptyForm: CreateCourseAnnouncementPayload = {
+  name: "",
+  message: "",
+  type: "general",
+  priority: "normal",
+};
 
 export default function CourseAnnouncements() {
   const { id: courseId } = useParams<{ id: string }>();
@@ -20,16 +30,17 @@ export default function CourseAnnouncements() {
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
 
-  // Create form state
-  const [showForm, setShowForm] = useState(false);
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<CreateCourseAnnouncementPayload>({
-    name: "",
-    message: "",
-    type: "general",
-    priority: "normal",
-  });
+  const [formData, setFormData] = useState<CreateCourseAnnouncementPayload>(emptyForm);
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Delete state
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const isEditing = editingAnnouncement !== null;
 
   const fetchAnnouncements = useCallback(async () => {
     if (!courseId) return;
@@ -51,6 +62,32 @@ export default function CourseAnnouncements() {
     fetchAnnouncements();
   }, [fetchAnnouncements]);
 
+  const openCreateModal = () => {
+    setEditingAnnouncement(null);
+    setFormData(emptyForm);
+    setFormError(null);
+    setShowModal(true);
+  };
+
+  const openEditModal = (announcement: Announcement) => {
+    setEditingAnnouncement(announcement);
+    setFormData({
+      name: announcement.name,
+      message: announcement.message,
+      type: announcement.type,
+      priority: announcement.priority,
+    });
+    setFormError(null);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingAnnouncement(null);
+    setFormData(emptyForm);
+    setFormError(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!courseId) return;
@@ -63,15 +100,33 @@ export default function CourseAnnouncements() {
     setIsSubmitting(true);
     setFormError(null);
     try {
-      await createCourseAnnouncement(courseId, formData);
-      setFormData({ name: "", message: "", type: "general", priority: "normal" });
-      setShowForm(false);
-      setPage(1);
+      if (isEditing) {
+        await updateAnnouncement(editingAnnouncement.id, formData);
+      } else {
+        await createCourseAnnouncement(courseId, formData);
+        setPage(1);
+      }
+      closeModal();
       await fetchAnnouncements();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to create announcement");
+      setFormError(
+        err instanceof Error ? err.message : `Failed to ${isEditing ? "update" : "create"} announcement`
+      );
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (announcementId: string) => {
+    if (!courseId) return;
+    setDeletingId(announcementId);
+    try {
+      await deleteAnnouncement(announcementId);
+      await fetchAnnouncements();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete announcement");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -86,7 +141,7 @@ export default function CourseAnnouncements() {
       <span
         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${styles[priority] || styles.normal}`}
       >
-        {priority}
+        {priority.charAt(0).toUpperCase() + priority.slice(1)}
       </span>
     );
   };
@@ -101,7 +156,7 @@ export default function CourseAnnouncements() {
       <span
         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${styles[type] || styles.general}`}
       >
-        {type}
+        {type.charAt(0).toUpperCase() + type.slice(1)}
       </span>
     );
   };
@@ -111,126 +166,16 @@ export default function CourseAnnouncements() {
       <ManagePageHeader
         title="Announcements"
         actions={
-          !showForm ? (
-            <button
-              type="button"
-              onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-x-1.5 py-2.5 px-4 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700"
-            >
-              <Plus className="size-4" />
-              New Announcement
-            </button>
-          ) : undefined
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-x-1.5 py-2.5 px-4 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700"
+          >
+            <Plus className="size-4" />
+            New Announcement
+          </button>
         }
       />
-
-      {/* Create Form */}
-      {showForm && (
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-          <h3 className="text-sm font-bold text-gray-900 mb-4">Create Announcement</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {formError && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-700 text-sm">
-                <AlertCircle className="size-4 shrink-0" />
-                {formError}
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="ann-name" className="block text-sm font-medium text-gray-900 mb-1.5">
-                Title
-              </label>
-              <input
-                id="ann-name"
-                type="text"
-                maxLength={255}
-                value={formData.name}
-                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                placeholder="e.g. Welcome to Module 3"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="ann-message"
-                className="block text-sm font-medium text-gray-900 mb-1.5"
-              >
-                Message
-              </label>
-              <textarea
-                id="ann-message"
-                rows={4}
-                value={formData.message}
-                onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
-                placeholder="Write your announcement message..."
-                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500"
-              />
-            </div>
-
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label
-                  htmlFor="ann-type"
-                  className="block text-sm font-medium text-gray-900 mb-1.5"
-                >
-                  Type
-                </label>
-                <select
-                  id="ann-type"
-                  value={formData.type}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, type: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-                >
-                  <option value="general">General</option>
-                  <option value="update">Update</option>
-                  <option value="alert">Alert</option>
-                </select>
-              </div>
-
-              <div className="flex-1">
-                <label
-                  htmlFor="ann-priority"
-                  className="block text-sm font-medium text-gray-900 mb-1.5"
-                >
-                  Priority
-                </label>
-                <select
-                  id="ann-priority"
-                  value={formData.priority}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, priority: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-                >
-                  <option value="normal">Normal</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="inline-flex items-center gap-x-1.5 py-2.5 px-5 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Send className="size-4" />
-                {isSubmitting ? "Sending..." : "Send Announcement"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setFormError(null);
-                }}
-                className="py-2.5 px-5 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
 
       {/* Announcements List */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
@@ -281,6 +226,25 @@ export default function CourseAnnouncements() {
                         })}
                       </p>
                     </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(announcement)}
+                        className="p-2 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50"
+                        title="Edit"
+                      >
+                        <Pencil className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(announcement.id)}
+                        disabled={deletingId === announcement.id}
+                        className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-50"
+                        title="Delete"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -315,6 +279,110 @@ export default function CourseAnnouncements() {
           </>
         )}
       </div>
+
+      {/* Create / Edit Modal */}
+      <Modal
+        isOpen={showModal}
+        onClose={closeModal}
+        title={isEditing ? "Edit Announcement" : "Create Announcement"}
+        size="md"
+      >
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {formError && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-700 text-sm">
+              <AlertCircle className="size-4 shrink-0" />
+              {formError}
+            </div>
+          )}
+
+          <div>
+            <label htmlFor="ann-name" className="block text-sm font-medium text-gray-900 mb-1.5">
+              Title
+            </label>
+            <input
+              id="ann-name"
+              type="text"
+              maxLength={255}
+              value={formData.name}
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              placeholder="e.g. Welcome to Module 3"
+              className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="ann-message" className="block text-sm font-medium text-gray-900 mb-1.5">
+              Message
+            </label>
+            <textarea
+              id="ann-message"
+              rows={4}
+              value={formData.message}
+              onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
+              placeholder="Write your announcement message..."
+              className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500"
+            />
+          </div>
+
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label htmlFor="ann-type" className="block text-sm font-medium text-gray-900 mb-1.5">
+                Type
+              </label>
+              <select
+                id="ann-type"
+                value={formData.type}
+                onChange={(e) => setFormData((prev) => ({ ...prev, type: e.target.value as Announcement["type"] }))}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+              >
+                <option value="general">General</option>
+                <option value="update">Update</option>
+                <option value="alert">Alert</option>
+              </select>
+            </div>
+
+            <div className="flex-1">
+              <label htmlFor="ann-priority" className="block text-sm font-medium text-gray-900 mb-1.5">
+                Priority
+              </label>
+              <select
+                id="ann-priority"
+                value={formData.priority}
+                onChange={(e) => setFormData((prev) => ({ ...prev, priority: e.target.value as Announcement["priority"] }))}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+              >
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex items-center gap-x-1.5 py-2.5 px-5 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isEditing ? <Save className="size-4" /> : <Send className="size-4" />}
+              {isSubmitting
+                ? isEditing
+                  ? "Saving..."
+                  : "Sending..."
+                : isEditing
+                  ? "Save Changes"
+                  : "Send Announcement"}
+            </button>
+            <button
+              type="button"
+              onClick={closeModal}
+              className="py-2.5 px-5 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

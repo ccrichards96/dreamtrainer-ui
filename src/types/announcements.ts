@@ -12,7 +12,9 @@ export interface Announcement {
 }
 
 // Draft type for creating new announcements
-export type DraftAnnouncement = Pick<Announcement, "name" | "message" | "type" | "priority">;
+export type DraftAnnouncement = Pick<Announcement, "name" | "message" | "type" | "priority"> & {
+  courseId?: string;
+};
 
 // Update type for modifying existing announcements
 export type UpdateAnnouncement = Partial<DraftAnnouncement>;
@@ -21,8 +23,8 @@ export type UpdateAnnouncement = Partial<DraftAnnouncement>;
 export interface CreateCourseAnnouncementPayload {
   name: string;
   message: string;
-  type?: string;
-  priority?: string;
+  type?: Announcement["type"];
+  priority?: Announcement["priority"];
 }
 
 export interface PaginatedAnnouncementsResponse {
