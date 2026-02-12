@@ -100,6 +100,17 @@ export default function AvatarDropdown({ className = "" }: AvatarDropdownProps) 
               My Account
             </Link>
 
+            {/* Expert Dashboard - Only show for users with an expert profile */}
+            {userProfile?.expertProfile && (
+              <Link
+                to="/expert/dashboard"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                onClick={() => setIsOpen(false)}
+              >
+                Expert Dashboard
+              </Link>
+            )}
+
             {/* Admin Link - Only show for admin users */}
             {userProfile?.role === Role.Admin && (
               <Link

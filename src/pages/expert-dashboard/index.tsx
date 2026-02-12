@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Loader2,
   BookOpen,
   Users,
   MessageSquare,
@@ -29,58 +27,8 @@ const validTabs: Tab[] = ["courses", "students", "communications", "performance"
 export default function ExpertDashboard() {
   const navigate = useNavigate();
   const { tab } = useParams<{ tab?: string }>();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const activeTab: Tab = validTabs.includes(tab as Tab) ? (tab as Tab) : "courses";
-
-  useEffect(() => {
-    const fetchExpert = async () => {
-      try {
-        // setLoading(true);
-        // setError(null);
-
-      } catch (err) {
-        console.error("Error fetching expert:", err);
-        setError(err instanceof Error ? err.message : "Failed to load expert profile");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchExpert();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-[#c5a8de]" />
-            <span className="ml-3 text-gray-600">Loading dashboard...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-            <p className="text-red-600 font-medium">{error || "Expert not found"}</p>
-            <button
-              onClick={() => navigate("/")}
-              className="mt-4 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            >
-              Go Home
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <DashboardLayout

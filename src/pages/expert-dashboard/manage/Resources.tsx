@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import {
   FileText,
@@ -10,49 +10,14 @@ import {
   ChevronRight,
   Loader2,
   Plus,
+  Table2,
+  Presentation,
 } from "lucide-react";
-import { CourseAsset, AssetType, AssetStatus, AssetVisibility } from "../../../types/course-assets";
+import { CourseAsset, AssetType, AssetStatus, AssetPagination } from "../../../types/course-assets";
+import { courseAssetsService } from "../../../services/api/course-assets";
 import UploadResourceModal from "./UploadResourceModal";
 
-// Mock data for development - replace with actual API call
-const mockAssets: CourseAsset[] = [
-  {
-    id: "1",
-    name: "Introduction Video.mp4",
-    description: "Course introduction",
-    s3Key: "courses/123/intro.mp4",
-    mimeType: "video/mp4",
-    fileSize: 52428800,
-    type: AssetType.VIDEO,
-    status: AssetStatus.READY,
-    visibility: AssetVisibility.ENROLLED_ONLY,
-    thumbnailS3Key: null,
-    courseId: "123",
-    uploadedById: "user1",
-    metadata: null,
-    order: 0,
-    createdAt: "2026-02-01T10:00:00Z",
-    updatedAt: "2026-02-01T10:00:00Z",
-  },
-  {
-    id: "2",
-    name: "Course Slides.pdf",
-    description: "Lesson slides",
-    s3Key: "courses/123/slides.pdf",
-    mimeType: "application/pdf",
-    fileSize: 2097152,
-    type: AssetType.DOCUMENT,
-    status: AssetStatus.READY,
-    visibility: AssetVisibility.ENROLLED_ONLY,
-    thumbnailS3Key: null,
-    courseId: "123",
-    uploadedById: "user1",
-    metadata: null,
-    order: 1,
-    createdAt: "2026-02-02T14:30:00Z",
-    updatedAt: "2026-02-02T14:30:00Z",
-  },
-];
+const LIMIT = 10;
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 Bytes";
@@ -72,32 +37,36 @@ function formatDate(dateString: string): string {
 
 function getAssetIcon(type: AssetType) {
   switch (type) {
-    case AssetType.VIDEO:
+    case "video":
       return <Video className="size-5 text-purple-600" />;
-    case AssetType.IMAGE:
+    case "image":
       return <Image className="size-5 text-blue-600" />;
-    case AssetType.DOCUMENT:
+    case "document":
       return <FileText className="size-5 text-red-600" />;
-    case AssetType.AUDIO:
+    case "audio":
       return <Music className="size-5 text-green-600" />;
+    case "spreadsheet":
+      return <Table2 className="size-5 text-emerald-600" />;
+    case "presentation":
+      return <Presentation className="size-5 text-orange-600" />;
     default:
       return <File className="size-5 text-gray-600" />;
   }
 }
 
 function getStatusBadge(status: AssetStatus) {
-  const styles = {
-    [AssetStatus.READY]: "bg-green-100 text-green-700",
-    [AssetStatus.PENDING]: "bg-yellow-100 text-yellow-700",
-    [AssetStatus.PROCESSING]: "bg-blue-100 text-blue-700",
-    [AssetStatus.FAILED]: "bg-red-100 text-red-700",
+  const styles: Record<AssetStatus, string> = {
+    ready: "bg-green-100 text-green-700",
+    pending: "bg-yellow-100 text-yellow-700",
+    processing: "bg-blue-100 text-blue-700",
+    failed: "bg-red-100 text-red-700",
   };
 
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${styles[status]}`}
     >
-      {status.charAt(0) + status.slice(1).toLowerCase()}
+      {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
 }
@@ -106,65 +75,42 @@ export default function Resources() {
   const { id: courseId } = useParams<{ id: string }>();
   const [assets, setAssets] = useState<CourseAsset[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState({
+  const [pagination, setPagination] = useState<AssetPagination>({
     total: 0,
     page: 1,
-    limit: 10,
+    limit: LIMIT,
+    totalPages: 0,
   });
   const [showUploadModal, setShowUploadModal] = useState(false);
 
-  useEffect(() => {
-    const fetchAssets = async () => {
-      setLoading(true);
-      try {
-        // TODO: Replace with actual API call
-        // const response = await getAssetsByCourse(courseId, page, 10);
-        // setAssets(response.data);
-        // setPagination(response.pagination);
-
-        // Mock data for now
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setAssets(mockAssets);
-        setPagination({ total: mockAssets.length, page: 1, limit: 10 });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAssets();
+  const fetchAssets = useCallback(async () => {
+    if (!courseId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await courseAssetsService.listAssets(courseId, { page, limit: LIMIT });
+      setAssets(result.assets);
+      setPagination(result.pagination);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load resources");
+    } finally {
+      setLoading(false);
+    }
   }, [courseId, page]);
 
-  const handleUpload = async (data: { name: string; type: AssetType; file: File }) => {
-    // TODO: Replace with actual API call
-    console.log("Uploading resource:", data);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+  useEffect(() => {
+    fetchAssets();
+  }, [fetchAssets]);
 
-    // Mock adding the new asset
-    const newAsset: CourseAsset = {
-      id: crypto.randomUUID(),
-      name: data.name,
-      description: null,
-      s3Key: `courses/${courseId}/${data.file.name}`,
-      mimeType: data.file.type,
-      fileSize: data.file.size,
-      type: data.type,
-      status: AssetStatus.PENDING,
-      visibility: AssetVisibility.ENROLLED_ONLY,
-      thumbnailS3Key: null,
-      courseId: courseId || "",
-      uploadedById: "current-user",
-      metadata: null,
-      order: assets.length,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    setAssets((prev) => [newAsset, ...prev]);
-    setPagination((prev) => ({ ...prev, total: prev.total + 1 }));
+  const handleUploadComplete = () => {
+    // Re-fetch the first page to show the new asset at the top
+    setPage(1);
+    if (page === 1) {
+      fetchAssets();
+    }
   };
-
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
 
   if (loading) {
     return (
@@ -172,6 +118,22 @@ export default function Resources() {
         <div className="flex items-center justify-center py-12">
           <Loader2 className="size-6 animate-spin text-purple-600" />
           <span className="ml-2 text-gray-600">Loading resources...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+        <div className="text-center py-12">
+          <p className="text-red-600 text-sm">{error}</p>
+          <button
+            onClick={fetchAssets}
+            className="mt-3 text-sm font-medium text-purple-600 hover:text-purple-800"
+          >
+            Try again
+          </button>
         </div>
       </div>
     );
@@ -231,7 +193,17 @@ export default function Resources() {
                     <div className="flex items-center gap-3">
                       {getAssetIcon(asset.type)}
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{asset.name}</p>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!courseId) return;
+                            const { downloadUrl } = await courseAssetsService.getDownloadUrl(courseId, asset.id);
+                            window.open(downloadUrl, "_blank", "noopener,noreferrer");
+                          }}
+                          className="text-sm font-medium text-purple-600 hover:text-purple-800 hover:underline text-left"
+                        >
+                          {asset.name}
+                        </button>
                         {asset.description && (
                           <p className="text-xs text-gray-500">{asset.description}</p>
                         )}
@@ -239,7 +211,7 @@ export default function Resources() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-600">{asset.type}</span>
+                    <span className="text-sm text-gray-600 capitalize">{asset.type}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm text-gray-600">{formatFileSize(asset.fileSize)}</span>
@@ -272,12 +244,12 @@ export default function Resources() {
               <ChevronLeft className="size-4" />
             </button>
             <span className="text-sm text-gray-600">
-              Page {page} of {totalPages || 1}
+              Page {page} of {pagination.totalPages || 1}
             </span>
             <button
               type="button"
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+              disabled={page >= pagination.totalPages}
               className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronRight className="size-4" />
@@ -291,7 +263,8 @@ export default function Resources() {
       <UploadResourceModal
         isOpen={showUploadModal}
         onClose={() => setShowUploadModal(false)}
-        onUpload={handleUpload}
+        courseId={courseId || ""}
+        onUploadComplete={handleUploadComplete}
       />
     </>
   );

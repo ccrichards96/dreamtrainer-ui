@@ -48,6 +48,14 @@ export interface ExpertReview {
 }
 
 /**
+ * Assigned course - links an expert to a course with a specific role
+ */
+export interface AssignedCourse {
+  role: "owner" | "collaborator";
+  course: Course;
+}
+
+/**
  * Expert profile - instructor/creator profile for courses
  */
 export interface ExpertProfile {
@@ -68,6 +76,7 @@ export interface ExpertProfile {
   updatedAt: string;
   deletedAt: string | null;
   courses?: Course[];
+  assignedCourses?: AssignedCourse[];
   reviews?: ExpertReview[];
   user?: {
     firstName: string;

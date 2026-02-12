@@ -1,5 +1,7 @@
 import React, { createContext, ReactNode, useState, useCallback } from "react";
 import { Announcement } from "../types/announcements";
+import { ExpertProfile } from "../types/modules";
+import { useApp } from "./useAppContext";
 
 // Form data interfaces for each manage tab
 export interface CoursePlanFormData {
@@ -55,9 +57,12 @@ const initialCourseManageData: CourseManageData = {
 
 // Context type definition
 export interface ExpertDashboardContextType {
+  // Expert profile from user data
+  expertProfile: ExpertProfile | null;
+
   // Course management data
   courseManageData: CourseManageData;
-  
+
   // Update functions
   updateCoursePlan: (data: Partial<CoursePlanFormData>) => void;
   updateGoalsOutcomes: (data: Partial<GoalsOutcomesFormData>) => void;
@@ -67,7 +72,7 @@ export interface ExpertDashboardContextType {
   updateAnnouncements: (announcements: Announcement[]) => void;
   // Reset functions
   resetCourseManageData: () => void;
-  
+
   // Loading state
   isSaving: boolean;
 }
@@ -84,6 +89,9 @@ interface ExpertDashboardProviderProps {
 
 // Provider component
 export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = ({ children }) => {
+  const { userProfile } = useApp();
+  const expertProfile = userProfile?.expertProfile ?? null;
+
   const [courseManageData, setCourseManageData] = useState<CourseManageData>(initialCourseManageData);
   const [isSaving] = useState(false);
 
@@ -134,6 +142,7 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
   }, []);
 
   const value: ExpertDashboardContextType = {
+    expertProfile,
     courseManageData,
     updateCoursePlan,
     updateGoalsOutcomes,

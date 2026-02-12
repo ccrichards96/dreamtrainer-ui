@@ -1,21 +1,25 @@
 import { useState, useRef } from "react";
 import { Upload, X } from "lucide-react";
 import Modal from "../../../components/modals/Modal";
-import { AssetType } from "../../../types/course-assets";
+import { AssetVisibility } from "../../../types/course-assets";
+import { courseAssetsService } from "../../../services/api/course-assets";
 
 interface UploadResourceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (data: { name: string; type: AssetType; file: File }) => Promise<void>;
+  courseId: string;
+  onUploadComplete: () => void;
 }
 
 export default function UploadResourceModal({
   isOpen,
   onClose,
-  onUpload,
+  courseId,
+  onUploadComplete,
 }: UploadResourceModalProps) {
   const [name, setName] = useState("");
-  const [type, setType] = useState<AssetType>(AssetType.DOCUMENT);
+  const [description, setDescription] = useState("");
+  const [visibility, setVisibility] = useState<AssetVisibility>("enrolled_only");
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,11 +39,6 @@ export default function UploadResourceModal({
     e.preventDefault();
     setError(null);
 
-    if (!name.trim()) {
-      setError("Please enter a name for the resource.");
-      return;
-    }
-
     if (!file) {
       setError("Please select a file to upload.");
       return;
@@ -47,8 +46,14 @@ export default function UploadResourceModal({
 
     setIsUploading(true);
     try {
-      await onUpload({ name: name.trim(), type, file });
+      await courseAssetsService.uploadAsset(courseId, {
+        file,
+        name: name.trim() || undefined,
+        description: description.trim() || undefined,
+        visibility,
+      });
       handleClose();
+      onUploadComplete();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to upload resource.");
     } finally {
@@ -58,7 +63,8 @@ export default function UploadResourceModal({
 
   const handleClose = () => {
     setName("");
-    setType(AssetType.DOCUMENT);
+    setDescription("");
+    setVisibility("enrolled_only");
     setFile(null);
     setError(null);
     onClose();
@@ -80,7 +86,7 @@ export default function UploadResourceModal({
           </div>
         )}
 
-                {/* File Upload */}
+        {/* File Upload */}
         <div>
           <label className="block text-sm font-medium text-gray-900">File</label>
           <div className="mt-1.5">
@@ -123,34 +129,47 @@ export default function UploadResourceModal({
         {/* Name Field */}
         <div>
           <label htmlFor="resource-name" className="block text-sm font-medium text-gray-900">
-            Resource Name
+            Display Name
           </label>
           <input
             type="text"
             id="resource-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Enter resource name"
+            placeholder="Defaults to filename if left blank"
             className="mt-1.5 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500"
           />
         </div>
 
-        {/* Type Field */}
+        {/* Description Field */}
         <div>
-          <label htmlFor="resource-type" className="block text-sm font-medium text-gray-900">
-            Resource Type
+          <label htmlFor="resource-description" className="block text-sm font-medium text-gray-900">
+            Description
+          </label>
+          <textarea
+            id="resource-description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Optional description"
+            rows={2}
+            className="mt-1.5 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500 resize-none"
+          />
+        </div>
+
+        {/* Visibility Field */}
+        <div>
+          <label htmlFor="resource-visibility" className="block text-sm font-medium text-gray-900">
+            Visibility
           </label>
           <select
-            id="resource-type"
-            value={type}
-            onChange={(e) => setType(e.target.value as AssetType)}
+            id="resource-visibility"
+            value={visibility}
+            onChange={(e) => setVisibility(e.target.value as AssetVisibility)}
             className="mt-1.5 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 focus:border-purple-500 focus:ring-purple-500"
           >
-            <option value={AssetType.VIDEO}>Video</option>
-            <option value={AssetType.IMAGE}>Image</option>
-            <option value={AssetType.DOCUMENT}>Document</option>
-            <option value={AssetType.AUDIO}>Audio</option>
-            <option value={AssetType.OTHER}>Other</option>
+            <option value="enrolled_only">Enrolled Students Only</option>
+            <option value="public">Public</option>
+            <option value="private">Private</option>
           </select>
         </div>
 

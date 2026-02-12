@@ -10,11 +10,10 @@ import DreamFlow from "../../components/DreamFlow";
 import Modal from "../../components/modals/Modal";
 import SupportMessageForm from "../../components/forms/SupportMessageForm";
 import { Section } from "../../types/modules";
-import { CourseAsset } from "../../types/course-assets";
+import { CourseAsset, AssetType } from "../../types/course-assets";
 import { getCourseSections } from "../../services/api/modules";
 import { sanitizeHtml } from "../../utils/htmlSanitizer";
 import posthog from "posthog-js";
-import { AssetType } from "../../types/course-assets";
 
 // Helper function to format file size
 const formatFileSize = (bytes: number): string => {
@@ -28,11 +27,13 @@ const formatFileSize = (bytes: number): string => {
 // Helper function to get file icon color based on AssetType
 const getAssetTypeColor = (type: AssetType): string => {
   const colors: Record<AssetType, string> = {
-    [AssetType.VIDEO]: "text-pink-500",
-    [AssetType.IMAGE]: "text-blue-500",
-    [AssetType.DOCUMENT]: "text-red-500",
-    [AssetType.AUDIO]: "text-purple-500",
-    [AssetType.OTHER]: "text-gray-500",
+    video: "text-pink-500",
+    image: "text-blue-500",
+    document: "text-red-500",
+    audio: "text-purple-500",
+    spreadsheet: "text-emerald-500",
+    presentation: "text-orange-500",
+    other: "text-gray-500",
   };
   return colors[type] || "text-gray-500";
 };

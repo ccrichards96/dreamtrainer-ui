@@ -12,12 +12,13 @@ export interface ApiError {
 }
 
 export interface APIResponseWithPagination<T = unknown> {
-  message: string
-  data: T
+  message: string;
+  data: T;
   pagination: {
-    total: number
-    page: number
-    limit: number
-  }
-  success: boolean
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  success: boolean;
 }

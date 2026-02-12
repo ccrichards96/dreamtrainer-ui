@@ -1,4 +1,5 @@
 import { User as Auth0User } from "@auth0/auth0-react";
+import { ExpertProfile } from "./modules";
 
 export enum Role {
   Admin = "admin",
@@ -16,6 +17,7 @@ interface User {
   onboardingComplete: boolean;
   avatarUrl: string | null;
   role: Role;
+  expertProfile: ExpertProfile | null;
   lastLoginAt: Date | null;
   createdAt: Date | null;
   updatedAt: Date | null;

@@ -92,7 +92,7 @@ function App() {
                         <Route
                           path="/expert/dashboard/:tab?"
                           element={
-                            <ProtectedRoute>
+                            <ProtectedRoute requireExpertProfile>
                               <ExpertDashboardProvider>
                                 <ExpertDashboard />
                               </ExpertDashboardProvider>
@@ -102,7 +102,7 @@ function App() {
                         <Route
                           path="/expert/dashboard/courses/:id/manage"
                           element={
-                            <ProtectedRoute>
+                            <ProtectedRoute requireExpertProfile>
                               <ExpertDashboardProvider>
                                 <CourseManage />
                               </ExpertDashboardProvider>
