@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Loader2, BookOpen, DollarSign, ArrowRight, CheckCircle } from "lucide-react";
+import { Loader2, BookOpen, ArrowRight, CheckCircle, Target, ListChecks, Users } from "lucide-react";
 import { isEnrolledInCourse } from "../../services/api/enrollment";
 import { useCheckoutContext } from "../../contexts";
 import ExpertProfileCard from "../../components/ExpertProfileCard";
@@ -136,6 +136,67 @@ export default function CourseProfilePage() {
                 )}
               </div>
             </div>
+
+            {/* Course Plan Details */}
+            {(course.learningObjectives?.length || course.prerequisites?.length || course.targetAudiences?.length) && (
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="grid md:grid-cols-3 gap-6">
+                  {/* Learning Objectives */}
+                  {course.learningObjectives && course.learningObjectives.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Target className="size-5 text-purple-600" />
+                        <h3 className="text-sm font-bold text-gray-900">What You'll Learn</h3>
+                      </div>
+                      <ul className="space-y-2">
+                        {course.learningObjectives.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                            <CheckCircle className="size-4 text-green-500 mt-0.5 shrink-0" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Prerequisites */}
+                  {course.prerequisites && course.prerequisites.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <ListChecks className="size-5 text-purple-600" />
+                        <h3 className="text-sm font-bold text-gray-900">Prerequisites</h3>
+                      </div>
+                      <ul className="space-y-2">
+                        {course.prerequisites.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                            <span className="text-gray-400">•</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Target Audience */}
+                  {course.targetAudiences && course.targetAudiences.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Users className="size-5 text-purple-600" />
+                        <h3 className="text-sm font-bold text-gray-900">Who This Is For</h3>
+                      </div>
+                      <ul className="space-y-2">
+                        {course.targetAudiences.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                            <span className="text-gray-400 mr-1">•</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Expert Profile Card */}
             {course.expertProfile && <ExpertProfileCard expertProfile={course.expertProfile} />}
