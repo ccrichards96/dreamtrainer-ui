@@ -12,6 +12,7 @@ import {
   Plus,
   Table2,
   Presentation,
+  Edit3,
 } from "lucide-react";
 import { CourseAsset, AssetType, AssetStatus, AssetPagination } from "../../../types/course-assets";
 import { courseAssetsService } from "../../../services/api/course-assets";
@@ -84,6 +85,7 @@ export default function Resources() {
     totalPages: 0,
   });
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<CourseAsset | null>(null);
 
   const fetchAssets = useCallback(async () => {
     if (!courseId) return;
@@ -177,12 +179,15 @@ export default function Resources() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Uploaded
                 </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {assets.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                     No resources uploaded yet.
                   </td>
                 </tr>
@@ -224,6 +229,16 @@ export default function Resources() {
                     <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(asset.status)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-600">{formatDate(asset.createdAt)}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <button
+                        type="button"
+                        onClick={() => setEditingAsset(asset)}
+                        className="p-2 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50"
+                        title="Edit resource"
+                      >
+                        <Edit3 className="size-4" />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -270,6 +285,15 @@ export default function Resources() {
         onClose={() => setShowUploadModal(false)}
         courseId={courseId || ""}
         onUploadComplete={handleUploadComplete}
+      />
+
+      {/* Edit Modal */}
+      <UploadResourceModal
+        isOpen={!!editingAsset}
+        onClose={() => setEditingAsset(null)}
+        courseId={courseId || ""}
+        onUploadComplete={fetchAssets}
+        asset={editingAsset}
       />
     </>
   );

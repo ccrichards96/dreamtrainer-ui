@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
-import { Upload, X } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Upload, X, Trash2 } from "lucide-react";
 import Modal from "../../../components/modals/Modal";
-import { AssetVisibility } from "../../../types/course-assets";
+import { AssetVisibility, CourseAsset } from "../../../types/course-assets";
 import { courseAssetsService } from "../../../services/api/course-assets";
 
 interface UploadResourceModalProps {
@@ -9,6 +9,7 @@ interface UploadResourceModalProps {
   onClose: () => void;
   courseId: string;
   onUploadComplete: () => void;
+  asset?: CourseAsset | null;
 }
 
 export default function UploadResourceModal({
@@ -16,14 +17,26 @@ export default function UploadResourceModal({
   onClose,
   courseId,
   onUploadComplete,
+  asset,
 }: UploadResourceModalProps) {
+  const isEditMode = !!asset;
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [visibility, setVisibility] = useState<AssetVisibility>("enrolled_only");
   const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen && asset) {
+      setName(asset.name);
+      setDescription(asset.description || "");
+      setVisibility(asset.visibility);
+    }
+  }, [isOpen, asset]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -39,12 +52,30 @@ export default function UploadResourceModal({
     e.preventDefault();
     setError(null);
 
+    if (isEditMode) {
+      setIsSaving(true);
+      try {
+        await courseAssetsService.updateAsset(courseId, asset.id, {
+          name: name.trim() || undefined,
+          description: description.trim() || undefined,
+          visibility,
+        });
+        handleClose();
+        onUploadComplete();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to update resource.");
+      } finally {
+        setIsSaving(false);
+      }
+      return;
+    }
+
     if (!file) {
       setError("Please select a file to upload.");
       return;
     }
 
-    setIsUploading(true);
+    setIsSaving(true);
     try {
       await courseAssetsService.uploadAsset(courseId, {
         file,
@@ -57,7 +88,23 @@ export default function UploadResourceModal({
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to upload resource.");
     } finally {
-      setIsUploading(false);
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!asset || !confirm(`Are you sure you want to delete "${asset.name}"?`)) return;
+
+    setIsDeleting(true);
+    setError(null);
+    try {
+      await courseAssetsService.deleteAsset(courseId, asset.id);
+      handleClose();
+      onUploadComplete();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete resource.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -78,7 +125,12 @@ export default function UploadResourceModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Add New Resource" size="lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isEditMode ? "Edit Resource" : "Add New Resource"}
+      size="lg"
+    >
       <form onSubmit={handleSubmit} className="space-y-5 p-6">
         {error && (
           <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600">
@@ -86,40 +138,42 @@ export default function UploadResourceModal({
           </div>
         )}
 
-        {/* File Upload */}
-        <div>
-          <label className="block text-sm font-medium text-gray-900">File</label>
-          <div className="mt-1.5">
-            {file ? (
-              <div className="flex items-center justify-between p-3 rounded-lg border border-gray-300 bg-gray-50">
-                <div className="flex items-center gap-3 min-w-0">
-                  <Upload className="size-5 text-gray-400 shrink-0" />
-                  <span className="text-sm text-gray-900 truncate">{file.name}</span>
-                  <span className="text-xs text-gray-500 shrink-0">
-                    ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                  </span>
+        {/* File Upload - only shown in create mode */}
+        {!isEditMode && (
+          <div>
+            <label className="block text-sm font-medium text-gray-900">File</label>
+            <div className="mt-1.5">
+              {file ? (
+                <div className="flex items-center justify-between p-3 rounded-lg border border-gray-300 bg-gray-50">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Upload className="size-5 text-gray-400 shrink-0" />
+                    <span className="text-sm text-gray-900 truncate">{file.name}</span>
+                    <span className="text-xs text-gray-500 shrink-0">
+                      ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="p-1 text-gray-400 hover:text-red-500"
+                  >
+                    <X className="size-4" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleRemoveFile}
-                  className="p-1 text-gray-400 hover:text-red-500"
+              ) : (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-purple-400 hover:bg-purple-50/50 transition-colors"
                 >
-                  <X className="size-4" />
-                </button>
-              </div>
-            ) : (
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-purple-400 hover:bg-purple-50/50 transition-colors"
-              >
-                <Upload className="size-8 text-gray-400 mb-2" />
-                <p className="text-sm text-gray-600">Click to select a file</p>
-                <p className="text-xs text-gray-400 mt-1">or drag and drop</p>
-              </div>
-            )}
-            <input ref={fileInputRef} type="file" onChange={handleFileChange} className="hidden" />
+                  <Upload className="size-8 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600">Click to select a file</p>
+                  <p className="text-xs text-gray-400 mt-1">or drag and drop</p>
+                </div>
+              )}
+              <input ref={fileInputRef} type="file" onChange={handleFileChange} className="hidden" />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Name Field */}
         <div>
@@ -131,7 +185,7 @@ export default function UploadResourceModal({
             id="resource-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Defaults to filename if left blank"
+            placeholder={isEditMode ? "Resource name" : "Defaults to filename if left blank"}
             className="mt-1.5 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500"
           />
         </div>
@@ -169,22 +223,43 @@ export default function UploadResourceModal({
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            onClick={handleClose}
-            disabled={isUploading}
-            className="py-2.5 px-4 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isUploading || !file}
-            className="py-2.5 px-5 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isUploading ? "Uploading..." : "Upload"}
-          </button>
+        <div className="flex items-center justify-between pt-2">
+          {isEditMode ? (
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isSaving || isDeleting}
+              className="inline-flex items-center gap-1.5 text-sm text-red-600 hover:text-red-800 disabled:opacity-50"
+            >
+              <Trash2 className="size-4" />
+              {isDeleting ? "Deleting..." : "Delete"}
+            </button>
+          ) : (
+            <div />
+          )}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={isSaving || isDeleting}
+              className="py-2.5 px-4 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSaving || isDeleting || (!isEditMode && !file)}
+              className="py-2.5 px-5 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving
+                ? isEditMode
+                  ? "Saving..."
+                  : "Uploading..."
+                : isEditMode
+                  ? "Save Changes"
+                  : "Upload"}
+            </button>
+          </div>
         </div>
       </form>
     </Modal>
