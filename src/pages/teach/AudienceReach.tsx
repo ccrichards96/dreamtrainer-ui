@@ -87,12 +87,8 @@ export default function AudienceReach({
         <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Users className="w-8 h-8 text-purple-600" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Your Audience & Reach
-        </h2>
-        <p className="text-lg text-gray-600">
-          Tell us about your existing audience
-        </p>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Audience & Reach</h2>
+        <p className="text-lg text-gray-600">Tell us about your existing audience</p>
       </div>
 
       {/* Question 1: Audience Size */}
@@ -122,11 +118,7 @@ export default function AudienceReach({
                     >
                       {option.label}
                     </h4>
-                    <p
-                      className={`text-sm ${
-                        isSelected ? "text-purple-700" : "text-gray-600"
-                      }`}
-                    >
+                    <p className={`text-sm ${isSelected ? "text-purple-700" : "text-gray-600"}`}>
                       {option.description}
                     </p>
                   </div>
@@ -146,9 +138,7 @@ export default function AudienceReach({
 
       {/* Question 2: Platforms (optional) */}
       <div className="max-w-2xl mx-auto mb-8">
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          Where is your audience?
-        </h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">Where is your audience?</h3>
         <p className="text-sm text-gray-500 mb-4">Optional — select all that apply</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {platformOptions.map((option) => {

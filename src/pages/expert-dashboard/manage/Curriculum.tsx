@@ -47,7 +47,5 @@ export default function Curriculum() {
     );
   }
 
-  return (
-    <SectionManager course={course} onManageModules={handleManageModules} />
-  );
+  return <SectionManager course={course} onManageModules={handleManageModules} />;
 }

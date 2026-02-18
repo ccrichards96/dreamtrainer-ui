@@ -121,8 +121,7 @@ export default function CheckoutSuccess() {
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Payment Successful!</h1>
 
         <p className="text-gray-600 mb-8">
-          Your subscription has been activated and you're ready to
-          start your learning journey.
+          Your subscription has been activated and you're ready to start your learning journey.
         </p>
 
         {updateError && (

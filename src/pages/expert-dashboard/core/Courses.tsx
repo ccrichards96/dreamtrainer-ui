@@ -7,7 +7,10 @@ import { CourseStatus } from "../../../types/modules";
 
 const statusConfig: Record<CourseStatus, { label: string; className: string }> = {
   [CourseStatus.DRAFT]: { label: "Draft", className: "bg-gray-100 text-gray-700" },
-  [CourseStatus.PENDING_REVIEW]: { label: "Pending Review", className: "bg-yellow-100 text-yellow-700" },
+  [CourseStatus.PENDING_REVIEW]: {
+    label: "Pending Review",
+    className: "bg-yellow-100 text-yellow-700",
+  },
   [CourseStatus.PUBLISHED]: { label: "Published", className: "bg-green-100 text-green-700" },
   [CourseStatus.ARCHIVED]: { label: "Archived", className: "bg-red-100 text-red-700" },
 };
@@ -19,7 +22,11 @@ export default function Courses() {
 
   const assignedCourses = expertProfile?.assignedCourses ?? [];
 
-  const handleCreateCourse = async (data: { title: string; description: string; category: string }) => {
+  const handleCreateCourse = async (data: {
+    title: string;
+    description: string;
+    category: string;
+  }) => {
     // Simulate API call to create course in Draft status
     await new Promise((resolve) => setTimeout(resolve, 1500));
     const newCourseId = crypto.randomUUID();
@@ -104,7 +111,8 @@ export default function Courses() {
                 Teach Your Next Cohort with Dream Trainer
               </h2>
               <p className="mt-1 text-sm text-gray-600">
-                Share your expertise with the world. Create your first course and start making an impact.
+                Share your expertise with the world. Create your first course and start making an
+                impact.
               </p>
             </div>
             <button
@@ -127,27 +135,41 @@ export default function Courses() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-800">Get Started As An Expert</h2>
-              <p className="mt-0.5 text-sm text-gray-600">We've put together insightful resources for new experts.</p>
+              <p className="mt-0.5 text-sm text-gray-600">
+                We've put together insightful resources for new experts.
+              </p>
             </div>
           </div>
           <ul className="mt-4 space-y-3">
             <li>
-              <a href="#" className="text-sm text-purple-600 hover:text-purple-800 hover:underline font-medium">
+              <a
+                href="#"
+                className="text-sm text-purple-600 hover:text-purple-800 hover:underline font-medium"
+              >
                 How to Create Your First Engaging Course
               </a>
             </li>
             <li>
-              <a href="#" className="text-sm text-purple-600 hover:text-purple-800 hover:underline font-medium">
+              <a
+                href="#"
+                className="text-sm text-purple-600 hover:text-purple-800 hover:underline font-medium"
+              >
                 Best Practices for Structuring Your Content
               </a>
             </li>
             <li>
-              <a href="#" className="text-sm text-purple-600 hover:text-purple-800 hover:underline font-medium">
+              <a
+                href="#"
+                className="text-sm text-purple-600 hover:text-purple-800 hover:underline font-medium"
+              >
                 Tips for Marketing Your Course
               </a>
             </li>
             <li>
-              <a href="#" className="text-sm text-purple-600 hover:text-purple-800 hover:underline font-medium">
+              <a
+                href="#"
+                className="text-sm text-purple-600 hover:text-purple-800 hover:underline font-medium"
+              >
                 Activate Your Course Marketing Engine with Webinars & Video
               </a>
             </li>

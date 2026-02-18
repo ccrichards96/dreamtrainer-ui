@@ -161,102 +161,107 @@ export default function Resources() {
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Type
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Size
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Uploaded
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {assets.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                  No resources uploaded yet.
-                </td>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Type
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Size
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Uploaded
+                </th>
               </tr>
-            ) : (
-              assets.map((asset) => (
-                <tr key={asset.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      {getAssetIcon(asset.type)}
-                      <div>
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            if (!courseId) return;
-                            const { downloadUrl } = await courseAssetsService.getDownloadUrl(courseId, asset.id);
-                            window.open(downloadUrl, "_blank", "noopener,noreferrer");
-                          }}
-                          className="text-sm font-medium text-purple-600 hover:text-purple-800 hover:underline text-left"
-                        >
-                          {asset.name}
-                        </button>
-                        {asset.description && (
-                          <p className="text-xs text-gray-500">{asset.description}</p>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-600 capitalize">{asset.type}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-600">{formatFileSize(asset.fileSize)}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(asset.status)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-600">{formatDate(asset.createdAt)}</span>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {assets.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    No resources uploaded yet.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      {pagination.total > 0 && (
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <p className="text-sm text-gray-600">
-            Showing {(page - 1) * pagination.limit + 1} to{" "}
-            {Math.min(page * pagination.limit, pagination.total)} of {pagination.total} resources
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="size-4" />
-            </button>
-            <span className="text-sm text-gray-600">
-              Page {page} of {pagination.totalPages || 1}
-            </span>
-            <button
-              type="button"
-              onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
-              disabled={page >= pagination.totalPages}
-              className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="size-4" />
-            </button>
-          </div>
+              ) : (
+                assets.map((asset) => (
+                  <tr key={asset.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        {getAssetIcon(asset.type)}
+                        <div>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!courseId) return;
+                              const { downloadUrl } = await courseAssetsService.getDownloadUrl(
+                                courseId,
+                                asset.id
+                              );
+                              window.open(downloadUrl, "_blank", "noopener,noreferrer");
+                            }}
+                            className="text-sm font-medium text-purple-600 hover:text-purple-800 hover:underline text-left"
+                          >
+                            {asset.name}
+                          </button>
+                          {asset.description && (
+                            <p className="text-xs text-gray-500">{asset.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-600 capitalize">{asset.type}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-600">
+                        {formatFileSize(asset.fileSize)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(asset.status)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-600">{formatDate(asset.createdAt)}</span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+
+        {/* Pagination */}
+        {pagination.total > 0 && (
+          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <p className="text-sm text-gray-600">
+              Showing {(page - 1) * pagination.limit + 1} to{" "}
+              {Math.min(page * pagination.limit, pagination.total)} of {pagination.total} resources
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <span className="text-sm text-gray-600">
+                Page {page} of {pagination.totalPages || 1}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                disabled={page >= pagination.totalPages}
+                className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Upload Modal */}

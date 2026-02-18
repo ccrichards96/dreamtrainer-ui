@@ -1,13 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  Plus,
-  X,
-  Save,
-  AlertCircle,
-  Users,
-  Search,
-} from "lucide-react";
+import { Plus, X, Save, AlertCircle, Users, Search } from "lucide-react";
 import { User } from "../../types/user";
 import { AdminCreateUser } from "../../types/user";
 import { getAllUsers, createAdminUser } from "../../services/api/admin";
@@ -54,9 +47,7 @@ const UsersManager: React.FC = () => {
     fetchUsers();
   }, []);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -140,9 +131,7 @@ const UsersManager: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Manage Users</h3>
-              <p className="text-sm text-gray-500">
-                Create and manage platform users
-              </p>
+              <p className="text-sm text-gray-500">Create and manage platform users</p>
             </div>
             <button
               onClick={handleAddUser}
@@ -159,9 +148,7 @@ const UsersManager: React.FC = () => {
           <div className="flex items-center gap-3">
             <Users className="w-5 h-5 text-gray-400" />
             <div>
-              <p className="text-sm font-medium text-gray-900">
-                Total Users: {users.length}
-              </p>
+              <p className="text-sm font-medium text-gray-900">Total Users: {users.length}</p>
               <p className="text-sm text-gray-500">Registered platform users</p>
             </div>
           </div>
@@ -185,9 +172,7 @@ const UsersManager: React.FC = () => {
         >
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h4 className="text-lg font-medium text-gray-900">
-                Add New User
-              </h4>
+              <h4 className="text-lg font-medium text-gray-900">Add New User</h4>
               <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
@@ -312,9 +297,7 @@ const UsersManager: React.FC = () => {
       {/* Users List */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h4 className="text-lg font-medium text-gray-900">
-            Users ({filteredUsers.length})
-          </h4>
+          <h4 className="text-lg font-medium text-gray-900">Users ({filteredUsers.length})</h4>
         </div>
 
         {filteredUsers.length === 0 ? (
@@ -334,13 +317,20 @@ const UsersManager: React.FC = () => {
                   <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Name</th>
                   <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Email</th>
                   <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Role</th>
-                  <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Created</th>
-                  <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Status</th>
+                  <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
+                    Created
+                  </th>
+                  <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={user.id}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium">
@@ -361,9 +351,7 @@ const UsersManager: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-4 px-6 text-sm text-gray-500">
-                      {user.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString()
-                        : "—"}
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—"}
                     </td>
                     <td className="py-4 px-6">
                       <span

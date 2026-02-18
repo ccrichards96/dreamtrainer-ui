@@ -1,4 +1,11 @@
-export type AssetType = "document" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "other";
+export type AssetType =
+  | "document"
+  | "image"
+  | "video"
+  | "audio"
+  | "spreadsheet"
+  | "presentation"
+  | "other";
 
 export type AssetStatus = "pending" | "processing" | "ready" | "failed";
 

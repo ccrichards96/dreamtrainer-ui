@@ -1,10 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  BookOpen,
-  MessageSquare,
-  BarChart3,
-  HelpCircle,
-} from "lucide-react";
+import { BookOpen, MessageSquare, BarChart3, HelpCircle } from "lucide-react";
 import DashboardLayout, { type SidebarItem } from "./DashboardLayout";
 import Courses from "./core/Courses";
 import Communications from "./core/Communications";

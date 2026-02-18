@@ -25,14 +25,13 @@ export default function Pricing() {
             Set a Course Price
           </label>
           <p className="mt-1 text-sm text-gray-500">
-            Set the price for your course in USD. You can update this later if needed. (Minimum $5.00)
+            Set the price for your course in USD. You can update this later if needed. (Minimum
+            $5.00)
           </p>
         </div>
 
         <div className="relative max-w-xs">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500">
-            $
-          </span>
+          <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500">$</span>
           <input
             type="number"
             id="price"
@@ -46,12 +45,12 @@ export default function Pricing() {
           />
         </div>
         <button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="py-2.5 px-5 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-            {isSaving ? "Saving..." : "Save Price"}
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="py-2.5 px-5 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSaving ? "Saving..." : "Save Price"}
         </button>
       </div>
     </div>

@@ -54,7 +54,8 @@ export default function Stakeholders() {
     } catch (err) {
       setInviteResult({
         success: false,
-        message: err instanceof Error ? err.message : "Failed to send invitations. Please try again.",
+        message:
+          err instanceof Error ? err.message : "Failed to send invitations. Please try again.",
       });
     } finally {
       setIsInviting(false);
@@ -70,13 +71,17 @@ export default function Stakeholders() {
           <div>
             <h3 className="text-sm font-bold text-gray-900">Invite Stakeholders</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Enter email addresses to invite stakeholders who need to be connected to course performance.
+              Enter email addresses to invite stakeholders who need to be connected to course
+              performance.
             </p>
           </div>
 
           {/* Stakeholder Role */}
           <div>
-            <label htmlFor="stakeholder-role" className="block text-sm font-medium text-gray-900 mb-1.5">
+            <label
+              htmlFor="stakeholder-role"
+              className="block text-sm font-medium text-gray-900 mb-1.5"
+            >
               Role
             </label>
             <select

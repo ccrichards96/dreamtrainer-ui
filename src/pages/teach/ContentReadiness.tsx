@@ -88,12 +88,8 @@ export default function ContentReadiness({
         <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <FileText className="w-8 h-8 text-purple-600" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Content & Video
-        </h2>
-        <p className="text-lg text-gray-600">
-          Tell us about your content and video experience
-        </p>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">Content & Video</h2>
+        <p className="text-lg text-gray-600">Tell us about your content and video experience</p>
       </div>
 
       {/* Question 1: Content Readiness */}
@@ -123,11 +119,7 @@ export default function ContentReadiness({
                     >
                       {option.label}
                     </h4>
-                    <p
-                      className={`text-sm ${
-                        isSelected ? "text-purple-700" : "text-gray-600"
-                      }`}
-                    >
+                    <p className={`text-sm ${isSelected ? "text-purple-700" : "text-gray-600"}`}>
                       {option.description}
                     </p>
                   </div>
@@ -172,11 +164,7 @@ export default function ContentReadiness({
                     >
                       {option.label}
                     </h4>
-                    <p
-                      className={`text-sm ${
-                        isSelected ? "text-purple-700" : "text-gray-600"
-                      }`}
-                    >
+                    <p className={`text-sm ${isSelected ? "text-purple-700" : "text-gray-600"}`}>
                       {option.description}
                     </p>
                   </div>

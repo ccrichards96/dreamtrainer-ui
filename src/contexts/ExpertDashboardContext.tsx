@@ -100,7 +100,8 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
 
   const [course, setCourse] = useState<Course | null>(null);
   const [isLoadingCourse, setIsLoadingCourse] = useState(false);
-  const [courseManageData, setCourseManageData] = useState<CourseManageData>(initialCourseManageData);
+  const [courseManageData, setCourseManageData] =
+    useState<CourseManageData>(initialCourseManageData);
   const [isSaving] = useState(false);
 
   const loadCourse = useCallback(async (courseId: string) => {
@@ -117,7 +118,10 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
       setCourseManageData((prev) => ({
         ...prev,
         coursePlan: {
-          learningObjectives: objectives.length >= 3 ? objectives : [...objectives, ...Array(3 - objectives.length).fill("")],
+          learningObjectives:
+            objectives.length >= 3
+              ? objectives
+              : [...objectives, ...Array(3 - objectives.length).fill("")],
           prerequisites: prereqs.length >= 1 ? prereqs : [""],
           targetAudience: audience.length >= 1 ? audience : [""],
         },
@@ -170,7 +174,7 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
       ...prev,
       announcements,
     }));
-  }, []);   
+  }, []);
 
   const resetCourseManageData = useCallback(() => {
     setCourseManageData(initialCourseManageData);
@@ -193,8 +197,6 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
   };
 
   return (
-    <ExpertDashboardContext.Provider value={value}>
-      {children}
-    </ExpertDashboardContext.Provider>
+    <ExpertDashboardContext.Provider value={value}>{children}</ExpertDashboardContext.Provider>
   );
 };

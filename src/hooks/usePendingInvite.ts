@@ -1,10 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
-import {
-  acceptSupportExpertInvite,
-  acceptStakeholderInvite,
-} from "../services/api/course-invites";
+import { acceptSupportExpertInvite, acceptStakeholderInvite } from "../services/api/course-invites";
 
 /**
  * Checks sessionStorage for a pending invite after auth redirect

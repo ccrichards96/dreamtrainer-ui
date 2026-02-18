@@ -111,20 +111,14 @@ export default function TeachingExperience({
                   >
                     {option.label}
                   </h3>
-                  <p
-                    className={`text-sm ${
-                      isSelected ? "text-purple-700" : "text-gray-600"
-                    }`}
-                  >
+                  <p className={`text-sm ${isSelected ? "text-purple-700" : "text-gray-600"}`}>
                     {option.description}
                   </p>
                 </div>
 
                 <div
                   className={`w-5 h-5 rounded border-2 flex items-center justify-center mt-1 ${
-                    isSelected
-                      ? "border-purple-500 bg-purple-500"
-                      : "border-gray-300"
+                    isSelected ? "border-purple-500 bg-purple-500" : "border-gray-300"
                   }`}
                 >
                   {isSelected && <Check className="w-3 h-3 text-white" />}

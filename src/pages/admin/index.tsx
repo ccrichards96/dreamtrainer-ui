@@ -40,7 +40,12 @@ const AdminDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [reorderingCourseId, setReorderingCourseId] = useState<string | null>(null);
   const [view, setView] = useState<
-    "overview" | "course-edit" | "section-manage" | "module-manage" | "announcement-manage" | "user-manage"
+    | "overview"
+    | "course-edit"
+    | "section-manage"
+    | "module-manage"
+    | "announcement-manage"
+    | "user-manage"
   >("overview");
 
   // Inline form states for new course

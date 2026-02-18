@@ -138,9 +138,7 @@ function StarRating({ rating }: { rating: number }) {
         <Star
           key={star}
           className={`w-4 h-4 ${
-            star <= rating
-              ? "text-yellow-400 fill-yellow-400"
-              : "text-gray-300"
+            star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
           }`}
         />
       ))}
@@ -194,9 +192,7 @@ function ReviewCard({ review }: { review: ExpertReview }) {
       </div>
 
       {/* Review Comment */}
-      {review.comment && (
-        <p className="text-gray-700 leading-relaxed">{review.comment}</p>
-      )}
+      {review.comment && <p className="text-gray-700 leading-relaxed">{review.comment}</p>}
 
       {/* Instructor Reply */}
       {review.commentReply && (
@@ -363,16 +359,17 @@ export default function ExpertProfilePage() {
         {reviews.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">
-                Student Reviews
-              </h2>
+              <h2 className="text-xl font-bold text-gray-900">Student Reviews</h2>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                 <span>
-                  {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)} average
+                  {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)}{" "}
+                  average
                 </span>
                 <span className="text-gray-400">·</span>
-                <span>{reviews.length} review{reviews.length !== 1 ? "s" : ""}</span>
+                <span>
+                  {reviews.length} review{reviews.length !== 1 ? "s" : ""}
+                </span>
               </div>
             </div>
             <div className="space-y-4">

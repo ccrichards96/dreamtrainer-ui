@@ -26,9 +26,10 @@ export default function Performance() {
               key={tab.id}
               onClick={() => setActiveSubTab(tab.id)}
               className={`whitespace-nowrap border-b-2 py-3 px-1 text-sm font-medium transition
-                ${activeSubTab === tab.id
-                  ? "border-purple-600 text-purple-600"
-                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                ${
+                  activeSubTab === tab.id
+                    ? "border-purple-600 text-purple-600"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
                 }`}
             >
               {tab.label}

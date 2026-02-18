@@ -95,11 +95,12 @@ export const getDownloadUrl = async (
   expiresIn?: number
 ): Promise<{ downloadUrl: string; expiresIn: number }> => {
   try {
-    const response = await apiClient.get<
-      APIResponse<{ downloadUrl: string; expiresIn: number }>
-    >(`/courses/${courseId}/assets/${assetId}/download`, {
-      params: expiresIn ? { expiresIn } : undefined,
-    });
+    const response = await apiClient.get<APIResponse<{ downloadUrl: string; expiresIn: number }>>(
+      `/courses/${courseId}/assets/${assetId}/download`,
+      {
+        params: expiresIn ? { expiresIn } : undefined,
+      }
+    );
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {

@@ -56,12 +56,10 @@ export default function FinalDetails({
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Application Submitted!
-          </h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Application Submitted!</h2>
           <p className="text-lg text-gray-600 max-w-md mx-auto mb-6">
-            Thank you for your interest in teaching on DreamTrainer. We'll review your
-            application and get back to you soon.
+            Thank you for your interest in teaching on DreamTrainer. We'll review your application
+            and get back to you soon.
           </p>
           <a
             href="/dashboard"
@@ -90,9 +88,7 @@ export default function FinalDetails({
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
           Almost there! Tell us about yourself
         </h2>
-        <p className="text-lg text-gray-600">
-          Final details to complete your application
-        </p>
+        <p className="text-lg text-gray-600">Final details to complete your application</p>
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
@@ -172,7 +168,9 @@ export default function FinalDetails({
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
             placeholder="Tell us about your expertise, what you'd like to teach, and why you want to join DreamTrainer..."
           />
-          <p className={`text-sm mt-1 ${bio.trim().length >= 50 ? "text-green-600" : "text-gray-500"}`}>
+          <p
+            className={`text-sm mt-1 ${bio.trim().length >= 50 ? "text-green-600" : "text-gray-500"}`}
+          >
             {bio.trim().length}/50 characters minimum
           </p>
         </div>

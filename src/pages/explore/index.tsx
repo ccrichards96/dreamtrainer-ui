@@ -52,10 +52,7 @@ const ExploreCoursesContent = () => {
 
   // Create a Set of enrolled course IDs for filtering
   const enrolledCourseIds = useMemo(
-    () =>
-      new Set(
-        enrollments.filter((e) => e.courseId && !e.deletedAt).map((e) => e.courseId)
-      ),
+    () => new Set(enrollments.filter((e) => e.courseId && !e.deletedAt).map((e) => e.courseId)),
     [enrollments]
   );
 
@@ -144,7 +141,7 @@ const ExploreCoursesContent = () => {
         {/* Tabs */}
         <div className="mb-6">
           <div className="flex space-x-1 bg-white/50 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-gray-200">
-           <button
+            <button
               onClick={() => setActiveTab("explore")}
               className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
                 activeTab === "explore"

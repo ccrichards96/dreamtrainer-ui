@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Loader2, BookOpen, ArrowRight, CheckCircle, Target, ListChecks, Users } from "lucide-react";
+import {
+  Loader2,
+  BookOpen,
+  ArrowRight,
+  CheckCircle,
+  Target,
+  ListChecks,
+  Users,
+} from "lucide-react";
 import { isEnrolledInCourse } from "../../services/api/enrollment";
 import { useCheckoutContext } from "../../contexts";
 import ExpertProfileCard from "../../components/ExpertProfileCard";
@@ -138,7 +146,9 @@ export default function CourseProfilePage() {
             </div>
 
             {/* Course Plan Details */}
-            {(course.learningObjectives?.length || course.prerequisites?.length || course.targetAudiences?.length) && (
+            {(course.learningObjectives?.length ||
+              course.prerequisites?.length ||
+              course.targetAudiences?.length) && (
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <div className="grid md:grid-cols-3 gap-6">
                   {/* Learning Objectives */}

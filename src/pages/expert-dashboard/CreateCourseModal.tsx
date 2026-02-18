@@ -11,11 +11,7 @@ interface CourseFormData {
 interface WizardStep {
   id: string;
   label: string;
-  render: (
-    value: string,
-    onChange: (value: string) => void,
-    error?: string
-  ) => React.ReactNode;
+  render: (value: string, onChange: (value: string) => void, error?: string) => React.ReactNode;
   validate: (value: string) => string | null;
 }
 
@@ -68,7 +64,10 @@ const steps: WizardStep[] = [
       value.trim().length < 10 ? "Description must be at least 10 characters." : null,
     render: (value, onChange, error) => (
       <div>
-        <label htmlFor="course-description" className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          htmlFor="course-description"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
           Describe what students will learn
         </label>
         <textarea
@@ -125,7 +124,11 @@ const steps: WizardStep[] = [
 
 export default function CreateCourseModal({ isOpen, onClose, onSubmit }: CreateCourseModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<CourseFormData>({ title: "", description: "", category: "" });
+  const [formData, setFormData] = useState<CourseFormData>({
+    title: "",
+    description: "",
+    category: "",
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -203,9 +206,7 @@ export default function CreateCourseModal({ isOpen, onClose, onSubmit }: CreateC
               >
                 {s.label}
               </span>
-              {i < steps.length - 1 && (
-                <ChevronRight className="size-4 text-gray-300 mx-1" />
-              )}
+              {i < steps.length - 1 && <ChevronRight className="size-4 text-gray-300 mx-1" />}
             </div>
           ))}
         </div>

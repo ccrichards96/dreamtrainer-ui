@@ -53,7 +53,8 @@ export default function Expert() {
     } catch (err) {
       setInviteResult({
         success: false,
-        message: err instanceof Error ? err.message : "Failed to send invitations. Please try again.",
+        message:
+          err instanceof Error ? err.message : "Failed to send invitations. Please try again.",
       });
     } finally {
       setIsInviting(false);

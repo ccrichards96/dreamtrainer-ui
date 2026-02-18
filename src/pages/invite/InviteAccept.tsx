@@ -28,10 +28,7 @@ export default function InviteAccept() {
     }
 
     // Store invite details for post-auth pickup
-    sessionStorage.setItem(
-      "pendingInvite",
-      JSON.stringify({ token, course, role })
-    );
+    sessionStorage.setItem("pendingInvite", JSON.stringify({ token, course, role }));
 
     if (isLoading) return;
 
@@ -67,9 +64,7 @@ export default function InviteAccept() {
     } catch (err) {
       setStatus("error");
       setErrorMessage(
-        err instanceof Error
-          ? err.message
-          : "This invitation has expired or was already used."
+        err instanceof Error ? err.message : "This invitation has expired or was already used."
       );
     }
   };

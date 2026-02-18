@@ -70,9 +70,7 @@ export default function CourseStudents() {
             </button>
           </div>
         ) : students.length === 0 ? (
-          <div className="p-6 text-center text-sm text-gray-500">
-            No students enrolled yet.
-          </div>
+          <div className="p-6 text-center text-sm text-gray-500">No students enrolled yet.</div>
         ) : (
           <>
             <div className="overflow-x-auto">

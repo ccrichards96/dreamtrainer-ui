@@ -81,13 +81,15 @@ export default function PricingSelection({
         if (courseSlug) {
           const product = await getProductBySlug(courseSlug);
           // Transform the product response to match ApiPlan structure
-          apiPlans = [{
-            id: product.priceId,
-            name: product.productName,
-            amount: product.amount,
-            priceId: product.priceId,
-            description: product.productDescription || '',
-          }];
+          apiPlans = [
+            {
+              id: product.priceId,
+              name: product.productName,
+              amount: product.amount,
+              priceId: product.priceId,
+              description: product.productDescription || "",
+            },
+          ];
         } else {
           apiPlans = await getAllProducts();
         }

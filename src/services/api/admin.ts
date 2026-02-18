@@ -22,14 +22,9 @@ export const getAllUsers = async (): Promise<User[]> => {
  * @param userData - The user data to create
  * @returns Promise<User> - The created user
  */
-export const createAdminUser = async (
-  userData: AdminCreateUser
-): Promise<User> => {
+export const createAdminUser = async (userData: AdminCreateUser): Promise<User> => {
   try {
-    const response = await apiClient.post<APIResponse<User>>(
-      "/admin/users",
-      userData
-    );
+    const response = await apiClient.post<APIResponse<User>>("/admin/users", userData);
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {

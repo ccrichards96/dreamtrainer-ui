@@ -64,7 +64,7 @@ const sidebarSections: SidebarSection[] = [
       { id: "resources", label: "Resources", icon: FileText },
     ],
   },
-    {
+  {
     id: "course-team",
     label: "Team & Collaboration",
     items: [
@@ -75,9 +75,7 @@ const sidebarSections: SidebarSection[] = [
   {
     id: "course-marketing",
     label: "Course Marketing",
-    items: [
-      { id: "affiliates", label: "Referral Link & Affiliates", icon: Group },
-    ],
+    items: [{ id: "affiliates", label: "Referral Link & Affiliates", icon: Group }],
   },
   {
     id: "course-management",

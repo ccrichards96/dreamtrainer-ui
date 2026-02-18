@@ -1,6 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { Plus, Send, Save, ChevronLeft, ChevronRight, AlertCircle, Pencil, Trash2 } from "lucide-react";
+import {
+  Plus,
+  Send,
+  Save,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { useExpertDashboardContext } from "../../../contexts";
 import {
   createCourseAnnouncement,
@@ -110,7 +119,9 @@ export default function CourseAnnouncements() {
       await fetchAnnouncements();
     } catch (err) {
       setFormError(
-        err instanceof Error ? err.message : `Failed to ${isEditing ? "update" : "create"} announcement`
+        err instanceof Error
+          ? err.message
+          : `Failed to ${isEditing ? "update" : "create"} announcement`
       );
     } finally {
       setIsSubmitting(false);
@@ -332,7 +343,9 @@ export default function CourseAnnouncements() {
               <select
                 id="ann-type"
                 value={formData.type}
-                onChange={(e) => setFormData((prev) => ({ ...prev, type: e.target.value as Announcement["type"] }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, type: e.target.value as Announcement["type"] }))
+                }
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
               >
                 <option value="general">General</option>
@@ -342,13 +355,21 @@ export default function CourseAnnouncements() {
             </div>
 
             <div className="flex-1">
-              <label htmlFor="ann-priority" className="block text-sm font-medium text-gray-900 mb-1.5">
+              <label
+                htmlFor="ann-priority"
+                className="block text-sm font-medium text-gray-900 mb-1.5"
+              >
                 Priority
               </label>
               <select
                 id="ann-priority"
                 value={formData.priority}
-                onChange={(e) => setFormData((prev) => ({ ...prev, priority: e.target.value as Announcement["priority"] }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    priority: e.target.value as Announcement["priority"],
+                  }))
+                }
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
               >
                 <option value="normal">Normal</option>

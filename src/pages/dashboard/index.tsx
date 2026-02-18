@@ -1,6 +1,17 @@
 import { motion } from "framer-motion";
 import { useAuth0 } from "@auth0/auth0-react";
-import { MessageSquare, RefreshCw, AlertCircle, Calendar, Play, Mail, FileText, Download, Youtube, ExternalLink } from "lucide-react";
+import {
+  MessageSquare,
+  RefreshCw,
+  AlertCircle,
+  Calendar,
+  Play,
+  Mail,
+  FileText,
+  Download,
+  Youtube,
+  ExternalLink,
+} from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDashboardContext, DashboardProvider } from "../../contexts";
@@ -47,14 +58,14 @@ function CourseResourcesSection({ courseId }: { courseId?: string }) {
   useEffect(() => {
     const fetchResources = async () => {
       if (!courseId) return;
-      
+
       try {
         setLoading(true);
         setError(null);
         // TODO: Replace with actual API call when endpoint is available
         // const data = await getCourseResources(courseId);
         // setResources(data);
-        
+
         // Placeholder: Empty array until API is connected
         setResources([]);
       } catch (err) {
@@ -108,15 +119,26 @@ function CourseResourcesSection({ courseId }: { courseId?: string }) {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Name</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Type</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Size</th>
-                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Action</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Name
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Type
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                      Size
+                    </th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {resources.map((resource) => (
-                    <tr key={resource.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <tr
+                      key={resource.id}
+                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                    >
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3">
                           <FileText className={`w-5 h-5 ${getAssetTypeColor(resource.type)}`} />
@@ -544,7 +566,9 @@ function DashboardContent() {
                         }`}
                       >
                         <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-semibold text-gray-900 text-sm">{announcement.name}</h3>
+                          <h3 className="font-semibold text-gray-900 text-sm">
+                            {announcement.name}
+                          </h3>
                           <span
                             className={`text-xs px-2 py-1 rounded-full ${
                               announcement.type === "general"
