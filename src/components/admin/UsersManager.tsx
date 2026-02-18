@@ -1,9 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Plus, X, Save, AlertCircle, Users, Search } from "lucide-react";
+import {
+  Plus,
+  X,
+  Save,
+  AlertCircle,
+  Users,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { User } from "../../types/user";
 import { AdminCreateUser } from "../../types/user";
-import { getAllUsers, createAdminUser } from "../../services/api/admin";
+import { getUsersPaginated, createAdminUser } from "../../services/api/admin";
+import UserDetailModal from "./UserDetailModal";
+
+const LIMIT = 10;
 
 const UsersManager: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -12,12 +24,28 @@ const UsersManager: React.FC = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    limit: LIMIT,
+    totalPages: 0,
+  });
+
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [formData, setFormData] = useState<AdminCreateUser>({
     firstName: "",
     lastName: "",
     email: "",
     userType: "student",
+  });
+
+  const [expertFields, setExpertFields] = useState({
+    displayName: "",
+    bio: "",
+    expertise: "",
+    calendarLink: "",
   });
 
   const resetForm = () => {
@@ -27,25 +55,40 @@ const UsersManager: React.FC = () => {
       email: "",
       userType: "student",
     });
+    setExpertFields({
+      displayName: "",
+      bio: "",
+      expertise: "",
+      calendarLink: "",
+    });
   };
 
-  // Load users on component mount
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setInitialLoading(true);
-        const userData = await getAllUsers();
-        setUsers(userData || []);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-        setError("Failed to load users");
-      } finally {
-        setInitialLoading(false);
-      }
-    };
+  const fetchUsers = useCallback(async () => {
+    try {
+      setInitialLoading(true);
+      const result = await getUsersPaginated({
+        page,
+        limit: LIMIT,
+        search: searchTerm || undefined,
+      });
+      setUsers(result.users || []);
+      setPagination(result.pagination);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setError("Failed to load users");
+    } finally {
+      setInitialLoading(false);
+    }
+  }, [page, searchTerm]);
 
+  useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -53,6 +96,13 @@ const UsersManager: React.FC = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleExpertFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setExpertFields((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAddUser = () => {
@@ -66,13 +116,24 @@ const UsersManager: React.FC = () => {
     setError(null);
 
     try {
-      const newUser = await createAdminUser(formData);
-
-      // Add to local state
-      setUsers((prev) => [newUser, ...prev]);
-
+      const payload: AdminCreateUser = { ...formData };
+      if (formData.userType === "expert") {
+        payload.expertProfile = {
+          displayName: expertFields.displayName,
+          bio: expertFields.bio || undefined,
+          expertise: expertFields.expertise
+            ? expertFields.expertise.split(",").map((s) => s.trim()).filter(Boolean)
+            : undefined,
+          calendarLink: expertFields.calendarLink || undefined,
+        };
+      }
+      await createAdminUser(payload);
       setShowAddForm(false);
       resetForm();
+      setPage(1);
+      if (page === 1) {
+        fetchUsers();
+      }
     } catch (err) {
       setError("Failed to create user. Please try again.");
       console.error("Error creating user:", err);
@@ -90,14 +151,8 @@ const UsersManager: React.FC = () => {
     formData.firstName.trim().length > 0 &&
     formData.lastName.trim().length > 0 &&
     formData.email.trim().length > 0 &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
-
-  const filteredUsers = users.filter(
-    (user) =>
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+    (formData.userType !== "expert" || expertFields.displayName.trim().length > 0);
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -108,7 +163,7 @@ const UsersManager: React.FC = () => {
     }
   };
 
-  if (initialLoading) {
+  if (initialLoading && users.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-8">
         <div className="text-center">
@@ -148,7 +203,9 @@ const UsersManager: React.FC = () => {
           <div className="flex items-center gap-3">
             <Users className="w-5 h-5 text-gray-400" />
             <div>
-              <p className="text-sm font-medium text-gray-900">Total Users: {users.length}</p>
+              <p className="text-sm font-medium text-gray-900">
+                Total Users: {pagination.total}
+              </p>
               <p className="text-sm text-gray-500">Registered platform users</p>
             </div>
           </div>
@@ -160,6 +217,9 @@ const UsersManager: React.FC = () => {
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-red-500" />
           <span className="text-red-700">{error}</span>
+          <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -249,6 +309,77 @@ const UsersManager: React.FC = () => {
                   <option value="expert">Expert</option>
                 </select>
               </div>
+
+              {/* Expert Profile Fields */}
+              {formData.userType === "expert" && (
+                <>
+                  <div className="md:col-span-2 border-t border-gray-200 pt-4">
+                    <h5 className="text-sm font-semibold text-gray-800 mb-3">Expert Profile</h5>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-1">
+                      Display Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="displayName"
+                      name="displayName"
+                      value={expertFields.displayName}
+                      onChange={handleExpertFieldChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., Dr. Jane Smith"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
+                      Bio
+                    </label>
+                    <textarea
+                      id="bio"
+                      name="bio"
+                      value={expertFields.bio}
+                      onChange={handleExpertFieldChange}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="A short biography..."
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="expertise" className="block text-sm font-medium text-gray-700 mb-1">
+                      Expertise
+                    </label>
+                    <input
+                      type="text"
+                      id="expertise"
+                      name="expertise"
+                      value={expertFields.expertise}
+                      onChange={handleExpertFieldChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., React, Node.js, TypeScript"
+                    />
+                    <p className="mt-1 text-xs text-gray-400">Comma-separated list</p>
+                  </div>
+
+                  <div>
+                    <label htmlFor="calendarLink" className="block text-sm font-medium text-gray-700 mb-1">
+                      Calendar Link
+                    </label>
+                    <input
+                      type="url"
+                      id="calendarLink"
+                      name="calendarLink"
+                      value={expertFields.calendarLink}
+                      onChange={handleExpertFieldChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., https://calendly.com/..."
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Form Actions */}
@@ -297,10 +428,10 @@ const UsersManager: React.FC = () => {
       {/* Users List */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h4 className="text-lg font-medium text-gray-900">Users ({filteredUsers.length})</h4>
+          <h4 className="text-lg font-medium text-gray-900">Users ({pagination.total})</h4>
         </div>
 
-        {filteredUsers.length === 0 ? (
+        {users.length === 0 ? (
           <div className="p-8 text-center">
             <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500">
@@ -326,10 +457,11 @@ const UsersManager: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                   <tr
                     key={user.id}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                    onClick={() => setSelectedUser(user)}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
@@ -351,7 +483,7 @@ const UsersManager: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-4 px-6 text-sm text-gray-500">
-                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—"}
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "\u2014"}
                     </td>
                     <td className="py-4 px-6">
                       <span
@@ -370,7 +502,45 @@ const UsersManager: React.FC = () => {
             </table>
           </div>
         )}
+
+        {/* Pagination */}
+        {pagination.total > 0 && (
+          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <p className="text-sm text-gray-600">
+              Showing {(page - 1) * pagination.limit + 1} to{" "}
+              {Math.min(page * pagination.limit, pagination.total)} of {pagination.total} users
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-sm text-gray-600">
+                Page {page} of {pagination.totalPages || 1}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                disabled={page >= pagination.totalPages}
+                className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+      {/* User Detail Modal */}
+      <UserDetailModal
+        isOpen={!!selectedUser}
+        onClose={() => setSelectedUser(null)}
+        user={selectedUser}
+        onUserUpdated={fetchUsers}
+      />
     </motion.div>
   );
 };

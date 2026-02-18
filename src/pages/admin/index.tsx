@@ -14,6 +14,7 @@ import {
   Save,
   Layers,
   ArrowLeft,
+  Tag,
 } from "lucide-react";
 import { Course, Section, Module } from "../../types/modules";
 import {
@@ -28,6 +29,7 @@ import {
   AnnouncementManager,
   SectionManager,
   UsersManager,
+  CategoryManager,
 } from "../../components/admin";
 
 const AdminDashboard: React.FC = () => {
@@ -46,6 +48,7 @@ const AdminDashboard: React.FC = () => {
     | "module-manage"
     | "announcement-manage"
     | "user-manage"
+    | "category-manage"
   >("overview");
 
   // Inline form states for new course
@@ -144,6 +147,10 @@ const AdminDashboard: React.FC = () => {
     setView("user-manage");
   };
 
+  const handleManageCategories = () => {
+    setView("category-manage");
+  };
+
   // Handle creating a new course inline
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,7 +234,7 @@ const AdminDashboard: React.FC = () => {
 
   if (loading && view === "overview") {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading admin dashboard...</p>
@@ -238,7 +245,7 @@ const AdminDashboard: React.FC = () => {
 
   if (error && view === "overview") {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-xl mb-4">Error: {error}</div>
           <button
@@ -253,7 +260,7 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -296,6 +303,13 @@ const AdminDashboard: React.FC = () => {
               >
                 <Users className="w-4 h-4" />
                 Manage Users
+              </button>
+              <button
+                onClick={handleManageCategories}
+                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 flex items-center gap-2"
+              >
+                <Tag className="w-4 h-4" />
+                Manage Categories
               </button>
               <button
                 onClick={handleManageAnnouncements}
@@ -645,6 +659,9 @@ const AdminDashboard: React.FC = () => {
 
         {/* Users Manager */}
         {view === "user-manage" && <UsersManager />}
+
+        {/* Category Manager */}
+        {view === "category-manage" && <CategoryManager />}
       </div>
     </div>
   );

@@ -39,11 +39,35 @@ export type DraftSupportMessage = {
   email: string;
 };
 
+export type AdminCreateExpertProfileDTO = {
+  displayName: string;
+  bio?: string;
+  expertise?: string[];
+  calendarLink?: string;
+};
+
 export type AdminCreateUser = {
   firstName: string;
   lastName: string;
   email: string;
   userType: "student" | "expert";
+  createAsExpert?: boolean;
+  expertProfile?: AdminCreateExpertProfileDTO;
+};
+
+export type AdminUpdateExpertProfile = {
+  displayName?: string;
+  bio?: string | null;
+  expertise?: string[];
+  calendarLink?: string | null;
+  approvalStatus?: "pending" | "approved" | "rejected";
+  listingStatus?: "public" | "private";
+};
+
+export type AdminUpdateUser = Partial<
+  Pick<User, "firstName" | "lastName" | "email" | "role" | "onboardingComplete" | "isEmailVerified">
+> & {
+  expertProfile?: AdminUpdateExpertProfile;
 };
 
 export type { User };
