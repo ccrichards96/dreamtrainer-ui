@@ -4,6 +4,7 @@ import Modal from "../../components/modals/Modal";
 
 interface CourseFormData {
   title: string;
+  description: string;
   category: string;
   [key: string]: string;
 }

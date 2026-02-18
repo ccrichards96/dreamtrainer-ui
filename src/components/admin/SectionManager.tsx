@@ -20,6 +20,7 @@ import {
   deleteSection,
   getSectionWithModules,
 } from "../../services/api/modules";
+import axios from "axios";
 
 interface SectionManagerProps {
   course: Course;
@@ -134,9 +135,11 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
       setShowAddForm(false);
       setEditingSection(null);
       resetForm();
-    } catch (err: any) {
-      setError(err.message || "Failed to save section. Please try again.");
-      console.error("Error saving section:", err);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message || "Failed to save section. Please try again.");
+        console.error("Error saving section:", err);
+      }
     } finally {
       setLoading(false);
     }
@@ -154,9 +157,11 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
     try {
       await deleteSection(sectionId);
       setSectionList((prev) => prev.filter((section) => section.id !== sectionId));
-    } catch (err: any) {
-      setError(err.message || "Failed to delete section. Make sure it has no modules.");
-      console.error("Error deleting section:", err);
+    } catch (err) {
+      if (err instanceof Error || axios.isAxiosError(err)) {
+        setError(err.message || "Failed to delete section. Make sure it has no modules.");
+        console.error("Error deleting section:", err);
+      }
     }
   };
 
