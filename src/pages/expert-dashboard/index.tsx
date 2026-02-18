@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import {
   BookOpen,
-  Users,
   MessageSquare,
   BarChart3,
   HelpCircle,
@@ -10,19 +9,16 @@ import DashboardLayout, { type SidebarItem } from "./DashboardLayout";
 import Courses from "./core/Courses";
 import Communications from "./core/Communications";
 import Performance from "./core/Performance";
-import Students from "./core/Students";
-
-type Tab = "courses" | "students" | "communications" | "performance" | "support";
+type Tab = "courses" | "communications" | "performance" | "support";
 
 const navItems: SidebarItem[] = [
   { id: "courses", label: "Courses", icon: BookOpen },
-  { id: "students", label: "Students", icon: Users },
   { id: "communications", label: "Communications", icon: MessageSquare },
   { id: "performance", label: "Performance", icon: BarChart3 },
   { id: "support", label: "Support", icon: HelpCircle },
 ];
 
-const validTabs: Tab[] = ["courses", "students", "communications", "performance", "support"];
+const validTabs: Tab[] = ["courses", "communications", "performance", "support"];
 
 export default function ExpertDashboard() {
   const navigate = useNavigate();
@@ -39,7 +35,6 @@ export default function ExpertDashboard() {
       breadcrumbRoot="Expert Dashboard"
     >
       {activeTab === "courses" && <Courses />}
-      {activeTab === "students" && <Students />}
       {activeTab === "communications" && <Communications />}
       {activeTab === "performance" && <Performance />}
       {activeTab === "support" && (
