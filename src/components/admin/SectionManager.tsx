@@ -222,9 +222,9 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
 
   if (loadingSections) {
     return (
-      <div className="bg-white rounded-lg shadow p-8">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading sections...</p>
         </div>
       </div>
@@ -238,7 +238,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
       className="space-y-6"
     >
       {/* Header */}
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
@@ -246,7 +246,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
             </div>
             <button
               onClick={handleAddSection}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
               Add Section
@@ -255,7 +255,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
         </div>
 
         {/* Course Info */}
-        <div className="px-6 py-4 bg-gray-50">
+        <div className="px-6 py-4 bg-gray-200 rounded-xl">
           <div className="flex items-center gap-3">
             <Layers className="w-5 h-5 text-gray-400" />
             <div>
@@ -286,7 +286,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-lg shadow"
+          className="bg-white border border-gray-200 rounded-xl shadow-sm"
         >
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
@@ -313,7 +313,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="e.g., Getting Started"
                 />
               </div>
@@ -332,7 +332,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="Describe what this section covers"
                 />
               </div>
@@ -348,7 +348,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                   name="imageUrl"
                   value={formData.imageUrl}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="https://..."
                 />
               </div>
@@ -366,7 +366,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
               <button
                 type="submit"
                 disabled={!isFormValid || loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {loading ? (
                   <>
@@ -386,7 +386,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
       )}
 
       {/* Sections List */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         {sectionList.length === 0 ? (
           <div className="p-8 text-center">
             <Layers className="w-12 h-12 text-gray-300 mx-auto mb-4" />
@@ -427,7 +427,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                   {/* Section Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <Layers className="w-5 h-5 text-blue-500" />
+                      <Layers className="w-5 h-5 text-purple-500" />
                       <h4 className="text-sm font-medium text-gray-900 truncate">{section.name}</h4>
                     </div>
                     {section.description && (
@@ -459,7 +459,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                     <button
                       onClick={() => handleEditSection(section)}
                       disabled={reorderingSectionId !== null}
-                      className="text-blue-600 hover:text-blue-900 flex items-center gap-1 disabled:opacity-50 px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50"
+                      className="text-purple-600 hover:text-purple-900 flex items-center gap-1 disabled:opacity-50 px-3 py-1.5 border border-purple-200 rounded-lg hover:bg-purple-50"
                     >
                       <Edit3 className="w-4 h-4" />
                       Edit

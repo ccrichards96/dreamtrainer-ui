@@ -207,7 +207,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
@@ -215,7 +215,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
             </div>
             <button
               onClick={handleAddModule}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
               Add Module
@@ -224,7 +224,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
         </div>
 
         {/* Section Info */}
-        <div className="px-6 py-4 bg-gray-50">
+        <div className="px-6 py-4 bg-gray-200">
           <div className="flex items-center gap-3">
             <Layers className="w-5 h-5 text-gray-400" />
             <div>
@@ -255,7 +255,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-lg shadow"
+          className="bg-white border border-gray-200 rounded-xl shadow-sm"
         >
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
@@ -282,7 +282,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                   value={formData.topic}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="e.g., TOEFL Writing Task 1"
                 />
               </div>
@@ -302,7 +302,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                   onChange={handleInputChange}
                   required
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="Describe what students will learn in this module"
                 />
               </div>
@@ -318,7 +318,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                   name="videoUrl"
                   value={formData.videoUrl}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="https://..."
                 />
               </div>
@@ -337,7 +337,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                   name="botIframeUrl"
                   value={formData.botIframeUrl}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="https://..."
                 />
               </div>
@@ -400,7 +400,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
               <button
                 type="submit"
                 disabled={!isFormValid || loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {loading ? (
                   <>
@@ -420,7 +420,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
       )}
 
       {/* Modules List */}
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
         <div className="px-6 py-4 border-b border-gray-200">
           <h4 className="text-lg font-medium text-gray-900">Modules ({moduleList.length})</h4>
         </div>
@@ -436,7 +436,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
               <div
                 key={module.id}
                 className={`p-6 hover:bg-gray-50 transition-colors ${
-                  reorderingModuleId === module.id ? "bg-blue-50" : ""
+                  reorderingModuleId === module.id ? "bg-purple-50" : ""
                 }`}
               >
                 <div className="flex items-start gap-4">
@@ -467,7 +467,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                       <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
                       <h5 className="text-lg font-medium text-gray-900">{module.topic}</h5>
                       {reorderingModuleId === module.id && (
-                        <span className="text-xs text-blue-600 animate-pulse">Updating...</span>
+                        <span className="text-xs text-purple-600 animate-pulse">Updating...</span>
                       )}
                     </div>
                     <p className="text-gray-600 mb-3">{module.description}</p>
@@ -478,7 +478,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                     <button
                       onClick={() => handleEditModule(module)}
                       disabled={reorderingModuleId !== null}
-                      className="text-blue-600 hover:text-blue-800 p-2 disabled:opacity-50"
+                      className="text-purple-600 hover:text-purple-800 p-2 disabled:opacity-50"
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>

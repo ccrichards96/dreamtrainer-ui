@@ -112,7 +112,7 @@ export default function CourseManage() {
   const activeLabel =
     sidebarSections.flatMap((s) => s.items).find((t) => t.id === activeTab)?.label ?? "";
 
-  const tabsWithOwnHeader: ManageTab[] = ["plan", "announcements", "students"];
+  const tabsWithOwnHeader: ManageTab[] = ["plan", "announcements", "students", "curriculum"];
 
   const renderTabContent = () => {
     switch (activeTab) {
