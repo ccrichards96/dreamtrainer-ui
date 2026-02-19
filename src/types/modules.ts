@@ -113,6 +113,7 @@ interface Course {
   slug: string;
   expertProfileId: string | null;
   expertProfile?: ExpertProfile; // Nested expert profile data
+  categoryId?: string | null;
   status: CourseStatus;
   price: number;
   stripeProductId: string | null;

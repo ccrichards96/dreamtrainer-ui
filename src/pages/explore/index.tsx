@@ -2,9 +2,11 @@ import { useState, useEffect, useMemo } from "react";
 import { Loader2, Search } from "lucide-react";
 import { getAllCourses } from "../../services/api/modules";
 import { getUserEnrollments } from "../../services/api/enrollment";
+import { getAllCategories } from "../../services/api/categories";
 import { CourseProvider } from "../../contexts/CourseContext";
 import type { Course } from "../../types/modules";
 import type { CourseEnrollment } from "../../types/enrollment";
+import type { Category } from "../../types/categories";
 import { Breadcrumb } from "../../components/Breadcrumb";
 import { AllCoursesView } from "./AllCoursesView";
 
@@ -13,10 +15,12 @@ type TabType = "my-courses" | "explore";
 const ExploreCoursesContent = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [enrollments, setEnrollments] = useState<CourseEnrollment[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>("explore");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,10 +28,11 @@ const ExploreCoursesContent = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch courses and enrollments in parallel
-        const [coursesResponse, enrollmentsData] = await Promise.all([
+        // Fetch courses, enrollments, and categories in parallel
+        const [coursesResponse, enrollmentsData, categoriesData] = await Promise.all([
           getAllCourses(),
           getUserEnrollments(),
+          getAllCategories(),
         ]);
 
         // Sort courses by order field, then by createdAt
@@ -39,6 +44,7 @@ const ExploreCoursesContent = () => {
         });
         setCourses(sortedCourses);
         setEnrollments(enrollmentsData);
+        setCategories(categoriesData);
       } catch (err) {
         console.error("Error fetching courses:", err);
         const errorMessage = err instanceof Error ? err.message : "Failed to load courses";
@@ -68,6 +74,11 @@ const ExploreCoursesContent = () => {
       filtered = filtered.filter((course) => !enrolledCourseIds.has(course.id));
     }
 
+    // Filter by category
+    if (selectedCategoryId) {
+      filtered = filtered.filter((course) => course.categoryId === selectedCategoryId);
+    }
+
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -79,7 +90,7 @@ const ExploreCoursesContent = () => {
     }
 
     return filtered;
-  }, [courses, activeTab, enrolledCourseIds, searchQuery]);
+  }, [courses, activeTab, enrolledCourseIds, selectedCategoryId, searchQuery]);
 
   if (loading) {
     return (
@@ -137,6 +148,41 @@ const ExploreCoursesContent = () => {
             />
           </div>
         </div>
+
+        {/* Category Filter */}
+        {categories.length > 0 && (
+          <div className="mb-6">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              <button
+                onClick={() => setSelectedCategoryId(null)}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  selectedCategoryId === null
+                    ? "bg-purple-600 text-white shadow-sm"
+                    : "bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600"
+                }`}
+              >
+                All
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() =>
+                    setSelectedCategoryId(
+                      selectedCategoryId === category.id ? null : category.id
+                    )
+                  }
+                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    selectedCategoryId === category.id
+                      ? "bg-purple-600 text-white shadow-sm"
+                      : "bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600"
+                  }`}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="mb-6">
