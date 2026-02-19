@@ -35,6 +35,15 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
     calendarLink: "",
     approvalStatus: "pending" as "pending" | "approved" | "rejected",
     listingStatus: "private" as "public" | "private",
+    socialLinks: {
+      linkedin: "",
+      facebook: "",
+      instagram: "",
+      youtube: "",
+      tiktok: "",
+      twitter: "",
+      website: "",
+    },
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +71,15 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           calendarLink: ep.calendarLink || "",
           approvalStatus: ep.approvalStatus || "pending",
           listingStatus: ep.listingStatus || "private",
+          socialLinks: {
+            linkedin: ep.socialLinks?.linkedin || "",
+            facebook: ep.socialLinks?.facebook || "",
+            instagram: ep.socialLinks?.instagram || "",
+            youtube: ep.socialLinks?.youtube || "",
+            tiktok: ep.socialLinks?.tiktok || "",
+            twitter: ep.socialLinks?.twitter || "",
+            website: ep.socialLinks?.website || "",
+          },
         });
       }
       setActiveTab("user");
@@ -83,6 +101,14 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
   ) => {
     const { name, value } = e.target;
     setExpertData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSocialLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setExpertData((prev) => ({
+      ...prev,
+      socialLinks: { ...prev.socialLinks, [name]: value },
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -136,6 +162,32 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
         }
         if (expertData.listingStatus !== ep.listingStatus) {
           expertUpdates.listingStatus = expertData.listingStatus;
+          hasExpertChanges = true;
+        }
+
+        // Check for social links changes
+        const currentSocialLinks = ep.socialLinks || {};
+        const newSocialLinks = expertData.socialLinks;
+        const socialLinksChanged =
+          newSocialLinks.linkedin !== (currentSocialLinks.linkedin || "") ||
+          newSocialLinks.facebook !== (currentSocialLinks.facebook || "") ||
+          newSocialLinks.instagram !== (currentSocialLinks.instagram || "") ||
+          newSocialLinks.youtube !== (currentSocialLinks.youtube || "") ||
+          newSocialLinks.tiktok !== (currentSocialLinks.tiktok || "") ||
+          newSocialLinks.twitter !== (currentSocialLinks.twitter || "") ||
+          newSocialLinks.website !== (currentSocialLinks.website || "");
+
+        if (socialLinksChanged) {
+          // Only include non-empty values
+          expertUpdates.socialLinks = {
+            linkedin: newSocialLinks.linkedin || undefined,
+            facebook: newSocialLinks.facebook || undefined,
+            instagram: newSocialLinks.instagram || undefined,
+            youtube: newSocialLinks.youtube || undefined,
+            tiktok: newSocialLinks.tiktok || undefined,
+            twitter: newSocialLinks.twitter || undefined,
+            website: newSocialLinks.website || undefined,
+          };
           hasExpertChanges = true;
         }
 
@@ -390,6 +442,111 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="e.g., https://calendly.com/..."
                 />
+              </div>
+
+              {/* Social Links Section */}
+              <div className="pt-4 border-t border-gray-200">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Social Links</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="expert-linkedin" className="block text-sm font-medium text-gray-700 mb-1">
+                      LinkedIn
+                    </label>
+                    <input
+                      type="url"
+                      id="expert-linkedin"
+                      name="linkedin"
+                      value={expertData.socialLinks.linkedin}
+                      onChange={handleSocialLinkChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://linkedin.com/in/..."
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="expert-twitter" className="block text-sm font-medium text-gray-700 mb-1">
+                      Twitter
+                    </label>
+                    <input
+                      type="url"
+                      id="expert-twitter"
+                      name="twitter"
+                      value={expertData.socialLinks.twitter}
+                      onChange={handleSocialLinkChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://twitter.com/..."
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="expert-facebook" className="block text-sm font-medium text-gray-700 mb-1">
+                      Facebook
+                    </label>
+                    <input
+                      type="url"
+                      id="expert-facebook"
+                      name="facebook"
+                      value={expertData.socialLinks.facebook}
+                      onChange={handleSocialLinkChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://facebook.com/..."
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="expert-instagram" className="block text-sm font-medium text-gray-700 mb-1">
+                      Instagram
+                    </label>
+                    <input
+                      type="url"
+                      id="expert-instagram"
+                      name="instagram"
+                      value={expertData.socialLinks.instagram}
+                      onChange={handleSocialLinkChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://instagram.com/..."
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="expert-youtube" className="block text-sm font-medium text-gray-700 mb-1">
+                      YouTube
+                    </label>
+                    <input
+                      type="url"
+                      id="expert-youtube"
+                      name="youtube"
+                      value={expertData.socialLinks.youtube}
+                      onChange={handleSocialLinkChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://youtube.com/..."
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="expert-tiktok" className="block text-sm font-medium text-gray-700 mb-1">
+                      TikTok
+                    </label>
+                    <input
+                      type="url"
+                      id="expert-tiktok"
+                      name="tiktok"
+                      value={expertData.socialLinks.tiktok}
+                      onChange={handleSocialLinkChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://tiktok.com/@..."
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label htmlFor="expert-website" className="block text-sm font-medium text-gray-700 mb-1">
+                      Website
+                    </label>
+                    <input
+                      type="url"
+                      id="expert-website"
+                      name="website"
+                      value={expertData.socialLinks.website}
+                      onChange={handleSocialLinkChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

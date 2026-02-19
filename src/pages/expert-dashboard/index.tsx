@@ -1,10 +1,52 @@
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookOpen, MessageSquare, BarChart3, HelpCircle } from "lucide-react";
 import DashboardLayout, { type SidebarItem } from "./DashboardLayout";
 import Courses from "./core/Courses";
 import Communications from "./core/Communications";
 import Performance from "./core/Performance";
+import apiClient from "../../services/api/client";
+
 type Tab = "courses" | "communications" | "performance" | "support";
+
+export interface ExpertPerformanceData {
+  overview: {
+    totalRevenue: number;
+    totalStudents: number;
+    avgRating: number;
+    completionRate: number;
+  };
+  revenue: {
+    thisMonth: number;
+    lastMonth: number;
+    lifetime: number;
+    pendingPayout: number;
+  };
+  students: {
+    totalStudents: number;
+    newSignupsThisMonth: number;
+    activeThisWeek: number;
+    completionRate: number;
+  };
+  reviews: {
+    averageRating: number;
+    totalReviews: number;
+    fiveStar: number;
+    responseRate: number;
+  };
+  traffic: {
+    pageViews: number;
+    uniqueVisitors: number;
+    conversionRate: number;
+    topSource: string;
+  };
+  affiliates: {
+    totalReferrals: number;
+    activeAffiliates: number;
+    affiliateRevenue: number;
+    conversionRate: number;
+  };
+}
 
 const navItems: SidebarItem[] = [
   { id: "courses", label: "Courses", icon: BookOpen },
@@ -21,6 +63,18 @@ export default function ExpertDashboard() {
 
   const activeTab: Tab = validTabs.includes(tab as Tab) ? (tab as Tab) : "courses";
 
+  const [performanceData, setPerformanceData] = useState<ExpertPerformanceData | null>(null);
+  const [performanceLoading, setPerformanceLoading] = useState(false);
+
+  useEffect(() => {
+    setPerformanceLoading(true);
+    apiClient
+      .get<{ data: ExpertPerformanceData }>("/expert/performance")
+      .then((res) => setPerformanceData(res.data.data))
+      .catch(() => setPerformanceData(null))
+      .finally(() => setPerformanceLoading(false));
+  }, []);
+
   return (
     <DashboardLayout
       items={navItems}
@@ -31,7 +85,9 @@ export default function ExpertDashboard() {
     >
       {activeTab === "courses" && <Courses />}
       {activeTab === "communications" && <Communications />}
-      {activeTab === "performance" && <Performance />}
+      {activeTab === "performance" && (
+        <Performance data={performanceData} isLoading={performanceLoading} />
+      )}
       {activeTab === "support" && (
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Support</h1>

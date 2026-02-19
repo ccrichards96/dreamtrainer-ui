@@ -1,5 +1,5 @@
 import { User as Auth0User } from "@auth0/auth0-react";
-import { ExpertProfile } from "./modules";
+import { ExpertProfile, ExpertSocialLinks } from "./modules";
 
 export enum Role {
   Admin = "admin",
@@ -62,6 +62,7 @@ export type AdminUpdateExpertProfile = {
   calendarLink?: string | null;
   approvalStatus?: "pending" | "approved" | "rejected";
   listingStatus?: "public" | "private";
+  socialLinks?: ExpertSocialLinks;
 };
 
 export type AdminUpdateUser = Partial<
