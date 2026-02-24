@@ -6,7 +6,6 @@ import {
   BookOpen,
   Users,
   Search,
-  Megaphone,
   ChevronUp,
   ChevronDown,
   Plus,
@@ -14,16 +13,18 @@ import {
   Save,
   Layers,
   ArrowLeft,
-  Tag,
 } from "lucide-react";
 import { Course, Section, Module } from "../../types/modules";
+import { Category } from "../../types/categories";
 import {
   getAllCourses,
   getCourseById,
   updateCourse,
   createCourse,
 } from "../../services/api/modules";
+import { getAllCategories } from "../../services/api/categories";
 import {
+  AdminSidebar,
   CourseEditor,
   ModuleManager,
   AnnouncementManager,
@@ -31,6 +32,7 @@ import {
   UsersManager,
   CategoryManager,
 } from "../../components/admin";
+import type { AdminView } from "../../components/admin";
 
 const AdminDashboard: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -41,21 +43,18 @@ const AdminDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [reorderingCourseId, setReorderingCourseId] = useState<string | null>(null);
-  const [view, setView] = useState<
-    | "overview"
-    | "course-edit"
-    | "section-manage"
-    | "module-manage"
-    | "announcement-manage"
-    | "user-manage"
-    | "category-manage"
-  >("overview");
+  const [view, setView] = useState<AdminView>("overview");
+
+  // Categories
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   // Inline form states for new course
   const [showNewCourseForm, setShowNewCourseForm] = useState(false);
   const [newCourseData, setNewCourseData] = useState({
     name: "",
     description: "",
+    categoryId: "",
   });
   const [creatingCourse, setCreatingCourse] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -83,6 +82,14 @@ const AdminDashboard: React.FC = () => {
     };
 
     fetchData();
+  }, []);
+
+  // Load categories
+  useEffect(() => {
+    getAllCategories()
+      .then((data) => setCategories(data.sort((a, b) => a.sortOrder - b.sortOrder)))
+      .catch(() => setCategories([]))
+      .finally(() => setLoadingCategories(false));
   }, []);
 
   // Filter courses based on search term
@@ -139,16 +146,11 @@ const AdminDashboard: React.FC = () => {
     setSelectedSectionModules([]);
   };
 
-  const handleManageAnnouncements = () => {
-    setView("announcement-manage");
-  };
-
-  const handleManageUsers = () => {
-    setView("user-manage");
-  };
-
-  const handleManageCategories = () => {
-    setView("category-manage");
+  const handleSidebarNavigate = (target: AdminView) => {
+    setSelectedCourse(null);
+    setSelectedSection(null);
+    setSelectedSectionModules([]);
+    setView(target);
   };
 
   // Handle creating a new course inline
@@ -162,10 +164,11 @@ const AdminDashboard: React.FC = () => {
       await createCourse({
         name: newCourseData.name.trim(),
         description: newCourseData.description.trim() || undefined,
+        categoryId: newCourseData.categoryId || undefined,
       });
 
       setSuccessMessage("Course created successfully!");
-      setNewCourseData({ name: "", description: "" });
+      setNewCourseData({ name: "", description: "", categoryId: "" });
       setShowNewCourseForm(false);
       await refreshCourses();
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -234,7 +237,7 @@ const AdminDashboard: React.FC = () => {
 
   if (loading && view === "overview") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-400 via-gray-300 to-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading admin dashboard...</p>
@@ -245,7 +248,7 @@ const AdminDashboard: React.FC = () => {
 
   if (error && view === "overview") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-400 via-gray-300 to-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-xl mb-4">Error: {error}</div>
           <button
@@ -260,73 +263,46 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600">Manage courses, sections, modules, and users</p>
-            </div>
-            <div className="flex items-center gap-4">
-              {view === "module-manage" && selectedSection && (
-                <button
-                  onClick={handleBackToSections}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Back to Sections
-                </button>
-              )}
-              {view !== "overview" && view !== "module-manage" && (
-                <button
-                  onClick={handleBackToOverview}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Back to Overview
-                </button>
-              )}
-              {view === "overview" && (
-                <button
-                  onClick={() => setShowNewCourseForm(!showNewCourseForm)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  New Course
-                </button>
-              )}
-              <button
-                onClick={handleManageUsers}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
-              >
-                <Users className="w-4 h-4" />
-                Manage Users
-              </button>
-              <button
-                onClick={handleManageCategories}
-                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 flex items-center gap-2"
-              >
-                <Tag className="w-4 h-4" />
-                Manage Categories
-              </button>
-              <button
-                onClick={handleManageAnnouncements}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-              >
-                <Megaphone className="w-4 h-4" />
-                Manage Announcements
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-400 via-gray-300 to-gray-100 pt-16">
+      {/* Sidebar */}
+      <AdminSidebar activeView={view} onNavigate={handleSidebarNavigate} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Content */}
+      <div className="w-full px-4 sm:px-6 md:px-8 lg:ps-80 py-6">
+        {/* Contextual back buttons */}
+        {view === "module-manage" && selectedSection && (
+          <button
+            onClick={handleBackToSections}
+            className="mb-4 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 inline-flex items-center gap-1.5"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Sections
+          </button>
+        )}
+        {(["course-edit", "section-manage"] as AdminView[]).includes(view) && (
+          <button
+            onClick={handleBackToOverview}
+            className="mb-4 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 inline-flex items-center gap-1.5"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Courses
+          </button>
+        )}
         {/* Overview */}
         {view === "overview" && (
           <>
+            {/* Page header with action */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Courses</h2>
+              <button
+                onClick={() => setShowNewCourseForm(!showNewCourseForm)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                New Course
+              </button>
+            </div>
+
             {/* Success Message */}
             {successMessage && (
               <motion.div
@@ -389,11 +365,12 @@ const AdminDashboard: React.FC = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description
+                        Description *
                       </label>
                       <input
                         type="text"
                         value={newCourseData.description}
+                        required
                         onChange={(e) =>
                           setNewCourseData({ ...newCourseData, description: e.target.value })
                         }
@@ -401,13 +378,35 @@ const AdminDashboard: React.FC = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Category
+                      </label>
+                      <select
+                        value={newCourseData.categoryId}
+                        onChange={(e) =>
+                          setNewCourseData({ ...newCourseData, categoryId: e.target.value })
+                        }
+                        disabled={loadingCategories}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                      >
+                        <option value="">
+                          {loadingCategories ? "Loading categories\u2026" : "\u2014 No Category \u2014"}
+                        </option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                   <div className="mt-4 flex justify-end gap-2">
                     <button
                       type="button"
                       onClick={() => {
                         setShowNewCourseForm(false);
-                        setNewCourseData({ name: "", description: "" });
+                        setNewCourseData({ name: "", description: "", categoryId: "" });
                       }}
                       className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
                     >

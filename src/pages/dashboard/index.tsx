@@ -724,7 +724,6 @@ function DashboardContent() {
 
         {/* Course Resources Section */}
         <CourseResourcesSection courseId={currentCourse?.id} />
-
         {/* Send Message Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -748,7 +747,6 @@ function DashboardContent() {
           </button>
         </motion.div>
       </div>
-
       {/* Welcome Modal */}
       <Modal
         isOpen={welcomeModalOpen}
@@ -786,9 +784,8 @@ function DashboardContent() {
           </button>
         </div>
       </Modal>
-
-      {/* Support Message Modal */}
       <SupportMessageForm
+        courseId={currentCourse?.id}
         isOpen={supportMessageModalOpen}
         onClose={() => setSupportMessageModalOpen(false)}
       />

@@ -5,51 +5,15 @@ import DashboardLayout, { type SidebarItem } from "./DashboardLayout";
 import Courses from "./core/Courses";
 import Communications from "./core/Communications";
 import Performance from "./core/Performance";
-import apiClient from "../../services/api/client";
+import { getExpertPerformance } from "../../services/api/experts";
+import { ExpertPerformanceData } from "../../types/expert";
 
 type Tab = "courses" | "communications" | "performance" | "support";
 
-export interface ExpertPerformanceData {
-  overview: {
-    totalRevenue: number;
-    totalStudents: number;
-    avgRating: number;
-    completionRate: number;
-  };
-  revenue: {
-    thisMonth: number;
-    lastMonth: number;
-    lifetime: number;
-    pendingPayout: number;
-  };
-  students: {
-    totalStudents: number;
-    newSignupsThisMonth: number;
-    activeThisWeek: number;
-    completionRate: number;
-  };
-  reviews: {
-    averageRating: number;
-    totalReviews: number;
-    fiveStar: number;
-    responseRate: number;
-  };
-  traffic: {
-    pageViews: number;
-    uniqueVisitors: number;
-    conversionRate: number;
-    topSource: string;
-  };
-  affiliates: {
-    totalReferrals: number;
-    activeAffiliates: number;
-    affiliateRevenue: number;
-    conversionRate: number;
-  };
-}
+
 
 const navItems: SidebarItem[] = [
-  { id: "courses", label: "Courses", icon: BookOpen },
+  { id: "courses", label: "My Courses", icon: BookOpen },
   { id: "communications", label: "Communications", icon: MessageSquare },
   { id: "performance", label: "Performance", icon: BarChart3 },
   { id: "support", label: "Support", icon: HelpCircle },
@@ -68,11 +32,17 @@ export default function ExpertDashboard() {
 
   useEffect(() => {
     setPerformanceLoading(true);
-    apiClient
-      .get<{ data: ExpertPerformanceData }>("/expert/performance")
-      .then((res) => setPerformanceData(res.data.data))
-      .catch(() => setPerformanceData(null))
-      .finally(() => setPerformanceLoading(false));
+    const fetchPerformanceData = async () => {
+      try {
+        const performanceData = await getExpertPerformance();
+        setPerformanceData(performanceData);
+      } catch (error) {
+        setPerformanceData(null);
+      } finally {
+        setPerformanceLoading(false);
+      }
+    };
+    fetchPerformanceData();
   }, []);
 
   return (

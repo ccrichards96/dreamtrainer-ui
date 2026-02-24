@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useAuthContext } from "../../contexts";
+
+import { useApp } from "../../contexts/useAppContext";
 import { RefreshCw, AlertCircle, CheckCircle } from "lucide-react";
 import {
   acceptSupportExpertInvite,
@@ -12,7 +15,10 @@ type InviteStatus = "loading" | "success" | "error";
 export default function InviteAccept() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+  const { isAuthenticated } = useAuthContext();
+  const { appInitialized } = useApp();
+
+  const { isLoading, loginWithRedirect } = useAuth0();
   const [status, setStatus] = useState<InviteStatus>("loading");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -21,7 +27,10 @@ export default function InviteAccept() {
   const role = searchParams.get("role");
 
   useEffect(() => {
-    if (!token || !course) {
+    if (!appInitialized) {
+      return;
+    }
+    if (!token || !course || !role) {
       setStatus("error");
       setErrorMessage("Invalid invite link. Missing required parameters.");
       return;
@@ -39,30 +48,34 @@ export default function InviteAccept() {
       return;
     }
 
-    acceptInvite(token, role, course);
-  }, [isAuthenticated, isLoading, token, course, role]);
+    acceptInvite(token, role);
+  }, [isAuthenticated, isLoading, token, course, role, appInitialized]);
 
   const acceptInvite = async (
     inviteToken: string,
     inviteRole: string | null,
-    courseSlug: string
   ) => {
     setStatus("loading");
     try {
-      if (inviteRole === "support_expert") {
+      if (inviteRole === "support-expert") {
         await acceptSupportExpertInvite(inviteToken);
-      } else {
+      } else if (inviteRole === "stakeholder") {
         await acceptStakeholderInvite(inviteToken);
+      }else {
+        setStatus("error");
+        setErrorMessage("Invalid invite role.");
+        return;
       }
 
       sessionStorage.removeItem("pendingInvite");
       setStatus("success");
 
       setTimeout(() => {
-        navigate(`/courses/${courseSlug}`, { replace: true });
+        navigate(`/expert-onboarding`, { replace: true });
       }, 2000);
     } catch (err) {
       setStatus("error");
+      console.error("Error accepting invite:", err);
       setErrorMessage(
         err instanceof Error ? err.message : "This invitation has expired or was already used."
       );

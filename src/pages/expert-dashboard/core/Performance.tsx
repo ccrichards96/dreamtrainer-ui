@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ExpertPerformanceData } from "../index";
+import { ExpertPerformanceData } from "../../../types/expert";
 
 type PerformanceTab = "overview" | "revenue" | "students" | "reviews" | "traffic" | "affiliates";
 

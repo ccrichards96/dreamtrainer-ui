@@ -178,3 +178,23 @@ export type DraftSection = Pick<Section, "courseId" | "name"> & {
 export type UpdateSection = Partial<Pick<Section, "name" | "description" | "imageUrl" | "order">>;
 
 export type { Course, Module, Section };
+
+export interface Message {
+  id: string;
+  studentUserId: string;
+  student: {
+    firstName: string;
+    lastName: string;
+    avatarUrl: string | null;
+  };
+  expertProfileId: string;
+  courseId: string | null;
+  subject: string;
+  body: string;
+  isRead: boolean;
+  isReplied: boolean;
+  readAt: string | null;
+  repliedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

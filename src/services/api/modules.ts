@@ -282,6 +282,7 @@ export const updateCourse = async (
   courseData: {
     name?: string;
     description?: string;
+    categoryId?: string | null;
     order?: number;
     learningObjectives?: string[];
     prerequisites?: string[];
@@ -309,6 +310,7 @@ export const updateCourse = async (
 export const createCourse = async (courseData: {
   name: string;
   description?: string;
+  categoryId?: string;
 }): Promise<APIResponse<Course>> => {
   try {
     const response = await apiClient.post<APIResponse<Course>>(`/courses`, courseData);

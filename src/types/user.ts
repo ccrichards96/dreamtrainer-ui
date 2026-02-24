@@ -33,14 +33,23 @@ export type UpdateUser = Partial<
 
 // Draft type for creating support messages
 export type DraftSupportMessage = {
+  subject: string;
   message: string;
   supportType: "technical" | "course-content" | "billing" | "general" | "feedback";
   userId: string;
   email: string;
+  courseId?: string;
 };
 
 export type AdminCreateExpertProfileDTO = {
   displayName: string;
+  bio?: string;
+  expertise?: string[];
+  calendarLink?: string;
+};
+
+export type UpdateExpertProfileDTO = {
+  displayName?: string;
   bio?: string;
   expertise?: string[];
   calendarLink?: string;

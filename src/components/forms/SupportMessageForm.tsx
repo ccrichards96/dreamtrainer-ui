@@ -6,20 +6,25 @@ import { sendSupportMessage } from "../../services/api/users";
 import Modal from "../modals/Modal";
 
 interface SupportMessageFormProps {
+  courseId?: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
 interface FormData {
+  courseId?: string;
+  subject: string;
   message: string;
   supportType: "technical" | "course-content" | "billing" | "general" | "feedback";
 }
 
 type FormState = "idle" | "loading" | "success" | "error";
 
-const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose }) => {
+const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ courseId, isOpen, onClose }) => {
   const { userProfile } = useApp();
   const [formData, setFormData] = useState<FormData>({
+    courseId: courseId || undefined,
+    subject: "",
     message: "",
     supportType: "general",
   });
@@ -38,6 +43,12 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+
+    if (!formData.subject.trim()) {
+      setErrorMessage("Please enter a subject.");
+      return;
+    }
 
     if (!formData.message.trim()) {
       setErrorMessage("Please enter your message.");
@@ -67,7 +78,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose
 
       // Reset form after 2 seconds and close modal
       setTimeout(() => {
-        setFormData({ message: "", supportType: "general" });
+        setFormData({ courseId: courseId || undefined, subject: "", message: "", supportType: "general" });
         setFormState("idle");
         onClose();
       }, 2000);
@@ -79,7 +90,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose
 
   const handleClose = () => {
     if (formState !== "loading") {
-      setFormData({ message: "", supportType: "general" });
+      setFormData({ courseId: courseId || undefined, subject: "", message: "", supportType: "general" });
       setFormState("idle");
       setErrorMessage("");
       onClose();
@@ -144,6 +155,24 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ isOpen, onClose
                 <option value="billing">Billing & Account</option>
                 <option value="feedback">Feedback & Suggestions</option>
               </select>
+            </div>
+
+            {/* Subject */}
+            <div>
+              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+                Subject <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="subject"
+                name="subject"
+                value={formData.subject}
+                onChange={handleInputChange}
+                placeholder="Enter the subject of your message..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={formState === "loading"}
+                required
+              />
             </div>
 
             {/* Message */}

@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Save, X, AlertCircle } from "lucide-react";
 import { Course } from "../../types/modules";
+import { Category } from "../../types/categories";
 import { updateCourse } from "../../services/api/modules";
+import { getAllCategories } from "../../services/api/categories";
 
 interface CourseEditorProps {
   course: Course;
@@ -14,10 +16,20 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
   const [formData, setFormData] = useState({
     name: course.name || "",
     description: course.description || "",
+    categoryId: course.categoryId || "",
   });
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    getAllCategories()
+      .then((data) => setCategories(data.sort((a, b) => a.sortOrder - b.sortOrder)))
+      .catch(() => setError("Failed to load categories"))
+      .finally(() => setLoadingCategories(false));
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -36,7 +48,10 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
 
     try {
       // Update course via API
-      await updateCourse(course.id, formData);
+      await updateCourse(course.id, {
+        ...formData,
+        categoryId: formData.categoryId || null,
+      });
 
       setSuccess(true);
       setTimeout(() => {
@@ -116,6 +131,28 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter course description"
             />
+          </div>
+
+          {/* Category */}
+          <div>
+            <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
+              Category
+            </label>
+            <select
+              id="categoryId"
+              name="categoryId"
+              value={formData.categoryId}
+              onChange={handleInputChange}
+              disabled={loadingCategories}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+            >
+              <option value="">{loadingCategories ? "Loading categories…" : "— No Category —"}</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Course Metadata */}

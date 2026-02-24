@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
 import Modal from "../../components/modals/Modal";
+import { Category } from "../../types/categories";
+import { getAllCategories } from "../../services/api/categories";
 
 interface CourseFormData {
   title: string;
@@ -22,17 +24,7 @@ interface CreateCourseModalProps {
   onSubmit: (data: CourseFormData) => Promise<void>;
 }
 
-const courseCategories = [
-  "Business & Entrepreneurship",
-  "Design & Creative",
-  "Health & Wellness",
-  "Marketing & Sales",
-  "Personal Development",
-  "Technology & Engineering",
-  "Other",
-];
-
-const steps: WizardStep[] = [
+const buildSteps = (categories: Category[], loadingCategories: boolean): WizardStep[] => [
   {
     id: "title",
     label: "Course Title",
@@ -95,28 +87,35 @@ const steps: WizardStep[] = [
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Choose a category for your course
         </label>
-        <div className="space-y-2">
-          {courseCategories.map((category) => (
-            <label
-              key={category}
-              className={`flex items-center gap-x-3 p-3 border rounded-lg cursor-pointer transition ${
-                value === category
-                  ? "border-purple-500 bg-purple-50"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              <input
-                type="radio"
-                name="category"
-                value={category}
-                checked={value === category}
-                onChange={(e) => onChange(e.target.value)}
-                className="text-purple-600 focus:ring-purple-500"
-              />
-              <span className="text-sm text-gray-800">{category}</span>
-            </label>
-          ))}
-        </div>
+        {loadingCategories ? (
+          <div className="flex items-center gap-2 py-4 text-sm text-gray-500">
+            <Loader2 className="size-4 animate-spin" />
+            Loading categories…
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {categories.map((cat) => (
+              <label
+                key={cat.id}
+                className={`flex items-center gap-x-3 p-3 border rounded-lg cursor-pointer transition ${
+                  value === cat.id
+                    ? "border-purple-500 bg-purple-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="category"
+                  value={cat.id}
+                  checked={value === cat.id}
+                  onChange={(e) => onChange(e.target.value)}
+                  className="text-purple-600 focus:ring-purple-500"
+                />
+                <span className="text-sm text-gray-800">{cat.name}</span>
+              </label>
+            ))}
+          </div>
+        )}
         {error && <p className="mt-1.5 text-sm text-red-600">{error}</p>}
       </div>
     ),
@@ -124,6 +123,8 @@ const steps: WizardStep[] = [
 ];
 
 export default function CreateCourseModal({ isOpen, onClose, onSubmit }: CreateCourseModalProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<CourseFormData>({
     title: "",
@@ -133,6 +134,16 @@ export default function CreateCourseModal({ isOpen, onClose, onSubmit }: CreateC
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    setLoadingCategories(true);
+    getAllCategories()
+      .then((data) => setCategories(data.sort((a, b) => a.sortOrder - b.sortOrder)))
+      .catch(() => setCategories([]))
+      .finally(() => setLoadingCategories(false));
+  }, [isOpen]);
+
+  const steps = buildSteps(categories, loadingCategories);
   const step = steps[currentStep];
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === steps.length - 1;

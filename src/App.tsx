@@ -4,6 +4,7 @@ import Login from "./pages/auth/login";
 import Signup from "./pages/auth/signup";
 import Dashboard from "./pages/dashboard";
 import Onboarding from "./pages/onboarding";
+import ExpertOnboarding from "./pages/expert-onboarding";
 import CheckoutSuccess from "./pages/checkout/Success";
 import ProtectedRoute from "./components/routes/ProtectedRoute";
 import AccountPage from "./pages/account";
@@ -25,7 +26,6 @@ import { AppProvider } from "./contexts/AppContext";
 import NotFound from "./pages/NotFound";
 import { Role } from "./types/user";
 import usePageTracking from "./hooks/usePageTracking";
-import usePendingInvite from "./hooks/usePendingInvite";
 
 // Component to handle page tracking (must be inside Router)
 function PageTracker() {
@@ -34,10 +34,10 @@ function PageTracker() {
 }
 
 // Checks for pending invite in sessionStorage after auth redirect
-function PendingInviteHandler() {
-  usePendingInvite();
-  return null;
-}
+// function PendingInviteHandler() {
+//   usePendingInvite();
+//   return null;
+// }
 
 function App() {
   return (
@@ -55,7 +55,6 @@ function App() {
             <CheckoutProvider>
               <Router>
                 <PageTracker />
-                <PendingInviteHandler />
                 <div className="min-h-screen bg-gray-100">
                   <Navigation />
                   <div className="pt-16">
@@ -127,6 +126,14 @@ function App() {
                         element={
                           <ProtectedRoute>
                             <Onboarding />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/expert-onboarding"
+                        element={
+                          <ProtectedRoute>
+                            <ExpertOnboarding />
                           </ProtectedRoute>
                         }
                       />
