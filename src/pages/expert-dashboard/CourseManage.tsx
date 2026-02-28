@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -13,6 +13,7 @@ import {
   Megaphone,
   BriefcaseIcon,
   Users,
+  Lock,
 } from "lucide-react";
 import DashboardLayout, { type SidebarSection } from "./DashboardLayout";
 import {
@@ -45,6 +46,25 @@ type ManageTab =
   | "review"
   | "preview"
   | "launch";
+
+const SUPPORT_EXPERT_TABS: ManageTab[] = [
+  "curriculum",
+  "resources",
+  "announcements",
+  "students",
+];
+
+function AccessDenied() {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 text-center">
+      <Lock className="w-12 h-12 text-gray-300 mb-4" />
+      <h2 className="text-xl font-semibold text-gray-700 mb-2">Access Restricted</h2>
+      <p className="text-sm text-gray-500 max-w-sm">
+        This section is only available to course owners. Contact the course owner for further assistance.
+      </p>
+    </div>
+  );
+}
 
 const sidebarSections: SidebarSection[] = [
   {
@@ -98,8 +118,19 @@ const sidebarSections: SidebarSection[] = [
 export default function CourseManage() {
   const navigate = useNavigate();
   const { id: courseId } = useParams<{ id: string }>();
-  const { loadCourse, isLoadingCourse } = useExpertDashboardContext();
+  const { loadCourse, isLoadingCourse, expertProfile, course } = useExpertDashboardContext();
   const [activeTab, setActiveTab] = useState<ManageTab>("plan");
+
+  const isSupportExpert = useMemo(() => {
+    if (!course || !expertProfile) return false;
+    if (course.expertProfileId === expertProfile.id) return false;
+    const assignment = expertProfile.assignedCourses?.find((ac) => ac.course.id === courseId);
+    return assignment?.role === "support-expert";
+  }, [course, expertProfile, courseId]);
+
+  useEffect(() => {
+    if (isSupportExpert) setActiveTab("curriculum");
+  }, [isSupportExpert]);
 
   useEffect(() => {
     if (courseId) {
@@ -113,6 +144,9 @@ export default function CourseManage() {
   const tabsWithOwnHeader: ManageTab[] = ["plan", "announcements", "students", "curriculum"];
 
   const renderTabContent = () => {
+    if (isSupportExpert && !SUPPORT_EXPERT_TABS.includes(activeTab)) {
+      return <AccessDenied />;
+    }
     switch (activeTab) {
       case "plan":
         return <CoursePlan />;

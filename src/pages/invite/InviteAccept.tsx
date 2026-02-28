@@ -43,7 +43,8 @@ export default function InviteAccept() {
 
     if (!isAuthenticated) {
       loginWithRedirect({
-        appState: { returnTo: window.location.pathname + window.location.search },
+        appState: { returnTo: "/expert-onboarding" },
+        authorizationParams: { screen_hint: "signup" },
       });
       return;
     }

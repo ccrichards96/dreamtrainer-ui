@@ -51,7 +51,7 @@ export interface ExpertReview {
  * Assigned course - links an expert to a course with a specific role
  */
 export interface AssignedCourse {
-  role: "owner" | "collaborator";
+  role: "owner" | "support-expert" | "collaborator";
   course: Course;
 }
 

@@ -2,6 +2,7 @@ import React, { createContext, ReactNode, useState, useCallback } from "react";
 import { Announcement } from "../types/announcements";
 import { Course, ExpertProfile } from "../types/modules";
 import { getCourseById } from "../services/api/modules";
+import { getCoursePricing, updateCoursePricing } from "../services/api/billing";
 import { useApp } from "./useAppContext";
 
 // Form data interfaces for each manage tab
@@ -72,7 +73,7 @@ export interface ExpertDashboardContextType {
   // Update functions
   updateCoursePlan: (data: Partial<CoursePlanFormData>) => void;
   updateGoalsOutcomes: (data: Partial<GoalsOutcomesFormData>) => void;
-  updatePricing: (data: Partial<PricingFormData>) => void;
+  saveCoursePricing: (courseId: string, amount: number) => Promise<void>;
   updateCurriculum: (data: Partial<CurriculumFormData>) => void;
   updateResources: (data: Partial<ResourcesFormData>) => void;
   updateAnnouncements: (announcements: Announcement[]) => void;
@@ -115,6 +116,14 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
       const prereqs = loadedCourse.prerequisites ?? [];
       const audience = loadedCourse.targetAudiences ?? [];
 
+      let pricingAmount = loadedCourse.price?.toString() ?? "";
+      try {
+        const stripePricing = await getCoursePricing(loadedCourse.id);
+        pricingAmount = stripePricing.amount.toString();
+      } catch {
+        // No Stripe pricing configured yet — keep course default
+      }
+
       setCourseManageData((prev) => ({
         ...prev,
         coursePlan: {
@@ -125,7 +134,7 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
           prerequisites: prereqs.length >= 1 ? prereqs : [""],
           targetAudience: audience.length >= 1 ? audience : [""],
         },
-        pricing: { price: loadedCourse.price?.toString() ?? "" },
+        pricing: { price: pricingAmount },
       }));
     } catch {
       // Course load failed — keep defaults
@@ -148,10 +157,11 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
     }));
   }, []);
 
-  const updatePricing = useCallback((data: Partial<PricingFormData>) => {
+  const saveCoursePricing = useCallback(async (courseId: string, amount: number) => {
+    await updateCoursePricing(courseId, { amount, type: "one_time" });
     setCourseManageData((prev) => ({
       ...prev,
-      pricing: { ...prev.pricing, ...data },
+      pricing: { price: amount.toString() },
     }));
   }, []);
 
@@ -188,7 +198,7 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
     courseManageData,
     updateCoursePlan,
     updateGoalsOutcomes,
-    updatePricing,
+    saveCoursePricing,
     updateCurriculum,
     updateResources,
     resetCourseManageData,

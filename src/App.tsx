@@ -1,5 +1,5 @@
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { Auth0Provider } from "@auth0/auth0-react";
+import { Route, BrowserRouter as Router, Routes, useNavigate } from "react-router-dom";
+import { Auth0Provider, AppState } from "@auth0/auth0-react";
 import Login from "./pages/auth/login";
 import Signup from "./pages/auth/signup";
 import Dashboard from "./pages/dashboard";
@@ -33,13 +33,14 @@ function PageTracker() {
   return null;
 }
 
-// Checks for pending invite in sessionStorage after auth redirect
-// function PendingInviteHandler() {
-//   usePendingInvite();
-//   return null;
-// }
+// Wraps Auth0Provider inside Router so useNavigate is available for onRedirectCallback
+function Auth0ProviderWithNavigate({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
 
-function App() {
+  const onRedirectCallback = (appState?: AppState) => {
+    navigate(appState?.returnTo || window.location.pathname, { replace: true });
+  };
+
   return (
     <Auth0Provider
       domain={import.meta.env.VITE_AUTH0_DOMAIN}
@@ -48,12 +49,21 @@ function App() {
         redirect_uri: window.location.origin,
         audience: import.meta.env.VITE_AUTH0_AUDIENCE,
       }}
+      onRedirectCallback={onRedirectCallback}
     >
-      <AuthProvider>
-        <ApiProvider>
-          <AppProvider>
-            <CheckoutProvider>
-              <Router>
+      {children}
+    </Auth0Provider>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Auth0ProviderWithNavigate>
+        <AuthProvider>
+          <ApiProvider>
+            <AppProvider>
+              <CheckoutProvider>
                 <PageTracker />
                 <div className="min-h-screen bg-gray-100">
                   <Navigation />
@@ -188,12 +198,12 @@ function App() {
                   </div>
                   <Footer />
                 </div>
-              </Router>
-            </CheckoutProvider>
-          </AppProvider>
-        </ApiProvider>
-      </AuthProvider>
-    </Auth0Provider>
+              </CheckoutProvider>
+            </AppProvider>
+          </ApiProvider>
+        </AuthProvider>
+      </Auth0ProviderWithNavigate>
+    </Router>
   );
 }
 

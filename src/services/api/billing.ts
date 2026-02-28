@@ -145,6 +145,35 @@ export const getCoursePricing = async (courseId: string): Promise<CoursePricing>
   }
 };
 
+/**
+ * Update pricing for a specific course
+ * @param courseId - The course ID to update pricing for
+ * @param pricingData - The pricing data (amount in dollars, type, optional recurring config)
+ * @returns Promise<CoursePricing> - Updated course pricing information
+ */
+export const updateCoursePricing = async (
+  courseId: string,
+  pricingData: {
+    amount: number;
+    currency?: string;
+    type: "one_time" | "recurring";
+    recurring?: { interval: "day" | "week" | "month" | "year"; intervalCount?: number };
+  }
+): Promise<CoursePricing> => {
+  try {
+    const response = await apiClient.put<APIResponse<CoursePricing>>(
+      `/courses/${courseId}/pricing`,
+      pricingData
+    );
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to update course pricing: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while updating course pricing");
+  }
+};
+
 export const billingService = {
   getAllProducts,
   getProductBySlug,
@@ -153,6 +182,7 @@ export const billingService = {
   generateBillingPortalLink,
   getUserSubscriptions,
   getCoursePricing,
+  updateCoursePricing,
 };
 
 export default billingService;

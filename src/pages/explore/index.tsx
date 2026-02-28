@@ -7,10 +7,11 @@ import { CourseProvider } from "../../contexts/CourseContext";
 import type { Course } from "../../types/modules";
 import type { CourseEnrollment } from "../../types/enrollment";
 import type { Category } from "../../types/categories";
-import { Breadcrumb } from "../../components/Breadcrumb";
 import { AllCoursesView } from "./AllCoursesView";
 
 type TabType = "my-courses" | "explore";
+
+const HERO_BG_IMAGE = "";
 
 const ExploreCoursesContent = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -27,19 +28,13 @@ const ExploreCoursesContent = () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Fetch courses, enrollments, and categories in parallel
         const [coursesResponse, enrollmentsData, categoriesData] = await Promise.all([
           getAllCourses(),
           getUserEnrollments(),
           getAllCategories(),
         ]);
-
-        // Sort courses by order field, then by createdAt
         const sortedCourses = (coursesResponse.data || []).sort((a: Course, b: Course) => {
-          if (a.order !== b.order) {
-            return a.order - b.order;
-          }
+          if (a.order !== b.order) return a.order - b.order;
           return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
         });
         setCourses(sortedCourses);
@@ -47,8 +42,7 @@ const ExploreCoursesContent = () => {
         setCategories(categoriesData);
       } catch (err) {
         console.error("Error fetching courses:", err);
-        const errorMessage = err instanceof Error ? err.message : "Failed to load courses";
-        setError(errorMessage);
+        setError(err instanceof Error ? err.message : "Failed to load courses");
       } finally {
         setLoading(false);
       }
@@ -56,30 +50,24 @@ const ExploreCoursesContent = () => {
     fetchData();
   }, []);
 
-  // Create a Set of enrolled course IDs for filtering
   const enrolledCourseIds = useMemo(
     () => new Set(enrollments.filter((e) => e.courseId && !e.deletedAt).map((e) => e.courseId)),
     [enrollments]
   );
 
-  // Filter courses based on active tab and search query
   const filteredCourses = useMemo(() => {
     let filtered = courses;
 
-    // Filter by tab
     if (activeTab === "my-courses") {
       filtered = filtered.filter((course) => enrolledCourseIds.has(course.id));
     } else {
-      // Explore: show courses the user is NOT enrolled in
       filtered = filtered.filter((course) => !enrolledCourseIds.has(course.id));
     }
 
-    // Filter by category
     if (selectedCategoryId) {
       filtered = filtered.filter((course) => course.categoryId === selectedCategoryId);
     }
 
-    // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -94,12 +82,10 @@ const ExploreCoursesContent = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-[#c5a8de]" />
-            <span className="ml-3 text-gray-600">Loading courses...</span>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-[#c5a8de]" />
+          <span className="text-gray-600">Loading courses...</span>
         </div>
       </div>
     );
@@ -107,92 +93,111 @@ const ExploreCoursesContent = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-            <p className="text-red-600 font-medium">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            >
-              Retry
-            </button>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center max-w-md">
+          <p className="text-red-600 font-medium">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
-        <Breadcrumb
-          items={[
-            {
-              label: activeTab === "my-courses" ? "My Courses" : "Explore New Courses",
-              isActive: true,
-            },
-          ]}
-        />
+    <div className="min-h-screen bg-gray-50">
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <div
+        className="relative overflow-hidden bg-[#1e1630]"
+        style={
+          HERO_BG_IMAGE
+            ? { backgroundImage: `url(${HERO_BG_IMAGE})`, backgroundSize: "cover", backgroundPosition: "center" }
+            : undefined
+        }
+      >
+        {/* Dark overlay (only when background image is set) */}
+        {HERO_BG_IMAGE && <div className="absolute inset-0 bg-black/55" />}
 
-        {/* Search Bar */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search courses..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-            />
-          </div>
+        {/* Preline-style gradient blobs */}
+        <div aria-hidden="true" className="flex absolute -top-96 start-1/2 -translate-x-1/2 pointer-events-none">
+          <div className="bg-gradient-to-r from-violet-500/40 to-purple-300/30 blur-3xl w-[400px] h-[700px] rotate-[-60deg] -translate-x-40" />
+          <div className="bg-gradient-to-tl from-indigo-900/60 via-purple-900/40 to-violet-800/30 blur-3xl w-[1440px] h-[800px] rounded-full origin-top-left -rotate-12 -translate-x-60" />
         </div>
 
-        {/* Category Filter */}
-        {categories.length > 0 && (
-          <div className="mb-6">
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              <button
-                onClick={() => setSelectedCategoryId(null)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selectedCategoryId === null
-                    ? "bg-purple-600 text-white shadow-sm"
-                    : "bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600"
-                }`}
-              >
-                All
-              </button>
-              {categories.map((category) => (
+        {/* Hero content */}
+        <div className="relative z-10 max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
+          <div className="max-w-2xl mx-auto text-center">
+            <p className="inline-block text-sm font-medium bg-clip-text bg-gradient-to-l from-blue-400 to-violet-400 text-transparent">
+              Dream Trainer
+            </p>
+            <h1 className="mt-3 block font-semibold text-white text-4xl md:text-5xl lg:text-6xl">
+              Explore Courses
+            </h1>
+            <p className="mt-4 text-lg text-white/70">
+              Find the perfect course to elevate your career.
+            </p>
+            {/* Search bar */}
+            <div className="mt-8 relative max-w-xl mx-auto">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search courses..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 bg-white border border-transparent rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent text-gray-900 placeholder-gray-400 transition-all"
+              />
+            </div>
+
+            {/* Category pills */}
+            {categories.length > 0 && (
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
                 <button
-                  key={category.id}
-                  onClick={() =>
-                    setSelectedCategoryId(
-                      selectedCategoryId === category.id ? null : category.id
-                    )
-                  }
+                  onClick={() => setSelectedCategoryId(null)}
                   className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                    selectedCategoryId === category.id
-                      ? "bg-purple-600 text-white shadow-sm"
-                      : "bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600"
+                    selectedCategoryId === null
+                      ? "bg-white text-purple-700 shadow-md"
+                      : "bg-white/15 text-white border border-white/25 hover:bg-white/25"
                   }`}
                 >
-                  {category.name}
+                  All
                 </button>
-              ))}
-            </div>
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() =>
+                      setSelectedCategoryId(
+                        selectedCategoryId === category.id ? null : category.id
+                      )
+                    }
+                    className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                      selectedCategoryId === category.id
+                        ? "bg-white text-purple-700 shadow-md"
+                        : "bg-white/15 text-white border border-white/25 hover:bg-white/25"
+                    }`}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
+      </div>
 
+      {/* ── Tabs + Course Grid ────────────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
         {/* Tabs */}
         <div className="mb-6">
-          <div className="flex space-x-1 bg-white/50 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-gray-200">
+          <div className="flex space-x-1 bg-white p-1 rounded-xl shadow-sm border border-gray-200">
             <button
               onClick={() => setActiveTab("explore")}
               className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
                 activeTab === "explore"
-                  ? "bg-white text-purple-700 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               }`}
             >
               Explore New Courses
@@ -201,8 +206,8 @@ const ExploreCoursesContent = () => {
               onClick={() => setActiveTab("my-courses")}
               className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
                 activeTab === "my-courses"
-                  ? "bg-white text-purple-700 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               }`}
             >
               My Courses
@@ -216,7 +221,6 @@ const ExploreCoursesContent = () => {
   );
 };
 
-// Wrapper component that provides the Course context
 export default function ExploreCourses() {
   return (
     <CourseProvider>

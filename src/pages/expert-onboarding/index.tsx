@@ -1,11 +1,16 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileSetup from "./ProfileSetup.tsx";
 import ExpertProfileSetup from "./ExpertProfileSetup.tsx";
 import { useAuthContext } from "../../contexts/useAuthContext.ts";
+import { useApp } from "../../contexts/useAppContext.ts";
 import { getCurrentUser } from "../../services/api/users.ts";
 import type { UpdateExpertProfileDTO } from "../../types/user.ts";
+import {
+  acceptSupportExpertInvite,
+  acceptStakeholderInvite,
+} from "../../services/api/course-invites.ts";
 
 export type OnboardingExpertData = {
   firstName?: string;
@@ -17,15 +22,33 @@ export type OnboardingExpertData = {
 
 export default function ExpertOnboarding() {
     const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const courseSlug = searchParams.get("course") || undefined;  //http://localhost:5173/invite/accept?token=9785f8d6-5f0b-40eb-bba5-1e52370296d8&course=toefl-max
-  const inviteToken = searchParams.get("token") || undefined; 
   const [currentStep, setCurrentStep] = useState(1);
   const [onboardingData, setOnboardingData] = useState<OnboardingExpertData>({});
   const [isLoadingUserData, setIsLoadingUserData] = useState(true);
   const { user, isAuthenticated } = useAuthContext();
+  const { refreshUserProfile } = useApp();
   const totalSteps = 2;
   
+  // Accept pending invite stored in sessionStorage (set by InviteAccept before Auth0 redirect)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const raw = sessionStorage.getItem("pendingInvite");
+    if (!raw) return;
+    try {
+      const { token, role } = JSON.parse(raw) as { token: string; role: string };
+      const normalizedRole = role.toLowerCase().replace(/\s+/g, "-");
+      if (normalizedRole === "support-expert") {
+        acceptSupportExpertInvite(token).catch(console.error);
+      } else if (normalizedRole === "stakeholder") {
+        acceptStakeholderInvite(token).catch(console.error);
+      }
+    } catch (e) {
+      console.error("Failed to parse pendingInvite", e);
+    } finally {
+      sessionStorage.removeItem("pendingInvite");
+    }
+  }, [isAuthenticated]);
+
   // Initialize onboarding data from Auth0 or existing user record
   useEffect(() => {
     const initializeUserData = async () => {
@@ -88,13 +111,10 @@ export default function ExpertOnboarding() {
     }
   };
 
-  const onComplete = () => {
+  const onComplete = async () => {
+    await refreshUserProfile();
     navigate(`/expert/dashboard`, { replace: true });
   };
-
-
-
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white">
