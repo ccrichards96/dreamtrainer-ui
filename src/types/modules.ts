@@ -122,6 +122,7 @@ interface Course {
   learningObjectives?: string[];
   prerequisites?: string[];
   targetAudiences?: string[];
+  welcomeVideoUrl?: string | null;
   numberOfSections?: number; // Returned from /courses endpoint
   createdAt: string;
   updatedAt: string;

@@ -282,11 +282,17 @@ export const updateCourse = async (
   courseData: {
     name?: string;
     description?: string;
+    imageUrl?: string | null;
+    slug?: string;
     categoryId?: string | null;
+    expertProfileId?: string | null;
+    status?: string;
+    listingStatus?: string;
     order?: number;
     learningObjectives?: string[];
     prerequisites?: string[];
     targetAudiences?: string[];
+    welcomeVideoUrl?: string | null;
   }
 ): Promise<Course> => {
   try {

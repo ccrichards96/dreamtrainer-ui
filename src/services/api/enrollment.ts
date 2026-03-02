@@ -66,11 +66,28 @@ export const listCourseStudents = async (
   }
 };
 
+export const listCourseStudentLeaders = async (
+  courseId: string,
+  params?: ListCourseStudentsParams
+): Promise<PaginatedCourseStudentsResponse> => {
+  try {
+    const response = await apiClient.get<{
+      success: boolean;
+      data: CourseStudent[];
+      meta: { page: number; limit: number; total: number; totalPages: number };
+    }>(`/courses/${courseId}/student-leaders`, { params });
+    return { data: response.data.data, meta: response.data.meta };
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to fetch student leaders");
+  }
+};
+
 const enrollmentService = {
   getUserEnrollments,
   isEnrolledInCourse,
   enrollInCourse,
   listCourseStudents,
+  listCourseStudentLeaders,
 };
 
 export default enrollmentService;

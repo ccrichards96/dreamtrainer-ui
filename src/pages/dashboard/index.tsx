@@ -35,6 +35,17 @@ const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 };
 
+// Convert a raw YouTube or Vimeo watch URL to an embeddable URL
+const toEmbedUrl = (url: string): string => {
+  // YouTube: watch?v=ID or youtu.be/ID
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
+  // Vimeo: vimeo.com/ID or player.vimeo.com/video/ID
+  const vimeoMatch = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/);
+  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
+  return url;
+};
+
 // Helper function to get file icon color based on AssetType
 const getAssetTypeColor = (type: AssetType): string => {
   const colors: Record<AssetType, string> = {
@@ -761,7 +772,7 @@ function DashboardContent() {
           {/* Vimeo Video */}
           <div className="w-full h-64 md:h-96 rounded-lg overflow-hidden">
             <iframe
-              src="https://player.vimeo.com/video/1114100368?h=a8cd5f3151&badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1"
+              src={currentCourse?.welcomeVideoUrl ? toEmbedUrl(currentCourse.welcomeVideoUrl) : ""}
               width="100%"
               height="100%"
               frameBorder="0"
@@ -776,11 +787,10 @@ function DashboardContent() {
           <button
             onClick={() => {
               setWelcomeModalOpen(false);
-              startTestMode();
             }}
             className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
           >
-            Start My First Test
+            Let's Begin
           </button>
         </div>
       </Modal>

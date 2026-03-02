@@ -14,6 +14,7 @@ import {
   BriefcaseIcon,
   Users,
   Lock,
+  Video,
 } from "lucide-react";
 import DashboardLayout, { type SidebarSection } from "./DashboardLayout";
 import {
@@ -24,10 +25,12 @@ import {
   Resources,
   Review,
   Launch,
+  WelcomeVideo,
 } from "./manage";
 import Affiliates from "./manage/Affliates";
 import CourseAnnouncements from "./manage/CourseAnnouncements";
 import CourseStudents from "./manage/CourseStudents";
+import CourseStudentLeaders from "./manage/CourseStudentLeaders";
 import Expert from "./manage/Expert";
 import Stakeholders from "./manage/Stakeholders";
 import { useExpertDashboardContext } from "../../contexts";
@@ -43,6 +46,8 @@ type ManageTab =
   | "affiliates"
   | "announcements"
   | "students"
+  | "student-leaders"
+  | "welcome-video"
   | "review"
   | "preview"
   | "launch";
@@ -103,6 +108,8 @@ const sidebarSections: SidebarSection[] = [
     items: [
       { id: "announcements", label: "Announcements", icon: Megaphone },
       { id: "students", label: "Students", icon: Users },
+      { id: "student-leaders", label: "Student Leaders", icon: Users },
+      { id: "welcome-video", label: "Welcome Video", icon: Video },
     ],
   },
   {
@@ -141,7 +148,7 @@ export default function CourseManage() {
   const activeLabel =
     sidebarSections.flatMap((s) => s.items).find((t) => t.id === activeTab)?.label ?? "";
 
-  const tabsWithOwnHeader: ManageTab[] = ["plan", "announcements", "students", "curriculum"];
+  const tabsWithOwnHeader: ManageTab[] = ["plan", "announcements", "students", "student-leaders", "curriculum"];
 
   const renderTabContent = () => {
     if (isSupportExpert && !SUPPORT_EXPERT_TABS.includes(activeTab)) {
@@ -168,6 +175,10 @@ export default function CourseManage() {
         return <CourseAnnouncements />;
       case "students":
         return <CourseStudents />;
+      case "student-leaders":
+        return <CourseStudentLeaders />;
+      case "welcome-video":
+        return <WelcomeVideo />;
       case "review":
         return <Review />;
       case "launch":
