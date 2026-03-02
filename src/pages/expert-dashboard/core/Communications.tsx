@@ -1,5 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
-import { Mail, MailOpen, ChevronLeft, ChevronRight, Inbox, MailCheck, MessageSquareReply } from "lucide-react";
+import {
+  Mail,
+  MailOpen,
+  ChevronLeft,
+  ChevronRight,
+  Inbox,
+  MailCheck,
+  MessageSquareReply,
+} from "lucide-react";
 import { getInbox, markAsRead, markAsReplied, InboxResponse } from "../../../services/api/messages";
 import { Message } from "../../../types/modules";
 
@@ -43,7 +51,11 @@ function MessageListItem({
       {/* Avatar */}
       <div className="shrink-0 w-9 h-9 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-semibold">
         {student.avatarUrl ? (
-          <img src={student.avatarUrl} alt={name} className="w-full h-full rounded-full object-cover" />
+          <img
+            src={student.avatarUrl}
+            alt={name}
+            className="w-full h-full rounded-full object-cover"
+          />
         ) : (
           getInitials(student.firstName, student.lastName)
         )}
@@ -51,20 +63,22 @@ function MessageListItem({
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <span className={`text-sm truncate ${!isRead ? "font-semibold text-gray-900" : "font-medium text-gray-700"}`}>
+          <span
+            className={`text-sm truncate ${!isRead ? "font-semibold text-gray-900" : "font-medium text-gray-700"}`}
+          >
             {name}
           </span>
           <span className="text-xs text-gray-400 shrink-0">{formatDate(createdAt)}</span>
         </div>
-        <div className={`text-sm truncate mt-0.5 ${!isRead ? "font-medium text-gray-800" : "text-gray-600"}`}>
+        <div
+          className={`text-sm truncate mt-0.5 ${!isRead ? "font-medium text-gray-800" : "text-gray-600"}`}
+        >
           {subject}
         </div>
         <div className="text-xs text-gray-400 truncate mt-0.5">{body}</div>
       </div>
 
-      {!isRead && (
-        <div className="shrink-0 mt-1.5 w-2 h-2 rounded-full bg-purple-600" />
-      )}
+      {!isRead && <div className="shrink-0 mt-1.5 w-2 h-2 rounded-full bg-purple-600" />}
     </button>
   );
 }
@@ -89,7 +103,11 @@ function MessageDetail({
         <div className="flex items-center gap-2 mt-1">
           <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-semibold shrink-0">
             {student.avatarUrl ? (
-              <img src={student.avatarUrl} alt={name} className="w-full h-full rounded-full object-cover" />
+              <img
+                src={student.avatarUrl}
+                alt={name}
+                className="w-full h-full rounded-full object-cover"
+              />
             ) : (
               getInitials(student.firstName, student.lastName)
             )}
@@ -185,7 +203,10 @@ export default function Communications() {
     <div>
       <h1 className="text-2xl font-bold text-gray-800">Communications</h1>
 
-      <div className="mt-6 bg-white border border-gray-200 rounded-xl overflow-hidden" style={{ height: "calc(100vh - 220px)", minHeight: 400 }}>
+      <div
+        className="mt-6 bg-white border border-gray-200 rounded-xl overflow-hidden"
+        style={{ height: "calc(100vh - 220px)", minHeight: 400 }}
+      >
         {loading ? (
           <div className="flex items-center justify-center h-full text-gray-500">
             <div className="text-center">
@@ -194,7 +215,9 @@ export default function Communications() {
             </div>
           </div>
         ) : error ? (
-          <div className="flex items-center justify-center h-full text-red-500 text-sm">{error}</div>
+          <div className="flex items-center justify-center h-full text-red-500 text-sm">
+            {error}
+          </div>
         ) : (
           <div className="flex h-full">
             {/* Message list */}

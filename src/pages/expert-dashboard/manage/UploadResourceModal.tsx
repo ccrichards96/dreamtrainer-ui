@@ -170,7 +170,12 @@ export default function UploadResourceModal({
                   <p className="text-xs text-gray-400 mt-1">or drag and drop</p>
                 </div>
               )}
-              <input ref={fileInputRef} type="file" onChange={handleFileChange} className="hidden" />
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileChange}
+                className="hidden"
+              />
             </div>
           </div>
         )}

@@ -75,10 +75,7 @@ export default function ProfileSetup({
     );
     setLastNameError(lastNameValidation.isValid ? "" : lastNameValidation.error || "Invalid name");
 
-    if (
-      firstNameValidation.isValid &&
-      lastNameValidation.isValid
-    ) {
+    if (firstNameValidation.isValid && lastNameValidation.isValid) {
       onNext();
     }
   };
@@ -95,9 +92,7 @@ export default function ProfileSetup({
       {/* Content */}
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">Let's Set Up Your Expert Profile</h2>
-        <p className="text-lg text-gray-600">
-          Enter your first and last name, add a profile photo
-        </p>
+        <p className="text-lg text-gray-600">Enter your first and last name, add a profile photo</p>
       </div>
 
       <div className="max-w-md mx-auto space-y-8">
@@ -188,10 +183,7 @@ export default function ProfileSetup({
         <div className="pt-6">
           <button
             onClick={handleNext}
-            disabled={
-              !firstName.trim() ||
-              !lastName.trim()
-            }
+            disabled={!firstName.trim() || !lastName.trim()}
             className="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none transition-colors"
           >
             Continue

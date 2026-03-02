@@ -52,12 +52,7 @@ type ManageTab =
   | "preview"
   | "launch";
 
-const SUPPORT_EXPERT_TABS: ManageTab[] = [
-  "curriculum",
-  "resources",
-  "announcements",
-  "students",
-];
+const SUPPORT_EXPERT_TABS: ManageTab[] = ["curriculum", "resources", "announcements", "students"];
 
 function AccessDenied() {
   return (
@@ -65,7 +60,8 @@ function AccessDenied() {
       <Lock className="w-12 h-12 text-gray-300 mb-4" />
       <h2 className="text-xl font-semibold text-gray-700 mb-2">Access Restricted</h2>
       <p className="text-sm text-gray-500 max-w-sm">
-        This section is only available to course owners. Contact the course owner for further assistance.
+        This section is only available to course owners. Contact the course owner for further
+        assistance.
       </p>
     </div>
   );
@@ -148,7 +144,13 @@ export default function CourseManage() {
   const activeLabel =
     sidebarSections.flatMap((s) => s.items).find((t) => t.id === activeTab)?.label ?? "";
 
-  const tabsWithOwnHeader: ManageTab[] = ["plan", "announcements", "students", "student-leaders", "curriculum"];
+  const tabsWithOwnHeader: ManageTab[] = [
+    "plan",
+    "announcements",
+    "students",
+    "student-leaders",
+    "curriculum",
+  ];
 
   const renderTabContent = () => {
     if (isSupportExpert && !SUPPORT_EXPERT_TABS.includes(activeTab)) {

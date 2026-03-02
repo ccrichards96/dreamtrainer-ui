@@ -62,12 +62,11 @@ export default function Launch() {
           <div className="w-full max-w-md rounded-xl bg-white shadow-xl p-6 mx-4">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Submit for Review</h2>
             <p className="text-sm text-gray-600 mb-6">
-              This will send your course to the Dream Trainer team to review before publishing for public audiences.
+              This will send your course to the Dream Trainer team to review before publishing for
+              public audiences.
             </p>
 
-            {error && (
-              <p className="mb-4 text-sm text-red-600">{error}</p>
-            )}
+            {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
             <div className="flex justify-end gap-3">
               <button

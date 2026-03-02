@@ -333,16 +333,12 @@ export default function Expert() {
                         Support Expert
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {statusBadge(invite.status)}
-                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{statusBadge(invite.status)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="relative inline-block text-left">
                         <button
                           type="button"
-                          onClick={() =>
-                            setOpenMenuId(openMenuId === invite.id ? null : invite.id)
-                          }
+                          onClick={() => setOpenMenuId(openMenuId === invite.id ? null : invite.id)}
                           disabled={deletingId === invite.id}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-50"
                         >

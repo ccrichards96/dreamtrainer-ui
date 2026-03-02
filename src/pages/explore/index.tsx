@@ -114,7 +114,11 @@ const ExploreCoursesContent = () => {
         className="relative overflow-hidden bg-[#1e1630]"
         style={
           HERO_BG_IMAGE
-            ? { backgroundImage: `url(${HERO_BG_IMAGE})`, backgroundSize: "cover", backgroundPosition: "center" }
+            ? {
+                backgroundImage: `url(${HERO_BG_IMAGE})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }
             : undefined
         }
       >
@@ -122,7 +126,10 @@ const ExploreCoursesContent = () => {
         {HERO_BG_IMAGE && <div className="absolute inset-0 bg-black/55" />}
 
         {/* Preline-style gradient blobs */}
-        <div aria-hidden="true" className="flex absolute -top-96 start-1/2 -translate-x-1/2 pointer-events-none">
+        <div
+          aria-hidden="true"
+          className="flex absolute -top-96 start-1/2 -translate-x-1/2 pointer-events-none"
+        >
           <div className="bg-gradient-to-r from-violet-500/40 to-purple-300/30 blur-3xl w-[400px] h-[700px] rotate-[-60deg] -translate-x-40" />
           <div className="bg-gradient-to-tl from-indigo-900/60 via-purple-900/40 to-violet-800/30 blur-3xl w-[1440px] h-[800px] rounded-full origin-top-left -rotate-12 -translate-x-60" />
         </div>
@@ -168,9 +175,7 @@ const ExploreCoursesContent = () => {
                   <button
                     key={category.id}
                     onClick={() =>
-                      setSelectedCategoryId(
-                        selectedCategoryId === category.id ? null : category.id
-                      )
+                      setSelectedCategoryId(selectedCategoryId === category.id ? null : category.id)
                     }
                     className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                       selectedCategoryId === category.id

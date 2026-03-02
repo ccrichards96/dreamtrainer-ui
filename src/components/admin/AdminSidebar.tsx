@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  BookOpen,
-  Users,
-  Tag,
-  Megaphone,
-  PanelLeft,
-} from "lucide-react";
+import { BookOpen, Users, Tag, Megaphone, PanelLeft } from "lucide-react";
 
 export type AdminView =
   | "overview"
@@ -37,7 +31,9 @@ interface AdminSidebarProps {
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeView, onNavigate }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const resolvedActive = (["course-edit", "section-manage", "module-manage"] as AdminView[]).includes(activeView)
+  const resolvedActive = (
+    ["course-edit", "section-manage", "module-manage"] as AdminView[]
+  ).includes(activeView)
     ? "overview"
     : activeView;
 
@@ -57,9 +53,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeView, onNavigate }) =
             setSidebarOpen(false);
           }}
           className={`w-full flex items-center gap-x-3 py-2 px-2.5 text-sm rounded-lg ${
-            isActive
-              ? "bg-white/10 text-white"
-              : "text-white/70 hover:bg-white/10 hover:text-white"
+            isActive ? "bg-white/10 text-white" : "text-white/70 hover:bg-white/10 hover:text-white"
           }`}
         >
           <Icon className="shrink-0 size-4" />
@@ -140,9 +134,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeView, onNavigate }) =
                   Manage
                 </p>
               </div>
-              <ul className="space-y-0.5">
-                {manageItems.map(renderNavItem)}
-              </ul>
+              <ul className="space-y-0.5">{manageItems.map(renderNavItem)}</ul>
             </nav>
           </div>
         </div>

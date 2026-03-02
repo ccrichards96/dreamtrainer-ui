@@ -391,7 +391,9 @@ const AdminDashboard: React.FC = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                       >
                         <option value="">
-                          {loadingCategories ? "Loading categories\u2026" : "\u2014 No Category \u2014"}
+                          {loadingCategories
+                            ? "Loading categories\u2026"
+                            : "\u2014 No Category \u2014"}
                         </option>
                         {categories.map((cat) => (
                           <option key={cat.id} value={cat.id}>

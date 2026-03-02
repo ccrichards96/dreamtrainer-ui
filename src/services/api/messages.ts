@@ -35,10 +35,9 @@ export const markAsReplied = async (id: string): Promise<void> => {
 
 export const getInbox = async (params: InboxParams = {}): Promise<InboxResponse> => {
   try {
-    const response = await apiClient.get<APIResponseWithPagination<Message[]>>(
-      "/messages/inbox",
-      { params }
-    );
+    const response = await apiClient.get<APIResponseWithPagination<Message[]>>("/messages/inbox", {
+      params,
+    });
     return {
       messages: response.data.data,
       pagination: response.data.pagination,

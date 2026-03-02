@@ -355,10 +355,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
             </div>
 
             <div>
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                 Description
               </label>
               <textarea
@@ -403,9 +400,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                   disabled={loadingCategories}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                 >
-                  <option value="">
-                    {loadingCategories ? "Loading…" : "— No Category —"}
-                  </option>
+                  <option value="">{loadingCategories ? "Loading…" : "— No Category —"}</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.name}
@@ -435,9 +430,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 disabled={loadingExperts}
                 className="w-full px-3 py-2 border border-gray-300 border-t-0 rounded-b-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
-                <option value="">
-                  {loadingExperts ? "Loading experts…" : "— No Owner —"}
-                </option>
+                <option value="">{loadingExperts ? "Loading experts…" : "— No Owner —"}</option>
                 {filteredExperts.map((u) => (
                   <option key={u.expertProfile!.id} value={u.expertProfile!.id}>
                     {u.expertProfile!.displayName} — {u.firstName} {u.lastName} ({u.email})
@@ -530,7 +523,9 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Stripe Product ID</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Stripe Product ID
+              </label>
               <input
                 type="text"
                 value={course.stripeProductId || "—"}

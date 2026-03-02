@@ -94,9 +94,7 @@ const CategoryManager: React.FC = () => {
           description: formData.description || undefined,
           imageUrl: formData.imageUrl || undefined,
         });
-        setCategories((prev) =>
-          prev.map((c) => (c.id === editingCategory.id ? updated : c))
-        );
+        setCategories((prev) => prev.map((c) => (c.id === editingCategory.id ? updated : c)));
       } else {
         const created = await createCategory({
           name: formData.name,
@@ -219,7 +217,10 @@ const CategoryManager: React.FC = () => {
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-red-500" />
           <span className="text-red-700">{error}</span>
-          <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">
+          <button
+            onClick={() => setError(null)}
+            className="ml-auto text-red-400 hover:text-red-600"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -262,7 +263,10 @@ const CategoryManager: React.FC = () => {
               </div>
 
               <div className="md:col-span-2">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Description
                 </label>
                 <textarea
@@ -327,7 +331,9 @@ const CategoryManager: React.FC = () => {
         {categories.length === 0 ? (
           <div className="p-8 text-center">
             <Tag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">No categories yet. Create your first category to get started.</p>
+            <p className="text-gray-500">
+              No categories yet. Create your first category to get started.
+            </p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
@@ -363,10 +369,14 @@ const CategoryManager: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <Tag className="w-5 h-5 text-blue-500" />
-                      <h4 className="text-sm font-medium text-gray-900 truncate">{category.name}</h4>
+                      <h4 className="text-sm font-medium text-gray-900 truncate">
+                        {category.name}
+                      </h4>
                     </div>
                     {category.description && (
-                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">{category.description}</p>
+                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                        {category.description}
+                      </p>
                     )}
                     <p className="text-xs text-gray-400 mt-2">
                       Order: {category.sortOrder} | ID: {category.id.slice(0, 8)}...

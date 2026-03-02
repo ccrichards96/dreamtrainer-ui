@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import {
-  Plus,
-  X,
-  Save,
-  AlertCircle,
-  Users,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Plus, X, Save, AlertCircle, Users, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { User } from "../../types/user";
 import { AdminCreateUser } from "../../types/user";
 import { getUsersPaginated, createAdminUser } from "../../services/api/admin";
@@ -122,7 +113,10 @@ const UsersManager: React.FC = () => {
           displayName: expertFields.displayName,
           bio: expertFields.bio || undefined,
           expertise: expertFields.expertise
-            ? expertFields.expertise.split(",").map((s) => s.trim()).filter(Boolean)
+            ? expertFields.expertise
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean)
             : undefined,
           calendarLink: expertFields.calendarLink || undefined,
         };
@@ -203,9 +197,7 @@ const UsersManager: React.FC = () => {
           <div className="flex items-center gap-3">
             <Users className="w-5 h-5 text-gray-400" />
             <div>
-              <p className="text-sm font-medium text-gray-900">
-                Total Users: {pagination.total}
-              </p>
+              <p className="text-sm font-medium text-gray-900">Total Users: {pagination.total}</p>
               <p className="text-sm text-gray-500">Registered platform users</p>
             </div>
           </div>
@@ -217,7 +209,10 @@ const UsersManager: React.FC = () => {
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-red-500" />
           <span className="text-red-700">{error}</span>
-          <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">
+          <button
+            onClick={() => setError(null)}
+            className="ml-auto text-red-400 hover:text-red-600"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -318,7 +313,10 @@ const UsersManager: React.FC = () => {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="displayName"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Display Name *
                     </label>
                     <input
@@ -349,7 +347,10 @@ const UsersManager: React.FC = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="expertise" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="expertise"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Expertise
                     </label>
                     <input
@@ -365,7 +366,10 @@ const UsersManager: React.FC = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="calendarLink" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="calendarLink"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Calendar Link
                     </label>
                     <input

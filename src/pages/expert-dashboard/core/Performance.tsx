@@ -31,7 +31,8 @@ export default function Performance({ data, isLoading }: PerformanceProps) {
 
   const s = (v: number | string | undefined) => (isLoading ? "—" : (v ?? "—"));
   const pct = (v: number | undefined) => (isLoading ? "—" : v != null ? `${v}%` : "—");
-  const usd = (v: number | undefined) => (isLoading ? "—" : v != null ? `$${v.toLocaleString()}` : "—");
+  const usd = (v: number | undefined) =>
+    isLoading ? "—" : v != null ? `$${v.toLocaleString()}` : "—";
 
   const panels: Record<PerformanceTab, { label: string; value: string | number }[]> = {
     overview: [

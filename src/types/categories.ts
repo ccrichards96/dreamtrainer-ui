@@ -17,4 +17,6 @@ export type DraftCategory = Pick<Category, "name"> & {
 };
 
 // Update type for modifying existing categories
-export type UpdateCategory = Partial<Pick<Category, "name" | "description" | "imageUrl" | "sortOrder">>;
+export type UpdateCategory = Partial<
+  Pick<Category, "name" | "description" | "imageUrl" | "sortOrder">
+>;

@@ -44,7 +44,6 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ courseId, isOpe
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-
     if (!formData.subject.trim()) {
       setErrorMessage("Please enter a subject.");
       return;
@@ -78,7 +77,12 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ courseId, isOpe
 
       // Reset form after 2 seconds and close modal
       setTimeout(() => {
-        setFormData({ courseId: courseId || undefined, subject: "", message: "", supportType: "general" });
+        setFormData({
+          courseId: courseId || undefined,
+          subject: "",
+          message: "",
+          supportType: "general",
+        });
         setFormState("idle");
         onClose();
       }, 2000);
@@ -90,7 +94,12 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ courseId, isOpe
 
   const handleClose = () => {
     if (formState !== "loading") {
-      setFormData({ courseId: courseId || undefined, subject: "", message: "", supportType: "general" });
+      setFormData({
+        courseId: courseId || undefined,
+        subject: "",
+        message: "",
+        supportType: "general",
+      });
       setFormState("idle");
       setErrorMessage("");
       onClose();

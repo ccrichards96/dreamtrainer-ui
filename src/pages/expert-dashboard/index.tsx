@@ -10,8 +10,6 @@ import { ExpertPerformanceData } from "../../types/expert";
 
 type Tab = "courses" | "communications" | "performance" | "support";
 
-
-
 const navItems: SidebarItem[] = [
   { id: "courses", label: "My Courses", icon: BookOpen },
   { id: "communications", label: "Communications", icon: MessageSquare },

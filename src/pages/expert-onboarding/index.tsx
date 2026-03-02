@@ -21,14 +21,14 @@ export type OnboardingExpertData = {
 };
 
 export default function ExpertOnboarding() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [onboardingData, setOnboardingData] = useState<OnboardingExpertData>({});
   const [isLoadingUserData, setIsLoadingUserData] = useState(true);
   const { user, isAuthenticated } = useAuthContext();
   const { refreshUserProfile } = useApp();
   const totalSteps = 2;
-  
+
   // Accept pending invite stored in sessionStorage (set by InviteAccept before Auth0 redirect)
   useEffect(() => {
     if (!isAuthenticated) return;

@@ -24,7 +24,8 @@ export const getExpertBySlug = async (slug: string): Promise<ExpertProfile | Api
 
 export const getExpertPerformance = async (): Promise<ExpertPerformanceData | ApiError> => {
   try {
-    const response = await apiClient.get<APIResponse<ExpertPerformanceData>>(`/experts/me/performance`);
+    const response =
+      await apiClient.get<APIResponse<ExpertPerformanceData>>(`/experts/me/performance`);
     return response.data.data;
   } catch (error: any) {
     const apiError: ApiError = {
@@ -35,7 +36,9 @@ export const getExpertPerformance = async (): Promise<ExpertPerformanceData | Ap
   }
 };
 
-export const updateMyExpertProfile = async (data: UpdateExpertProfileDTO): Promise<ExpertProfile> => {
+export const updateMyExpertProfile = async (
+  data: UpdateExpertProfileDTO
+): Promise<ExpertProfile> => {
   try {
     const response = await apiClient.put<APIResponse<ExpertProfile>>(`/experts/me`, data);
     return response.data.data;

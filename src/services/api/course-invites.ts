@@ -88,9 +88,7 @@ export const inviteSupportExperts = async (
  * Get all support expert invites for a course
  * GET /courses/:courseId/invites/experts
  */
-export const getSupportExpertInvites = async (
-  courseId: string
-): Promise<CourseInvite[]> => {
+export const getSupportExpertInvites = async (courseId: string): Promise<CourseInvite[]> => {
   try {
     const response = await apiClient.get<APIResponse<CourseInvite[]>>(
       `/courses/${courseId}/invites/experts`
@@ -108,9 +106,7 @@ export const getSupportExpertInvites = async (
  * Get all course experts with their expert profiles
  * GET /courses/:courseId/experts
  */
-export const getCourseExperts = async (
-  courseId: string
-): Promise<CourseExpert[]> => {
+export const getCourseExperts = async (courseId: string): Promise<CourseExpert[]> => {
   try {
     const response = await apiClient.get<APIResponse<CourseExpert[]>>(
       `/courses/${courseId}/experts`
@@ -133,9 +129,7 @@ export const deleteSupportExpertInvite = async (
   inviteId: string
 ): Promise<void> => {
   try {
-    await apiClient.delete(
-      `/courses/${courseId}/invite/support-experts/${inviteId}`
-    );
+    await apiClient.delete(`/courses/${courseId}/invite/support-experts/${inviteId}`);
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to remove support expert: ${error.message}`);
@@ -148,9 +142,7 @@ export const deleteSupportExpertInvite = async (
  * Get all stakeholder invites for a course
  * GET /courses/:courseId/invites/stakeholders
  */
-export const getStakeholderInvites = async (
-  courseId: string
-): Promise<CourseInvite[]> => {
+export const getStakeholderInvites = async (courseId: string): Promise<CourseInvite[]> => {
   try {
     const response = await apiClient.get<APIResponse<CourseInvite[]>>(
       `/courses/${courseId}/invites/stakeholders`
@@ -168,9 +160,7 @@ export const getStakeholderInvites = async (
  * Get all established stakeholders for a course
  * GET /courses/:courseId/stakeholders
  */
-export const getCourseStakeholders = async (
-  courseId: string
-): Promise<CourseStakeholder[]> => {
+export const getCourseStakeholders = async (courseId: string): Promise<CourseStakeholder[]> => {
   try {
     const response = await apiClient.get<APIResponse<CourseStakeholder[]>>(
       `/courses/${courseId}/stakeholders`
@@ -193,9 +183,7 @@ export const deleteStakeholderInvite = async (
   inviteId: string
 ): Promise<void> => {
   try {
-    await apiClient.delete(
-      `/courses/${courseId}/invite/stakeholders/${inviteId}`
-    );
+    await apiClient.delete(`/courses/${courseId}/invite/stakeholders/${inviteId}`);
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to remove stakeholder invite: ${error.message}`);
@@ -235,7 +223,9 @@ export const acceptSupportExpertInvite = async (
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error("Error accepting support expert invite:", error);
-      throw new Error(`Failed to accept invite: ${error?.response?.data?.message || error.message}`);
+      throw new Error(
+        `Failed to accept invite: ${error?.response?.data?.message || error.message}`
+      );
     }
     if (error instanceof Error) {
       throw new Error(`Failed to accept invite: ${error.message}`);

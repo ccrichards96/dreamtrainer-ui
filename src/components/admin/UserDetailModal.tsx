@@ -65,9 +65,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
         setExpertData({
           displayName: ep.displayName || "",
           bio: ep.bio || "",
-          expertise: ep.expertise
-            ? Object.values(ep.expertise).join(", ")
-            : "",
+          expertise: ep.expertise ? Object.values(ep.expertise).join(", ") : "",
           calendarLink: ep.calendarLink || "",
           approvalStatus: ep.approvalStatus || "pending",
           listingStatus: ep.listingStatus || "private",
@@ -148,7 +146,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
         const currentExpertise = ep.expertise ? Object.values(ep.expertise).join(", ") : "";
         if (expertData.expertise !== currentExpertise) {
           expertUpdates.expertise = expertData.expertise
-            ? expertData.expertise.split(",").map((s) => s.trim()).filter(Boolean)
+            ? expertData.expertise
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean)
             : [];
           hasExpertChanges = true;
         }
@@ -261,7 +262,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="detail-firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="detail-firstName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     First Name
                   </label>
                   <input
@@ -275,7 +279,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   />
                 </div>
                 <div>
-                  <label htmlFor="detail-lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="detail-lastName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Last Name
                   </label>
                   <input
@@ -291,7 +298,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               </div>
 
               <div>
-                <label htmlFor="detail-email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="detail-email"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Email
                 </label>
                 <input
@@ -306,7 +316,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               </div>
 
               <div>
-                <label htmlFor="detail-role" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="detail-role"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Role
                 </label>
                 <select
@@ -327,7 +340,9 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-900">Onboarding Complete</p>
-                    <p className="text-xs text-gray-500">Whether the user has completed onboarding</p>
+                    <p className="text-xs text-gray-500">
+                      Whether the user has completed onboarding
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -384,7 +399,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           {activeTab === "expert" && hasExpertProfile && (
             <>
               <div>
-                <label htmlFor="expert-displayName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="expert-displayName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Display Name *
                 </label>
                 <input
@@ -399,7 +417,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               </div>
 
               <div>
-                <label htmlFor="expert-bio" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="expert-bio"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Bio
                 </label>
                 <textarea
@@ -414,7 +435,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               </div>
 
               <div>
-                <label htmlFor="expert-expertise" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="expert-expertise"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Expertise
                 </label>
                 <input
@@ -430,7 +454,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               </div>
 
               <div>
-                <label htmlFor="expert-calendarLink" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="expert-calendarLink"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Calendar Link
                 </label>
                 <input
@@ -449,7 +476,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 <h4 className="text-sm font-medium text-gray-700 mb-3">Social Links</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="expert-linkedin" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="expert-linkedin"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       LinkedIn
                     </label>
                     <input
@@ -463,7 +493,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label htmlFor="expert-twitter" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="expert-twitter"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Twitter
                     </label>
                     <input
@@ -477,7 +510,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label htmlFor="expert-facebook" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="expert-facebook"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Facebook
                     </label>
                     <input
@@ -491,7 +527,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label htmlFor="expert-instagram" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="expert-instagram"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Instagram
                     </label>
                     <input
@@ -505,7 +544,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label htmlFor="expert-youtube" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="expert-youtube"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       YouTube
                     </label>
                     <input
@@ -519,7 +561,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label htmlFor="expert-tiktok" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="expert-tiktok"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       TikTok
                     </label>
                     <input
@@ -533,7 +578,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label htmlFor="expert-website" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="expert-website"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Website
                     </label>
                     <input
@@ -551,7 +599,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="expert-approvalStatus" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="expert-approvalStatus"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Approval Status
                   </label>
                   <select
@@ -568,7 +619,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 </div>
 
                 <div>
-                  <label htmlFor="expert-listingStatus" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="expert-listingStatus"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Listing Status
                   </label>
                   <select

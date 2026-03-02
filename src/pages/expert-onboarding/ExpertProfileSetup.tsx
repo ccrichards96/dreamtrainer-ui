@@ -24,9 +24,7 @@ export default function ExpertProfileSetup({
     data.expertProfile?.displayName ?? `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim()
   );
   const [bio, setBio] = useState(data.expertProfile?.bio ?? "");
-  const [expertise, setExpertise] = useState(
-    data.expertProfile?.expertise?.join(", ") ?? ""
-  );
+  const [expertise, setExpertise] = useState(data.expertProfile?.expertise?.join(", ") ?? "");
   const [calendarLink, setCalendarLink] = useState(data.expertProfile?.calendarLink ?? "");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -41,7 +39,10 @@ export default function ExpertProfileSetup({
         displayName: displayName.trim(),
         bio: bio.trim() || undefined,
         expertise: expertise
-          ? expertise.split(",").map((s) => s.trim()).filter(Boolean)
+          ? expertise
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
           : undefined,
         calendarLink: calendarLink.trim() || undefined,
       });
@@ -77,9 +78,7 @@ export default function ExpertProfileSetup({
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Display Name *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Display Name *</label>
           <input
             type="text"
             value={displayName}
@@ -116,9 +115,7 @@ export default function ExpertProfileSetup({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Calendar Link
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Calendar Link</label>
           <input
             type="url"
             value={calendarLink}
@@ -132,7 +129,7 @@ export default function ExpertProfileSetup({
           <button
             type="button"
             onClick={onBack}
-            disabled={loading || success} 
+            disabled={loading || success}
             className="flex-1 py-3 px-4 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
           >
             Back

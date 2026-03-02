@@ -52,17 +52,14 @@ export default function InviteAccept() {
     acceptInvite(token, role);
   }, [isAuthenticated, isLoading, token, course, role, appInitialized]);
 
-  const acceptInvite = async (
-    inviteToken: string,
-    inviteRole: string | null,
-  ) => {
+  const acceptInvite = async (inviteToken: string, inviteRole: string | null) => {
     setStatus("loading");
     try {
       if (inviteRole === "support-expert") {
         await acceptSupportExpertInvite(inviteToken);
       } else if (inviteRole === "stakeholder") {
         await acceptStakeholderInvite(inviteToken);
-      }else {
+      } else {
         setStatus("error");
         setErrorMessage("Invalid invite role.");
         return;

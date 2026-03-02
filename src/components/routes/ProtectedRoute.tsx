@@ -23,7 +23,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const location = useLocation();
 
   // Routes that don't require onboarding completion
-  const onboardingExemptRoutes = ["/expert-onboarding", "/onboarding", "/checkout/success", "/teach"];
+  const onboardingExemptRoutes = [
+    "/expert-onboarding",
+    "/onboarding",
+    "/checkout/success",
+    "/teach",
+  ];
 
   // Show loading while Auth0 is loading
   if (auth0Loading) {
