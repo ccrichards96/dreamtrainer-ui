@@ -161,7 +161,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -479,7 +479,10 @@ const handleSubmit = async (e: React.FormEvent) => {
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="stripeProductId" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="stripeProductId"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Stripe Product ID
               </label>
               <input

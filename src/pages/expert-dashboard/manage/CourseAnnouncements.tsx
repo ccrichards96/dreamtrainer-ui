@@ -364,16 +364,14 @@ export default function CourseAnnouncements() {
                 }
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
               >
-                  <option value="low">Low</option>
-                  <option value="normal">Normal</option>
-                  <option value="high">High</option>
+                <option value="low">Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
               </select>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1.5">
-              Message *
-            </label>
+            <label className="block text-sm font-medium text-gray-900 mb-1.5">Message *</label>
             <div className="border border-gray-300 rounded-lg overflow-hidden">
               <ReactQuill
                 theme="snow"

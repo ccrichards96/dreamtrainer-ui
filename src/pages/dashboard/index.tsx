@@ -51,13 +51,55 @@ const getInitials = (name: string): string => {
 };
 
 const SOCIAL_LINKS = [
-  { key: "youtube" as const, icon: Youtube, label: "YouTube", bg: "bg-red-100 hover:bg-red-200", color: "text-red-600" },
-  { key: "linkedin" as const, icon: Linkedin, label: "LinkedIn", bg: "bg-blue-100 hover:bg-blue-200", color: "text-blue-700" },
-  { key: "facebook" as const, icon: Facebook, label: "Facebook", bg: "bg-blue-100 hover:bg-blue-200", color: "text-blue-600" },
-  { key: "instagram" as const, icon: Instagram, label: "Instagram", bg: "bg-pink-100 hover:bg-pink-200", color: "text-pink-600" },
-  { key: "tiktok" as const, icon: Music, label: "TikTok", bg: "bg-gray-100 hover:bg-gray-200", color: "text-gray-900" },
-  { key: "twitter" as const, icon: Twitter, label: "Twitter", bg: "bg-sky-100 hover:bg-sky-200", color: "text-sky-500" },
-  { key: "website" as const, icon: Globe, label: "Website", bg: "bg-gray-100 hover:bg-gray-200", color: "text-gray-600" },
+  {
+    key: "youtube" as const,
+    icon: Youtube,
+    label: "YouTube",
+    bg: "bg-red-100 hover:bg-red-200",
+    color: "text-red-600",
+  },
+  {
+    key: "linkedin" as const,
+    icon: Linkedin,
+    label: "LinkedIn",
+    bg: "bg-blue-100 hover:bg-blue-200",
+    color: "text-blue-700",
+  },
+  {
+    key: "facebook" as const,
+    icon: Facebook,
+    label: "Facebook",
+    bg: "bg-blue-100 hover:bg-blue-200",
+    color: "text-blue-600",
+  },
+  {
+    key: "instagram" as const,
+    icon: Instagram,
+    label: "Instagram",
+    bg: "bg-pink-100 hover:bg-pink-200",
+    color: "text-pink-600",
+  },
+  {
+    key: "tiktok" as const,
+    icon: Music,
+    label: "TikTok",
+    bg: "bg-gray-100 hover:bg-gray-200",
+    color: "text-gray-900",
+  },
+  {
+    key: "twitter" as const,
+    icon: Twitter,
+    label: "Twitter",
+    bg: "bg-sky-100 hover:bg-sky-200",
+    color: "text-sky-500",
+  },
+  {
+    key: "website" as const,
+    icon: Globe,
+    label: "Website",
+    bg: "bg-gray-100 hover:bg-gray-200",
+    color: "text-gray-600",
+  },
 ];
 
 // Convert a raw YouTube or Vimeo watch URL to an embeddable URL
@@ -615,7 +657,8 @@ function DashboardContent() {
                         Need help/support from {expert.displayName}?
                       </h2>
                       <p className="text-gray-600 mb-4">
-                        Struggling, confused, or not improving? We'll get you back on track right away:
+                        Struggling, confused, or not improving? We'll get you back on track right
+                        away:
                       </p>
 
                       {activeSocials.length > 0 && (
@@ -747,7 +790,6 @@ function DashboardContent() {
             </div>
           </motion.div>
         )}
-
 
         {/* Learning Modules - DreamFlow Section */}
         {modules.length > 0 && (

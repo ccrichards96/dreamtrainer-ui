@@ -17,15 +17,7 @@ import {
   Video,
 } from "lucide-react";
 import DashboardLayout, { type SidebarSection } from "./DashboardLayout";
-import {
-  CoursePlan,
-  Pricing,
-  Curriculum,
-  Resources,
-  Review,
-  Launch,
-  WelcomeVideo,
-} from "./manage";
+import { CoursePlan, Pricing, Curriculum, Resources, Review, Launch, WelcomeVideo } from "./manage";
 import Affiliates from "./manage/Affliates";
 import CourseAnnouncements from "./manage/CourseAnnouncements";
 import CourseStudents from "./manage/CourseStudents";

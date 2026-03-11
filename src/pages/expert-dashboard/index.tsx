@@ -19,7 +19,7 @@ const navItems: SidebarItem[] = [
   { id: "support", label: "Support", icon: HelpCircle },
 ];
 
-const validTabs: Tab[] = ["getting-started","courses", "communications", "performance", "support"];
+const validTabs: Tab[] = ["getting-started", "courses", "communications", "performance", "support"];
 
 export default function ExpertDashboard() {
   const navigate = useNavigate();
@@ -52,8 +52,8 @@ export default function ExpertDashboard() {
       onTabChange={(id) => navigate(`/expert/dashboard/${id}`)}
       title="Expert Dashboard"
       breadcrumbRoot="Expert Dashboard"
-    > 
-      {activeTab === "getting-started" && <GettingStarted/>}
+    >
+      {activeTab === "getting-started" && <GettingStarted />}
       {activeTab === "courses" && <Courses />}
       {activeTab === "communications" && <Communications />}
       {activeTab === "performance" && (

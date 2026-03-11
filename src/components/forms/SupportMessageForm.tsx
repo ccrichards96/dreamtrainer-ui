@@ -21,7 +21,12 @@ interface FormData {
 
 type FormState = "idle" | "loading" | "success" | "error";
 
-const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ courseId, expertName, isOpen, onClose }) => {
+const SupportMessageForm: React.FC<SupportMessageFormProps> = ({
+  courseId,
+  expertName,
+  isOpen,
+  onClose,
+}) => {
   const recipientName = expertName || "the Dream Trainer Team";
   const { userProfile } = useApp();
   const [formData, setFormData] = useState<FormData>({
