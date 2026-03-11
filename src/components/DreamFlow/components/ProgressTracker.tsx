@@ -24,26 +24,8 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
     setIsCollapsed(!isCollapsed);
   };
 
-  // Calculate the highest module reached (current module or any completed module)
-  const getHighestModuleReached = (): number => {
-    let highest = currentModuleIndex;
-    completedModules.forEach((index) => {
-      if (index > highest) {
-        highest = index;
-      }
-    });
-    return highest;
-  };
-
-  // Check if a module can be clicked (up to the highest module reached)
-  const canClickModule = (index: number): boolean => {
-    return index <= getHighestModuleReached();
-  };
-
   const handleModuleClick = (index: number) => {
-    if (canClickModule(index) && onModuleClick) {
-      onModuleClick(index);
-    }
+    onModuleClick?.(index);
   };
 
   return (
@@ -116,30 +98,23 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
 
                 {/* Compact Module Indicators */}
                 <div className="space-y-2">
-                  {modules.map((_, index) => {
-                    const isClickable = canClickModule(index);
-                    return (
-                      <motion.div
-                        key={index}
-                        onClick={() => handleModuleClick(index)}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors mx-auto ${
-                          completedModules.has(index)
-                            ? "bg-green-500 text-white"
-                            : index === currentModuleIndex
-                              ? "bg-indigo-500 text-white"
-                              : "bg-gray-200 text-gray-500"
-                        } ${
-                          isClickable
-                            ? "cursor-pointer hover:ring-2 hover:ring-indigo-300"
-                            : "cursor-not-allowed opacity-60"
-                        }`}
-                        whileHover={isClickable ? { scale: 1.05 } : {}}
-                        whileTap={isClickable ? { scale: 0.95 } : {}}
-                      >
-                        {completedModules.has(index) ? <CheckCircle size={14} /> : index + 1}
-                      </motion.div>
-                    );
-                  })}
+                  {modules.map((_, index) => (
+                    <motion.div
+                      key={index}
+                      onClick={() => handleModuleClick(index)}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors mx-auto cursor-pointer hover:ring-2 hover:ring-indigo-300 ${
+                        completedModules.has(index)
+                          ? "bg-green-500 text-white"
+                          : index === currentModuleIndex
+                            ? "bg-indigo-500 text-white"
+                            : "bg-gray-200 text-gray-500"
+                      }`}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {completedModules.has(index) ? <CheckCircle size={14} /> : index + 1}
+                    </motion.div>
+                  ))}
                 </div>
               </motion.div>
             ) : (
@@ -169,17 +144,11 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
 
                 {/* Detailed Module List */}
                 <div className="space-y-4">
-                  {modules.map((module, index) => {
-                    const isClickable = canClickModule(index);
-                    return (
+                  {modules.map((module, index) => (
                       <motion.div
                         key={index}
                         onClick={() => handleModuleClick(index)}
-                        className={`flex items-start gap-3 ${
-                          isClickable
-                            ? "cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2"
-                            : "cursor-not-allowed opacity-60"
-                        }`}
+                        className="flex items-start gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
@@ -191,9 +160,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                               : index === currentModuleIndex
                                 ? "bg-indigo-500 text-white"
                                 : "bg-gray-200 text-gray-500"
-                          } ${isClickable ? "group-hover:ring-2 group-hover:ring-indigo-300" : ""}`}
-                          whileHover={isClickable ? { scale: 1.05 } : {}}
-                          whileTap={isClickable ? { scale: 0.95 } : {}}
+                          }`}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                         >
                           {completedModules.has(index) ? <CheckCircle size={16} /> : index + 1}
                         </motion.div>
@@ -228,8 +197,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                           </div>
                         </div>
                       </motion.div>
-                    );
-                  })}
+                  ))}
                 </div>
               </motion.div>
             )}

@@ -4,20 +4,22 @@ import { BookOpen, MessageSquare, BarChart3, HelpCircle } from "lucide-react";
 import DashboardLayout, { type SidebarItem } from "./DashboardLayout";
 import Courses from "./core/Courses";
 import Communications from "./core/Communications";
+import GettingStarted from "./core/GettingStarted";
 import Performance from "./core/Performance";
 import { getExpertPerformance } from "../../services/api/experts";
 import { ExpertPerformanceData } from "../../types/expert";
 
-type Tab = "courses" | "communications" | "performance" | "support";
+type Tab = "getting-started" | "courses" | "communications" | "performance" | "support";
 
 const navItems: SidebarItem[] = [
+  { id: "getting-started", label: "Getting Started", icon: BookOpen },
   { id: "courses", label: "My Courses", icon: BookOpen },
   { id: "communications", label: "Communications", icon: MessageSquare },
   { id: "performance", label: "Performance", icon: BarChart3 },
   { id: "support", label: "Support", icon: HelpCircle },
 ];
 
-const validTabs: Tab[] = ["courses", "communications", "performance", "support"];
+const validTabs: Tab[] = ["getting-started","courses", "communications", "performance", "support"];
 
 export default function ExpertDashboard() {
   const navigate = useNavigate();
@@ -50,7 +52,8 @@ export default function ExpertDashboard() {
       onTabChange={(id) => navigate(`/expert/dashboard/${id}`)}
       title="Expert Dashboard"
       breadcrumbRoot="Expert Dashboard"
-    >
+    > 
+      {activeTab === "getting-started" && <GettingStarted/>}
       {activeTab === "courses" && <Courses />}
       {activeTab === "communications" && <Communications />}
       {activeTab === "performance" && (

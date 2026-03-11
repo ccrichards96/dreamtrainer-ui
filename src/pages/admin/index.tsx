@@ -21,6 +21,7 @@ import {
   getCourseById,
   updateCourse,
   createCourse,
+  deleteCourse,
 } from "../../services/api/modules";
 import { getAllCategories } from "../../services/api/categories";
 import {
@@ -58,6 +59,10 @@ const AdminDashboard: React.FC = () => {
   });
   const [creatingCourse, setCreatingCourse] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Delete confirmation modal
+  const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
+  const [deletingCourse, setDeletingCourse] = useState(false);
 
   // Load all courses on component mount
   useEffect(() => {
@@ -193,6 +198,23 @@ const AdminDashboard: React.FC = () => {
       setCourses(sortedCourses);
     } catch (err) {
       console.error("Error refreshing courses:", err);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!courseToDelete) return;
+    try {
+      setDeletingCourse(true);
+      await deleteCourse(courseToDelete.id);
+      setCourseToDelete(null);
+      setSuccessMessage(`"${courseToDelete.name}" has been deleted.`);
+      await refreshCourses();
+      setTimeout(() => setSuccessMessage(null), 4000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to delete course";
+      setError(errorMessage);
+    } finally {
+      setDeletingCourse(false);
     }
   };
 
@@ -590,6 +612,7 @@ const AdminDashboard: React.FC = () => {
                                   Sections
                                 </button>
                                 <button
+                                  onClick={() => setCourseToDelete(course)}
                                   disabled={reorderingCourseId !== null}
                                   className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"
                                 >
@@ -664,6 +687,68 @@ const AdminDashboard: React.FC = () => {
         {/* Category Manager */}
         {view === "category-manage" && <CategoryManager />}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {courseToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-200 flex items-center gap-3">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Delete Course</h3>
+                <p className="text-sm text-gray-500">"{courseToDelete.name}"</p>
+              </div>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm font-semibold text-red-600 mb-3">
+                This action is irreversible — by deleting this course you remove the following:
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700">
+                {[
+                  "All Course Details",
+                  "Related Stripe Products become Archived",
+                  "All Students & Their Subscriptions Are to Be Cancelled",
+                  "Any Related Course Assets",
+                  "Any Other Course Details",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <span className="mt-0.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => setCourseToDelete(null)}
+                disabled={deletingCourse}
+                className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                disabled={deletingCourse}
+                className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {deletingCourse ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Yes, Delete Course
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

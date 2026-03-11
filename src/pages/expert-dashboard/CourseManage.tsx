@@ -19,7 +19,6 @@ import {
 import DashboardLayout, { type SidebarSection } from "./DashboardLayout";
 import {
   CoursePlan,
-  CourseStructure,
   Pricing,
   Curriculum,
   Resources,
@@ -30,14 +29,13 @@ import {
 import Affiliates from "./manage/Affliates";
 import CourseAnnouncements from "./manage/CourseAnnouncements";
 import CourseStudents from "./manage/CourseStudents";
-import CourseStudentLeaders from "./manage/CourseStudentLeaders";
+//import CourseStudentLeaders from "./manage/CourseStudentLeaders";
 import Expert from "./manage/Expert";
-import Stakeholders from "./manage/Stakeholders";
+//import Stakeholders from "./manage/Stakeholders";
 import { useExpertDashboardContext } from "../../contexts";
 
 type ManageTab =
   | "plan"
-  | "structure"
   | "pricing"
   | "curriculum"
   | "resources"
@@ -53,6 +51,20 @@ type ManageTab =
   | "launch";
 
 const SUPPORT_EXPERT_TABS: ManageTab[] = ["curriculum", "resources", "announcements", "students"];
+
+function ComingSoon({ title }: { title: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 text-center">
+      <div className="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
+        <Rocket className="w-7 h-7 text-indigo-400" />
+      </div>
+      <h2 className="text-xl font-semibold text-gray-800 mb-2">{title}</h2>
+      <p className="text-sm text-gray-500 max-w-xs">
+        This feature is on its way. Check back soon for updates.
+      </p>
+    </div>
+  );
+}
 
 function AccessDenied() {
   return (
@@ -73,7 +85,6 @@ const sidebarSections: SidebarSection[] = [
     label: "Course Planning",
     items: [
       { id: "plan", label: "Course Plan & Outcomes", icon: ClipboardList },
-      { id: "structure", label: "Course Structure", icon: Target },
       { id: "pricing", label: "Pricing", icon: DollarSign },
     ],
   },
@@ -102,10 +113,10 @@ const sidebarSections: SidebarSection[] = [
     id: "course-management",
     label: "Course Management",
     items: [
+      { id: "welcome-video", label: "Welcome Video", icon: Video },
       { id: "announcements", label: "Announcements", icon: Megaphone },
       { id: "students", label: "Students", icon: Users },
       { id: "student-leaders", label: "Student Leaders", icon: Users },
-      { id: "welcome-video", label: "Welcome Video", icon: Video },
     ],
   },
   {
@@ -159,8 +170,6 @@ export default function CourseManage() {
     switch (activeTab) {
       case "plan":
         return <CoursePlan />;
-      case "structure":
-        return <CourseStructure />;
       case "pricing":
         return <Pricing />;
       case "curriculum":
@@ -170,7 +179,7 @@ export default function CourseManage() {
       case "experts":
         return <Expert />;
       case "stakeholders":
-        return <Stakeholders />;
+        return <ComingSoon title="Stakeholders — Coming Soon" />;
       case "affiliates":
         return <Affiliates />;
       case "announcements":
@@ -178,7 +187,7 @@ export default function CourseManage() {
       case "students":
         return <CourseStudents />;
       case "student-leaders":
-        return <CourseStudentLeaders />;
+        return <ComingSoon title="Student Leaders — Coming Soon" />;
       case "welcome-video":
         return <WelcomeVideo />;
       case "review":

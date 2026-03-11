@@ -95,18 +95,7 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
   };
 
   const handleModuleClick = (index: number) => {
-    // Calculate the highest module reached
-    let highestReached = currentModuleIndex;
-    completedModules.forEach((moduleIndex) => {
-      if (moduleIndex > highestReached) {
-        highestReached = moduleIndex;
-      }
-    });
-
-    // Allow navigation to any module up to the highest reached
-    if (index <= highestReached) {
-      setCurrentModuleIndex(index);
-    }
+    setCurrentModuleIndex(index);
   };
 
   return (

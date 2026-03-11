@@ -10,6 +10,8 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import { useExpertDashboardContext } from "../../../contexts";
 import {
   createCourseAnnouncement,
@@ -20,6 +22,7 @@ import {
 import { Announcement, CreateCourseAnnouncementPayload } from "../../../types/announcements";
 import ManagePageHeader from "./ManagePageHeader";
 import Modal from "../../../components/modals/Modal";
+import { sanitizeHtml, getPlainTextLength } from "../../../utils/htmlSanitizer";
 
 const emptyForm: CreateCourseAnnouncementPayload = {
   name: "",
@@ -101,7 +104,7 @@ export default function CourseAnnouncements() {
     e.preventDefault();
     if (!courseId) return;
 
-    if (!formData.name.trim() || !formData.message.trim()) {
+    if (!formData.name.trim() || getPlainTextLength(formData.message) === 0) {
       setFormError("Name and message are required.");
       return;
     }
@@ -109,10 +112,11 @@ export default function CourseAnnouncements() {
     setIsSubmitting(true);
     setFormError(null);
     try {
+      const payload = { ...formData, message: sanitizeHtml(formData.message) };
       if (isEditing) {
-        await updateAnnouncement(editingAnnouncement.id, formData);
+        await updateAnnouncement(editingAnnouncement.id, payload);
       } else {
-        await createCourseAnnouncement(courseId, formData);
+        await createCourseAnnouncement(courseId, payload);
         setPage(1);
       }
       closeModal();
@@ -224,9 +228,10 @@ export default function CourseAnnouncements() {
                         {typeBadge(announcement.type)}
                         {priorityBadge(announcement.priority)}
                       </div>
-                      <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                        {announcement.message}
-                      </p>
+                      <div
+                        className="text-sm text-gray-600 [&>p]:mb-1 [&>ul]:ml-4 [&>ol]:ml-4 [&>li]:mb-0.5 [&>strong]:font-semibold [&>em]:italic [&>u]:underline [&>a]:text-purple-600 [&>a]:underline"
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(announcement.message) }}
+                      />
                       <p className="mt-2 text-xs text-gray-400">
                         {new Date(announcement.createdAt).toLocaleDateString("en-US", {
                           year: "numeric",
@@ -296,7 +301,7 @@ export default function CourseAnnouncements() {
         isOpen={showModal}
         onClose={closeModal}
         title={isEditing ? "Edit Announcement" : "Create Announcement"}
-        size="md"
+        size="xl"
       >
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {formError && (
@@ -308,7 +313,7 @@ export default function CourseAnnouncements() {
 
           <div>
             <label htmlFor="ann-name" className="block text-sm font-medium text-gray-900 mb-1.5">
-              Title
+              Announcement Title *
             </label>
             <input
               id="ann-name"
@@ -321,24 +326,10 @@ export default function CourseAnnouncements() {
             />
           </div>
 
-          <div>
-            <label htmlFor="ann-message" className="block text-sm font-medium text-gray-900 mb-1.5">
-              Message
-            </label>
-            <textarea
-              id="ann-message"
-              rows={4}
-              value={formData.message}
-              onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
-              placeholder="Write your announcement message..."
-              className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500"
-            />
-          </div>
-
           <div className="flex gap-4">
             <div className="flex-1">
               <label htmlFor="ann-type" className="block text-sm font-medium text-gray-900 mb-1.5">
-                Type
+                Type *
               </label>
               <select
                 id="ann-type"
@@ -349,8 +340,9 @@ export default function CourseAnnouncements() {
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
               >
                 <option value="general">General</option>
-                <option value="update">Update</option>
-                <option value="alert">Alert</option>
+                <option value="account">Account</option>
+                <option value="support">Support</option>
+                <option value="other">Other</option>
               </select>
             </div>
 
@@ -359,7 +351,7 @@ export default function CourseAnnouncements() {
                 htmlFor="ann-priority"
                 className="block text-sm font-medium text-gray-900 mb-1.5"
               >
-                Priority
+                Priority *
               </label>
               <select
                 id="ann-priority"
@@ -372,10 +364,33 @@ export default function CourseAnnouncements() {
                 }
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
               >
-                <option value="normal">Normal</option>
-                <option value="high">High</option>
-                <option value="urgent">Urgent</option>
+                  <option value="low">Low</option>
+                  <option value="normal">Normal</option>
+                  <option value="high">High</option>
               </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-1.5">
+              Message *
+            </label>
+            <div className="border border-gray-300 rounded-lg overflow-hidden">
+              <ReactQuill
+                theme="snow"
+                value={formData.message}
+                onChange={(content) => setFormData((prev) => ({ ...prev, message: content }))}
+                placeholder="Write your announcement message..."
+                style={{ minHeight: "150px", backgroundColor: "white" }}
+                modules={{
+                  toolbar: [
+                    [{ header: [1, 2, 3, false] }],
+                    ["bold", "italic", "underline", "strike"],
+                    [{ list: "ordered" }, { list: "bullet" }],
+                    ["link"],
+                    ["clean"],
+                  ],
+                }}
+              />
             </div>
           </div>
 

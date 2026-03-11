@@ -11,6 +11,13 @@ import {
   Download,
   Youtube,
   ExternalLink,
+  User,
+  Linkedin,
+  Facebook,
+  Instagram,
+  Twitter,
+  Globe,
+  Music,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
@@ -34,6 +41,24 @@ const formatFileSize = (bytes: number): string => {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 };
+
+// Get initials from a display name for avatar fallback
+const getInitials = (name: string): string => {
+  const parts = name.trim().split(/\s+/);
+  return parts.length >= 2
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : name.slice(0, 2).toUpperCase();
+};
+
+const SOCIAL_LINKS = [
+  { key: "youtube" as const, icon: Youtube, label: "YouTube", bg: "bg-red-100 hover:bg-red-200", color: "text-red-600" },
+  { key: "linkedin" as const, icon: Linkedin, label: "LinkedIn", bg: "bg-blue-100 hover:bg-blue-200", color: "text-blue-700" },
+  { key: "facebook" as const, icon: Facebook, label: "Facebook", bg: "bg-blue-100 hover:bg-blue-200", color: "text-blue-600" },
+  { key: "instagram" as const, icon: Instagram, label: "Instagram", bg: "bg-pink-100 hover:bg-pink-200", color: "text-pink-600" },
+  { key: "tiktok" as const, icon: Music, label: "TikTok", bg: "bg-gray-100 hover:bg-gray-200", color: "text-gray-900" },
+  { key: "twitter" as const, icon: Twitter, label: "Twitter", bg: "bg-sky-100 hover:bg-sky-200", color: "text-sky-500" },
+  { key: "website" as const, icon: Globe, label: "Website", bg: "bg-gray-100 hover:bg-gray-200", color: "text-gray-600" },
+];
 
 // Convert a raw YouTube or Vimeo watch URL to an embeddable URL
 const toEmbedUrl = (url: string): string => {
@@ -90,8 +115,8 @@ function CourseResourcesSection({ courseId }: { courseId?: string }) {
     fetchResources();
   }, [courseId]);
 
-  // Don't render if no courseId
-  if (!courseId) {
+  // Don't render if no courseId or empty resources
+  if (!courseId || resources.length === 0) {
     return null;
   }
 
@@ -242,7 +267,6 @@ function DashboardContent() {
     error: courseError,
     loadCourse,
     loadSectionModules,
-    startTestMode,
   } = useCourseContext();
 
   // State for available sections within the current course
@@ -279,11 +303,20 @@ function DashboardContent() {
         const sortedSections = sections.sort((a, b) => a.order - b.order);
         setAvailableSections(sortedSections);
 
+        // Determine which section to load
+        const sectionToLoad =
+          selectedSectionId && sortedSections.some((s) => s.id === selectedSectionId)
+            ? selectedSectionId
+            : sortedSections.length > 0
+              ? sortedSections[0].id
+              : null;
+
         // Load modules for the active section
-        if (selectedSectionId && sortedSections.some((s) => s.id === selectedSectionId)) {
-          await loadSectionModules(selectedSectionId);
-        } else if (sortedSections.length > 0) {
-          await loadSectionModules(sortedSections[0].id);
+        if (sectionToLoad) {
+          await loadSectionModules(sectionToLoad);
+          // Persist last visited course + section for the nav "Continue Learning" button
+          localStorage.setItem("last_course_id", targetCourseId);
+          localStorage.setItem("last_section_id", sectionToLoad);
         }
 
         // Clear localStorage selection after loading
@@ -303,8 +336,12 @@ function DashboardContent() {
   const handleSwitchSection = async (sectionId: string) => {
     try {
       setSwitchingSection(sectionId);
-      // Load modules for the selected section from context
       await loadSectionModules(sectionId);
+      // Keep last_section_id in sync when user switches sections
+      if (currentCourse) {
+        localStorage.setItem("last_course_id", currentCourse.id);
+        localStorage.setItem("last_section_id", sectionId);
+      }
     } catch (error) {
       console.error("Error switching section:", error);
     } finally {
@@ -363,85 +400,16 @@ function DashboardContent() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-2xl shadow-lg p-8 mb-8"
         >
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {firstName}!</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold text-gray-900">Welcome back, {firstName}!</h1>
+            <button
+              onClick={() => setWelcomeModalOpen(true)}
+              className="text-base font-medium bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors shadow-md flex items-center flex-shrink-0"
+            >
+              <Play className="w-5 h-5 mr-2" /> Watch Your Welcome Video!
+            </button>
+          </div>
         </motion.div>
-
-        {/* Available Sections - Only show if course is loaded and has sections */}
-        {currentCourse && availableSections.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="mb-8"
-          >
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">{currentCourse.name}</h2>
-            <p className="text-gray-600 mb-4">Select a section to continue learning</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {availableSections.map((section, index) => {
-                const isActive = currentSectionId === section.id;
-                const isLoading = switchingSection === section.id;
-
-                return (
-                  <motion.button
-                    key={section.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 + index * 0.05 }}
-                    onClick={() => !isActive && handleSwitchSection(section.id)}
-                    disabled={isLoading}
-                    className={`relative p-6 rounded-xl transition-all ${
-                      isActive
-                        ? "bg-gradient-to-br from-[#c5a8de] to-[#b399d6] text-white shadow-lg ring-2 ring-[#c5a8de] ring-offset-2"
-                        : "bg-white text-gray-900 shadow-md hover:shadow-lg hover:scale-105"
-                    } ${isLoading ? "opacity-50 cursor-wait" : "cursor-pointer"}`}
-                  >
-                    {isActive && (
-                      <div className="absolute top-3 right-3">
-                        <div className="bg-white text-[#c5a8de] text-xs font-semibold px-2 py-1 rounded-full">
-                          Active
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex flex-col items-center text-center">
-                      {isLoading ? (
-                        <RefreshCw className="w-8 h-8 mb-3 animate-spin" />
-                      ) : (
-                        <div
-                          className={`w-12 h-12 mb-3 rounded-full flex items-center justify-center ${
-                            isActive ? "bg-white/20" : "bg-[#c5a8de]/10"
-                          }`}
-                        >
-                          <svg
-                            className={`w-6 h-6 ${isActive ? "text-white" : "text-[#c5a8de]"}`}
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                          </svg>
-                        </div>
-                      )}
-
-                      <h3
-                        className={`font-semibold mb-1 ${isActive ? "text-white" : "text-gray-900"}`}
-                      >
-                        {section.name}
-                      </h3>
-
-                      {section.description && (
-                        <p
-                          className={`text-sm line-clamp-2 ${isActive ? "text-white/90" : "text-gray-600"}`}
-                        >
-                          {section.description}
-                        </p>
-                      )}
-                    </div>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
 
         {/* Score Progress Section - Only show if course has tests */}
         {tests.length > 0 && (startingScore !== null || currentScore !== null) && (
@@ -535,14 +503,8 @@ function DashboardContent() {
             transition={{ delay: 0.2 }}
             className="bg-white rounded-2xl shadow-lg p-8"
           >
-            <div className="flex items-center justify-between mb-6">
+            <div className="mb-6">
               <h2 className="text-2xl font-semibold text-gray-900">General Announcements</h2>
-              <button
-                onClick={() => setWelcomeModalOpen(true)}
-                className="text-base font-medium bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors shadow-md flex items-center"
-              >
-                <Play className="w-5 h-5 mr-2" /> Watch Your Welcome Video!
-              </button>
             </div>
             <div className="max-h-80 overflow-y-auto">
               {announcements.length === 0 ? (
@@ -615,98 +577,177 @@ function DashboardContent() {
           </motion.div>
 
           {/* Need Help? */}
+          {currentCourse?.expertProfile && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white rounded-2xl shadow-lg p-8"
+            >
+              {(() => {
+                const expert = currentCourse.expertProfile!;
+                const activeSocials = SOCIAL_LINKS.filter(({ key }) => expert.socialLinks?.[key]);
+                return (
+                  <div className="flex flex-col gap-6 items-center text-center">
+                    <div className="flex-shrink-0">
+                      <div className="relative w-32 h-32 mx-auto">
+                        {expert.avatarUrl ? (
+                          <img
+                            src={expert.avatarUrl}
+                            alt={expert.displayName}
+                            className="w-full h-full rounded-full object-cover shadow-xl ring-4 ring-[#c5a8de]/20"
+                          />
+                        ) : (
+                          <div className="w-full h-full rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-xl ring-4 ring-[#c5a8de]/20">
+                            {expert.displayName ? (
+                              <span className="text-white font-bold text-3xl">
+                                {getInitials(expert.displayName)}
+                              </span>
+                            ) : (
+                              <User className="w-12 h-12 text-white" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                        Need help/support from {expert.displayName}?
+                      </h2>
+                      <p className="text-gray-600 mb-4">
+                        Struggling, confused, or not improving? We'll get you back on track right away:
+                      </p>
+
+                      {activeSocials.length > 0 && (
+                        <div className="flex items-center justify-center gap-4 mb-4">
+                          {activeSocials.map(({ key, icon: Icon, label, bg, color }) => (
+                            <a
+                              key={key}
+                              href={expert.socialLinks[key]!}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`w-10 h-10 rounded-full ${bg} flex items-center justify-center transition-colors`}
+                              title={label}
+                            >
+                              <Icon className={`w-5 h-5 ${color}`} />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+
+                      {expert.slug && (
+                        <a
+                          href={`/experts/${expert.slug}`}
+                          className="text-[#c5a8de] hover:text-[#b399d6] text-sm font-medium flex items-center justify-center gap-1 mb-4"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          View {expert.displayName}'s Full Profile
+                        </a>
+                      )}
+
+                      {expert.calendarLink && (
+                        <a
+                          href={expert.calendarLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full bg-[#c5a8de] text-white py-4 px-8 rounded-lg font-medium hover:bg-[#b399d6] hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-md"
+                        >
+                          <Calendar className="w-5 h-5" />
+                          Schedule a Session with {expert.displayName}
+                        </a>
+                      )}
+                      <button
+                        onClick={() => setSupportMessageModalOpen(true)}
+                        className="w-full bg-blue-600 text-white py-4 px-8 rounded-lg font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-md"
+                      >
+                        <Mail className="w-5 h-5" />
+                        Send Message
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+            </motion.div>
+          )}
+        </div>
+
+        {/* Available Sections - Only show if course is loaded and has sections */}
+        {currentCourse && availableSections.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl shadow-lg p-8"
+            transition={{ delay: 0.05 }}
+            className="mb-8"
           >
-            <div className="flex flex-col gap-6 items-center text-center">
-              <div className="flex-shrink-0">
-                <div className="relative w-32 h-32 mx-auto">
-                  <img
-                    src="https://i0.wp.com/www.notefull.com/wp-content/uploads/2017/05/NotefullJoseph-2-scaled.jpg?w=2114&ssl=1"
-                    alt="Joseph - TOEFL Expert"
-                    className="w-full h-full rounded-full object-cover shadow-xl ring-4 ring-[#c5a8de]/20"
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                  Need help/support from Joseph?
-                </h2>
-                <p className="text-gray-600 mb-4">
-                  Struggling, confused, or not improving? We'll get you back on track right away:
-                </p>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">{currentCourse.name}</h2>
+            <p className="text-gray-600 mb-4">Select a section to continue learning</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {availableSections.map((section, index) => {
+                const isActive = currentSectionId === section.id;
+                const isLoading = switchingSection === section.id;
 
-                {/* Social Links */}
-                <div className="flex items-center justify-center gap-4 mb-4">
-                  <a
-                    href="https://www.youtube.com/@Notefull"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-full bg-red-100 hover:bg-red-200 flex items-center justify-center transition-colors"
-                    title="YouTube"
+                return (
+                  <motion.button
+                    key={section.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + index * 0.05 }}
+                    onClick={() => !isActive && handleSwitchSection(section.id)}
+                    disabled={isLoading}
+                    className={`relative p-6 rounded-xl transition-all ${
+                      isActive
+                        ? "bg-gradient-to-br from-[#c5a8de] to-[#b399d6] text-white shadow-lg ring-2 ring-[#c5a8de] ring-offset-2"
+                        : "bg-white text-gray-900 shadow-md hover:shadow-lg hover:scale-105"
+                    } ${isLoading ? "opacity-50 cursor-wait" : "cursor-pointer"}`}
                   >
-                    <Youtube className="w-5 h-5 text-red-600" />
-                  </a>
-                  <a
-                    href="https://www.facebook.com/notefull"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-full bg-blue-100 hover:bg-blue-200 flex items-center justify-center transition-colors"
-                    title="Facebook"
-                  >
-                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                    </svg>
-                  </a>
-                  <a
-                    href="https://www.instagram.com/notefull_toefl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-full bg-pink-100 hover:bg-pink-200 flex items-center justify-center transition-colors"
-                    title="Instagram"
-                  >
-                    <svg className="w-5 h-5 text-pink-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                    </svg>
-                  </a>
-                  <a
-                    href="https://www.tiktok.com/@notefull"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-                    title="TikTok"
-                  >
-                    <svg className="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
-                    </svg>
-                  </a>
-                </div>
+                    {isActive && (
+                      <div className="absolute top-3 right-3">
+                        <div className="bg-white text-[#c5a8de] text-xs font-semibold px-2 py-1 rounded-full">
+                          Active
+                        </div>
+                      </div>
+                    )}
 
-                {/* Expert Profile Link */}
-                <a
-                  href="/experts/joseph"
-                  className="text-[#c5a8de] hover:text-[#b399d6] text-sm font-medium flex items-center justify-center gap-1 mb-4"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  View Joseph's Full Profile
-                </a>
+                    <div className="flex flex-col items-center text-center">
+                      {isLoading ? (
+                        <RefreshCw className="w-8 h-8 mb-3 animate-spin" />
+                      ) : (
+                        <div
+                          className={`w-12 h-12 mb-3 rounded-full flex items-center justify-center ${
+                            isActive ? "bg-white/20" : "bg-[#c5a8de]/10"
+                          }`}
+                        >
+                          <svg
+                            className={`w-6 h-6 ${isActive ? "text-white" : "text-[#c5a8de]"}`}
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                          </svg>
+                        </div>
+                      )}
 
-                <a
-                  href="https://calendly.com/notefulljoseph/toefl-course-help"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-[#c5a8de] text-white py-4 px-8 rounded-lg font-medium hover:bg-[#b399d6] hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-md"
-                >
-                  <Calendar className="w-5 h-5" />
-                  Schedule a Session with Joseph
-                </a>
-              </div>
+                      <h3
+                        className={`font-semibold mb-1 ${isActive ? "text-white" : "text-gray-900"}`}
+                      >
+                        {section.name}
+                      </h3>
+
+                      {section.description && (
+                        <p
+                          className={`text-sm line-clamp-2 ${isActive ? "text-white/90" : "text-gray-600"}`}
+                        >
+                          {section.description}
+                        </p>
+                      )}
+                    </div>
+                  </motion.button>
+                );
+              })}
             </div>
           </motion.div>
-        </div>
+        )}
+
 
         {/* Learning Modules - DreamFlow Section */}
         {modules.length > 0 && (
@@ -735,34 +776,12 @@ function DashboardContent() {
 
         {/* Course Resources Section */}
         <CourseResourcesSection courseId={currentCourse?.id} />
-        {/* Send Message Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white rounded-2xl shadow-lg p-8 mb-8"
-        >
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-            Send a Message to Joseph and the Dream Trainer Team
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Have a question or need assistance? Send us a message and we'll get back to you
-            promptly.
-          </p>
-          <button
-            onClick={() => setSupportMessageModalOpen(true)}
-            className="w-full bg-blue-600 text-white py-4 rounded-lg font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
-          >
-            <Mail className="w-5 h-5" />
-            Send Message
-          </button>
-        </motion.div>
       </div>
       {/* Welcome Modal */}
       <Modal
         isOpen={welcomeModalOpen}
         onClose={() => setWelcomeModalOpen(false)}
-        title="Welcome to Dream Trainer!"
+        title={currentCourse?.name ? `Welcome to ${currentCourse?.name}!` : "Welcome!"}
         size="xl"
         closeOnOverlayClick={false}
         closeOnEscape={false}
@@ -778,7 +797,7 @@ function DashboardContent() {
               frameBorder="0"
               allow="autoplay; fullscreen; picture-in-picture"
               allowFullScreen
-              title="Welcome to Dream Trainer"
+              title={currentCourse?.name ? `Welcome to ${currentCourse?.name}` : "Welcome!"}
               className="rounded-lg"
             ></iframe>
           </div>
@@ -788,7 +807,7 @@ function DashboardContent() {
             onClick={() => {
               setWelcomeModalOpen(false);
             }}
-            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
+            className="mt-3 bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
           >
             Let's Begin
           </button>
@@ -796,6 +815,7 @@ function DashboardContent() {
       </Modal>
       <SupportMessageForm
         courseId={currentCourse?.id}
+        expertName={currentCourse?.expertProfile?.displayName}
         isOpen={supportMessageModalOpen}
         onClose={() => setSupportMessageModalOpen(false)}
       />

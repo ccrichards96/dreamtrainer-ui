@@ -40,14 +40,6 @@ export default function Courses() {
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">Courses</h1>
-        <button
-          type="button"
-          onClick={() => setShowCreateModal(true)}
-          className="py-2.5 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700"
-        >
-          <Plus className="shrink-0 size-4" />
-          New Course
-        </button>
       </div>
 
       {assignedCourses.length > 0 ? (

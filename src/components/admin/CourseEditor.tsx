@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Save, X, AlertCircle, AlertTriangle } from "lucide-react";
+import { Save, X, AlertCircle } from "lucide-react";
 import { Course, CourseStatus, ListingStatus } from "../../types/modules";
 import { Category } from "../../types/categories";
 import { User } from "../../types/user";
@@ -119,6 +119,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     learningObjectives: course.learningObjectives || [],
     prerequisites: course.prerequisites || [],
     targetAudiences: course.targetAudiences || [],
+    stripeProductId: course.stripeProductId || "",
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -129,7 +130,6 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
 
   useEffect(() => {
     getAllCategories()
@@ -158,25 +158,10 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
   ) => {
     const { name, value } = e.target;
 
-    // Intercept status change to published — show confirm
-    if (
-      name === "status" &&
-      value === CourseStatus.PUBLISHED &&
-      formData.status !== CourseStatus.PUBLISHED
-    ) {
-      setShowPublishConfirm(true);
-      return;
-    }
-
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const confirmPublish = () => {
-    setFormData((prev) => ({ ...prev, status: CourseStatus.PUBLISHED }));
-    setShowPublishConfirm(false);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -195,6 +180,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
         learningObjectives: formData.learningObjectives,
         prerequisites: formData.prerequisites,
         targetAudiences: formData.targetAudiences,
+        stripeProductId: formData.stripeProductId || null,
       });
 
       setSuccess(true);
@@ -248,36 +234,6 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
         {success && (
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
             <span className="text-green-700">Course updated successfully!</span>
-          </div>
-        )}
-
-        {/* Publish confirm banner */}
-        {showPublishConfirm && (
-          <div className="p-4 bg-yellow-50 border border-yellow-300 rounded-lg flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-yellow-800">Publish this course?</p>
-              <p className="text-sm text-yellow-700 mt-1">
-                Publishing will make this course visible based on its listing status. This action
-                can be reversed by setting the status back to Draft or Archived.
-              </p>
-              <div className="mt-3 flex gap-2">
-                <button
-                  type="button"
-                  onClick={confirmPublish}
-                  className="px-3 py-1.5 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700"
-                >
-                  Yes, Publish
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowPublishConfirm(false)}
-                  className="px-3 py-1.5 bg-white text-yellow-700 border border-yellow-300 text-sm rounded-lg hover:bg-yellow-50"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
           </div>
         )}
 
@@ -523,14 +479,17 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="stripeProductId" className="block text-sm font-medium text-gray-700 mb-1">
                 Stripe Product ID
               </label>
               <input
                 type="text"
-                value={course.stripeProductId || "—"}
-                disabled
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-400 font-mono text-sm"
+                id="stripeProductId"
+                name="stripeProductId"
+                value={formData.stripeProductId}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                placeholder="prod_..."
               />
             </div>
             <div>

@@ -7,6 +7,7 @@ import Modal from "../modals/Modal";
 
 interface SupportMessageFormProps {
   courseId?: string;
+  expertName?: string;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -20,7 +21,8 @@ interface FormData {
 
 type FormState = "idle" | "loading" | "success" | "error";
 
-const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ courseId, isOpen, onClose }) => {
+const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ courseId, expertName, isOpen, onClose }) => {
+  const recipientName = expertName || "the Dream Trainer Team";
   const { userProfile } = useApp();
   const [formData, setFormData] = useState<FormData>({
     courseId: courseId || undefined,
@@ -118,7 +120,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ courseId, isOpe
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Message Sent Successfully!</h3>
             <p className="text-gray-600">
-              Joseph and the Dream Trainer team will get back to you soon.
+              {recipientName} and the Dream Trainer team will get back to you soon.
             </p>
           </motion.div>
         );
@@ -246,7 +248,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({ courseId, isOpe
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Send a Message to Joseph and the Dream Trainer Team"
+      title={`Send a Message to ${recipientName}`}
       size="lg"
       closeOnOverlayClick={formState !== "loading"}
       closeOnEscape={formState !== "loading"}
