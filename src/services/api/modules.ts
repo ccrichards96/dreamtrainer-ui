@@ -306,6 +306,7 @@ export const updateCourse = async (
     prerequisites?: string[];
     targetAudiences?: string[];
     welcomeVideoUrl?: string | null;
+    stripeProductId?: string | null;
   }
 ): Promise<Course> => {
   try {

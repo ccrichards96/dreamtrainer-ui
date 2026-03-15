@@ -56,6 +56,17 @@ export interface AssignedCourse {
 }
 
 /**
+ * Course Expert - connects a course with an expert profile
+ */
+export interface CourseExpert {
+  id: string;
+  expertProfileId: string;
+  courseId: string;
+  role: "owner" | "support-expert";
+  expertProfile?: ExpertProfile;
+}
+
+/**
  * Expert profile - instructor/creator profile for courses
  */
 export interface ExpertProfile {

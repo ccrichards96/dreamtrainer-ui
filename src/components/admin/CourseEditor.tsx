@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Save, X, AlertCircle, Copy, Check } from "lucide-react";
-import { Course, CourseStatus, ListingStatus } from "../../types/modules";
+import { Save, X, AlertCircle, Copy, Check, UserPlus, Trash2, Loader2 } from "lucide-react";
+import { Course, CourseExpert, CourseStatus, ListingStatus } from "../../types/modules";
 import { Category } from "../../types/categories";
 import { User } from "../../types/user";
 import { updateCourse } from "../../services/api/modules";
+import courseExpertsService from "../../services/api/course-experts";
 import { getAllCategories } from "../../services/api/categories";
 import { getAllUsers } from "../../services/api/admin";
 
@@ -112,7 +113,6 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     imageUrl: course.imageUrl || "",
     slug: course.slug || "",
     categoryId: course.categoryId || "",
-    expertProfileId: course.expertProfileId || "",
     status: course.status || CourseStatus.DRAFT,
     listingStatus: course.listingStatus || ListingStatus.PRIVATE,
     welcomeVideoUrl: course.welcomeVideoUrl || "",
@@ -124,12 +124,22 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [expertUsers, setExpertUsers] = useState<User[]>([]);
+  const [courseExperts, setCourseExperts] = useState<CourseExpert[]>([]);
+  
+  // Selection state for adding a new expert
   const [expertSearch, setExpertSearch] = useState("");
+  const [selectedExpertProfileId, setSelectedExpertProfileId] = useState("");
+  const [selectedRole, setSelectedRole] = useState<"owner" | "support-expert">("support-expert");
+
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const [loadingExperts, setLoadingExperts] = useState(true);
+  const [loadingExpertsList, setLoadingExpertsList] = useState(true);
+  const [loadingCourseExperts, setLoadingCourseExperts] = useState(true);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [expertSuccess, setExpertSuccess] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -141,10 +151,23 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     getAllUsers()
       .then((users) => setExpertUsers(users.filter((u) => u.expertProfile !== null)))
       .catch(() => setError("Failed to load expert users"))
-      .finally(() => setLoadingExperts(false));
-  }, []);
+      .finally(() => setLoadingExpertsList(false));
+
+    if (course.id) {
+      courseExpertsService.getExpertsByCourse(course.id)
+        .then((experts) => setCourseExperts(experts))
+        .catch(() => setError("Failed to load course experts"))
+        .finally(() => setLoadingCourseExperts(false));
+    } else {
+      setLoadingCourseExperts(false);
+    }
+  }, [course.id]);
 
   const filteredExperts = expertUsers.filter((u) => {
+    // Only show experts not already assigned
+    if (courseExperts.some((ce) => ce.expertProfileId === u.expertProfile?.id)) {
+      return false;
+    }
     const q = expertSearch.toLowerCase();
     return (
       u.expertProfile!.displayName.toLowerCase().includes(q) ||
@@ -153,6 +176,61 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
       u.email.toLowerCase().includes(q)
     );
   });
+
+  const handleAddExpert = async () => {
+    if (!selectedExpertProfileId || !course.id) return;
+    
+    setActionLoadingId("add");
+    try {
+      const newExpert = await courseExpertsService.createCourseExpert({
+        expertProfileId: selectedExpertProfileId,
+        courseId: course.id,
+        role: selectedRole,
+      });
+      // Try to find the user profile info to render it immediately
+      const matchedUser = expertUsers.find((u) => u.expertProfile?.id === selectedExpertProfileId);
+      if (matchedUser && matchedUser.expertProfile) {
+        newExpert.expertProfile = matchedUser.expertProfile;
+      }
+      setCourseExperts((prev) => [...prev, newExpert]);
+      setSelectedExpertProfileId("");
+      setExpertSearch("");
+      setExpertSuccess("Course experts updated successfully");
+      setTimeout(() => setExpertSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to add expert");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleUpdateExpertRole = async (expertId: string, newRole: "owner" | "support-expert") => {
+    setActionLoadingId(expertId);
+    try {
+      const updated = await courseExpertsService.updateCourseExpert(expertId, { role: newRole });
+      setCourseExperts((prev) => prev.map((ce) => (ce.id === expertId ? { ...ce, role: updated.role } : ce)));
+      setExpertSuccess("Course experts updated successfully");
+      setTimeout(() => setExpertSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to update expert role");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleRemoveExpert = async (expertId: string) => {
+    setActionLoadingId(expertId);
+    try {
+      await courseExpertsService.deleteCourseExpert(expertId);
+      setCourseExperts((prev) => prev.filter((ce) => ce.id !== expertId));
+      setExpertSuccess("Course experts updated successfully");
+      setTimeout(() => setExpertSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to remove expert");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -174,7 +252,6 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
         imageUrl: formData.imageUrl || null,
         slug: formData.slug || undefined,
         categoryId: formData.categoryId || null,
-        expertProfileId: formData.expertProfileId || null,
         status: formData.status,
         listingStatus: formData.listingStatus,
         welcomeVideoUrl: formData.welcomeVideoUrl || null,
@@ -367,39 +444,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
               </div>
             </div>
 
-            {/* Course Owner */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Course Owner (Expert)
-              </label>
-              <input
-                type="text"
-                value={expertSearch}
-                onChange={(e) => setExpertSearch(e.target.value)}
-                placeholder="Search by name or email…"
-                className="w-full px-3 py-2 border border-gray-300 rounded-t-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              />
-              <select
-                id="expertProfileId"
-                name="expertProfileId"
-                value={formData.expertProfileId}
-                onChange={handleInputChange}
-                disabled={loadingExperts}
-                className="w-full px-3 py-2 border border-gray-300 border-t-0 rounded-b-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              >
-                <option value="">{loadingExperts ? "Loading experts…" : "— No Owner —"}</option>
-                {filteredExperts.map((u) => (
-                  <option key={u.expertProfile!.id} value={u.expertProfile!.id}>
-                    {u.expertProfile!.displayName} — {u.firstName} {u.lastName} ({u.email})
-                  </option>
-                ))}
-              </select>
-              {formData.expertProfileId && (
-                <p className="text-xs text-gray-400 mt-1">
-                  Expert profile ID: {formData.expertProfileId}
-                </p>
-              )}
-            </div>
+            {/* Image and Wrapper Fields */}
 
             <div>
               <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
@@ -547,6 +592,173 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 disabled
                 className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-400 text-sm"
               />
+            </div>
+          </div>
+        </section>
+
+        {/* Section: Course Experts Management */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+              Course Experts
+            </h4>
+          </div>
+          <div className="space-y-4">
+            {expertSuccess && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span className="text-green-700">{expertSuccess}</span>
+              </div>
+            )}
+            
+            {loadingCourseExperts ? (
+              <div className="flex justify-center p-6 border border-gray-200 border-dashed rounded-lg">
+                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+              </div>
+            ) : courseExperts.length > 0 ? (
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                        Expert
+                      </th>
+                      <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                        Role
+                      </th>
+                      <th className="px-6 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {courseExperts.map((expert) => (
+                      <tr key={expert.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {expert.expertProfile?.avatarUrl ? (
+                              <img
+                                className="h-8 w-8 rounded-full object-cover border border-gray-300"
+                                src={expert.expertProfile.avatarUrl}
+                                alt=""
+                              />
+                            ) : (
+                              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium border border-blue-200">
+                                {expert.expertProfile?.displayName?.charAt(0) || "?"}
+                              </div>
+                            )}
+                            <div className="ml-3">
+                              <p className="text-sm font-medium text-gray-900">
+                                {expert.expertProfile?.displayName || "Unknown Expert"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {actionLoadingId === expert.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                          ) : (
+                            <select
+                              value={expert.role}
+                              onChange={(e) =>
+                                handleUpdateExpertRole(
+                                  expert.id,
+                                  e.target.value as "owner" | "support-expert"
+                                )
+                              }
+                              className="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                              <option value="owner">Owner</option>
+                              <option value="support-expert">Support Expert</option>
+                            </select>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveExpert(expert.id)}
+                            disabled={actionLoadingId === expert.id}
+                            className="text-red-500 hover:text-red-700 disabled:opacity-50"
+                          >
+                            <Trash2 className="w-4 h-4 inline" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-6 border border-gray-200 border-dashed rounded-lg bg-gray-50 text-center">
+                <p className="text-sm text-gray-500 mb-1">No experts assigned yet.</p>
+                <p className="text-xs text-gray-400">
+                  Assign an expert below to let them manage or support this course.
+                </p>
+              </div>
+            )}
+
+            {/* Add New Expert Panel */}
+            <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg">
+              <h5 className="text-sm font-medium text-blue-900 mb-3 flex items-center gap-2">
+                <UserPlus className="w-4 h-4" />
+                Assign New Expert
+              </h5>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                <div className="md:col-span-5">
+                  <label className="block text-xs font-medium text-blue-800 mb-1">
+                    Search & Select Expert
+                  </label>
+                  <div className="flex flex-col border border-blue-200 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-blue-500">
+                    <input
+                      type="text"
+                      value={expertSearch}
+                      onChange={(e) => setExpertSearch(e.target.value)}
+                      placeholder="Search name or email…"
+                      className="w-full px-3 py-1.5 text-sm border-b border-gray-100 outline-none"
+                    />
+                    <select
+                      value={selectedExpertProfileId}
+                      onChange={(e) => setSelectedExpertProfileId(e.target.value)}
+                      disabled={loadingExpertsList}
+                      className="w-full px-3 py-2 text-sm outline-none bg-transparent"
+                    >
+                      <option value="" disabled>
+                        {loadingExpertsList ? "Loading..." : "— Choose Expert —"}
+                      </option>
+                      {filteredExperts.map((u) => (
+                        <option key={u.expertProfile!.id} value={u.expertProfile!.id}>
+                          {u.expertProfile!.displayName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="md:col-span-4">
+                  <label className="block text-xs font-medium text-blue-800 mb-1">Role</label>
+                  <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value as "owner" | "support-expert")}
+                    className="w-full px-3 py-2.5 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  >
+                    <option value="owner">Owner (Full Access)</option>
+                    <option value="support-expert">Support Expert (Messages & Feedback)</option>
+                  </select>
+                </div>
+                <div className="md:col-span-3">
+                  <button
+                    type="button"
+                    onClick={handleAddExpert}
+                    disabled={!selectedExpertProfileId || actionLoadingId === "add"}
+                    className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex items-center justify-center gap-2"
+                  >
+                    {actionLoadingId === "add" ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "Assign Expert"
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
