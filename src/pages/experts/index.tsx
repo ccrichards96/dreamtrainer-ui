@@ -235,7 +235,7 @@ export default function ExpertProfilePage() {
           setError("Expert not found");
           return;
         }
-        
+
         setExpert(expertData);
 
         // Set courses from expert data
@@ -265,8 +265,10 @@ export default function ExpertProfilePage() {
   // Check if the viewing user is enrolled in any of this expert's courses
   const isEnrolledStudent = useMemo(() => {
     if (!isAuthenticated || courses.length === 0 || enrollments.length === 0) return false;
-    const enrolledCourseIds = new Set(enrollments.filter(e => e.courseId && !e.deletedAt).map(e => e.courseId));
-    return courses.some(course => enrolledCourseIds.has(course.id));
+    const enrolledCourseIds = new Set(
+      enrollments.filter((e) => e.courseId && !e.deletedAt).map((e) => e.courseId)
+    );
+    return courses.some((course) => enrolledCourseIds.has(course.id));
   }, [isAuthenticated, courses, enrollments]);
 
   if (loading) {

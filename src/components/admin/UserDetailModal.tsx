@@ -131,7 +131,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           displayName: expertData.displayName.trim(),
           bio: expertData.bio.trim() || undefined,
           expertise: expertData.expertise
-            ? expertData.expertise.split(",").map((s) => s.trim()).filter(Boolean)
+            ? expertData.expertise
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean)
             : undefined,
           calendarLink: expertData.calendarLink.trim() || undefined,
           approvalStatus: expertData.approvalStatus,
@@ -441,7 +444,9 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <div>
                   <p className="text-sm font-medium text-gray-900">Expert Profile</p>
-                  <p className="text-xs text-gray-500">This user does not have an expert profile yet.</p>
+                  <p className="text-xs text-gray-500">
+                    This user does not have an expert profile yet.
+                  </p>
                 </div>
                 <button
                   type="button"

@@ -498,9 +498,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
             </div>
             {formData.slug && (
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sign-up Link
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sign-up Link</label>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-mono text-gray-600 truncate">
                     {`${window.location.origin}/signup?course=${formData.slug}`}

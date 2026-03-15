@@ -8,7 +8,6 @@ import { CheckCircle, RotateCcw, Home } from "lucide-react";
 const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
   const [testSubmitted, setTestSubmitted] = useState(false);
 
-
   const {
     modules,
     currentModuleIndex,

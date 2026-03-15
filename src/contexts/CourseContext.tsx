@@ -38,7 +38,9 @@ const saveProgress = async (
 
     // Calculate percentage using total course modules (across all sections)
     const percentageComplete =
-      totalCourseModules > 0 ? Math.round((allCompletedModuleIds.length / totalCourseModules) * 100) : 0;
+      totalCourseModules > 0
+        ? Math.round((allCompletedModuleIds.length / totalCourseModules) * 100)
+        : 0;
 
     const progressData = {
       percentageComplete,
