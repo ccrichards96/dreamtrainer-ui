@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Loader2, Search } from "lucide-react";
-import { getAllCourses } from "../../services/api/modules";
+import { getAllPublicCourses } from "../../services/api/modules";
 import { getUserEnrollments } from "../../services/api/enrollment";
 import { getAllCategories } from "../../services/api/categories";
 import { CourseProvider } from "../../contexts/CourseContext";
@@ -29,7 +29,7 @@ const ExploreCoursesContent = () => {
         setLoading(true);
         setError(null);
         const [coursesResponse, enrollmentsData, categoriesData] = await Promise.all([
-          getAllCourses(),
+          getAllPublicCourses(),
           getUserEnrollments(),
           getAllCategories(),
         ]);
