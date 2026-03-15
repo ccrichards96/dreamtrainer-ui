@@ -55,7 +55,7 @@ export const AllCoursesView = ({ courses, enrollments = [] }: AllCoursesViewProp
                   <img
                     src={course.imageUrl}
                     alt={course.name}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-contain"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
