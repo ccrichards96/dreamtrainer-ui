@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Save, AlertCircle } from "lucide-react";
+import { Save, AlertCircle, Trash2 } from "lucide-react";
 import { User, AdminUpdateUser, AdminUpdateExpertProfile, Role } from "../../types/user";
-import { updateAdminUser } from "../../services/api/admin";
+import { updateAdminUser, deleteAdminUser } from "../../services/api/admin";
 import Modal from "../modals/Modal";
 
 type Tab = "user" | "expert";
@@ -11,6 +11,7 @@ interface UserDetailModalProps {
   onClose: () => void;
   user: User | null;
   onUserUpdated: () => void;
+  onUserDeleted?: () => void;
 }
 
 const UserDetailModal: React.FC<UserDetailModalProps> = ({
@@ -18,6 +19,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
   onClose,
   user,
   onUserUpdated,
+  onUserDeleted,
 }) => {
   const [activeTab, setActiveTab] = useState<Tab>("user");
   const [formData, setFormData] = useState({
@@ -47,6 +49,8 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const hasExpertProfile = !!user?.expertProfile;
 
@@ -82,6 +86,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
       }
       setActiveTab("user");
       setError(null);
+      setShowDeleteConfirm(false);
     }
   }, [user]);
 
@@ -209,6 +214,22 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
       setError(err instanceof Error ? err.message : "Failed to update user");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!user) return;
+    setDeleteLoading(true);
+    setError(null);
+    try {
+      await deleteAdminUser(user.id);
+      onUserDeleted?.();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete user");
+      setShowDeleteConfirm(false);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -656,32 +677,81 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
             </>
           )}
 
+          {/* Delete Confirmation */}
+          {showDeleteConfirm && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm font-medium text-red-800 mb-1">
+                Permanently delete {user.firstName} {user.lastName}?
+              </p>
+              <p className="text-xs text-red-600 mb-3">
+                This will delete their account, profile, and all associated data. This action cannot
+                be undone.
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleteLoading}
+                  className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                >
+                  {deleteLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    "Yes, delete user"
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={deleteLoading}
+                  className="px-3 py-1.5 text-gray-700 bg-white border border-gray-300 text-sm rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-2">
+          <div className="flex items-center justify-between gap-3 pt-2">
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200"
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={loading || deleteLoading || showDeleteConfirm}
+              className="px-4 py-2 text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              Cancel
+              <Trash2 className="w-4 h-4" />
+              Delete User
             </button>
-            <button
-              type="submit"
-              disabled={!isFormValid || loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  Save Changes
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={!isFormValid || loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Save Changes
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </form>

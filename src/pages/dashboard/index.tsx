@@ -693,7 +693,7 @@ function DashboardContent() {
                           href={expert.calendarLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-full bg-[#c5a8de] text-white py-4 px-8 rounded-lg font-medium hover:bg-[#b399d6] hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-md"
+                          className="w-full bg-[#c5a8de] text-white py-4 px-8 rounded-lg font-medium hover:bg-[#b399d6] hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-md mb-4"
                         >
                           <Calendar className="w-5 h-5" />
                           Schedule a Session with {expert.displayName}
@@ -701,7 +701,7 @@ function DashboardContent() {
                       )}
                       <button
                         onClick={() => setSupportMessageModalOpen(true)}
-                        className="w-full bg-blue-600 text-white py-4 px-8 rounded-lg font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-md"
+                        className="w-full bg-blue-600 text-white py-4 px-8 rounded-lg font-medium hover:bg-blue-700 hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-md"
                       >
                         <Mail className="w-5 h-5" />
                         Send Message

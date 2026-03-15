@@ -544,6 +544,10 @@ const UsersManager: React.FC = () => {
         onClose={() => setSelectedUser(null)}
         user={selectedUser}
         onUserUpdated={fetchUsers}
+        onUserDeleted={() => {
+          setSelectedUser(null);
+          fetchUsers();
+        }}
       />
     </motion.div>
   );

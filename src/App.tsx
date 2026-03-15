@@ -38,7 +38,26 @@ function Auth0ProviderWithNavigate({ children }: { children: React.ReactNode }) 
   const navigate = useNavigate();
 
   const onRedirectCallback = (appState?: AppState) => {
-    navigate(appState?.returnTo || window.location.pathname, { replace: true });
+    // If there's an explicit returnTo, honor it
+    if (appState?.returnTo) {
+      navigate(appState.returnTo, { replace: true });
+      return;
+    }
+
+    // Check for last session in localStorage
+    const lastCourseId = localStorage.getItem("last_course_id");
+    const lastSectionId = localStorage.getItem("last_section_id");
+
+    if (lastCourseId) {
+      // Resume last session
+      if (lastSectionId) {
+        localStorage.setItem("selected_section_id", lastSectionId);
+      }
+      navigate(`/courses/${lastCourseId}/dashboard`, { replace: true });
+    } else {
+      // No previous session — send to course catalog
+      navigate("/courses", { replace: true });
+    }
   };
 
   return (

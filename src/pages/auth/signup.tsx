@@ -21,10 +21,19 @@ export default function Signup() {
     }
   }, [searchParams]);
 
-  // Redirect to dashboard if already authenticated
+  // Redirect to last session or courses if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard");
+      const lastCourseId = localStorage.getItem("last_course_id");
+      if (lastCourseId) {
+        const lastSectionId = localStorage.getItem("last_section_id");
+        if (lastSectionId) {
+          localStorage.setItem("selected_section_id", lastSectionId);
+        }
+        navigate(`/courses/${lastCourseId}/dashboard`);
+      } else {
+        navigate("/courses");
+      }
     }
   }, [isAuthenticated, navigate]);
 
@@ -63,7 +72,7 @@ export default function Signup() {
       <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-[#c5a8de] mb-4">You're already signed up!</h1>
-          <p className="text-[#7c5e99] mb-8">Redirecting you to the dashboard...</p>
+          <p className="text-[#7c5e99] mb-8">Redirecting...</p>
         </div>
       </div>
     );

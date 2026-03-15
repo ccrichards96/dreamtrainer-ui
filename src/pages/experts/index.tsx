@@ -1,5 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
+import { getUserEnrollments } from "../../services/api/enrollment";
+import type { CourseEnrollment } from "../../types/enrollment";
 import {
   Loader2,
   User,
@@ -12,6 +15,7 @@ import {
   Music,
   Calendar,
   BookOpen,
+  ArrowLeft,
   ArrowRight,
   Star,
 } from "lucide-react";
@@ -213,6 +217,8 @@ export default function ExpertProfilePage() {
   const [reviews, setReviews] = useState<ExpertReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [enrollments, setEnrollments] = useState<CourseEnrollment[]>([]);
+  const { isAuthenticated } = useAuth0();
 
   useEffect(() => {
     const fetchExpert = async () => {
@@ -224,6 +230,12 @@ export default function ExpertProfilePage() {
 
         // Fetch expert profile
         const expertData = await getExpertBySlug(slug);
+
+        if (!expertData) {
+          setError("Expert not found");
+          return;
+        }
+        
         setExpert(expertData);
 
         // Set courses from expert data
@@ -241,6 +253,21 @@ export default function ExpertProfilePage() {
 
     fetchExpert();
   }, [slug]);
+
+  // Fetch user enrollments to determine if they are an enrolled student
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    getUserEnrollments()
+      .then(setEnrollments)
+      .catch(() => setEnrollments([]));
+  }, [isAuthenticated]);
+
+  // Check if the viewing user is enrolled in any of this expert's courses
+  const isEnrolledStudent = useMemo(() => {
+    if (!isAuthenticated || courses.length === 0 || enrollments.length === 0) return false;
+    const enrolledCourseIds = new Set(enrollments.filter(e => e.courseId && !e.deletedAt).map(e => e.courseId));
+    return courses.some(course => enrolledCourseIds.has(course.id));
+  }, [isAuthenticated, courses, enrollments]);
 
   if (loading) {
     return (
@@ -276,6 +303,15 @@ export default function ExpertProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
+
         {/* Profile Header Card */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
           {/* Cover/Banner Area */}
@@ -322,7 +358,7 @@ export default function ExpertProfilePage() {
             <div className="flex flex-wrap items-center gap-4">
               {expert.socialLinks && <SocialLinks socialLinks={expert.socialLinks} />}
 
-              {expert.calendarLink && (
+              {isEnrolledStudent && expert.calendarLink && (
                 <a
                   href={expert.calendarLink}
                   target="_blank"

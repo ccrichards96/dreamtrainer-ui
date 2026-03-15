@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Save, X, AlertCircle } from "lucide-react";
+import { Save, X, AlertCircle, Copy, Check } from "lucide-react";
 import { Course, CourseStatus, ListingStatus } from "../../types/modules";
 import { Category } from "../../types/categories";
 import { User } from "../../types/user";
@@ -130,6 +130,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     getAllCategories()
@@ -495,6 +496,42 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 placeholder="prod_..."
               />
             </div>
+            {formData.slug && (
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sign-up Link
+                </label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-mono text-gray-600 truncate">
+                    {`${window.location.origin}/signup?course=${formData.slug}`}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        `${window.location.origin}/signup?course=${formData.slug}`
+                      );
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className="flex-shrink-0 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-600 flex items-center gap-1.5 text-sm"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-4 h-4 text-green-600" />
+                        <span className="text-green-600">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        Copy
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Created</label>
               <input

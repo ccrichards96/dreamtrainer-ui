@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { DreamFlowProps } from "./types";
 import { ProgressTracker, ModuleContent, NavigationButton, TestContent } from "./components";
 import { useCourseContext } from "../../contexts/useCourseContext";
@@ -7,6 +7,7 @@ import { CheckCircle, RotateCcw, Home } from "lucide-react";
 
 const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
   const [testSubmitted, setTestSubmitted] = useState(false);
+
 
   const {
     modules,
@@ -32,10 +33,14 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
     tests,
   } = useCourseContext();
 
-  const handleNextModule = () => {
-    // Mark current module as completed
-    markModuleAsCompleted(currentModuleIndex);
+  // Auto-mark the current module as completed when it's viewed
+  useEffect(() => {
+    if (modules.length > 0 && !isTestMode) {
+      markModuleAsCompleted(currentModuleIndex);
+    }
+  }, [currentModuleIndex, modules.length, isTestMode, markModuleAsCompleted]);
 
+  const handleNextModule = () => {
     if (isLastModule()) {
       // When user clicks "Review Materials Again" or "Test Your Skills" on last module
       if (tests.length > 0) {

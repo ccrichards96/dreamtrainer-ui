@@ -94,11 +94,26 @@ export const updateAdminUser = async (userId: string, userData: AdminUpdateUser)
   }
 };
 
+/**
+ * Delete a user (admin)
+ */
+export const deleteAdminUser = async (userId: string): Promise<void> => {
+  try {
+    await apiClient.delete(`/admin/users/${userId}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to delete user: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while deleting user");
+  }
+};
+
 export const adminService = {
   getAllUsers,
   getUsersPaginated,
   createAdminUser,
   updateAdminUser,
+  deleteAdminUser,
 };
 
 export default adminService;
