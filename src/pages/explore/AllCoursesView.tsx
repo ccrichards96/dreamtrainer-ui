@@ -50,7 +50,7 @@ export const AllCoursesView = ({ courses, enrollments = [] }: AllCoursesViewProp
           >
             <div className="flex flex-col md:flex-row h-full">
               {/* Left side - Image with overlay */}
-              <div className="relative md:w-72 h-52 md:min-h-[300px] md:min-w-[400px] bg-gradient-to-br from-[#c5a8de] to-[#b399d6] flex-shrink-0">
+              <div className="relative md:w-72 h-52 md:min-h-[300px] md:min-w-[400px] flex-shrink-0">
                 {course.imageUrl ? (
                   <img
                     src={course.imageUrl}
@@ -59,7 +59,7 @@ export const AllCoursesView = ({ courses, enrollments = [] }: AllCoursesViewProp
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-white opacity-20">
+                    <div className="text-gray-600 opacity-20">
                       <BookOpen className="w-32 h-32" />
                     </div>
                   </div>
