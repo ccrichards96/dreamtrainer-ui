@@ -1,7 +1,7 @@
 import apiClient, { APIResponse, ApiError } from "./client";
 import type { ExpertProfile } from "../../types/modules";
 import { ExpertPerformanceData } from "../../types/expert";
-import type { UpdateExpertProfileDTO } from "../../types/user";
+import type { UpdateExpertProfileDTO, AdminCreateExpertProfileDTO } from "../../types/user";
 
 /**
  * Get expert profile by slug (public endpoint)
@@ -51,10 +51,35 @@ export const updateMyExpertProfile = async (
   }
 };
 
+/**
+ * POST /experts
+ * Admin creates expert profile for a user
+ */
+export const createExpertProfile = async (
+  userId: string,
+  data: AdminCreateExpertProfileDTO
+): Promise<ExpertProfile> => {
+  try {
+    const response = await apiClient.post<APIResponse<ExpertProfile>>(`/experts`, {
+      userId,
+      ...data,
+    });
+    return response.data.data;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || "Failed to create expert profile",
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
 const expertsService = {
   getExpertBySlug,
   getExpertPerformance,
   updateMyExpertProfile,
+  createExpertProfile,
 };
 
 export default expertsService;
+

@@ -46,6 +46,9 @@ export type AdminCreateExpertProfileDTO = {
   bio?: string;
   expertise?: string[];
   calendarLink?: string;
+  socialLinks?: ExpertSocialLinks;
+  approvalStatus?: "pending" | "approved" | "rejected";
+  listingStatus?: "public" | "private";
 };
 
 export type UpdateExpertProfileDTO = {
@@ -53,6 +56,7 @@ export type UpdateExpertProfileDTO = {
   bio?: string;
   expertise?: string[];
   calendarLink?: string;
+  socialLinks?: ExpertSocialLinks;
 };
 
 export type AdminCreateUser = {

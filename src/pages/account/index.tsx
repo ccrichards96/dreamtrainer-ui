@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Loader2, Info, Save, LifeBuoy, Camera, User } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { generateBillingPortalLink, getUserSubscriptions } from "../../services/api/billing";
@@ -6,6 +6,8 @@ import { BillingData } from "../../types/billing";
 import SupportMessageForm from "../../components/forms/SupportMessageForm";
 import { useApp } from "../../contexts";
 import { updateCurrentUser } from "../../services/api/users";
+import ExpertProfileTab from "./ExpertProfileTab";
+import type { ExpertProfileTabHandle } from "./ExpertProfileTab";
 
 const AccountPage = () => {
   const { user, isLoading: isAuthLoading } = useAuth0();
@@ -18,6 +20,17 @@ const AccountPage = () => {
   const [isLoadingBilling, setIsLoadingBilling] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"account" | "expert">("account");
+  const expertProfileRef = useRef<ExpertProfileTabHandle>(null);
+  const [expertTabState, setExpertTabState] = useState({ hasUnsavedChanges: false, isSaving: false });
+
+  const handleExpertStateChange = useCallback(
+    (state: { hasUnsavedChanges: boolean; isSaving: boolean }) => {
+      setExpertTabState(state);
+    },
+    []
+  );
+
   const [formData, setFormData] = useState({
     firstName: userProfile?.firstName || "",
     lastName: userProfile?.lastName || "",
@@ -202,15 +215,27 @@ const AccountPage = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Account</h1>
           <button
-            onClick={handleSaveChanges}
-            disabled={!hasUnsavedChanges || isSaving}
+            onClick={() => {
+              if (activeTab === "expert" && expertProfileRef.current) {
+                expertProfileRef.current.save();
+              } else {
+                handleSaveChanges();
+              }
+            }}
+            disabled={
+              activeTab === "expert"
+                ? !expertTabState.hasUnsavedChanges || expertTabState.isSaving
+                : !hasUnsavedChanges || isSaving
+            }
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-              hasUnsavedChanges && !isSaving
+              (activeTab === "expert"
+                ? expertTabState.hasUnsavedChanges && !expertTabState.isSaving
+                : hasUnsavedChanges && !isSaving)
                 ? "bg-[#c5a8de] text-white hover:bg-[#7c5e99]"
                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
             }`}
           >
-            {isSaving ? (
+            {(activeTab === "expert" ? expertTabState.isSaving : isSaving) ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Saving...
@@ -224,6 +249,40 @@ const AccountPage = () => {
           </button>
         </div>
 
+        {/* Tab Navigation - only show tabs if user has expert profile */}
+        {userProfile?.expertProfile && (
+          <div className="flex gap-1 mb-6 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab("account")}
+              className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                activeTab === "account"
+                  ? "border-[#c5a8de] text-[#7c5e99]"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Account
+            </button>
+            <button
+              onClick={() => setActiveTab("expert")}
+              className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                activeTab === "expert"
+                  ? "border-[#c5a8de] text-[#7c5e99]"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Expert Profile
+            </button>
+          </div>
+        )}
+
+        {activeTab === "expert" && userProfile?.expertProfile ? (
+          <ExpertProfileTab
+            ref={expertProfileRef}
+            expertProfile={userProfile.expertProfile}
+            onProfileUpdated={refreshUserProfile}
+            onStateChange={handleExpertStateChange}
+          />
+        ) : (
         <div className="space-y-6">
           {/* Profile Section */}
           <div className="bg-white rounded-xl shadow p-6">
@@ -401,6 +460,7 @@ const AccountPage = () => {
             </div>
           </div>
         </div>
+        )}
       </div>
 
       {/* Support Message Modal */}

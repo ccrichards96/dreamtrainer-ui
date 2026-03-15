@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Save, AlertCircle, Trash2 } from "lucide-react";
+import { Save, AlertCircle, Trash2, UserPlus } from "lucide-react";
 import { User, AdminUpdateUser, AdminUpdateExpertProfile, Role } from "../../types/user";
 import { updateAdminUser, deleteAdminUser } from "../../services/api/admin";
+import { createExpertProfile } from "../../services/api/experts";
 import Modal from "../modals/Modal";
 
 type Tab = "user" | "expert";
@@ -51,6 +52,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [creatingExpert, setCreatingExpert] = useState(false);
 
   const hasExpertProfile = !!user?.expertProfile;
 
@@ -87,6 +89,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
       setActiveTab("user");
       setError(null);
       setShowDeleteConfirm(false);
+      setCreatingExpert(false);
     }
   }, [user]);
 
@@ -122,6 +125,21 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
     setError(null);
 
     try {
+      // Creating a new expert profile
+      if (creatingExpert && !hasExpertProfile) {
+        await createExpertProfile(user.id, {
+          displayName: expertData.displayName.trim(),
+          bio: expertData.bio.trim() || undefined,
+          expertise: expertData.expertise
+            ? expertData.expertise.split(",").map((s) => s.trim()).filter(Boolean)
+            : undefined,
+          calendarLink: expertData.calendarLink.trim() || undefined,
+          approvalStatus: expertData.approvalStatus,
+          listingStatus: expertData.listingStatus,
+          socialLinks: expertData.socialLinks,
+        });
+      }
+
       const updates: AdminUpdateUser = {};
 
       // User fields
@@ -202,12 +220,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
         }
       }
 
-      if (Object.keys(updates).length === 0) {
-        onClose();
-        return;
+      if (Object.keys(updates).length > 0) {
+        await updateAdminUser(user.id, updates);
       }
 
-      await updateAdminUser(user.id, updates);
       onUserUpdated();
       onClose();
     } catch (err) {
@@ -238,20 +254,23 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
     formData.lastName.trim().length > 0 &&
     formData.email.trim().length > 0 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
-    (!hasExpertProfile || expertData.displayName.trim().length > 0);
+    (!hasExpertProfile || expertData.displayName.trim().length > 0) &&
+    (!creatingExpert || expertData.displayName.trim().length > 0);
 
   if (!user) return null;
 
+  const showExpertTab = hasExpertProfile || creatingExpert;
+
   const tabs: { key: Tab; label: string }[] = [
     { key: "user", label: "User Details" },
-    ...(hasExpertProfile ? [{ key: "expert" as Tab, label: "Expert Profile" }] : []),
+    ...(showExpertTab ? [{ key: "expert" as Tab, label: "Expert Profile" }] : []),
   ];
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit User" size="lg">
       <form onSubmit={handleSubmit}>
         {/* Tabs */}
-        {hasExpertProfile && (
+        {showExpertTab && (
           <div className="flex border-b border-gray-200 px-6">
             {tabs.map((tab) => (
               <button
@@ -416,8 +435,48 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
             </>
           )}
 
-          {/* Expert Profile Tab */}
-          {activeTab === "expert" && hasExpertProfile && (
+          {/* Create Expert Profile CTA — only on user tab when no expert profile and not in create mode */}
+          {activeTab === "user" && !hasExpertProfile && !creatingExpert && (
+            <div className="pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Expert Profile</p>
+                  <p className="text-xs text-gray-500">This user does not have an expert profile yet.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreatingExpert(true);
+                    setExpertData({
+                      displayName: `${formData.firstName} ${formData.lastName}`.trim(),
+                      bio: "",
+                      expertise: "",
+                      calendarLink: "",
+                      approvalStatus: "pending",
+                      listingStatus: "private",
+                      socialLinks: {
+                        linkedin: "",
+                        facebook: "",
+                        instagram: "",
+                        youtube: "",
+                        tiktok: "",
+                        twitter: "",
+                        website: "",
+                      },
+                    });
+                    setActiveTab("expert");
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Create Expert Profile
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Expert Profile Tab — edit existing or create new */}
+          {activeTab === "expert" && (hasExpertProfile || creatingExpert) && (
             <>
               <div>
                 <label
