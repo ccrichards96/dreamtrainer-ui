@@ -7,7 +7,7 @@ import { User } from "../../types/user";
 import { updateCourse } from "../../services/api/modules";
 import courseExpertsService from "../../services/api/course-experts";
 import { getAllCategories } from "../../services/api/categories";
-import { getAllUsers } from "../../services/api/admin";
+import { getUsersPaginated } from "../../services/api/admin";
 
 interface CourseEditorProps {
   course: Course;
@@ -149,11 +149,6 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
       .catch(() => setError("Failed to load categories"))
       .finally(() => setLoadingCategories(false));
 
-    getAllUsers()
-      .then((users) => setExpertUsers(users.filter((u) => u.expertProfile !== null)))
-      .catch(() => setError("Failed to load expert users"))
-      .finally(() => setLoadingExpertsList(false));
-
     if (course.id) {
       courseExpertsService
         .getExpertsByCourse(course.id)
@@ -164,6 +159,29 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
       setLoadingCourseExperts(false);
     }
   }, [course.id]);
+
+  // Debounced server-side search for experts
+  useEffect(() => {
+    if (expertSearch.trim() === "") {
+      // Re-fetch initial list if search is cleared
+      getUsersPaginated({ limit: 100 })
+        .then((res) => setExpertUsers(res.users.filter((u) => u.expertProfile !== null)))
+        .catch(() => {});
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setLoadingExpertsList(true);
+      getUsersPaginated({ search: expertSearch, limit: 100 })
+        .then((res) => {
+          setExpertUsers(res.users.filter((u) => u.expertProfile !== null));
+        })
+        .catch(() => setError("Expert search failed"))
+        .finally(() => setLoadingExpertsList(false));
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [expertSearch]);
 
   const filteredExperts = expertUsers.filter((u) => {
     // Only show experts not already assigned

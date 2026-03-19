@@ -24,7 +24,9 @@ export interface GetUsersParams {
  */
 export const getAllUsers = async (): Promise<User[]> => {
   try {
-    const response = await apiClient.get<APIResponse<User[]>>("/admin/users");
+    const response = await apiClient.get<APIResponse<User[]>>("/admin/users", {
+      params: { limit: 5000 },
+    });
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
