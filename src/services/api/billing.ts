@@ -1,8 +1,7 @@
 import axios from "axios";
 import apiClient, { APIResponse } from "./client";
-import { Subscription, BillingData, UserBillingData } from "../../types/billing";
+import { Subscription, BillingData, UserBillingData, CoursePricing } from "../../types/billing";
 
-// Billing related interfaces
 export interface UserBillingInfo {
   userId: string;
   subscription: Subscription;
@@ -15,6 +14,7 @@ export interface CheckoutSessionRequest {
   mode?: "payment" | "subscription" | "setup";
   promoCode?: string;
   referralId?: string; //Referral ID for affliates
+  courseId?: string; // Course ID for course purchases (stored in Stripe metadata)
 }
 
 /**
@@ -24,6 +24,22 @@ export interface CheckoutSessionRequest {
 export const getAllProducts = async (): Promise<any[]> => {
   try {
     const response = await apiClient.get<APIResponse<any[]>>("/billing/products");
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to get products: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while fetching products");
+  }
+};
+
+/**
+ * Get all available subscription packages for a specific slug
+ * @returns Promise<any[]> - List of available subscription packages
+ */
+export const getProductBySlug = async (slug: string): Promise<any> => {
+  try {
+    const response = await apiClient.get<APIResponse<any>>(`/courses/${slug}/product`);
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
@@ -110,13 +126,63 @@ export const getUserSubscriptions = async (): Promise<BillingData[]> => {
   }
 };
 
-// Export all billing-related functions as a service object
+/**
+ * Get pricing information for a specific course
+ * @param courseId - The course ID to get pricing for
+ * @returns Promise<CoursePricing> - Course pricing information from Stripe
+ */
+export const getCoursePricing = async (courseId: string): Promise<CoursePricing> => {
+  try {
+    const response = await apiClient.get<APIResponse<CoursePricing>>(
+      `/courses/${courseId}/pricing`
+    );
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to get course pricing: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while fetching course pricing");
+  }
+};
+
+/**
+ * Update pricing for a specific course
+ * @param courseId - The course ID to update pricing for
+ * @param pricingData - The pricing data (amount in dollars, type, optional recurring config)
+ * @returns Promise<CoursePricing> - Updated course pricing information
+ */
+export const updateCoursePricing = async (
+  courseId: string,
+  pricingData: {
+    amount: number;
+    currency?: string;
+    type: "one_time" | "recurring";
+    recurring?: { interval: "day" | "week" | "month" | "year"; intervalCount?: number };
+  }
+): Promise<CoursePricing> => {
+  try {
+    const response = await apiClient.put<APIResponse<CoursePricing>>(
+      `/courses/${courseId}/pricing`,
+      pricingData
+    );
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to update course pricing: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while updating course pricing");
+  }
+};
+
 export const billingService = {
   getAllProducts,
+  getProductBySlug,
   getUserBillingInfo,
   createCheckoutSession,
   generateBillingPortalLink,
   getUserSubscriptions,
+  getCoursePricing,
+  updateCoursePricing,
 };
 
 export default billingService;

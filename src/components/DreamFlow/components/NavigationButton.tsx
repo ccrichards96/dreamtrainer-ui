@@ -44,29 +44,29 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
         </motion.button>
       )}
 
-      {/* Next Button */}
-      <motion.button
-        onClick={onNext}
-        className={`group flex items-center space-x-3 px-8 py-4 rounded-lg font-semibold text-white shadow-lg transition-all ${
-          isLastModule
-            ? "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-            : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
-        }`}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        whileInView={{ y: [10, 0] }}
-      >
-        <span>
-          {isLastModule ? (hasTests ? "Test Your Skills" : "Start Course From Beginning") : "Next"}
-        </span>
-        <motion.div
-          className="flex items-center justify-center w-6 h-6 bg-white/20 rounded-full"
-          animate={{ x: [0, 4, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5 }}
+      {/* Next Button - hidden on last module when there are no tests */}
+      {!(isLastModule && !hasTests) && (
+        <motion.button
+          onClick={onNext}
+          className={`group flex items-center space-x-3 px-8 py-4 rounded-lg font-semibold text-white shadow-lg transition-all ${
+            isLastModule
+              ? "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+              : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+          }`}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          whileInView={{ y: [10, 0] }}
         >
-          <ChevronRight size={16} />
-        </motion.div>
-      </motion.button>
+          <span>{isLastModule ? "Test Your Skills" : "Next"}</span>
+          <motion.div
+            className="flex items-center justify-center w-6 h-6 bg-white/20 rounded-full"
+            animate={{ x: [0, 4, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+          >
+            <ChevronRight size={16} />
+          </motion.div>
+        </motion.button>
+      )}
     </motion.div>
   );
 };

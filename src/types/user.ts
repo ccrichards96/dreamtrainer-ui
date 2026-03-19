@@ -1,4 +1,5 @@
 import { User as Auth0User } from "@auth0/auth0-react";
+import { ExpertProfile, ExpertSocialLinks } from "./modules";
 
 export enum Role {
   Admin = "admin",
@@ -16,6 +17,7 @@ interface User {
   onboardingComplete: boolean;
   avatarUrl: string | null;
   role: Role;
+  expertProfile: ExpertProfile | null;
   lastLoginAt: Date | null;
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -31,10 +33,55 @@ export type UpdateUser = Partial<
 
 // Draft type for creating support messages
 export type DraftSupportMessage = {
+  subject: string;
   message: string;
   supportType: "technical" | "course-content" | "billing" | "general" | "feedback";
   userId: string;
   email: string;
+  courseId?: string;
+};
+
+export type AdminCreateExpertProfileDTO = {
+  displayName: string;
+  bio?: string;
+  expertise?: string[];
+  calendarLink?: string;
+  socialLinks?: ExpertSocialLinks;
+  approvalStatus?: "pending" | "approved" | "rejected";
+  listingStatus?: "public" | "private";
+};
+
+export type UpdateExpertProfileDTO = {
+  displayName?: string;
+  bio?: string;
+  expertise?: string[];
+  calendarLink?: string;
+  socialLinks?: ExpertSocialLinks;
+};
+
+export type AdminCreateUser = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  userType: "student" | "expert";
+  createAsExpert?: boolean;
+  expertProfile?: AdminCreateExpertProfileDTO;
+};
+
+export type AdminUpdateExpertProfile = {
+  displayName?: string;
+  bio?: string | null;
+  expertise?: string[];
+  calendarLink?: string | null;
+  approvalStatus?: "pending" | "approved" | "rejected";
+  listingStatus?: "public" | "private";
+  socialLinks?: ExpertSocialLinks;
+};
+
+export type AdminUpdateUser = Partial<
+  Pick<User, "firstName" | "lastName" | "email" | "role" | "onboardingComplete" | "isEmailVerified">
+> & {
+  expertProfile?: AdminUpdateExpertProfile;
 };
 
 export type { User };

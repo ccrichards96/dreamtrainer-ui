@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileSetup from "./ProfileSetup.tsx";
 import ProficiencyLevel from "./ProficiencyLevel.tsx";
@@ -17,6 +18,8 @@ export type OnboardingData = {
 };
 
 export default function Onboarding() {
+  const [searchParams] = useSearchParams();
+  const courseSlug = searchParams.get("course") || undefined;
   const [currentStep, setCurrentStep] = useState(1);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({});
   const [isLoadingUserData, setIsLoadingUserData] = useState(true);
@@ -150,6 +153,7 @@ export default function Onboarding() {
                   onPrev={prevStep}
                   currentStep={currentStep}
                   totalSteps={totalSteps}
+                  courseSlug={courseSlug}
                 />
               </motion.div>
             )}

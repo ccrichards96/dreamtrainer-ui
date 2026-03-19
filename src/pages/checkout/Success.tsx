@@ -19,14 +19,25 @@ export default function CheckoutSuccess() {
   const { isInitialized: apiInitialized } = useApiContext();
   const { refreshUserProfile } = useApp();
 
+  const queryParams = new URLSearchParams(window.location.search);
+
   const [isUpdating, setIsUpdating] = useState(false);
+  const [processComplete, setProcessComplete] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const [courseSlug, setCourseSlug] = useState<string | null>(queryParams.get("courseSlug"));
+  const isFree = queryParams.get("isFree") === "true";
 
   useEffect(() => {
     const handleCheckoutSuccess = async () => {
       // Wait for Auth0 and API to be ready before making API calls
       if (auth0Loading || !isAuthenticated || !apiInitialized) {
         return;
+      }
+
+      // Capture course slug from localStorage if not already present from URL
+      const storedCourseSlug = localStorage.getItem("signup_course_slug");
+      if (!courseSlug && storedCourseSlug) {
+        setCourseSlug(storedCourseSlug);
       }
 
       try {
@@ -49,11 +60,17 @@ export default function CheckoutSuccess() {
         // Refresh the user profile in the app context
         await refreshUserProfile();
 
-        // Clear the referral ID from localStorage after successful conversion
+        // Clear the referral ID and course slug from localStorage after successful conversion
         localStorage.removeItem("rewardful_referral_id");
+        localStorage.removeItem("signup_course_slug");
+        
+        setProcessComplete(true);
       } catch (error) {
         console.error("Failed to update user onboarding status:", error);
         setUpdateError(error instanceof Error ? error.message : "Failed to update profile");
+        // If it fails but we've already done most of the work, we can still show the success screen
+        // as the payment was definitely successful by the time we reach this page
+        setProcessComplete(true);
       } finally {
         setIsUpdating(false);
       }
@@ -63,12 +80,23 @@ export default function CheckoutSuccess() {
   }, [auth0Loading, isAuthenticated, apiInitialized, user?.email]);
 
   const handleContinue = () => {
-    // Navigate to dashboard after successful payment
-    navigate("/dashboard");
+    if (courseSlug) {
+      navigate(`/courses/${courseSlug}/dashboard`);
+    } else {
+      navigate("/courses?tab=my-courses");
+    }
   };
 
-  // Show loading state while Auth0 is loading or API not ready
-  if (auth0Loading || !apiInitialized) {
+  // Show loading state while Auth0 is loading, API not ready, or processing updates
+  if (auth0Loading || !apiInitialized || isUpdating || !processComplete) {
+    const loadingMessage = isUpdating 
+      ? (isFree ? "Enrolling in your course..." : "Setting up your account...")
+      : "Initializing...";
+    
+    const loadingSubMessage = isUpdating
+      ? `Please wait while we complete your ${isFree ? "enrollment" : "subscription"} setup.`
+      : "Please wait while we prepare your account setup.";
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center px-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
@@ -76,26 +104,9 @@ export default function CheckoutSuccess() {
             <RefreshCw className="w-10 h-10 text-blue-600 animate-spin" />
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Initializing...</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">{loadingMessage}</h1>
 
-          <p className="text-gray-600">Please wait while we prepare your account setup.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading state while updating user
-  if (isUpdating) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center px-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <RefreshCw className="w-10 h-10 text-blue-600 animate-spin" />
-          </div>
-
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Setting up your account...</h1>
-
-          <p className="text-gray-600">Please wait while we complete your subscription setup.</p>
+          <p className="text-gray-600">{loadingSubMessage}</p>
         </div>
       </div>
     );
@@ -108,16 +119,19 @@ export default function CheckoutSuccess() {
           <CheckCircle className="w-10 h-10 text-green-600" />
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Payment Successful!</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          {isFree ? "Enrollment Successful!" : "Payment Successful!"}
+        </h1>
 
         <p className="text-gray-600 mb-8">
-          Welcome to TOEFL MAX Writing! Your subscription has been activated and you're ready to
-          start your English learning journey.
+          {isFree
+            ? "You have been successfully enrolled in your course and you're ready to start your learning journey."
+            : "Your subscription has been activated and you're ready to start your learning journey."}
         </p>
 
         {updateError && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-600 text-sm">⚠️ Profile update failed: {updateError}</p>
+            <p className="text-red-600 text-sm">⚠️ - Profile update failed: {updateError}</p>
             <p className="text-red-500 text-xs mt-1">
               Don't worry, your payment was successful. You can continue to your dashboard.
             </p>

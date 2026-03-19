@@ -8,11 +8,15 @@ const CMSRoute: React.FC = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  // Capture referralId from URL and store in localStorage for affiliate tracking
+  // Capture referralId and course slug from URL and store in localStorage
   useEffect(() => {
     const referralId = searchParams.get("via");
     if (referralId) {
       localStorage.setItem("rewardful_referral_id", referralId);
+    }
+    const courseSlug = searchParams.get("course");
+    if (courseSlug) {
+      localStorage.setItem("signup_course_slug", courseSlug);
     }
   }, [searchParams]);
 

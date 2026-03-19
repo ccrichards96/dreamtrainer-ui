@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Loader2, Info, Save, LifeBuoy, Camera, User } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { generateBillingPortalLink, getUserSubscriptions } from "../../services/api/billing";
@@ -6,6 +6,8 @@ import { BillingData } from "../../types/billing";
 import SupportMessageForm from "../../components/forms/SupportMessageForm";
 import { useApp } from "../../contexts";
 import { updateCurrentUser } from "../../services/api/users";
+import ExpertProfileTab from "./ExpertProfileTab";
+import type { ExpertProfileTabHandle } from "./ExpertProfileTab";
 
 const AccountPage = () => {
   const { user, isLoading: isAuthLoading } = useAuth0();
@@ -18,6 +20,20 @@ const AccountPage = () => {
   const [isLoadingBilling, setIsLoadingBilling] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"account" | "expert">("account");
+  const expertProfileRef = useRef<ExpertProfileTabHandle>(null);
+  const [expertTabState, setExpertTabState] = useState({
+    hasUnsavedChanges: false,
+    isSaving: false,
+  });
+
+  const handleExpertStateChange = useCallback(
+    (state: { hasUnsavedChanges: boolean; isSaving: boolean }) => {
+      setExpertTabState(state);
+    },
+    []
+  );
+
   const [formData, setFormData] = useState({
     firstName: userProfile?.firstName || "",
     lastName: userProfile?.lastName || "",
@@ -202,15 +218,29 @@ const AccountPage = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Account</h1>
           <button
-            onClick={handleSaveChanges}
-            disabled={!hasUnsavedChanges || isSaving}
+            onClick={() => {
+              if (activeTab === "expert" && expertProfileRef.current) {
+                expertProfileRef.current.save();
+              } else {
+                handleSaveChanges();
+              }
+            }}
+            disabled={
+              activeTab === "expert"
+                ? !expertTabState.hasUnsavedChanges || expertTabState.isSaving
+                : !hasUnsavedChanges || isSaving
+            }
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-              hasUnsavedChanges && !isSaving
+              (
+                activeTab === "expert"
+                  ? expertTabState.hasUnsavedChanges && !expertTabState.isSaving
+                  : hasUnsavedChanges && !isSaving
+              )
                 ? "bg-[#c5a8de] text-white hover:bg-[#7c5e99]"
                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
             }`}
           >
-            {isSaving ? (
+            {(activeTab === "expert" ? expertTabState.isSaving : isSaving) ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Saving...
@@ -224,183 +254,218 @@ const AccountPage = () => {
           </button>
         </div>
 
-        <div className="space-y-6">
-          {/* Profile Section */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Profile</h2>
-
-            {/* Profile Image Section */}
-            <div className="flex items-center space-x-6 mb-6 pb-6 border-b border-gray-100">
-              <div className="relative">
-                {profileImage ? (
-                  <img
-                    className="h-20 w-20 rounded-full object-cover border-4 border-gray-200"
-                    src={profileImage}
-                    alt="Profile"
-                  />
-                ) : (
-                  <div className="h-20 w-20 rounded-full bg-[#c5a8de] flex items-center justify-center text-white text-2xl font-semibold border-4 border-gray-200">
-                    <User className="w-8 h-8" />
-                  </div>
-                )}
-                <button
-                  onClick={triggerImageUpload}
-                  disabled={isUploadingImage}
-                  className="absolute bottom-0 right-0 bg-white rounded-full p-1.5 shadow-md border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isUploadingImage ? (
-                    <Loader2 className="w-4 h-4 text-gray-600 animate-spin" />
-                  ) : (
-                    <Camera className="w-4 h-4 text-gray-600" />
-                  )}
-                </button>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900">
-                  {userProfile
-                    ? `${userProfile.firstName} ${userProfile.lastName}`.trim() || "User"
-                    : user?.name || "User"}
-                </h3>
-                <p className="text-sm text-gray-500">{user?.email}</p>
-                <button
-                  onClick={triggerImageUpload}
-                  disabled={isUploadingImage}
-                  className="mt-2 text-sm text-[#c5a8de] hover:text-[#7c5e99] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isUploadingImage ? "Uploading..." : "Change Profile Picture"}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">First Name</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  value={formData.firstName}
-                  onChange={(e) => handleInputChange("firstName", e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  value={formData.lastName}
-                  onChange={(e) => handleInputChange("lastName", e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                  type="email"
-                  disabled
-                  className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm"
-                  defaultValue={user.email || ""}
-                />
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Info className="w-4 h-4 text-blue-500" />
-                <p>
-                  <span className="font-medium">Change Password:</span> To change your password,
-                  logout and head to the login page, then click the reset password link.
-                </p>
-              </div>
-            </div>
+        {/* Tab Navigation - only show tabs if user has expert profile */}
+        {userProfile?.expertProfile && (
+          <div className="flex gap-1 mb-6 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab("account")}
+              className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                activeTab === "account"
+                  ? "border-[#c5a8de] text-[#7c5e99]"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Account
+            </button>
+            <button
+              onClick={() => setActiveTab("expert")}
+              className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                activeTab === "expert"
+                  ? "border-[#c5a8de] text-[#7c5e99]"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Expert Profile
+            </button>
           </div>
+        )}
 
-          {/* Plans & Usage and Support Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Plan & Usage Section */}
+        {activeTab === "expert" && userProfile?.expertProfile ? (
+          <ExpertProfileTab
+            ref={expertProfileRef}
+            expertProfile={userProfile.expertProfile}
+            onProfileUpdated={refreshUserProfile}
+            onStateChange={handleExpertStateChange}
+          />
+        ) : (
+          <div className="space-y-6">
+            {/* Profile Section */}
             <div className="bg-white rounded-xl shadow p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Plan & Usage</h2>
-                {isLoadingBilling && <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />}
-              </div>
-              <div className="space-y-4">
-                {/* Plan Info Row */}
-                {billingData ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full border-separate border-spacing-y-2">
-                      <thead>
-                        <tr className="text-left text-sm text-gray-600">
-                          <th className="pr-6 font-medium">Current Plan</th>
-                          <th className="pr-6 font-medium">Amount</th>
-                          <th className="pr-6 font-medium">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="bg-[#f7f4fa] rounded">
-                          <td className="py-2 pr-6 pl-4 text-lg font-medium text-gray-900">
-                            {billingData.name}
-                          </td>
-                          <td className="py-2 pr-6 pl-4 text-gray-900">
-                            {billingData.amount && billingData.amount > 0 ? (
-                              <span className="font-medium">${billingData.amount}/month</span>
-                            ) : (
-                              <span className="text-gray-500">Free</span>
-                            )}
-                          </td>
-                          <td className="py-2 pr-6 pl-4">
-                            <span
-                              className={`inline-block px-2 py-1 text-xs font-semibold rounded ${
-                                billingData.status === "active"
-                                  ? "bg-green-100 text-green-700"
-                                  : billingData.status === "past_due"
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : billingData.status === "cancelled"
-                                      ? "bg-red-100 text-red-700"
-                                      : "bg-gray-100 text-gray-700"
-                              }`}
-                            >
-                              {billingData.status.charAt(0).toUpperCase() +
-                                billingData.status.slice(1).replace("_", " ")}
-                            </span>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                ) : null}
-                <button
-                  onClick={handleManagePlan}
-                  disabled={isUpgrading || isLoadingBilling}
-                  className="w-full bg-[#c5a8de] text-white py-2 px-4 rounded-md hover:bg-[#7c5e99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isUpgrading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Please wait...
-                    </>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Profile</h2>
+
+              {/* Profile Image Section */}
+              <div className="flex items-center space-x-6 mb-6 pb-6 border-b border-gray-100">
+                <div className="relative">
+                  {profileImage ? (
+                    <img
+                      className="h-20 w-20 rounded-full object-cover border-4 border-gray-200"
+                      src={profileImage}
+                      alt="Profile"
+                    />
                   ) : (
-                    "Manage Plan"
+                    <div className="h-20 w-20 rounded-full bg-[#c5a8de] flex items-center justify-center text-white text-2xl font-semibold border-4 border-gray-200">
+                      <User className="w-8 h-8" />
+                    </div>
                   )}
-                </button>
-              </div>
-            </div>
-
-            {/* Support Section */}
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Support</h2>
-              <div className="flex flex-col items-center text-center py-4 space-y-6">
-                <LifeBuoy className="w-16 h-16 text-blue-500" />
+                  <button
+                    onClick={triggerImageUpload}
+                    disabled={isUploadingImage}
+                    className="absolute bottom-0 right-0 bg-white rounded-full p-1.5 shadow-md border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUploadingImage ? (
+                      <Loader2 className="w-4 h-4 text-gray-600 animate-spin" />
+                    ) : (
+                      <Camera className="w-4 h-4 text-gray-600" />
+                    )}
+                  </button>
+                </div>
                 <div>
-                  <p className="text-lg font-medium text-gray-800">Need help with anything?</p>
-                  <p className="text-gray-600 mt-1">
-                    Our support team is here to assist you with any questions or issues.
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {userProfile
+                      ? `${userProfile.firstName} ${userProfile.lastName}`.trim() || "User"
+                      : user?.name || "User"}
+                  </h3>
+                  <p className="text-sm text-gray-500">{user?.email}</p>
+                  <button
+                    onClick={triggerImageUpload}
+                    disabled={isUploadingImage}
+                    className="mt-2 text-sm text-[#c5a8de] hover:text-[#7c5e99] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUploadingImage ? "Uploading..." : "Change Profile Picture"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">First Name</label>
+                  <input
+                    type="text"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    value={formData.firstName}
+                    onChange={(e) => handleInputChange("firstName", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                  <input
+                    type="text"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    value={formData.lastName}
+                    onChange={(e) => handleInputChange("lastName", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    type="email"
+                    disabled
+                    className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm"
+                    defaultValue={user.email || ""}
+                  />
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Info className="w-4 h-4 text-blue-500" />
+                  <p>
+                    <span className="font-medium">Change Password:</span> To change your password,
+                    logout and head to the login page, then click the reset password link.
                   </p>
                 </div>
-                <button
-                  onClick={() => setIsSupportModalOpen(true)}
-                  className="bg-[#c5a8de] text-white py-2 px-6 rounded-md hover:bg-[#7c5e99] flex items-center justify-center gap-2 transition-colors"
-                >
-                  Contact Support
-                </button>
+              </div>
+            </div>
+
+            {/* Plans & Usage and Support Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Plan & Usage Section */}
+              <div className="bg-white rounded-xl shadow p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-gray-900">Plan & Usage</h2>
+                  {isLoadingBilling && <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />}
+                </div>
+                <div className="space-y-4">
+                  {/* Plan Info Row */}
+                  {billingData ? (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full border-separate border-spacing-y-2">
+                        <thead>
+                          <tr className="text-left text-sm text-gray-600">
+                            <th className="pr-6 font-medium">Current Plan</th>
+                            <th className="pr-6 font-medium">Amount</th>
+                            <th className="pr-6 font-medium">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="bg-[#f7f4fa] rounded">
+                            <td className="py-2 pr-6 pl-4 text-lg font-medium text-gray-900">
+                              {billingData.name}
+                            </td>
+                            <td className="py-2 pr-6 pl-4 text-gray-900">
+                              {billingData.amount && billingData.amount > 0 ? (
+                                <span className="font-medium">${billingData.amount}/month</span>
+                              ) : (
+                                <span className="text-gray-500">Free</span>
+                              )}
+                            </td>
+                            <td className="py-2 pr-6 pl-4">
+                              <span
+                                className={`inline-block px-2 py-1 text-xs font-semibold rounded ${
+                                  billingData.status === "active"
+                                    ? "bg-green-100 text-green-700"
+                                    : billingData.status === "past_due"
+                                      ? "bg-yellow-100 text-yellow-700"
+                                      : billingData.status === "cancelled"
+                                        ? "bg-red-100 text-red-700"
+                                        : "bg-gray-100 text-gray-700"
+                                }`}
+                              >
+                                {billingData.status.charAt(0).toUpperCase() +
+                                  billingData.status.slice(1).replace("_", " ")}
+                              </span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : null}
+                  <button
+                    onClick={handleManagePlan}
+                    disabled={isUpgrading || isLoadingBilling}
+                    className="w-full bg-[#c5a8de] text-white py-2 px-4 rounded-md hover:bg-[#7c5e99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isUpgrading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Please wait...
+                      </>
+                    ) : (
+                      "Manage Plan"
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Support Section */}
+              <div className="bg-white rounded-xl shadow p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Support</h2>
+                <div className="flex flex-col items-center text-center py-4 space-y-6">
+                  <LifeBuoy className="w-16 h-16 text-blue-500" />
+                  <div>
+                    <p className="text-lg font-medium text-gray-800">Need help with anything?</p>
+                    <p className="text-gray-600 mt-1">
+                      Our support team is here to assist you with any questions or issues.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsSupportModalOpen(true)}
+                    className="bg-[#c5a8de] text-white py-2 px-6 rounded-md hover:bg-[#7c5e99] flex items-center justify-center gap-2 transition-colors"
+                  >
+                    Contact Support
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Support Message Modal */}

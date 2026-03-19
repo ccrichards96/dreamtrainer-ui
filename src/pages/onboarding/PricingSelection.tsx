@@ -6,6 +6,7 @@ import {
   CheckoutSessionRequest,
   createCheckoutSession,
   getAllProducts,
+  getProductBySlug,
 } from "../../services/api/billing";
 import { updateCurrentUser } from "../../services/api/users";
 
@@ -21,7 +22,6 @@ interface PricingPlan {
   iconColor: string;
   bgColor: string;
   borderColor: string;
-  features: string[];
   popular?: boolean;
 }
 
@@ -34,34 +34,13 @@ interface ApiPlan {
   description: string;
 }
 
-// UI configuration for pricing plans - maps plan IDs to UI-specific properties
-const planUIConfig: Record<
-  string,
-  {
-    icon: LucideIcon;
-    iconColor: string;
-    bgColor: string;
-    borderColor: string;
-    features: string[];
-    popular?: boolean;
-  }
-> = {
-  "TOEFL Max Writing": {
-    icon: Crown,
-    iconColor: "text-blue-600",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200",
-    features: [
-      "Personalized Feedback",
-      "Unlimited AI coaching sessions",
-      "5 AI trainers equivalent to $1,800 or more",
-      "Progress Monitoring",
-      "Live Interventions with Human Experts",
-      "Dedicated TOEFL guides & support",
-    ],
-    popular: true,
-  },
-  // Add more plan configurations as needed
+// Default UI configuration for all pricing plans
+const defaultPlanUI = {
+  icon: Crown,
+  iconColor: "text-blue-600",
+  bgColor: "bg-blue-50",
+  borderColor: "border-blue-200",
+  popular: true,
 };
 
 interface PricingSelectionProps {
@@ -70,6 +49,7 @@ interface PricingSelectionProps {
   onPrev: () => void;
   currentStep?: number;
   totalSteps?: number;
+  courseSlug?: string;
 }
 
 export default function PricingSelection({
@@ -78,6 +58,7 @@ export default function PricingSelection({
   onPrev,
   currentStep = 3,
   totalSteps = 3,
+  courseSlug,
 }: PricingSelectionProps) {
   const [selectedPlan, setSelectedPlan] = useState(data.selectedPackage || "premium");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -94,33 +75,32 @@ export default function PricingSelection({
         setIsLoading(true);
         setError(null);
 
-        const apiPlans = await getAllProducts();
+        let apiPlans: ApiPlan[];
 
-        // Merge API data with UI configuration
-        const enrichedPlans = apiPlans.map((plan: ApiPlan) => {
-          let uiConfig = null;
-          if (plan.name === "TOEFL Max Writing") {
-            uiConfig = planUIConfig["TOEFL Max Writing"];
-          }
-          // Fallback to default config if still no match
-          if (!uiConfig) {
-            uiConfig = {
-              icon: Crown,
-              iconColor: "text-blue-600",
-              bgColor: "bg-blue-50",
-              borderColor: "border-blue-200",
-              features: [],
-              popular: false,
-            };
-          }
-          return {
-            ...plan,
-            ...uiConfig,
-          } as PricingPlan;
-        });
+        // If courseSlug is provided, fetch specific product by slug
+        if (courseSlug) {
+          const product = await getProductBySlug(courseSlug);
+          // Transform the product response to match ApiPlan structure
+          apiPlans = [
+            {
+              id: product.priceId,
+              name: product.productName,
+              amount: product.amount,
+              priceId: product.priceId,
+              description: product.productDescription || "",
+            },
+          ];
+        } else {
+          apiPlans = await getAllProducts();
+        }
+
+        const enrichedPlans = apiPlans.map((plan: ApiPlan) => ({
+          ...plan,
+          ...defaultPlanUI,
+        }));
         setPricingPlans(enrichedPlans);
 
-        // Auto-select the first plan if no plan is currently selected
+        // Auto-select the first plan if no plan is selected
         if (enrichedPlans.length > 0) {
           const currentSelection = data.selectedPackage;
           if (!currentSelection) {
@@ -139,7 +119,7 @@ export default function PricingSelection({
     };
 
     fetchPricingPlans();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [courseSlug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
@@ -207,9 +187,9 @@ export default function PricingSelection({
         <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
           <Star className="w-8 h-8 text-white" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Plan</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">Confirm Your Plan</h2>
         <p className="text-lg text-gray-600">
-          Select the perfect plan to accelerate your English learning journey
+          The perfect plan to accelerate your learning journey
         </p>
       </div>
 
@@ -267,16 +247,6 @@ export default function PricingSelection({
                     <span className="text-gray-600 ml-1">/month</span>
                   </div>
                 </div>
-
-                <ul className="space-y-3 mb-6">
-                  {plan.features.map((feature: string, index: number) => (
-                    <li key={index} className="flex items-start">
-                      <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
                 <div
                   className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mx-auto ${
                     selectedPlan === plan.id ? "border-blue-500 bg-blue-500" : "border-gray-300"

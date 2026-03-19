@@ -1,9 +1,29 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../contexts";
 import AvatarDropdown from "./AvatarDropdown";
+import { useEffect, useState } from "react";
+import { Play } from "lucide-react";
 
 export default function Navigation() {
   const { isAuthenticated, login } = useAuthContext();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [lastCourseSlug, setLastCourseSlug] = useState<string | null>(null);
+  const [lastSectionId, setLastSectionId] = useState<string | null>(null);
+
+  // Refresh last visited course/section whenever route changes
+  useEffect(() => {
+    setLastCourseSlug(localStorage.getItem("last_course_slug"));
+    setLastSectionId(localStorage.getItem("last_section_id"));
+  }, [location.pathname]);
+
+  const handleContinueLearning = () => {
+    if (!lastCourseSlug) return;
+    if (lastSectionId) {
+      localStorage.setItem("selected_section_id", lastSectionId);
+    }
+    navigate(`/courses/${lastCourseSlug}/dashboard`);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/100 backdrop-blur-md">
@@ -18,12 +38,15 @@ export default function Navigation() {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/dashboard"
-                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Dashboard
-                </Link>
+                {lastCourseSlug && (
+                  <button
+                    onClick={handleContinueLearning}
+                    className="flex items-center gap-1.5 bg-[#c5a8de] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#b399d6] transition-colors"
+                  >
+                    <Play className="w-3.5 h-3.5" />
+                    Dashboard
+                  </button>
+                )}
                 <Link
                   to="/courses"
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"

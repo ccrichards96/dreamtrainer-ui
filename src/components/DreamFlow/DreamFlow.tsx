@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { DreamFlowProps } from "./types";
 import { ProgressTracker, ModuleContent, NavigationButton, TestContent } from "./components";
 import { useCourseContext } from "../../contexts/useCourseContext";
@@ -32,10 +32,18 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
     tests,
   } = useCourseContext();
 
-  const handleNextModule = () => {
-    // Mark current module as completed
-    markModuleAsCompleted(currentModuleIndex);
+  // Auto-mark the current module as completed when it's viewed for a reasonable amount of time (e.g. 3 seconds)
+  useEffect(() => {
+    if (modules.length > 0 && !isTestMode) {
+      const timer = setTimeout(() => {
+        markModuleAsCompleted(currentModuleIndex);
+      }, 3000); // 3-second delay before marking as complete
 
+      return () => clearTimeout(timer);
+    }
+  }, [currentModuleIndex, modules.length, isTestMode, markModuleAsCompleted]);
+
+  const handleNextModule = () => {
     if (isLastModule()) {
       // When user clicks "Review Materials Again" or "Test Your Skills" on last module
       if (tests.length > 0) {
@@ -95,18 +103,7 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
   };
 
   const handleModuleClick = (index: number) => {
-    // Calculate the highest module reached
-    let highestReached = currentModuleIndex;
-    completedModules.forEach((moduleIndex) => {
-      if (moduleIndex > highestReached) {
-        highestReached = moduleIndex;
-      }
-    });
-
-    // Allow navigation to any module up to the highest reached
-    if (index <= highestReached) {
-      setCurrentModuleIndex(index);
-    }
+    setCurrentModuleIndex(index);
   };
 
   return (

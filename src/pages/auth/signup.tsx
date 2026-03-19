@@ -9,18 +9,31 @@ export default function Signup() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Capture referralId from URL and store in localStorage for affiliate tracking
+  // Capture referralId and course slug from URL and store in localStorage
   useEffect(() => {
     const referralId = searchParams.get("via");
     if (referralId) {
       localStorage.setItem("rewardful_referral_id", referralId);
     }
+    const courseSlug = searchParams.get("course");
+    if (courseSlug) {
+      localStorage.setItem("signup_course_slug", courseSlug);
+    }
   }, [searchParams]);
 
-  // Redirect to dashboard if already authenticated
+  // Redirect to last session or courses if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard");
+      const lastCourseSlug = localStorage.getItem("last_course_slug");
+      if (lastCourseSlug) {
+        const lastSectionId = localStorage.getItem("last_section_id");
+        if (lastSectionId) {
+          localStorage.setItem("selected_section_id", lastSectionId);
+        }
+        navigate(`/courses/${lastCourseSlug}/dashboard`);
+      } else {
+        navigate("/courses");
+      }
     }
   }, [isAuthenticated, navigate]);
 
@@ -59,7 +72,7 @@ export default function Signup() {
       <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-[#c5a8de] mb-4">You're already signed up!</h1>
-          <p className="text-[#7c5e99] mb-8">Redirecting you to the dashboard...</p>
+          <p className="text-[#7c5e99] mb-8">Redirecting...</p>
         </div>
       </div>
     );

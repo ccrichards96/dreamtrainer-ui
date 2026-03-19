@@ -10,3 +10,15 @@ export interface ApiError {
   status?: number;
   details?: Record<string, unknown>;
 }
+
+export interface APIResponseWithPagination<T = unknown> {
+  message: string;
+  data: T;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  success: boolean;
+}

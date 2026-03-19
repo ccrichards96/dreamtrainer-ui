@@ -1,61 +1,176 @@
 import { Test } from "./tests";
 
-interface CourseGroup {
-  id: string;
-  name: string; //TOEFL Writing Max Course
-  description?: string;
-  image?: string;
-  createdAt: Date;
-  updatedAt: Date;
+/**
+ * Course status enum
+ */
+export enum CourseStatus {
+  DRAFT = "draft",
+  PENDING_REVIEW = "pending_review",
+  PUBLISHED = "published",
+  ARCHIVED = "archived",
 }
 
+/**
+ * Course listing status enum
+ */
+export enum ListingStatus {
+  PUBLIC = "public",
+  PRIVATE = "private",
+}
+
+/**
+ * Expert social links - optional URLs to expert's social profiles
+ */
+export interface ExpertSocialLinks {
+  linkedin?: string;
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
+  tiktok?: string;
+  twitter?: string;
+  website?: string;
+}
+
+/**
+ * Expert review - student review for an expert
+ */
+export interface ExpertReview {
+  id: string;
+  rating: number;
+  comment: string | null;
+  commentReply: string | null;
+  createdAt: string;
+  studentUser: {
+    firstName: string;
+    lastName: string;
+    avatarUrl: string | null;
+  };
+}
+
+/**
+ * Assigned course - links an expert to a course with a specific role
+ */
+export interface AssignedCourse {
+  role: "owner" | "support-expert" | "collaborator";
+  course: Course;
+}
+
+/**
+ * Course Expert - connects a course with an expert profile
+ */
+export interface CourseExpert {
+  id: string;
+  expertProfileId: string;
+  courseId: string;
+  role: "owner" | "support-expert";
+  expertProfile?: ExpertProfile;
+}
+
+/**
+ * Expert profile - instructor/creator profile for courses
+ */
+export interface ExpertProfile {
+  id: string;
+  userId: string;
+  displayName: string;
+  bio: string | null;
+  slug: string;
+  avatarUrl: string | null;
+  expertise: Record<string, string>;
+  socialLinks: ExpertSocialLinks;
+  approvalStatus: "pending" | "approved" | "rejected";
+  listingStatus: ListingStatus;
+  stripeConnectId: string | null;
+  approvedAt: string | null;
+  calendarLink: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  courses?: Course[];
+  assignedCourses?: AssignedCourse[];
+  reviews?: ExpertReview[];
+  user?: {
+    firstName: string;
+    lastName: string;
+    avatarUrl: string | null;
+  };
+}
+
+/**
+ * Section - Middle layer between Course and Module
+ */
+interface Section {
+  id: string;
+  name: string;
+  description: string | null;
+  imageUrl: string | null;
+  order: number;
+  courseId: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  modules?: Module[];
+}
+
+/**
+ * Course - Top level container
+ */
 interface Course {
   id: string;
-  name: string; //TOEFL Writing Max Course
-  description?: string;
-  courseGroupId: string;
+  name: string;
+  description: string;
+  imageUrl: string | null;
+  slug: string;
+  expertProfileId: string | null;
+  expertProfile?: ExpertProfile; // Nested expert profile data
+  categoryId?: string | null;
+  status: CourseStatus;
+  price: number;
+  stripeProductId: string | null;
+  listingStatus: ListingStatus;
   order: number;
-  createdAt: Date;
-  updatedAt: Date;
-  modules?: Module[];
+  learningObjectives?: string[];
+  prerequisites?: string[];
+  targetAudiences?: string[];
+  welcomeVideoUrl?: string | null;
+  featuredVideoUrl?: string | null;
+  numberOfSections?: number; // Returned from /courses endpoint
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+  sections?: Section[];
   tests?: Test[];
-  courseGroup?: CourseGroup;
 }
 
+/**
+ * Module - Learning unit within a Section
+ */
 interface Module {
   id: string;
-  courseId: string;
-  categoryId: string | null;
+  sectionId: string; // Changed from courseId
   topic: string; // e.g., "Introduction to TOEFL Writing"
   description: string;
   status: string;
   videoUrl: string; // URL for the video content
   botIframeUrl: string; // URL for the trainer bot
-  lessonContent: string; //Rich text content for the lesson
+  lessonContent: string; // Rich text content for the lesson
   order: number;
-  createdBy: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdBy: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 // Draft type for creating new modules (excludes auto-generated fields)
 export type DraftModule = Pick<
   Module,
-  | "courseId"
-  | "categoryId"
-  | "topic"
-  | "description"
-  | "status"
-  | "videoUrl"
-  | "botIframeUrl"
-  | "lessonContent"
+  "sectionId" | "topic" | "description" | "status" | "videoUrl" | "botIframeUrl" | "lessonContent"
 >;
 
-// Update type for modifying existing modules (partial of editable fields)
 export type UpdateModule = Partial<
   Pick<
     Module,
-    | "categoryId"
     | "topic"
     | "description"
     | "status"
@@ -63,7 +178,36 @@ export type UpdateModule = Partial<
     | "botIframeUrl"
     | "lessonContent"
     | "order"
+    | "sectionId"
   >
 >;
 
-export type { Course, Module, CourseGroup };
+export type DraftSection = Pick<Section, "courseId" | "name"> & {
+  description?: string;
+  imageUrl?: string;
+  order?: number;
+};
+
+export type UpdateSection = Partial<Pick<Section, "name" | "description" | "imageUrl" | "order">>;
+
+export type { Course, Module, Section };
+
+export interface Message {
+  id: string;
+  studentUserId: string;
+  student: {
+    firstName: string;
+    lastName: string;
+    avatarUrl: string | null;
+  };
+  expertProfileId: string;
+  courseId: string | null;
+  subject: string;
+  body: string;
+  isRead: boolean;
+  isReplied: boolean;
+  readAt: string | null;
+  repliedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

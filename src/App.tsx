@@ -1,20 +1,27 @@
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { Auth0Provider } from "@auth0/auth0-react";
+import { Route, BrowserRouter as Router, Routes, useNavigate } from "react-router-dom";
+import { Auth0Provider, AppState } from "@auth0/auth0-react";
 import Login from "./pages/auth/login";
 import Signup from "./pages/auth/signup";
 import Dashboard from "./pages/dashboard";
 import Onboarding from "./pages/onboarding";
+import ExpertOnboarding from "./pages/expert-onboarding";
 import CheckoutSuccess from "./pages/checkout/Success";
 import ProtectedRoute from "./components/routes/ProtectedRoute";
 import AccountPage from "./pages/account";
 import BlogPage from "./pages/blog";
 import ExploreCourses from "./pages/explore";
+import ExpertDashboard from "./pages/expert-dashboard";
+import CourseManage from "./pages/expert-dashboard/CourseManage";
+import { CourseProfilePage, CourseCheckout } from "./pages/courses";
+import ExpertProfilePage from "./pages/experts";
 import AdminDashboard from "./pages/admin";
+import TeachOnDreamTrainer from "./pages/teach";
 import SubscriptionRequired from "./pages/renew";
 import CMSRoute from "./components/routes/CMSRoute";
+import InviteAccept from "./pages/invite/InviteAccept";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
-import { AuthProvider, ApiProvider } from "./contexts";
+import { AuthProvider, ApiProvider, CheckoutProvider, ExpertDashboardProvider } from "./contexts";
 import { AppProvider } from "./contexts/AppContext";
 import NotFound from "./pages/NotFound";
 import { Role } from "./types/user";
@@ -26,93 +33,190 @@ function PageTracker() {
   return null;
 }
 
-function App() {
+// Wraps Auth0Provider inside Router so useNavigate is available for onRedirectCallback
+function Auth0ProviderWithNavigate({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+
+  const onRedirectCallback = (appState?: AppState) => {
+    // If there's an explicit returnTo, honor it
+    if (appState?.returnTo) {
+      navigate(appState.returnTo, { replace: true });
+      return;
+    }
+
+    // Check for last session in localStorage
+    const lastCourseSlug = localStorage.getItem("last_course_slug");
+    const lastSectionId = localStorage.getItem("last_section_id");
+
+    if (lastCourseSlug) {
+      // Resume last session
+      if (lastSectionId) {
+        localStorage.setItem("selected_section_id", lastSectionId);
+      }
+      navigate(`/courses/${lastCourseSlug}/dashboard`, { replace: true });
+    } else {
+      // No previous session — send to course catalog
+      navigate("/courses", { replace: true });
+    }
+  };
+
   return (
     <Auth0Provider
-      domain={import.meta.env.VITE_AUTH0_DOMAIN as string}
-      clientId={import.meta.env.VITE_AUTH0_CLIENT_ID as string}
+      domain={import.meta.env.VITE_AUTH0_DOMAIN}
+      clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
       authorizationParams={{
         redirect_uri: window.location.origin,
-        audience: import.meta.env.VITE_AUTH0_AUDIENCE as string,
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
       }}
+      cacheLocation="localstorage"
+      useRefreshTokens={true}
+      onRedirectCallback={onRedirectCallback}
     >
-      <AuthProvider>
-        <ApiProvider>
-          <AppProvider>
-            <Router>
-              <PageTracker />
-              <div className="min-h-screen bg-gray-100">
-                <Navigation />
-                <div className="pt-16">
-                  <Routes>
-                    <Route path="/" element={<CMSRoute />} />
-                    <Route path="/blog" element={<BlogPage />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route
-                      path="/courses"
-                      element={
-                        <ProtectedRoute requireSubscription={true}>
-                          <ExploreCourses />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/onboarding"
-                      element={
-                        <ProtectedRoute>
-                          <Onboarding />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                    <Route
-                      path="/renew"
-                      element={
-                        <ProtectedRoute>
-                          <SubscriptionRequired />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <ProtectedRoute requireSubscription={true}>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/account"
-                      element={
-                        <ProtectedRoute>
-                          <AccountPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin"
-                      element={
-                        <ProtectedRoute allowedRoles={[Role.Admin]}>
-                          <AdminDashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    {/* CMS Routes */}
-                    <Route path="/site/*" element={<CMSRoute />} />
-                    <Route path="/site" element={<CMSRoute />} />
-
-                    {/* 404 Catch-all route - must be last */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </div>
-                <Footer />
-              </div>
-            </Router>
-          </AppProvider>
-        </ApiProvider>
-      </AuthProvider>
+      {children}
     </Auth0Provider>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Auth0ProviderWithNavigate>
+        <AuthProvider>
+          <ApiProvider>
+            <AppProvider>
+              <CheckoutProvider>
+                <PageTracker />
+                <div className="min-h-screen bg-gray-100">
+                  <Navigation />
+                  <div className="pt-16">
+                    <Routes>
+                      <Route path="/" element={<CMSRoute />} />
+                      <Route path="/blog" element={<BlogPage />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/signup" element={<Signup />} />
+                      <Route path="/invite/accept" element={<InviteAccept />} />
+                      <Route
+                        path="/courses"
+                        element={
+                          <ProtectedRoute requireSubscription={true}>
+                            <ExploreCourses />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/courses/:slug"
+                        element={
+                          <ProtectedRoute requireSubscription={true}>
+                            <CourseProfilePage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/courses/:slug/checkout"
+                        element={
+                          <ProtectedRoute requireSubscription={true}>
+                            <CourseCheckout />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/courses/:slug/dashboard"
+                        element={
+                          <ProtectedRoute requireSubscription={true}>
+                            <Dashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+
+                      <Route path="/expert">
+                        <Route
+                          path="/expert/dashboard/:tab?"
+                          element={
+                            <ProtectedRoute requireExpertProfile>
+                              <ExpertDashboardProvider>
+                                <ExpertDashboard />
+                              </ExpertDashboardProvider>
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/expert/dashboard/courses/:id/manage"
+                          element={
+                            <ProtectedRoute requireExpertProfile>
+                              <ExpertDashboardProvider>
+                                <CourseManage />
+                              </ExpertDashboardProvider>
+                            </ProtectedRoute>
+                          }
+                        />
+                      </Route>
+
+                      <Route path="/experts/:slug" element={<ExpertProfilePage />} />
+                      <Route
+                        path="/onboarding"
+                        element={
+                          <ProtectedRoute>
+                            <Onboarding />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/expert-onboarding"
+                        element={
+                          <ProtectedRoute>
+                            <ExpertOnboarding />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                      <Route
+                        path="/renew"
+                        element={
+                          <ProtectedRoute>
+                            <SubscriptionRequired />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/account"
+                        element={
+                          <ProtectedRoute>
+                            <AccountPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin"
+                        element={
+                          <ProtectedRoute allowedRoles={[Role.Admin]}>
+                            <AdminDashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/teach"
+                        element={
+                          <ProtectedRoute>
+                            <TeachOnDreamTrainer />
+                          </ProtectedRoute>
+                        }
+                      />
+                      {/* CMS Routes */}
+                      <Route path="/site/*" element={<CMSRoute />} />
+                      <Route path="/site" element={<CMSRoute />} />
+
+                      {/* 404 Catch-all route - must be last */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </div>
+                  <Footer />
+                </div>
+              </CheckoutProvider>
+            </AppProvider>
+          </ApiProvider>
+        </AuthProvider>
+      </Auth0ProviderWithNavigate>
+    </Router>
   );
 }
 

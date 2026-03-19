@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Save, X, AlertCircle } from "lucide-react";
-import { Course, CourseGroup } from "../../types/modules";
-import {
-  updateCourse,
-  getAllCoursesGroups,
-  addCourseToGroup,
-  removeCourseFromGroup,
-} from "../../services/api/modules";
+import { Save, X, AlertCircle, Copy, Check, UserPlus, Trash2, Loader2 } from "lucide-react";
+import { Course, CourseExpert, CourseStatus, ListingStatus } from "../../types/modules";
+import { Category } from "../../types/categories";
+import { User } from "../../types/user";
+import { updateCourse } from "../../services/api/modules";
+import courseExpertsService from "../../services/api/course-experts";
+import { getAllCategories } from "../../services/api/categories";
+import { getAllUsers } from "../../services/api/admin";
 
 interface CourseEditorProps {
   course: Course;
@@ -15,42 +15,233 @@ interface CourseEditorProps {
   onCancel: () => void;
 }
 
+const STATUS_LABELS: Record<CourseStatus, string> = {
+  [CourseStatus.DRAFT]: "Draft",
+  [CourseStatus.PENDING_REVIEW]: "Pending Review",
+  [CourseStatus.PUBLISHED]: "Published",
+  [CourseStatus.ARCHIVED]: "Archived",
+};
+
+const STATUS_COLORS: Record<CourseStatus, string> = {
+  [CourseStatus.DRAFT]: "bg-gray-100 text-gray-700",
+  [CourseStatus.PENDING_REVIEW]: "bg-yellow-100 text-yellow-700",
+  [CourseStatus.PUBLISHED]: "bg-green-100 text-green-700",
+  [CourseStatus.ARCHIVED]: "bg-red-100 text-red-700",
+};
+
+// Tag input for arrays like learningObjectives, prerequisites, targetAudiences
+function TagInput({
+  label,
+  values,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  values: string[];
+  onChange: (values: string[]) => void;
+  placeholder?: string;
+}) {
+  const [inputValue, setInputValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const addTag = () => {
+    const trimmed = inputValue.trim();
+    if (trimmed && !values.includes(trimmed)) {
+      onChange([...values, trimmed]);
+    }
+    setInputValue("");
+  };
+
+  const removeTag = (index: number) => {
+    onChange(values.filter((_, i) => i !== index));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addTag();
+    } else if (e.key === "Backspace" && inputValue === "" && values.length > 0) {
+      removeTag(values.length - 1);
+    }
+  };
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <div
+        className="min-h-[42px] w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent bg-white flex flex-wrap gap-2 cursor-text"
+        onClick={() => inputRef.current?.focus()}
+      >
+        {values.map((tag, i) => (
+          <span
+            key={i}
+            className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-sm"
+          >
+            {tag}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                removeTag(i);
+              }}
+              className="hover:text-blue-600"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </span>
+        ))}
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={addTag}
+          placeholder={values.length === 0 ? placeholder : ""}
+          className="flex-1 min-w-[120px] outline-none text-sm bg-transparent"
+        />
+      </div>
+      <p className="text-xs text-gray-400 mt-1">Press Enter or click away to add an item</p>
+    </div>
+  );
+}
+
 const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     name: course.name || "",
     description: course.description || "",
+    imageUrl: course.imageUrl || "",
+    slug: course.slug || "",
+    categoryId: course.categoryId || "",
+    status: course.status || CourseStatus.DRAFT,
+    listingStatus: course.listingStatus || ListingStatus.PRIVATE,
+    welcomeVideoUrl: course.welcomeVideoUrl || "",
+    featuredVideoUrl: course.featuredVideoUrl || "",
+    learningObjectives: course.learningObjectives || [],
+    prerequisites: course.prerequisites || [],
+    targetAudiences: course.targetAudiences || [],
+    stripeProductId: course.stripeProductId || "",
   });
-  const [selectedGroupId, setSelectedGroupId] = useState<string>(course.courseGroupId || "");
-  const [courseGroups, setCourseGroups] = useState<CourseGroup[]>([]);
-  const [loadingGroups, setLoadingGroups] = useState(true);
+
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [expertUsers, setExpertUsers] = useState<User[]>([]);
+  const [courseExperts, setCourseExperts] = useState<CourseExpert[]>([]);
+
+  // Selection state for adding a new expert
+  const [expertSearch, setExpertSearch] = useState("");
+  const [selectedExpertProfileId, setSelectedExpertProfileId] = useState("");
+  const [selectedRole, setSelectedRole] = useState<"owner" | "support-expert">("support-expert");
+
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingExpertsList, setLoadingExpertsList] = useState(true);
+  const [loadingCourseExperts, setLoadingCourseExperts] = useState(true);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [expertSuccess, setExpertSuccess] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  // Fetch course groups on mount
   useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        setLoadingGroups(true);
-        const response = await getAllCoursesGroups();
-        setCourseGroups(response.data || []);
-      } catch (err) {
-        console.error("Error fetching course groups:", err);
-      } finally {
-        setLoadingGroups(false);
+    getAllCategories()
+      .then((data) => setCategories(data.sort((a, b) => a.sortOrder - b.sortOrder)))
+      .catch(() => setError("Failed to load categories"))
+      .finally(() => setLoadingCategories(false));
+
+    getAllUsers()
+      .then((users) => setExpertUsers(users.filter((u) => u.expertProfile !== null)))
+      .catch(() => setError("Failed to load expert users"))
+      .finally(() => setLoadingExpertsList(false));
+
+    if (course.id) {
+      courseExpertsService
+        .getExpertsByCourse(course.id)
+        .then((experts) => setCourseExperts(experts))
+        .catch(() => setError("Failed to load course experts"))
+        .finally(() => setLoadingCourseExperts(false));
+    } else {
+      setLoadingCourseExperts(false);
+    }
+  }, [course.id]);
+
+  const filteredExperts = expertUsers.filter((u) => {
+    // Only show experts not already assigned
+    if (courseExperts.some((ce) => ce.expertProfileId === u.expertProfile?.id)) {
+      return false;
+    }
+    const q = expertSearch.toLowerCase();
+    return (
+      u.expertProfile!.displayName.toLowerCase().includes(q) ||
+      u.firstName.toLowerCase().includes(q) ||
+      u.lastName.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q)
+    );
+  });
+
+  const handleAddExpert = async () => {
+    if (!selectedExpertProfileId || !course.id) return;
+
+    setActionLoadingId("add");
+    try {
+      const newExpert = await courseExpertsService.createCourseExpert({
+        expertProfileId: selectedExpertProfileId,
+        courseId: course.id,
+        role: selectedRole,
+      });
+      // Try to find the user profile info to render it immediately
+      const matchedUser = expertUsers.find((u) => u.expertProfile?.id === selectedExpertProfileId);
+      if (matchedUser && matchedUser.expertProfile) {
+        newExpert.expertProfile = matchedUser.expertProfile;
       }
-    };
-    fetchGroups();
-  }, []);
+      setCourseExperts((prev) => [...prev, newExpert]);
+      setSelectedExpertProfileId("");
+      setExpertSearch("");
+      setExpertSuccess("Course experts updated successfully");
+      setTimeout(() => setExpertSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to add expert");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleUpdateExpertRole = async (expertId: string, newRole: "owner" | "support-expert") => {
+    setActionLoadingId(expertId);
+    try {
+      const updated = await courseExpertsService.updateCourseExpert(expertId, { role: newRole });
+      setCourseExperts((prev) =>
+        prev.map((ce) => (ce.id === expertId ? { ...ce, role: updated.role } : ce))
+      );
+      setExpertSuccess("Course experts updated successfully");
+      setTimeout(() => setExpertSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to update expert role");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleRemoveExpert = async (expertId: string) => {
+    setActionLoadingId(expertId);
+    try {
+      await courseExpertsService.deleteCourseExpert(expertId);
+      setCourseExperts((prev) => prev.filter((ce) => ce.id !== expertId));
+      setExpertSuccess("Course experts updated successfully");
+      setTimeout(() => setExpertSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to remove expert");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,20 +250,21 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     setError(null);
 
     try {
-      // Update course via API
-      await updateCourse(course.id, formData);
-
-      // Handle course group assignment
-      const currentGroupId = course.courseGroupId || "";
-      if (selectedGroupId !== currentGroupId) {
-        if (selectedGroupId) {
-          // Assign to new group
-          await addCourseToGroup(course.id, selectedGroupId);
-        } else if (currentGroupId) {
-          // Remove from current group
-          await removeCourseFromGroup(course.id);
-        }
-      }
+      await updateCourse(course.id, {
+        name: formData.name,
+        description: formData.description,
+        imageUrl: formData.imageUrl || null,
+        slug: formData.slug || undefined,
+        categoryId: formData.categoryId || null,
+        status: formData.status,
+        listingStatus: formData.listingStatus,
+        welcomeVideoUrl: formData.welcomeVideoUrl || null,
+        featuredVideoUrl: formData.featuredVideoUrl || null,
+        learningObjectives: formData.learningObjectives,
+        prerequisites: formData.prerequisites,
+        targetAudiences: formData.targetAudiences,
+        stripeProductId: formData.stripeProductId || null,
+      });
 
       setSuccess(true);
       setTimeout(() => {
@@ -94,120 +286,508 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-lg shadow"
     >
+      {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-medium text-gray-900">Edit Course</h3>
-            <p className="text-sm text-gray-500">Course ID: {course.id}</p>
+            <p className="text-sm text-gray-500">ID: {course.id}</p>
           </div>
-          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600">
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-3">
+            <span
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[formData.status as CourseStatus] || "bg-gray-100 text-gray-700"}`}
+            >
+              {STATUS_LABELS[formData.status as CourseStatus] || formData.status}
+            </span>
+            <button onClick={onCancel} className="text-gray-400 hover:text-gray-600">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6">
+      <form onSubmit={handleSubmit} className="p-6 space-y-8">
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500" />
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
             <span className="text-red-700">{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
             <span className="text-green-700">Course updated successfully!</span>
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-6">
-          {/* Course Name */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Course Name *
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter course name"
-            />
-          </div>
-
-          {/* Course Description */}
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Course Description
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter course description"
-            />
-          </div>
-
-          {/* Course Group Selection */}
-          <div>
-            <label htmlFor="courseGroup" className="block text-sm font-medium text-gray-700 mb-1">
-              Course Group
-            </label>
-            {loadingGroups ? (
-              <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500">
-                Loading groups...
-              </div>
-            ) : (
+        {/* Section: Status & Visibility */}
+        <section>
+          <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+            Status &amp; Visibility
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+                Course Status
+              </label>
               <select
-                id="courseGroup"
-                value={selectedGroupId}
-                onChange={(e) => setSelectedGroupId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                id="status"
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
-                <option value="">No group (unassigned)</option>
-                {courseGroups.map((group) => (
-                  <option key={group.id} value={group.id}>
-                    {group.name}
+                {Object.values(CourseStatus).map((s) => (
+                  <option key={s} value={s}>
+                    {STATUS_LABELS[s]}
                   </option>
                 ))}
               </select>
-            )}
-            <p className="mt-1 text-sm text-gray-500">
-              Assign this course to a group for better organization
-            </p>
-          </div>
+              {course.status === CourseStatus.DRAFT && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Currently in Draft — select Published to go live.
+                </p>
+              )}
+            </div>
 
-          {/* Course Metadata */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Created Date</label>
+              <label
+                htmlFor="listingStatus"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Listing Status
+              </label>
+              <select
+                id="listingStatus"
+                name="listingStatus"
+                value={formData.listingStatus}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                <option value={ListingStatus.PRIVATE}>Private — invite-only</option>
+                <option value={ListingStatus.PUBLIC}>Public — visible in catalog</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        {/* Section: Basic Info */}
+        <section>
+          <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+            Basic Information
+          </h4>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Course Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                value={new Date(course.createdAt).toLocaleDateString()}
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter course name"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter course description"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
+                  Slug
+                </label>
+                <input
+                  type="text"
+                  id="slug"
+                  name="slug"
+                  value={formData.slug}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                  placeholder="course-slug"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="categoryId"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Category
+                </label>
+                <select
+                  id="categoryId"
+                  name="categoryId"
+                  value={formData.categoryId}
+                  onChange={handleInputChange}
+                  disabled={loadingCategories}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                >
+                  <option value="">{loadingCategories ? "Loading…" : "— No Category —"}</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Image and Wrapper Fields */}
+
+            <div>
+              <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                Image URL
+              </label>
+              <div className="flex gap-3">
+                <input
+                  type="url"
+                  id="imageUrl"
+                  name="imageUrl"
+                  value={formData.imageUrl}
+                  onChange={handleInputChange}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="https://..."
+                />
+                {formData.imageUrl && (
+                  <img
+                    src={formData.imageUrl}
+                    alt="Course thumbnail preview"
+                    className="w-16 h-16 object-cover rounded-lg border border-gray-200 flex-shrink-0"
+                    onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
+                  />
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="welcomeVideoUrl"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Welcome Video URL
+              </label>
+              <input
+                type="url"
+                id="welcomeVideoUrl"
+                name="welcomeVideoUrl"
+                value={formData.welcomeVideoUrl}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="featuredVideoUrl"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Featured Video URL
+              </label>
+              <input
+                type="url"
+                id="featuredVideoUrl"
+                name="featuredVideoUrl"
+                value={formData.featuredVideoUrl}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Section: Learning Details */}
+        <section>
+          <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+            Learning Details
+          </h4>
+          <div className="grid grid-cols-1 gap-4">
+            <TagInput
+              label="Learning Objectives"
+              values={formData.learningObjectives}
+              onChange={(v) => setFormData((p) => ({ ...p, learningObjectives: v }))}
+              placeholder="e.g. Learn English grammar"
+            />
+            <TagInput
+              label="Prerequisites"
+              values={formData.prerequisites}
+              onChange={(v) => setFormData((p) => ({ ...p, prerequisites: v }))}
+              placeholder="e.g. Basic English reading"
+            />
+            <TagInput
+              label="Target Audiences"
+              values={formData.targetAudiences}
+              onChange={(v) => setFormData((p) => ({ ...p, targetAudiences: v }))}
+              placeholder="e.g. Foreign English speakers"
+            />
+          </div>
+        </section>
+
+        {/* Section: Metadata (read-only) */}
+        <section>
+          <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+            Metadata
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="stripeProductId"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Stripe Product ID
+              </label>
+              <input
+                type="text"
+                id="stripeProductId"
+                name="stripeProductId"
+                value={formData.stripeProductId}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                placeholder="prod_..."
+              />
+            </div>
+            {formData.slug && (
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sign-up Link</label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-mono text-gray-600 truncate">
+                    {`${window.location.origin}/signup?course=${formData.slug}`}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        `${window.location.origin}/signup?course=${formData.slug}`
+                      );
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className="flex-shrink-0 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-600 flex items-center gap-1.5 text-sm"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-4 h-4 text-green-600" />
+                        <span className="text-green-600">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        Copy
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Created</label>
+              <input
+                type="text"
+                value={new Date(course.createdAt).toLocaleString()}
                 disabled
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-500"
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-400 text-sm"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
               <input
                 type="text"
-                value={new Date(course.updatedAt).toLocaleDateString()}
+                value={new Date(course.updatedAt).toLocaleString()}
                 disabled
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-500"
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-400 text-sm"
               />
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* Section: Course Experts Management */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+              Course Experts
+            </h4>
+          </div>
+          <div className="space-y-4">
+            {expertSuccess && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span className="text-green-700">{expertSuccess}</span>
+              </div>
+            )}
+
+            {loadingCourseExperts ? (
+              <div className="flex justify-center p-6 border border-gray-200 border-dashed rounded-lg">
+                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+              </div>
+            ) : courseExperts.length > 0 ? (
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                        Expert
+                      </th>
+                      <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                        Role
+                      </th>
+                      <th className="px-6 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {courseExperts.map((expert) => (
+                      <tr key={expert.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {expert.expertProfile?.avatarUrl ? (
+                              <img
+                                className="h-8 w-8 rounded-full object-cover border border-gray-300"
+                                src={expert.expertProfile.avatarUrl}
+                                alt=""
+                              />
+                            ) : (
+                              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium border border-blue-200">
+                                {expert.expertProfile?.displayName?.charAt(0) || "?"}
+                              </div>
+                            )}
+                            <div className="ml-3">
+                              <p className="text-sm font-medium text-gray-900">
+                                {expert.expertProfile?.displayName || "Unknown Expert"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {actionLoadingId === expert.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                          ) : (
+                            <select
+                              value={expert.role}
+                              onChange={(e) =>
+                                handleUpdateExpertRole(
+                                  expert.id,
+                                  e.target.value as "owner" | "support-expert"
+                                )
+                              }
+                              className="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                              <option value="owner">Owner</option>
+                              <option value="support-expert">Support Expert</option>
+                            </select>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveExpert(expert.id)}
+                            disabled={actionLoadingId === expert.id}
+                            className="text-red-500 hover:text-red-700 disabled:opacity-50"
+                          >
+                            <Trash2 className="w-4 h-4 inline" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-6 border border-gray-200 border-dashed rounded-lg bg-gray-50 text-center">
+                <p className="text-sm text-gray-500 mb-1">No experts assigned yet.</p>
+                <p className="text-xs text-gray-400">
+                  Assign an expert below to let them manage or support this course.
+                </p>
+              </div>
+            )}
+
+            {/* Add New Expert Panel */}
+            <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg">
+              <h5 className="text-sm font-medium text-blue-900 mb-3 flex items-center gap-2">
+                <UserPlus className="w-4 h-4" />
+                Assign New Expert
+              </h5>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                <div className="md:col-span-5">
+                  <label className="block text-xs font-medium text-blue-800 mb-1">
+                    Search & Select Expert
+                  </label>
+                  <div className="flex flex-col border border-blue-200 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-blue-500">
+                    <input
+                      type="text"
+                      value={expertSearch}
+                      onChange={(e) => setExpertSearch(e.target.value)}
+                      placeholder="Search name or email…"
+                      className="w-full px-3 py-1.5 text-sm border-b border-gray-100 outline-none"
+                    />
+                    <select
+                      value={selectedExpertProfileId}
+                      onChange={(e) => setSelectedExpertProfileId(e.target.value)}
+                      disabled={loadingExpertsList}
+                      className="w-full px-3 py-2 text-sm outline-none bg-transparent"
+                    >
+                      <option value="" disabled>
+                        {loadingExpertsList ? "Loading..." : "— Choose Expert —"}
+                      </option>
+                      {filteredExperts.map((u) => (
+                        <option key={u.expertProfile!.id} value={u.expertProfile!.id}>
+                          {u.expertProfile!.displayName} ({u.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="md:col-span-4">
+                  <label className="block text-xs font-medium text-blue-800 mb-1">Role</label>
+                  <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value as "owner" | "support-expert")}
+                    className="w-full px-3 py-2.5 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  >
+                    <option value="owner">Owner (Full Access)</option>
+                    <option value="support-expert">Support Expert (Messages & Feedback)</option>
+                  </select>
+                </div>
+                <div className="md:col-span-3">
+                  <button
+                    type="button"
+                    onClick={handleAddExpert}
+                    disabled={!selectedExpertProfileId || actionLoadingId === "add"}
+                    className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex items-center justify-center gap-2"
+                  >
+                    {actionLoadingId === "add" ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "Assign Expert"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Action Buttons */}
-        <div className="mt-8 flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
           <button
             type="button"
             onClick={onCancel}
@@ -222,7 +802,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
           >
             {loading ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
                 Saving...
               </>
             ) : (

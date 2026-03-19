@@ -1,9 +1,10 @@
-import React, { createContext, ReactNode, useState, useCallback, useEffect } from "react";
-import { Course, Module } from "../types/modules";
+import React, { createContext, ReactNode, useState, useCallback, useEffect, useRef } from "react";
+import { Course, Module, Section } from "../types/modules";
 import { Test } from "../types/tests";
 import {
   getCourseWithModulesById,
   getAllCourses as fetchAllCourses,
+  getSectionWithModules,
 } from "../services/api/modules";
 import { updateProgress, getUserCourseProgress } from "../services/api/course-progress";
 import type { CourseProgress } from "../types/course-progress";
@@ -18,38 +19,37 @@ const getModuleIndices = (moduleIds: string[], modules: Module[]): Set<number> =
   return indices;
 };
 
-// Helper to convert module indices to IDs
-const getModuleIds = (indices: Set<number>, modules: Module[]): string[] => {
-  return Array.from(indices)
-    .map((idx) => modules[idx]?.id)
-    .filter((id): id is string => id !== undefined);
-};
-
 const saveProgress = async (
   courseId: string,
   modules: Module[],
   tests: Test[],
   currentModuleIndex: number,
-  completedModules: Set<number>,
   completedTests: Set<string>,
-  currentTestIndex: number
+  currentTestIndex: number,
+  currentSectionId: string | null,
+  completedSectionIds: string[],
+  allCompletedModuleIds: string[],
+  totalCourseModules: number
 ) => {
   try {
     const currentModuleId = modules[currentModuleIndex]?.id || null;
-    const completedModuleIds = getModuleIds(completedModules, modules);
     const completedTestIds = Array.from(completedTests);
     const currentTestId = tests[currentTestIndex]?.id || null;
 
-    // Calculate percentage: completed modules / total modules
+    // Calculate percentage using total course modules (across all sections)
     const percentageComplete =
-      modules.length > 0 ? Math.round((completedModules.size / modules.length) * 100) : 0;
+      totalCourseModules > 0
+        ? Math.round((allCompletedModuleIds.length / totalCourseModules) * 100)
+        : 0;
 
     const progressData = {
       percentageComplete,
       currentModuleId,
-      completedModuleIds,
+      completedModuleIds: allCompletedModuleIds,
       completedTestIds,
       currentTestId,
+      currentSectionId,
+      completedSectionIds,
     };
 
     await updateProgress(courseId, progressData);
@@ -70,9 +70,15 @@ const loadProgress = async (courseId: string): Promise<CourseProgress | null> =>
 
 export interface CourseContextType {
   currentCourse: Course | null;
+  currentSectionId: string | null;
   currentModule: Module | null;
+
+  sections: Section[];
   modules: Module[];
   tests: Test[];
+
+  // Module navigation
+  completedSections: Set<string>;
 
   // Module navigation
   currentModuleIndex: number;
@@ -91,6 +97,7 @@ export interface CourseContextType {
 
   // Actions
   loadCourse: (courseId: string) => Promise<void>;
+  loadSectionModules: (sectionId: string) => Promise<void>;
   getAllCourses: () => Promise<Course[]>;
   setCurrentModuleIndex: (index: number) => void;
   markModuleAsCompleted: (index: number) => void;
@@ -129,11 +136,15 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   // State variables
   const [currentCourse, setCurrentCourse] = useState<Course | null>(null);
   const [currentModule, setCurrentModule] = useState<Module | null>(null);
+  const [currentSectionId, setCurrentSectionId] = useState<string | null>(null);
   const [modules, setModules] = useState<Module[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [tests, setTests] = useState<Test[]>([]);
   const [currentModuleIndex, setCurrentModuleIndexState] = useState<number>(0);
   const [completedModules, setCompletedModules] = useState<Set<number>>(new Set());
   const [completedTests, setCompletedTests] = useState<Set<string>>(new Set());
+  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [progressLoaded, setProgressLoaded] = useState<boolean>(false);
@@ -144,19 +155,30 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   const [currentTestIndex, setCurrentTestIndexState] = useState<number>(0);
   const [allModulesCompleted, setAllModulesCompleted] = useState<boolean>(false);
 
+  // Refs for cross-section progress tracking
+  // Tracks ALL completed module IDs across all sections (not just the current one)
+  const allCompletedModuleIdsRef = useRef<Set<string>>(new Set());
+  // Total number of modules across all sections in the course
+  const totalCourseModulesRef = useRef<number>(0);
+  // Stores sections data from loadCourse for section-completion checking
+  const courseSectionsRef = useRef<Section[]>([]);
+
   // Auto-save progress when module index, completed modules, or completed tests change
   // Only save after initial progress has been loaded to prevent overwriting on mount
   useEffect(() => {
     if (currentCourse && modules.length > 0 && progressLoaded) {
-      // Save progress asynchronously with ID-based tracking
+      // Save progress asynchronously with section-aware tracking
       saveProgress(
         currentCourse.id,
         modules,
         tests,
         currentModuleIndex,
-        completedModules,
         completedTests,
-        currentTestIndex
+        currentTestIndex,
+        currentSectionId,
+        Array.from(completedSections),
+        Array.from(allCompletedModuleIdsRef.current),
+        totalCourseModulesRef.current
       ).catch((err) => {
         console.error("Failed to auto-save progress:", err);
       });
@@ -167,6 +189,8 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     completedTests,
     currentTestIndex,
     currentCourse,
+    currentSectionId,
+    completedSections,
     modules,
     tests,
     progressLoaded,
@@ -182,23 +206,48 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
 
       setCurrentCourse(data);
 
-      // Sort modules by order field, then by createdAt if order is the same
-      const sortedModules = (data.modules || []).sort((a: Module, b: Module) => {
-        if (a.order !== b.order) {
-          return a.order - b.order;
-        }
-        // If order is the same, sort by createdAt
-        return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+      const sortedSections = (data.sections || []).sort(
+        (a: Section, b: Section) => a.order - b.order
+      );
+
+      const allModules: Module[] = [];
+      sortedSections.forEach((section: Section) => {
+        const sectionModules = (section.modules || []).sort((a: Module, b: Module) => {
+          if (a.order !== b.order) {
+            return a.order - b.order;
+          }
+          // If order is the same, sort by createdAt
+          return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+        });
+        allModules.push(...sectionModules);
       });
+
+      const sortedModules = allModules;
       setModules(sortedModules);
+      setSections(sortedSections);
+
+      // Store total course module count and sections for cross-section tracking
+      totalCourseModulesRef.current = sortedModules.length;
+      courseSectionsRef.current = sortedSections;
 
       const sortedTests = (data.tests || []).sort((a: Test, b: Test) => a.order - b.order);
       setTests(sortedTests);
-      // setTestAttempts(data.testAttempts);
 
-      //Load saved progress from backend
+      // Load saved progress from backend
       const saved = await loadProgress(courseId);
       if (saved) {
+        // Populate the cross-section completed module IDs ref
+        allCompletedModuleIdsRef.current = new Set(saved.completedModuleIds || []);
+
+        // Restore completed sections
+        const savedCompletedSections = new Set<string>(saved.completedSectionIds || []);
+        setCompletedSections(savedCompletedSections);
+
+        // Restore current section
+        if (saved.currentSectionId) {
+          setCurrentSectionId(saved.currentSectionId);
+        }
+
         // Convert module IDs to indices (using sorted modules)
         const savedCompletedIndices = getModuleIndices(
           saved.completedModuleIds || [],
@@ -224,9 +273,11 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
         setAllModulesCompleted(savedCompletedIndices.size === sortedModules.length);
       } else {
         // Reset to defaults
+        allCompletedModuleIdsRef.current = new Set();
         setCurrentModuleIndexState(0);
         setCompletedModules(new Set());
         setCompletedTests(new Set());
+        setCompletedSections(new Set());
         setCurrentModule(sortedModules[0] || null);
         setCurrentTestIndexState(0);
         setAllModulesCompleted(false);
@@ -236,15 +287,65 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       setProgressLoaded(true);
     } catch (err) {
       console.warn("Course loading failed, using fallback data:", err);
-
       setCurrentCourse(null);
       setModules([]);
+      setSections([]);
       setTests([]);
       setCurrentModuleIndexState(0);
+      setCompletedSections(new Set());
       setCompletedModules(new Set());
       setCompletedTests(new Set());
       setCurrentModule(null);
       setCurrentTestIndexState(0);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Load modules for a specific section
+  const loadSectionModules = useCallback(async (sectionId: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const sectionWithModules = await getSectionWithModules(sectionId);
+
+      // Sort modules by order field
+      const sortedModules = (sectionWithModules.modules || []).sort((a: Module, b: Module) => {
+        if (a.order !== b.order) {
+          return a.order - b.order;
+        }
+        return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+      });
+
+      setCurrentSectionId(sectionId);
+      setModules(sortedModules);
+
+      // Restore completed modules for this section from the cross-section ref
+      const restoredCompleted = getModuleIndices(
+        Array.from(allCompletedModuleIdsRef.current),
+        sortedModules
+      );
+      setCompletedModules(restoredCompleted);
+      setAllModulesCompleted(restoredCompleted.size === sortedModules.length);
+
+      // Position user at the first incomplete module in this section
+      let startIndex = 0;
+      if (restoredCompleted.size > 0 && restoredCompleted.size < sortedModules.length) {
+        // Find first module that isn't completed
+        for (let i = 0; i < sortedModules.length; i++) {
+          if (!restoredCompleted.has(i)) {
+            startIndex = i;
+            break;
+          }
+        }
+      }
+      setCurrentModuleIndexState(startIndex);
+      setCurrentModule(sortedModules[startIndex] || null);
+    } catch (err) {
+      console.warn("Failed to load section modules:", err);
+      setError("Failed to load section modules");
+      setModules([]);
+      setCurrentModule(null);
     } finally {
       setLoading(false);
     }
@@ -279,19 +380,31 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   // Mark a module as completed
   const markModuleAsCompleted = useCallback(
     (index: number): void => {
+      // Also track in the cross-section ref by module ID
+      const moduleId = modules[index]?.id;
+      if (moduleId) {
+        allCompletedModuleIdsRef.current.add(moduleId);
+      }
+
       setCompletedModules((prev) => {
         const newCompleted = new Set([...prev, index]);
 
-        // Don't auto-save here - let nextModule handle it
-        // This prevents race conditions
-
-        if (newCompleted.size === modules.length) {
-          setAllModulesCompleted(true);
+        // A section is only completed when all its modules are in the newCompleted set
+        const isSectionCompleted = newCompleted.size === modules.length;
+        
+        if (isSectionCompleted) {
+          if (currentSectionId && !completedSections.has(currentSectionId)) {
+            setCompletedSections((prevSections) => new Set([...prevSections, currentSectionId]));
+            
+            if (allCompletedModuleIdsRef.current.size === totalCourseModulesRef.current) {
+              setAllModulesCompleted(true);
+            }
+          }
         }
         return newCompleted;
       });
     },
-    [modules.length]
+    [modules, currentSectionId]
   );
 
   // Mark a test as completed
@@ -425,12 +538,9 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   // Get progress percentage
   const getProgressPercentage = useCallback((): number => {
     if (modules.length === 0) return 0;
-    return (
-      ((completedModules.size + (currentModuleIndex > completedModules.size ? 1 : 0)) /
-        modules.length) *
-      100
-    );
-  }, [completedModules.size, currentModuleIndex, modules.length]);
+    // Only count modules that are actually in the completedModules set
+    return (completedModules.size / modules.length) * 100;
+  }, [completedModules.size, modules.length]);
 
   // Check if current module is the last
   const isLastModule = useCallback((): boolean => {
@@ -452,8 +562,12 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
     // Current course and modules
     currentCourse,
     currentModule,
+    currentSectionId,
     modules,
+    sections,
     tests,
+
+    completedSections,
 
     // Module navigation
     currentModuleIndex,
@@ -472,6 +586,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
 
     // Actions
     loadCourse,
+    loadSectionModules,
     getAllCourses,
     setCurrentModuleIndex,
     markModuleAsCompleted,

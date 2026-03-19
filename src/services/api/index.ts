@@ -17,6 +17,10 @@ export { default as billingService } from "./billing";
 export * from "./categories";
 export { default as categoriesService } from "./categories";
 
+// Export course assets services
+export * from "./course-assets";
+export { default as courseAssetsService } from "./course-assets";
+
 // Export course progress services
 export * from "./course-progress";
 export { default as courseProgressService } from "./course-progress";

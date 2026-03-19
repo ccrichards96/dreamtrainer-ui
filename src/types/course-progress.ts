@@ -11,6 +11,8 @@ export interface CourseProgress {
   currentTestId: string | null;
   dateStarted: string | null;
   dateCompleted: string | null;
+  currentSectionId: string | null;
+  completedSectionIds: string[];
 }
 
 export interface UpdateProgressDTO {
@@ -19,4 +21,6 @@ export interface UpdateProgressDTO {
   completedModuleIds?: string[];
   completedTestIds?: string[];
   currentTestId?: string | null;
+  currentSectionId?: string | null;
+  completedSectionIds?: string[];
 }

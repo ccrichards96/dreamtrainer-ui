@@ -6,74 +6,70 @@ import {
   BookOpen,
   Users,
   Search,
-  Tag,
-  Megaphone,
   ChevronUp,
   ChevronDown,
-  Folder,
   Plus,
   X,
   Save,
+  Layers,
+  ArrowLeft,
 } from "lucide-react";
-import { Course, Module, CourseGroup } from "../../types/modules";
+import { Course, Section, Module } from "../../types/modules";
+import { Category } from "../../types/categories";
 import {
   getAllCourses,
-  getAllCoursesGroups,
   getCourseById,
-  getCourseWithModulesById,
   updateCourse,
   createCourse,
-  createCourseGroup,
-  addCourseToGroup,
+  deleteCourse,
 } from "../../services/api/modules";
+import { getAllCategories } from "../../services/api/categories";
 import {
+  AdminSidebar,
   CourseEditor,
   ModuleManager,
-  CategoryManager,
   AnnouncementManager,
+  SectionManager,
+  UsersManager,
+  CategoryManager,
 } from "../../components/admin";
+import type { AdminView } from "../../components/admin";
 
 const AdminDashboard: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
-  const [courseGroups, setCourseGroups] = useState<CourseGroup[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [selectedCourseModules, setSelectedCourseModules] = useState<Module[]>([]);
+  const [selectedSection, setSelectedSection] = useState<Section | null>(null);
+  const [selectedSectionModules, setSelectedSectionModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [reorderingCourseId, setReorderingCourseId] = useState<string | null>(null);
-  const [view, setView] = useState<
-    "overview" | "course-edit" | "module-manage" | "category-manage" | "announcement-manage"
-  >("overview");
+  const [view, setView] = useState<AdminView>("overview");
+
+  // Categories
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   // Inline form states for new course
   const [showNewCourseForm, setShowNewCourseForm] = useState(false);
   const [newCourseData, setNewCourseData] = useState({
     name: "",
     description: "",
-    groupId: "",
+    categoryId: "",
   });
   const [creatingCourse, setCreatingCourse] = useState(false);
-
-  // Inline form states for new group
-  const [showNewGroupForm, setShowNewGroupForm] = useState(false);
-  const [newGroupData, setNewGroupData] = useState({
-    name: "",
-    description: "",
-    image: "",
-  });
-  const [creatingGroup, setCreatingGroup] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Delete confirmation modal
+  const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
+  const [deletingCourse, setDeletingCourse] = useState(false);
 
   // Load all courses on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [coursesResponse, groupsResponse] = await Promise.all([
-          getAllCourses(),
-          getAllCoursesGroups(),
-        ]);
+        const coursesResponse = await getAllCourses();
         // Sort courses by order field, then by createdAt if order is the same
         const sortedCourses = (coursesResponse.data || []).sort((a: Course, b: Course) => {
           if (a.order !== b.order) {
@@ -82,7 +78,6 @@ const AdminDashboard: React.FC = () => {
           return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
         });
         setCourses(sortedCourses);
-        setCourseGroups(groupsResponse.data || []);
       } catch (err) {
         setError("Failed to load courses");
         console.error("Error fetching courses:", err);
@@ -94,6 +89,14 @@ const AdminDashboard: React.FC = () => {
     fetchData();
   }, []);
 
+  // Load categories
+  useEffect(() => {
+    getAllCategories()
+      .then((data) => setCategories(data.sort((a, b) => a.sortOrder - b.sortOrder)))
+      .catch(() => setCategories([]))
+      .finally(() => setLoadingCategories(false));
+  }, []);
+
   // Filter courses based on search term
   const filteredCourses = courses.filter(
     (course) =>
@@ -101,37 +104,17 @@ const AdminDashboard: React.FC = () => {
       course.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Group courses by their courseGroupId
-  const getCoursesInGroup = (groupId: string) => {
-    return filteredCourses
-      .filter((course) => course.courseGroupId === groupId)
-      .sort((a, b) => a.order - b.order);
-  };
-
-  const getUnassignedCourses = () => {
-    return filteredCourses
-      .filter((course) => !course.courseGroupId)
-      .sort((a, b) => a.order - b.order);
-  };
-
   const handleEditCourse = async (course: Course) => {
     try {
       setLoading(true);
 
       try {
         const response = await getCourseById(course.id);
-
-        const courseData = response.data?.course || response.data || response;
-        const modulesData = response.data?.modules || [];
-
-        // Use the fetched data if available, otherwise fall back to the original course
-        setSelectedCourse(courseData && courseData.id ? courseData : course);
-        setSelectedCourseModules(modulesData);
+        const courseData = response.data || course;
+        setSelectedCourse(courseData);
       } catch (apiError) {
         console.warn("API call failed, using original course data:", apiError);
-        // Fallback to the original course data if API fails
         setSelectedCourse(course);
-        setSelectedCourseModules([]);
       }
 
       setView("course-edit");
@@ -143,43 +126,36 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleManageModules = async (course: Course) => {
-    try {
-      setLoading(true);
-      try {
-        const response = await getCourseWithModulesById(course.id);
+  const handleManageSections = async (course: Course) => {
+    setSelectedCourse(course);
+    setView("section-manage");
+  };
 
-        const courseData = response.data || response;
-        const modulesData = response.data?.modules || [];
-
-        setSelectedCourse(courseData && courseData.id ? courseData : course);
-        setSelectedCourseModules(modulesData);
-      } catch (apiError) {
-        console.warn("API call failed, using original course data:", apiError);
-        setSelectedCourse(course);
-        setSelectedCourseModules([]);
-      }
-      setView("module-manage");
-    } catch (err) {
-      setError("Failed to load course modules");
-      console.error("Error fetching course modules:", err);
-    } finally {
-      setLoading(false);
-    }
+  // Called from SectionManager when user wants to manage modules for a section
+  const handleManageModulesForSection = (section: Section, modules: Module[]) => {
+    setSelectedSection(section);
+    setSelectedSectionModules(modules);
+    setView("module-manage");
   };
 
   const handleBackToOverview = () => {
     setView("overview");
     setSelectedCourse(null);
-    setSelectedCourseModules([]);
+    setSelectedSection(null);
+    setSelectedSectionModules([]);
   };
 
-  const handleManageCategories = () => {
-    setView("category-manage");
+  const handleBackToSections = () => {
+    setView("section-manage");
+    setSelectedSection(null);
+    setSelectedSectionModules([]);
   };
 
-  const handleManageAnnouncements = () => {
-    setView("announcement-manage");
+  const handleSidebarNavigate = (target: AdminView) => {
+    setSelectedCourse(null);
+    setSelectedSection(null);
+    setSelectedSectionModules([]);
+    setView(target);
   };
 
   // Handle creating a new course inline
@@ -190,62 +166,22 @@ const AdminDashboard: React.FC = () => {
     try {
       setCreatingCourse(true);
       setError(null);
-      const createdCourse = await createCourse({
+      await createCourse({
         name: newCourseData.name.trim(),
         description: newCourseData.description.trim() || undefined,
+        categoryId: newCourseData.categoryId || undefined,
       });
 
-      // If a group was selected, assign the course to it
-      if (newCourseData.groupId && createdCourse?.data?.id) {
-        await addCourseToGroup(createdCourse.data.id, newCourseData.groupId);
-      }
-
       setSuccessMessage("Course created successfully!");
-      setNewCourseData({ name: "", description: "", groupId: "" });
+      setNewCourseData({ name: "", description: "", categoryId: "" });
       setShowNewCourseForm(false);
       await refreshCourses();
-      await refreshGroups();
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to create course";
       setError(errorMessage);
     } finally {
       setCreatingCourse(false);
-    }
-  };
-
-  // Handle creating a new group inline
-  const handleCreateGroup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newGroupData.name.trim()) return;
-
-    try {
-      setCreatingGroup(true);
-      setError(null);
-      await createCourseGroup({
-        name: newGroupData.name.trim(),
-        description: newGroupData.description.trim() || undefined,
-        image: newGroupData.image.trim() || undefined,
-      });
-      setSuccessMessage("Course group created successfully!");
-      setNewGroupData({ name: "", description: "", image: "" });
-      setShowNewGroupForm(false);
-      await refreshGroups();
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to create course group";
-      setError(errorMessage);
-    } finally {
-      setCreatingGroup(false);
-    }
-  };
-
-  const refreshGroups = async () => {
-    try {
-      const response = await getAllCoursesGroups();
-      setCourseGroups(response.data || []);
-    } catch (err) {
-      console.error("Error refreshing groups:", err);
     }
   };
 
@@ -262,6 +198,23 @@ const AdminDashboard: React.FC = () => {
       setCourses(sortedCourses);
     } catch (err) {
       console.error("Error refreshing courses:", err);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!courseToDelete) return;
+    try {
+      setDeletingCourse(true);
+      await deleteCourse(courseToDelete.id);
+      setCourseToDelete(null);
+      setSuccessMessage(`"${courseToDelete.name}" has been deleted.`);
+      await refreshCourses();
+      setTimeout(() => setSuccessMessage(null), 4000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to delete course";
+      setError(errorMessage);
+    } finally {
+      setDeletingCourse(false);
     }
   };
 
@@ -306,7 +259,7 @@ const AdminDashboard: React.FC = () => {
 
   if (loading && view === "overview") {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-400 via-gray-300 to-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading admin dashboard...</p>
@@ -317,7 +270,7 @@ const AdminDashboard: React.FC = () => {
 
   if (error && view === "overview") {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-400 via-gray-300 to-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-xl mb-4">Error: {error}</div>
           <button
@@ -332,65 +285,46 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600">Manage courses, modules, and content</p>
-            </div>
-            <div className="flex items-center gap-4">
-              {view !== "overview" && (
-                <button
-                  onClick={handleBackToOverview}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Back to Overview
-                </button>
-              )}
-              {view === "overview" && (
-                <>
-                  <button
-                    onClick={() => setShowNewCourseForm(!showNewCourseForm)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    New Course Section
-                  </button>
-                  <button
-                    onClick={() => setShowNewGroupForm(!showNewGroupForm)}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
-                  >
-                    <Folder className="w-4 h-4" />
-                    New Course
-                  </button>
-                </>
-              )}
-              <button
-                onClick={handleManageCategories}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
-              >
-                <Tag className="w-4 h-4" />
-                Manage Categories
-              </button>
-              <button
-                onClick={handleManageAnnouncements}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-              >
-                <Megaphone className="w-4 h-4" />
-                Manage Announcements
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-400 via-gray-300 to-gray-100 pt-16">
+      {/* Sidebar */}
+      <AdminSidebar activeView={view} onNavigate={handleSidebarNavigate} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Content */}
+      <div className="w-full px-4 sm:px-6 md:px-8 lg:ps-80 py-6">
+        {/* Contextual back buttons */}
+        {view === "module-manage" && selectedSection && (
+          <button
+            onClick={handleBackToSections}
+            className="mb-4 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 inline-flex items-center gap-1.5"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Sections
+          </button>
+        )}
+        {(["course-edit", "section-manage"] as AdminView[]).includes(view) && (
+          <button
+            onClick={handleBackToOverview}
+            className="mb-4 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 inline-flex items-center gap-1.5"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Courses
+          </button>
+        )}
         {/* Overview */}
         {view === "overview" && (
           <>
+            {/* Page header with action */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Courses</h2>
+              <button
+                onClick={() => setShowNewCourseForm(!showNewCourseForm)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                New Course
+              </button>
+            </div>
+
             {/* Success Message */}
             {successMessage && (
               <motion.div
@@ -425,7 +359,7 @@ const AdminDashboard: React.FC = () => {
               >
                 <div className="px-6 py-4 border-b border-gray-200 bg-blue-50">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900">Create New Course Section</h3>
+                    <h3 className="text-lg font-medium text-gray-900">Create New Course</h3>
                     <button
                       onClick={() => setShowNewCourseForm(false)}
                       className="text-gray-400 hover:text-gray-600"
@@ -435,10 +369,10 @@ const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
                 <form onSubmit={handleCreateCourse} className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Section Name *
+                        Course Name *
                       </label>
                       <input
                         type="text"
@@ -446,18 +380,19 @@ const AdminDashboard: React.FC = () => {
                         onChange={(e) =>
                           setNewCourseData({ ...newCourseData, name: e.target.value })
                         }
-                        placeholder="Enter section name"
+                        placeholder="Enter course name"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description
+                        Description *
                       </label>
                       <input
                         type="text"
                         value={newCourseData.description}
+                        required
                         onChange={(e) =>
                           setNewCourseData({ ...newCourseData, description: e.target.value })
                         }
@@ -467,19 +402,24 @@ const AdminDashboard: React.FC = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Assign to Course
+                        Category
                       </label>
                       <select
-                        value={newCourseData.groupId}
+                        value={newCourseData.categoryId}
                         onChange={(e) =>
-                          setNewCourseData({ ...newCourseData, groupId: e.target.value })
+                          setNewCourseData({ ...newCourseData, categoryId: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        disabled={loadingCategories}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                       >
-                        <option value="">No course (unassigned)</option>
-                        {courseGroups.map((group) => (
-                          <option key={group.id} value={group.id}>
-                            {group.name}
+                        <option value="">
+                          {loadingCategories
+                            ? "Loading categories\u2026"
+                            : "\u2014 No Category \u2014"}
+                        </option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.name}
                           </option>
                         ))}
                       </select>
@@ -490,7 +430,7 @@ const AdminDashboard: React.FC = () => {
                       type="button"
                       onClick={() => {
                         setShowNewCourseForm(false);
-                        setNewCourseData({ name: "", description: "", groupId: "" });
+                        setNewCourseData({ name: "", description: "", categoryId: "" });
                       }}
                       className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
                     >
@@ -502,101 +442,6 @@ const AdminDashboard: React.FC = () => {
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
                     >
                       {creatingCourse ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                          Creating...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="w-4 h-4" />
-                          Create Course Section
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              </motion.div>
-            )}
-
-            {/* Inline New Group Form */}
-            {showNewGroupForm && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                className="bg-white rounded-lg shadow mb-6"
-              >
-                <div className="px-6 py-4 border-b border-gray-200 bg-indigo-50">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900">Create New Course</h3>
-                    <button
-                      onClick={() => setShowNewGroupForm(false)}
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-                <form onSubmit={handleCreateGroup} className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Course Name *
-                      </label>
-                      <input
-                        type="text"
-                        value={newGroupData.name}
-                        onChange={(e) => setNewGroupData({ ...newGroupData, name: e.target.value })}
-                        placeholder="Enter course name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description
-                      </label>
-                      <input
-                        type="text"
-                        value={newGroupData.description}
-                        onChange={(e) =>
-                          setNewGroupData({ ...newGroupData, description: e.target.value })
-                        }
-                        placeholder="Enter description"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Image URL
-                      </label>
-                      <input
-                        type="text"
-                        value={newGroupData.image}
-                        onChange={(e) =>
-                          setNewGroupData({ ...newGroupData, image: e.target.value })
-                        }
-                        placeholder="Enter image URL"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-4 flex justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowNewGroupForm(false);
-                        setNewGroupData({ name: "", description: "", image: "" });
-                      }}
-                      className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={creatingGroup || !newGroupData.name.trim()}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {creatingGroup ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                           Creating...
@@ -623,7 +468,7 @@ const AdminDashboard: React.FC = () => {
                 <div className="flex items-center">
                   <BookOpen className="w-8 h-8 text-blue-600" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Course Sections</p>
+                    <p className="text-sm font-medium text-gray-600">Total Courses</p>
                     <p className="text-2xl font-semibold text-gray-900">{courses.length}</p>
                   </div>
                 </div>
@@ -665,141 +510,27 @@ const AdminDashboard: React.FC = () => {
 
             {/* Courses Grouped by Course Groups */}
             <div className="space-y-6">
-              {courseGroups.map((group) => {
-                const groupCourses = getCoursesInGroup(group.id);
-                return (
-                  <div key={group.id} className="bg-white rounded-lg shadow overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
-                      <div className="flex items-center gap-3">
-                        <Folder className="w-6 h-6 text-blue-600" />
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900">{group.name}</h3>
-                          {group.description && (
-                            <p className="text-sm text-gray-500">{group.description}</p>
-                          )}
-                        </div>
-                        <span className="ml-auto text-sm text-gray-500">
-                          {groupCourses.length} course(s)
-                        </span>
-                      </div>
+              <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="w-6 h-6 text-blue-600" />
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900">All Courses</h3>
+                      <p className="text-sm text-gray-500">Manage courses and their sections</p>
                     </div>
-                    {groupCourses.length === 0 ? (
-                      <div className="p-6 text-center text-gray-500">No courses in this group</div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Course
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Description
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Created
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {groupCourses.map((course, index) => (
-                              <tr key={course.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="flex items-start gap-3">
-                                    <div className="flex flex-col items-center gap-1 pt-1">
-                                      <button
-                                        onClick={() => handleMoveCourse(course.id, "up")}
-                                        disabled={index === 0 || reorderingCourseId !== null}
-                                        className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
-                                        title="Move up"
-                                      >
-                                        <ChevronUp className="w-4 h-4" />
-                                      </button>
-                                      <button
-                                        onClick={() => handleMoveCourse(course.id, "down")}
-                                        disabled={
-                                          index === groupCourses.length - 1 ||
-                                          reorderingCourseId !== null
-                                        }
-                                        className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
-                                        title="Move down"
-                                      >
-                                        <ChevronDown className="w-4 h-4" />
-                                      </button>
-                                    </div>
-                                    <div>
-                                      <div className="text-sm font-medium text-gray-900">
-                                        {course.name}
-                                      </div>
-                                      <div className="text-sm text-gray-500">ID: {course.id}</div>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                  <div className="text-sm text-gray-900 max-w-xs truncate">
-                                    {course.description || "No description"}
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {new Date(course.createdAt).toLocaleDateString()}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                  <div className="flex items-center gap-2">
-                                    <button
-                                      onClick={() => handleEditCourse(course)}
-                                      disabled={reorderingCourseId !== null}
-                                      className="text-blue-600 hover:text-blue-900 flex items-center gap-1 disabled:opacity-50"
-                                    >
-                                      <Edit3 className="w-4 h-4" />
-                                      Edit
-                                    </button>
-                                    <button
-                                      onClick={() => handleManageModules(course)}
-                                      disabled={reorderingCourseId !== null}
-                                      className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50"
-                                    >
-                                      <BookOpen className="w-4 h-4" />
-                                      Modules
-                                    </button>
-                                    <button
-                                      disabled={reorderingCourseId !== null}
-                                      className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                      Delete
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
+                    <span className="ml-auto text-sm text-gray-500">
+                      {filteredCourses.length} course(s)
+                    </span>
                   </div>
-                );
-              })}
-
-              {/* Unassigned Courses */}
-              {getUnassignedCourses().length > 0 && (
-                <div className="bg-white rounded-lg shadow overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-200 bg-yellow-50">
-                    <div className="flex items-center gap-3">
-                      <Folder className="w-6 h-6 text-yellow-600" />
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900">Unassigned Courses</h3>
-                        <p className="text-sm text-gray-500">
-                          These courses are not assigned to any group
-                        </p>
-                      </div>
-                      <span className="ml-auto text-sm text-gray-500">
-                        {getUnassignedCourses().length} course(s)
-                      </span>
-                    </div>
+                </div>
+                {filteredCourses.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">
+                      No courses found. Create your first course to get started.
+                    </p>
                   </div>
+                ) : (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
@@ -819,7 +550,7 @@ const AdminDashboard: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {getUnassignedCourses().map((course, index) => (
+                        {filteredCourses.map((course, index) => (
                           <tr key={course.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-start gap-3">
@@ -835,7 +566,7 @@ const AdminDashboard: React.FC = () => {
                                   <button
                                     onClick={() => handleMoveCourse(course.id, "down")}
                                     disabled={
-                                      index === getUnassignedCourses().length - 1 ||
+                                      index === filteredCourses.length - 1 ||
                                       reorderingCourseId !== null
                                     }
                                     className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
@@ -848,7 +579,9 @@ const AdminDashboard: React.FC = () => {
                                   <div className="text-sm font-medium text-gray-900">
                                     {course.name}
                                   </div>
-                                  <div className="text-sm text-gray-500">ID: {course.id}</div>
+                                  <div className="text-sm text-gray-500">
+                                    ID: {course.id.slice(0, 8)}...
+                                  </div>
                                 </div>
                               </div>
                             </td>
@@ -871,14 +604,15 @@ const AdminDashboard: React.FC = () => {
                                   Edit
                                 </button>
                                 <button
-                                  onClick={() => handleManageModules(course)}
+                                  onClick={() => handleManageSections(course)}
                                   disabled={reorderingCourseId !== null}
                                   className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50"
                                 >
-                                  <BookOpen className="w-4 h-4" />
-                                  Modules
+                                  <Layers className="w-4 h-4" />
+                                  Sections
                                 </button>
                                 <button
+                                  onClick={() => setCourseToDelete(course)}
                                   disabled={reorderingCourseId !== null}
                                   className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"
                                 >
@@ -892,16 +626,8 @@ const AdminDashboard: React.FC = () => {
                       </tbody>
                     </table>
                   </div>
-                </div>
-              )}
-
-              {/* Empty state */}
-              {courseGroups.length === 0 && getUnassignedCourses().length === 0 && (
-                <div className="bg-white rounded-lg shadow p-8 text-center">
-                  <Folder className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">No courses or course groups found</p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </>
         )}
@@ -923,25 +649,106 @@ const AdminDashboard: React.FC = () => {
             </div>
           ))}
 
-        {/* Module Manager */}
-        {view === "module-manage" &&
+        {/* Section Manager */}
+        {view === "section-manage" &&
           (selectedCourse ? (
-            <ModuleManager course={selectedCourse} modules={selectedCourseModules} />
+            <SectionManager
+              course={selectedCourse}
+              onManageModules={handleManageModulesForSection}
+            />
           ) : (
             <div className="bg-white rounded-lg shadow p-8">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading course modules...</p>
+                <p className="text-gray-600">Loading course sections...</p>
               </div>
             </div>
           ))}
 
-        {/* Category Manager */}
-        {view === "category-manage" && <CategoryManager />}
+        {/* Module Manager */}
+        {view === "module-manage" &&
+          (selectedSection ? (
+            <ModuleManager section={selectedSection} modules={selectedSectionModules} />
+          ) : (
+            <div className="bg-white rounded-lg shadow p-8">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading section modules...</p>
+              </div>
+            </div>
+          ))}
 
         {/* Announcement Manager */}
         {view === "announcement-manage" && <AnnouncementManager />}
+
+        {/* Users Manager */}
+        {view === "user-manage" && <UsersManager />}
+
+        {/* Category Manager */}
+        {view === "category-manage" && <CategoryManager />}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {courseToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-200 flex items-center gap-3">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Delete Course</h3>
+                <p className="text-sm text-gray-500">"{courseToDelete.name}"</p>
+              </div>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm font-semibold text-red-600 mb-3">
+                This action is irreversible — by deleting this course you remove the following:
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700">
+                {[
+                  "All Course Details",
+                  "Related Stripe Products become Archived",
+                  "All Students & Their Subscriptions Are to Be Cancelled",
+                  "Any Related Course Assets",
+                  "Any Other Course Details",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <span className="mt-0.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => setCourseToDelete(null)}
+                disabled={deletingCourse}
+                className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                disabled={deletingCourse}
+                className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {deletingCourse ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Yes, Delete Course
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
