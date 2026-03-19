@@ -68,7 +68,7 @@ export default function CourseCheckout() {
     };
 
     initiateCheckout();
-  }, [slug, activeCheckout, loadCheckoutData]);
+  }, [slug, loadCheckoutData]);
 
   const handleBackToCourse = () => {
     if (course?.slug) {

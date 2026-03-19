@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useState, useCallback } from "react";
+import { createContext, ReactNode, useState, useCallback, useEffect, useRef } from "react";
 import type { Course } from "../types/modules";
 import type { CoursePricing } from "../types/billing";
 import { getCourseBySlug } from "../services/api/modules";
@@ -33,6 +33,14 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Use a ref to keep track of activeCheckout for the stable callback
+  const activeCheckoutRef = useRef<ActiveCheckoutData | null>(null);
+  
+  // Sync ref with state
+  useEffect(() => {
+    activeCheckoutRef.current = activeCheckout;
+  }, [activeCheckout]);
+
   /**
    * Load course and pricing data for checkout
    * Returns cached data if already loaded for the same course slug
@@ -40,8 +48,9 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
   const loadCheckoutData = useCallback(
     async (slug: string): Promise<ActiveCheckoutData> => {
       // Return cached data if we already have it for this course
-      if (activeCheckout && activeCheckout.course.slug === slug) {
-        return activeCheckout;
+      const currentActive = activeCheckoutRef.current;
+      if (currentActive && currentActive.course.slug === slug) {
+        return currentActive;
       }
 
       setLoading(true);
@@ -67,7 +76,7 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
         setLoading(false);
       }
     },
-    [activeCheckout]
+    [] // Stable callback
   );
 
   /**

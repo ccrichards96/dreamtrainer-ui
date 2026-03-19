@@ -22,6 +22,7 @@ export default function CheckoutSuccess() {
   const queryParams = new URLSearchParams(window.location.search);
 
   const [isUpdating, setIsUpdating] = useState(false);
+  const [processComplete, setProcessComplete] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [courseSlug, setCourseSlug] = useState<string | null>(queryParams.get("courseSlug"));
   const isFree = queryParams.get("isFree") === "true";
@@ -62,9 +63,14 @@ export default function CheckoutSuccess() {
         // Clear the referral ID and course slug from localStorage after successful conversion
         localStorage.removeItem("rewardful_referral_id");
         localStorage.removeItem("signup_course_slug");
+        
+        setProcessComplete(true);
       } catch (error) {
         console.error("Failed to update user onboarding status:", error);
         setUpdateError(error instanceof Error ? error.message : "Failed to update profile");
+        // If it fails but we've already done most of the work, we can still show the success screen
+        // as the payment was definitely successful by the time we reach this page
+        setProcessComplete(true);
       } finally {
         setIsUpdating(false);
       }
@@ -81,8 +87,16 @@ export default function CheckoutSuccess() {
     }
   };
 
-  // Show loading state while Auth0 is loading or API not ready
-  if (auth0Loading || !apiInitialized) {
+  // Show loading state while Auth0 is loading, API not ready, or processing updates
+  if (auth0Loading || !apiInitialized || isUpdating || !processComplete) {
+    const loadingMessage = isUpdating 
+      ? (isFree ? "Enrolling in your course..." : "Setting up your account...")
+      : "Initializing...";
+    
+    const loadingSubMessage = isUpdating
+      ? `Please wait while we complete your ${isFree ? "enrollment" : "subscription"} setup.`
+      : "Please wait while we prepare your account setup.";
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center px-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
@@ -90,30 +104,9 @@ export default function CheckoutSuccess() {
             <RefreshCw className="w-10 h-10 text-blue-600 animate-spin" />
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Initializing...</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">{loadingMessage}</h1>
 
-          <p className="text-gray-600">Please wait while we prepare your account setup.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading state while updating user
-  if (isUpdating) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white flex items-center justify-center px-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <RefreshCw className="w-10 h-10 text-blue-600 animate-spin" />
-          </div>
-
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            {isFree ? "Enrolling in your course..." : "Setting up your account..."}
-          </h1>
-
-          <p className="text-gray-600">
-            Please wait while we complete your {isFree ? "enrollment" : "subscription"} setup.
-          </p>
+          <p className="text-gray-600">{loadingSubMessage}</p>
         </div>
       </div>
     );
