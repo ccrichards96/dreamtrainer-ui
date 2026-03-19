@@ -134,11 +134,13 @@ export default function CourseProfilePage() {
                 {course.featuredVideoUrl ? (
                   <iframe
                     className="w-full h-full"
-                    src={course.featuredVideoUrl.includes("watch?v=") 
-                      ? course.featuredVideoUrl.replace("watch?v=", "embed/") 
-                      : course.featuredVideoUrl.includes("youtu.be/")
-                        ? course.featuredVideoUrl.replace("youtu.be/", "youtube.com/embed/")
-                        : course.featuredVideoUrl}
+                    src={
+                      course.featuredVideoUrl.includes("watch?v=")
+                        ? course.featuredVideoUrl.replace("watch?v=", "embed/")
+                        : course.featuredVideoUrl.includes("youtu.be/")
+                          ? course.featuredVideoUrl.replace("youtu.be/", "youtube.com/embed/")
+                          : course.featuredVideoUrl
+                    }
                     title={course.name}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen

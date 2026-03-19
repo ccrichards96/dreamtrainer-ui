@@ -126,7 +126,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
   const [categories, setCategories] = useState<Category[]>([]);
   const [expertUsers, setExpertUsers] = useState<User[]>([]);
   const [courseExperts, setCourseExperts] = useState<CourseExpert[]>([]);
-  
+
   // Selection state for adding a new expert
   const [expertSearch, setExpertSearch] = useState("");
   const [selectedExpertProfileId, setSelectedExpertProfileId] = useState("");
@@ -155,7 +155,8 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
       .finally(() => setLoadingExpertsList(false));
 
     if (course.id) {
-      courseExpertsService.getExpertsByCourse(course.id)
+      courseExpertsService
+        .getExpertsByCourse(course.id)
         .then((experts) => setCourseExperts(experts))
         .catch(() => setError("Failed to load course experts"))
         .finally(() => setLoadingCourseExperts(false));
@@ -180,7 +181,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
 
   const handleAddExpert = async () => {
     if (!selectedExpertProfileId || !course.id) return;
-    
+
     setActionLoadingId("add");
     try {
       const newExpert = await courseExpertsService.createCourseExpert({
@@ -209,7 +210,9 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     setActionLoadingId(expertId);
     try {
       const updated = await courseExpertsService.updateCourseExpert(expertId, { role: newRole });
-      setCourseExperts((prev) => prev.map((ce) => (ce.id === expertId ? { ...ce, role: updated.role } : ce)));
+      setCourseExperts((prev) =>
+        prev.map((ce) => (ce.id === expertId ? { ...ce, role: updated.role } : ce))
+      );
       setExpertSuccess("Course experts updated successfully");
       setTimeout(() => setExpertSuccess(null), 3000);
     } catch (err: any) {
@@ -630,7 +633,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 <span className="text-green-700">{expertSuccess}</span>
               </div>
             )}
-            
+
             {loadingCourseExperts ? (
               <div className="flex justify-center p-6 border border-gray-200 border-dashed rounded-lg">
                 <Loader2 className="w-6 h-6 animate-spin text-blue-500" />

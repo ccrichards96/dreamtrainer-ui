@@ -99,11 +99,10 @@ export default function Courses() {
         <div className="mt-6">
           <div className="w-full bg-white border border-gray-200 rounded-xl shadow-sm p-6 flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-gray-800">
-                No courses assigned
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-800">No courses assigned</h2>
               <p className="mt-1 text-sm text-gray-600">
-                Please connect with the Dream Trainer support staff to get your first course assigned.
+                Please connect with the Dream Trainer support staff to get your first course
+                assigned.
               </p>
             </div>
             {/* <button

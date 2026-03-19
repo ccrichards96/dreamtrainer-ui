@@ -337,7 +337,7 @@ function DashboardContent() {
 
         // Load the course from URL or localStorage
         // Note: loadCourse currently expects an ID, so we need to fetch the course by slug first
-        // unless we update loadCourse to handle slugs. 
+        // unless we update loadCourse to handle slugs.
         // For now, let's fetch the course to get the ID.
         const courseResponse = await getCourseBySlug(targetSlug);
         const courseData = courseResponse.data;

@@ -280,7 +280,6 @@ export const getCourseSectionsBySlug = async (slug: string): Promise<Section[]> 
   }
 };
 
-
 /**
  * Get a single module by its ID
  * GET /modules/:id

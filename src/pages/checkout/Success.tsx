@@ -24,7 +24,7 @@ export default function CheckoutSuccess() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [courseSlug, setCourseSlug] = useState<string | null>(queryParams.get("courseSlug"));
-  const isFree = queryParams.get("isFree") === "true";  
+  const isFree = queryParams.get("isFree") === "true";
 
   useEffect(() => {
     const handleCheckoutSuccess = async () => {

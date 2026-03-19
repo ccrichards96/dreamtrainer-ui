@@ -25,7 +25,7 @@ import {
   Review,
   Launch,
   WelcomeVideo,
-  CoursePageDetails
+  CoursePageDetails,
 } from "./manage";
 import Affiliates from "./manage/Affliates";
 import CourseAnnouncements from "./manage/CourseAnnouncements";

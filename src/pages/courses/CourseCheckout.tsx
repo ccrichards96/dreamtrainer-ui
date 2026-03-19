@@ -38,10 +38,10 @@ export default function CourseCheckout() {
         if (!pricing.priceId || pricing.amount === 0) {
           await enrollInFreeCourse(checkoutData.course.id);
           await refreshUserProfile();
-          
+
           // Add a small artificial delay so it doesn't feel too "instant"
           await new Promise((resolve) => setTimeout(resolve, 1500));
-          
+
           navigate(
             `/checkout/success?type=course&courseId=${checkoutData.course.id}&courseSlug=${checkoutData.course.slug}&isFree=true`,
             { replace: true }

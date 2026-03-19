@@ -23,9 +23,9 @@ export default function CoursePageDetails() {
     setError(null);
     setSuccess(false);
     try {
-      await updateCourse(course.id, { 
+      await updateCourse(course.id, {
         imageUrl: imageUrl || null,
-        featuredVideoUrl: featuredVideoUrl || null
+        featuredVideoUrl: featuredVideoUrl || null,
       });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -44,9 +44,7 @@ export default function CoursePageDetails() {
             <label htmlFor="image-url" className="block text-sm font-bold text-gray-900">
               Course Image URL
             </label>
-            <p className="mt-1 text-sm text-gray-500">
-              Add an image URL to represent your course.
-            </p>
+            <p className="mt-1 text-sm text-gray-500">Add an image URL to represent your course.</p>
           </div>
 
           <input

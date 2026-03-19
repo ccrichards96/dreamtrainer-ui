@@ -57,10 +57,9 @@ export const enrollInCourse = async (courseId: string): Promise<CourseEnrollment
  */
 export const enrollInFreeCourse = async (courseId: string): Promise<CourseEnrollment> => {
   try {
-    const response = await apiClient.post<APIResponse<CourseEnrollment>>(
-      "/enrollments/enroll",
-      { courseId }
-    );
+    const response = await apiClient.post<APIResponse<CourseEnrollment>>("/enrollments/enroll", {
+      courseId,
+    });
     return response.data.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to enroll in free course");
