@@ -80,7 +80,7 @@ export const CourseDetail = ({ course }: CourseDetailProps) => {
       localStorage.setItem("selected_section_id", sectionId);
 
       // Navigate to course-specific dashboard
-      navigate(`/courses/${course.id}/dashboard`);
+      navigate(`/courses/${course.slug}/dashboard`);
     } catch (error) {
       console.error("Failed to start section:", error);
       alert("Failed to start section. Please try again.");

@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Copy, Check, X, Mail } from "lucide-react";
 import Modal from "../../../components/modals/Modal";
+import { useExpertDashboardContext } from "../../../contexts";
 
 export default function Affiliates() {
   const { id: courseId } = useParams<{ id: string }>();
+  const { course, expertProfile } = useExpertDashboardContext();
   const [copied, setCopied] = useState(false);
   const [emailInput, setEmailInput] = useState("");
   const [emails, setEmails] = useState<string[]>([]);
@@ -14,8 +16,8 @@ export default function Affiliates() {
     null
   );
 
-  // Generate referral link
-  const referralLink = `${window.location.origin}/courses/${courseId}?ref=expert`;
+  // Generate referral link with expert slug (via) and course slug
+  const referralLink = `${window.location.origin}/?via=${expertProfile?.slug ?? ""}&course=${course?.slug || courseId}`;
 
   const handleCopyLink = async () => {
     try {

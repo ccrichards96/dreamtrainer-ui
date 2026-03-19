@@ -134,6 +134,7 @@ interface Course {
   prerequisites?: string[];
   targetAudiences?: string[];
   welcomeVideoUrl?: string | null;
+  featuredVideoUrl?: string | null;
   numberOfSections?: number; // Returned from /courses endpoint
   createdAt: string;
   updatedAt: string;

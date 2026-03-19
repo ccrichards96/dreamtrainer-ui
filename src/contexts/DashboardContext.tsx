@@ -1,7 +1,6 @@
 import React, { createContext, ReactNode, useState, useCallback, useEffect } from "react";
 import { Announcement } from "../types/announcements";
 import { getAllAnnouncements } from "../services/api/announcements";
-import { getTestAttemptsByCourse } from "../services/api/tests";
 
 // Define the module interface
 export interface Module {
@@ -41,27 +40,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getTestScores = useCallback(async (courseId: string): Promise<void> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const testAttempts: any = await getTestAttemptsByCourse(courseId);
-
-      // Set dashboard data
-      setStartingScore(testAttempts.firstAttempt?.score || 0);
-      setStartingScoreDate(testAttempts.firstAttempt?.createdAt || null);
-      setCurrentScore(testAttempts.currentAttempt?.score || 0);
-      setCurrentScoreDate(testAttempts.currentAttempt?.createdAt || null);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "An unknown error occurred while fetching dashboard data";
-      setError(errorMessage);
-      console.error("Dashboard API Error:", err);
-    } finally {
-      setLoading(false);
-    }
+  const getTestScores = useCallback(async (_courseId: string): Promise<void> => {
+    // This API call is deprecated as a requirement for loading the dashboard
+    return;
   }, []);
 
   // Refetch function that can be called to update dashboard data
@@ -71,12 +52,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     try {
       // Fetch both dashboard data and announcements in parallel
       const [announcementsData] = await Promise.all([getAllAnnouncements()]);
-
-      // Set dashboard data
-      // setStartingScore(dashboardData.startingScore);
-      // setStartingScoreDate(dashboardData.startingScoreDate);
-      // setCurrentScore(dashboardData.currentScore);
-      // setCurrentScoreDate(dashboardData.currentScoreDate);
 
       // Set announcements data
       setAnnouncements(announcementsData);

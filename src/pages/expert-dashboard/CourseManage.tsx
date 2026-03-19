@@ -17,7 +17,16 @@ import {
   Video,
 } from "lucide-react";
 import DashboardLayout, { type SidebarSection } from "./DashboardLayout";
-import { CoursePlan, Pricing, Curriculum, Resources, Review, Launch, WelcomeVideo } from "./manage";
+import {
+  CoursePlan,
+  Pricing,
+  Curriculum,
+  Resources,
+  Review,
+  Launch,
+  WelcomeVideo,
+  CoursePageDetails
+} from "./manage";
 import Affiliates from "./manage/Affliates";
 import CourseAnnouncements from "./manage/CourseAnnouncements";
 import CourseStudents from "./manage/CourseStudents";
@@ -38,6 +47,7 @@ type ManageTab =
   | "students"
   | "student-leaders"
   | "welcome-video"
+  | "course-page-details"
   | "review"
   | "preview"
   | "launch";
@@ -106,6 +116,7 @@ const sidebarSections: SidebarSection[] = [
     label: "Course Management",
     items: [
       { id: "welcome-video", label: "Welcome Video", icon: Video },
+      { id: "course-page-details", label: "Course Page Details", icon: FileText },
       { id: "announcements", label: "Announcements", icon: Megaphone },
       { id: "students", label: "Students", icon: Users },
       { id: "student-leaders", label: "Student Leaders", icon: Users },
@@ -115,7 +126,7 @@ const sidebarSections: SidebarSection[] = [
     id: "publish",
     label: "Publish Your Course",
     items: [
-      { id: "review", label: "Review", icon: CheckCircle },
+      // { id: "review", label: "Review", icon: CheckCircle },
       { id: "launch", label: "Submit for Review", icon: Rocket },
     ],
   },
@@ -182,8 +193,10 @@ export default function CourseManage() {
         return <ComingSoon title="Student Leaders — Coming Soon" />;
       case "welcome-video":
         return <WelcomeVideo />;
+      case "course-page-details":
+        return <CoursePageDetails />;
       case "review":
-        return <Review />;
+        return <ComingSoon title="Review — Coming Soon" />;
       case "launch":
         return <Launch />;
       default:

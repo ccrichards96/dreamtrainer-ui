@@ -29,7 +29,7 @@ import Modal from "../../components/modals/Modal";
 import SupportMessageForm from "../../components/forms/SupportMessageForm";
 import { Section } from "../../types/modules";
 import { CourseAsset, AssetType } from "../../types/course-assets";
-import { getCourseSections } from "../../services/api/modules";
+import { getCourseBySlug, getCourseSectionsBySlug } from "../../services/api/modules";
 import { sanitizeHtml } from "../../utils/htmlSanitizer";
 import posthog from "posthog-js";
 
@@ -260,7 +260,7 @@ function CourseResourcesSection({ courseId }: { courseId?: string }) {
 }
 
 function DashboardContent() {
-  const { courseId } = useParams<{ courseId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const { user, isAuthenticated } = useAuth0();
   const firstName = user?.given_name || "there";
 
@@ -296,7 +296,6 @@ function DashboardContent() {
     announcements,
     loading: dashboardLoading,
     error: dashboardError,
-    getTestScores,
   } = useDashboardContext();
 
   // Use Course context for module management
@@ -319,35 +318,39 @@ function DashboardContent() {
   const isInitialized = useRef(false);
   const lastCourseId = useRef<string | null>(null);
 
-  // Load course and sections on component mount or when courseId changes
+  // Load course and sections on component mount or when slug changes
   useEffect(() => {
     const initializeDashboard = async () => {
-      // Use courseId from URL params, fallback to localStorage for backward compatibility
-      const targetCourseId = courseId || localStorage.getItem("selected_course_id");
+      // Use slug from URL params, fallback to localStorage for backward compatibility
+      const targetSlug = slug || localStorage.getItem("selected_course_slug");
 
-      // Skip if no course ID or if we've already initialized with this course
-      if (!targetCourseId || (isInitialized.current && lastCourseId.current === targetCourseId)) {
+      // Skip if no slug or if we've already initialized with this course
+      if (!targetSlug || (isInitialized.current && lastCourseId.current === targetSlug)) {
         return;
       }
 
       try {
         isInitialized.current = true;
-        lastCourseId.current = targetCourseId;
+        lastCourseId.current = targetSlug;
 
         const selectedSectionId = localStorage.getItem("selected_section_id");
 
         // Load the course from URL or localStorage
-        await loadCourse(targetCourseId);
-        await getTestScores(targetCourseId);
+        // Note: loadCourse currently expects an ID, so we need to fetch the course by slug first
+        // unless we update loadCourse to handle slugs. 
+        // For now, let's fetch the course to get the ID.
+        const courseResponse = await getCourseBySlug(targetSlug);
+        const courseData = courseResponse.data;
+        await loadCourse(courseData.id);
 
-        // Fetch sections for this course
-        const sections = await getCourseSections(targetCourseId);
-        const sortedSections = sections.sort((a, b) => a.order - b.order);
+        // Fetch sections for this course using the NEW slug-based API
+        const sections = await getCourseSectionsBySlug(targetSlug);
+        const sortedSections = sections.sort((a: Section, b: Section) => a.order - b.order);
         setAvailableSections(sortedSections);
 
         // Determine which section to load
         const sectionToLoad =
-          selectedSectionId && sortedSections.some((s) => s.id === selectedSectionId)
+          selectedSectionId && sortedSections.some((s: Section) => s.id === selectedSectionId)
             ? selectedSectionId
             : sortedSections.length > 0
               ? sortedSections[0].id
@@ -357,7 +360,7 @@ function DashboardContent() {
         if (sectionToLoad) {
           await loadSectionModules(sectionToLoad);
           // Persist last visited course + section for the nav "Continue Learning" button
-          localStorage.setItem("last_course_id", targetCourseId);
+          localStorage.setItem("last_course_slug", targetSlug);
           localStorage.setItem("last_section_id", sectionToLoad);
         }
 
@@ -372,7 +375,7 @@ function DashboardContent() {
 
     initializeDashboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courseId]); // Only depend on courseId - functions are stable via useCallback in context
+  }, [slug]); // Only depend on slug - functions are stable via useCallback in context
 
   // Handle section switching
   const handleSwitchSection = async (sectionId: string) => {
@@ -381,7 +384,7 @@ function DashboardContent() {
       await loadSectionModules(sectionId);
       // Keep last_section_id in sync when user switches sections
       if (currentCourse) {
-        localStorage.setItem("last_course_id", currentCourse.id);
+        localStorage.setItem("last_course_slug", currentCourse.slug);
         localStorage.setItem("last_section_id", sectionId);
       }
     } catch (error) {

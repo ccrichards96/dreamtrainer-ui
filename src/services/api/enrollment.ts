@@ -50,6 +50,23 @@ export const enrollInCourse = async (courseId: string): Promise<CourseEnrollment
   }
 };
 
+/**
+ * Enroll in a free course (no Stripe checkout required)
+ * POST /enrollments/enroll
+ * Backend verifies the course is free ($0) before creating enrollment
+ */
+export const enrollInFreeCourse = async (courseId: string): Promise<CourseEnrollment> => {
+  try {
+    const response = await apiClient.post<APIResponse<CourseEnrollment>>(
+      "/enrollments/enroll",
+      { courseId }
+    );
+    return response.data.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to enroll in free course");
+  }
+};
+
 export const listCourseStudents = async (
   courseId: string,
   params?: ListCourseStudentsParams

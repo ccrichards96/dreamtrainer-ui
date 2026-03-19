@@ -45,15 +45,15 @@ function Auth0ProviderWithNavigate({ children }: { children: React.ReactNode }) 
     }
 
     // Check for last session in localStorage
-    const lastCourseId = localStorage.getItem("last_course_id");
+    const lastCourseSlug = localStorage.getItem("last_course_slug");
     const lastSectionId = localStorage.getItem("last_section_id");
 
-    if (lastCourseId) {
+    if (lastCourseSlug) {
       // Resume last session
       if (lastSectionId) {
         localStorage.setItem("selected_section_id", lastSectionId);
       }
-      navigate(`/courses/${lastCourseId}/dashboard`, { replace: true });
+      navigate(`/courses/${lastCourseSlug}/dashboard`, { replace: true });
     } else {
       // No previous session — send to course catalog
       navigate("/courses", { replace: true });
@@ -120,7 +120,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/courses/:courseId/dashboard"
+                        path="/courses/:slug/dashboard"
                         element={
                           <ProtectedRoute requireSubscription={true}>
                             <Dashboard />
@@ -174,14 +174,6 @@ function App() {
                         element={
                           <ProtectedRoute>
                             <SubscriptionRequired />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/dashboard"
-                        element={
-                          <ProtectedRoute requireSubscription={true}>
-                            <Dashboard />
                           </ProtectedRoute>
                         }
                       />

@@ -19,9 +19,12 @@ export default function CheckoutSuccess() {
   const { isInitialized: apiInitialized } = useApiContext();
   const { refreshUserProfile } = useApp();
 
+  const queryParams = new URLSearchParams(window.location.search);
+
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
-  const [courseSlug, setCourseSlug] = useState<string | null>(null);
+  const [courseSlug, setCourseSlug] = useState<string | null>(queryParams.get("courseSlug"));
+  const isFree = queryParams.get("isFree") === "true";  
 
   useEffect(() => {
     const handleCheckoutSuccess = async () => {
@@ -30,9 +33,11 @@ export default function CheckoutSuccess() {
         return;
       }
 
-      // Capture course slug before clearing localStorage
+      // Capture course slug from localStorage if not already present from URL
       const storedCourseSlug = localStorage.getItem("signup_course_slug");
-      setCourseSlug(storedCourseSlug);
+      if (!courseSlug && storedCourseSlug) {
+        setCourseSlug(storedCourseSlug);
+      }
 
       try {
         setIsUpdating(true);
@@ -69,11 +74,10 @@ export default function CheckoutSuccess() {
   }, [auth0Loading, isAuthenticated, apiInitialized, user?.email]);
 
   const handleContinue = () => {
-    // Navigate to course-specific dashboard if we have a slug, otherwise default dashboard
     if (courseSlug) {
       navigate(`/courses/${courseSlug}/dashboard`);
     } else {
-      navigate("/dashboard");
+      navigate("/courses?tab=my-courses");
     }
   };
 
@@ -103,9 +107,13 @@ export default function CheckoutSuccess() {
             <RefreshCw className="w-10 h-10 text-blue-600 animate-spin" />
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Setting up your account...</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            {isFree ? "Enrolling in your course..." : "Setting up your account..."}
+          </h1>
 
-          <p className="text-gray-600">Please wait while we complete your subscription setup.</p>
+          <p className="text-gray-600">
+            Please wait while we complete your {isFree ? "enrollment" : "subscription"} setup.
+          </p>
         </div>
       </div>
     );
@@ -118,10 +126,14 @@ export default function CheckoutSuccess() {
           <CheckCircle className="w-10 h-10 text-green-600" />
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Payment Successful!</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          {isFree ? "Enrollment Successful!" : "Payment Successful!"}
+        </h1>
 
         <p className="text-gray-600 mb-8">
-          Your subscription has been activated and you're ready to start your learning journey.
+          {isFree
+            ? "You have been successfully enrolled in your course and you're ready to start your learning journey."
+            : "Your subscription has been activated and you're ready to start your learning journey."}
         </p>
 
         {updateError && (

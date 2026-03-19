@@ -24,13 +24,13 @@ export default function Signup() {
   // Redirect to last session or courses if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const lastCourseId = localStorage.getItem("last_course_id");
-      if (lastCourseId) {
+      const lastCourseSlug = localStorage.getItem("last_course_slug");
+      if (lastCourseSlug) {
         const lastSectionId = localStorage.getItem("last_section_id");
         if (lastSectionId) {
           localStorage.setItem("selected_section_id", lastSectionId);
         }
-        navigate(`/courses/${lastCourseId}/dashboard`);
+        navigate(`/courses/${lastCourseSlug}/dashboard`);
       } else {
         navigate("/courses");
       }

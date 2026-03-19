@@ -116,6 +116,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     status: course.status || CourseStatus.DRAFT,
     listingStatus: course.listingStatus || ListingStatus.PRIVATE,
     welcomeVideoUrl: course.welcomeVideoUrl || "",
+    featuredVideoUrl: course.featuredVideoUrl || "",
     learningObjectives: course.learningObjectives || [],
     prerequisites: course.prerequisites || [],
     targetAudiences: course.targetAudiences || [],
@@ -255,6 +256,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
         status: formData.status,
         listingStatus: formData.listingStatus,
         welcomeVideoUrl: formData.welcomeVideoUrl || null,
+        featuredVideoUrl: formData.featuredVideoUrl || null,
         learningObjectives: formData.learningObjectives,
         prerequisites: formData.prerequisites,
         targetAudiences: formData.targetAudiences,
@@ -483,6 +485,24 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 id="welcomeVideoUrl"
                 name="welcomeVideoUrl"
                 value={formData.welcomeVideoUrl}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="featuredVideoUrl"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Featured Video URL
+              </label>
+              <input
+                type="url"
+                id="featuredVideoUrl"
+                name="featuredVideoUrl"
+                value={formData.featuredVideoUrl}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="https://..."
@@ -727,7 +747,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                       </option>
                       {filteredExperts.map((u) => (
                         <option key={u.expertProfile!.id} value={u.expertProfile!.id}>
-                          {u.expertProfile!.displayName}
+                          {u.expertProfile!.displayName} ({u.email})
                         </option>
                       ))}
                     </select>

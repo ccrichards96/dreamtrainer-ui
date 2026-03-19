@@ -20,7 +20,7 @@ export const AllCoursesView = ({ courses, enrollments = [] }: AllCoursesViewProp
   const handleCourseClick = (course: Course) => {
     if (enrolledCourseIds.has(course.id)) {
       // User is enrolled - go directly to dashboard
-      navigate(`/courses/${course.id}/dashboard`);
+      navigate(`/courses/${course.slug}/dashboard`);
     } else {
       // Not enrolled - go to course profile page
       navigate(`/courses/${course.slug}`);

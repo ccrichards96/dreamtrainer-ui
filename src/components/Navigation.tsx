@@ -8,21 +8,21 @@ export default function Navigation() {
   const { isAuthenticated, login } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
-  const [lastCourseId, setLastCourseId] = useState<string | null>(null);
+  const [lastCourseSlug, setLastCourseSlug] = useState<string | null>(null);
   const [lastSectionId, setLastSectionId] = useState<string | null>(null);
 
   // Refresh last visited course/section whenever route changes
   useEffect(() => {
-    setLastCourseId(localStorage.getItem("last_course_id"));
+    setLastCourseSlug(localStorage.getItem("last_course_slug"));
     setLastSectionId(localStorage.getItem("last_section_id"));
   }, [location.pathname]);
 
   const handleContinueLearning = () => {
-    if (!lastCourseId) return;
+    if (!lastCourseSlug) return;
     if (lastSectionId) {
       localStorage.setItem("selected_section_id", lastSectionId);
     }
-    navigate(`/courses/${lastCourseId}/dashboard`);
+    navigate(`/courses/${lastCourseSlug}/dashboard`);
   };
 
   return (
@@ -38,7 +38,7 @@ export default function Navigation() {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                {lastCourseId && (
+                {lastCourseSlug && (
                   <button
                     onClick={handleContinueLearning}
                     className="flex items-center gap-1.5 bg-[#c5a8de] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#b399d6] transition-colors"

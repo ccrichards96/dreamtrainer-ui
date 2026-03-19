@@ -65,7 +65,7 @@ export default function CourseProfilePage() {
 
     if (isEnrolled) {
       // Already enrolled, go to course dashboard
-      navigate(`/courses/${course.id}/dashboard`);
+      navigate(`/courses/${course.slug}/dashboard`);
     } else {
       // Not enrolled, go to checkout
       navigate(`/courses/${course.slug}/checkout`);
@@ -128,10 +128,22 @@ export default function CourseProfilePage() {
               </p>
             </div>
 
-            {/* Course Image */}
+            {/* Course Image or Video */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className="h-64 bg-gradient-to-br from-[#c5a8de] to-[#b399d6] flex items-center justify-center">
-                {course.imageUrl ? (
+                {course.featuredVideoUrl ? (
+                  <iframe
+                    className="w-full h-full"
+                    src={course.featuredVideoUrl.includes("watch?v=") 
+                      ? course.featuredVideoUrl.replace("watch?v=", "embed/") 
+                      : course.featuredVideoUrl.includes("youtu.be/")
+                        ? course.featuredVideoUrl.replace("youtu.be/", "youtube.com/embed/")
+                        : course.featuredVideoUrl}
+                    title={course.name}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : course.imageUrl ? (
                   <img
                     src={course.imageUrl}
                     alt={course.name}
@@ -146,9 +158,9 @@ export default function CourseProfilePage() {
             </div>
 
             {/* Course Plan Details */}
-            {(course.learningObjectives?.length ||
-              course.prerequisites?.length ||
-              course.targetAudiences?.length) && (
+            {(course.learningObjectives?.length !== 0 ||
+              course.prerequisites?.length !== 0 ||
+              course.targetAudiences?.length !== 0) && (
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <div className="grid md:grid-cols-3 gap-6">
                   {/* Learning Objectives */}

@@ -8,7 +8,7 @@ const tabs: { id: PerformanceTab; label: string }[] = [
   { id: "revenue", label: "Revenue" },
   { id: "students", label: "Students" },
   { id: "reviews", label: "Reviews" },
-  { id: "traffic", label: "Traffic & Conversion" },
+  // { id: "traffic", label: "Traffic & Conversion" },
   { id: "affiliates", label: "Affiliates" },
 ];
 

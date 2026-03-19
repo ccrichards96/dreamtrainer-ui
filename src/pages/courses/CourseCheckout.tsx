@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Loader2, AlertCircle } from "lucide-react";
 import { createCheckoutSession } from "../../services/api/billing";
-import { useCheckoutContext } from "../../contexts";
+import { enrollInFreeCourse } from "../../services/api/enrollment";
+import { useCheckoutContext, useApp } from "../../contexts";
 import type { Course } from "../../types/modules";
 
 export default function CourseCheckout() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { activeCheckout, loadCheckoutData } = useCheckoutContext();
+  const { refreshUserProfile } = useApp();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,16 +34,25 @@ export default function CourseCheckout() {
         setCourse(checkoutData.course);
         const pricing = checkoutData.pricing;
 
-        if (!pricing.priceId) {
-          throw new Error(
-            "This course is not available for purchase. No payment method configured."
+        // Free course — enroll directly without Stripe
+        if (!pricing.priceId || pricing.amount === 0) {
+          await enrollInFreeCourse(checkoutData.course.id);
+          await refreshUserProfile();
+          
+          // Add a small artificial delay so it doesn't feel too "instant"
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+          
+          navigate(
+            `/checkout/success?type=course&courseId=${checkoutData.course.id}&courseSlug=${checkoutData.course.slug}&isFree=true`,
+            { replace: true }
           );
+          return;
         }
 
         // Create checkout session using the price ID from pricing endpoint
         const { checkoutUrl } = await createCheckoutSession({
           priceIds: [pricing.priceId],
-          successUrl: `${window.location.origin}/checkout/success?type=course&courseId=${checkoutData.course.id}`,
+          successUrl: `${window.location.origin}/checkout/success?type=course&courseId=${checkoutData.course.id}&courseSlug=${checkoutData.course.slug}`,
           cancelUrl: `${window.location.origin}/courses/${checkoutData.course.slug}`,
           mode: pricing.type === "recurring" ? "subscription" : "payment",
           courseId: checkoutData.course.id,

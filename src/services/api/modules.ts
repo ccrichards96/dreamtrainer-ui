@@ -262,6 +262,26 @@ export const getCourseSections = async (courseId: string): Promise<Section[]> =>
 };
 
 /**
+ * Get sections for a course by slug
+ * GET /courses/slug/:slug/sections
+ * @param slug - The slug of the course
+ * @returns Promise<Section[]>
+ */
+export const getCourseSectionsBySlug = async (slug: string): Promise<Section[]> => {
+  try {
+    const response = await apiClient.get<APIResponse<Section[]>>(`/courses/slug/${slug}/sections`);
+    return response.data.data || [];
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || "Failed to fetch course sections by slug",
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
+
+/**
  * Get a single module by its ID
  * GET /modules/:id
  * @param moduleId - The ID of the module
@@ -306,6 +326,7 @@ export const updateCourse = async (
     prerequisites?: string[];
     targetAudiences?: string[];
     welcomeVideoUrl?: string | null;
+    featuredVideoUrl?: string | null;
     stripeProductId?: string | null;
   }
 ): Promise<Course> => {
