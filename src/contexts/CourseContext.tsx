@@ -389,11 +389,16 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
       setCompletedModules((prev) => {
         const newCompleted = new Set([...prev, index]);
 
-        const isLastModule = index === modules.length - 1;
-        if (newCompleted.size === modules.length || isLastModule) {
-          setAllModulesCompleted(true);
-          if (currentSectionId) {
+        // A section is only completed when all its modules are in the newCompleted set
+        const isSectionCompleted = newCompleted.size === modules.length;
+        
+        if (isSectionCompleted) {
+          if (currentSectionId && !completedSections.has(currentSectionId)) {
             setCompletedSections((prevSections) => new Set([...prevSections, currentSectionId]));
+            
+            if (allCompletedModuleIdsRef.current.size === totalCourseModulesRef.current) {
+              setAllModulesCompleted(true);
+            }
           }
         }
         return newCompleted;
@@ -533,12 +538,9 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
   // Get progress percentage
   const getProgressPercentage = useCallback((): number => {
     if (modules.length === 0) return 0;
-    return (
-      ((completedModules.size + (currentModuleIndex > completedModules.size ? 1 : 0)) /
-        modules.length) *
-      100
-    );
-  }, [completedModules.size, currentModuleIndex, modules.length]);
+    // Only count modules that are actually in the completedModules set
+    return (completedModules.size / modules.length) * 100;
+  }, [completedModules.size, modules.length]);
 
   // Check if current module is the last
   const isLastModule = useCallback((): boolean => {

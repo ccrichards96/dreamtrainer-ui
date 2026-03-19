@@ -32,10 +32,14 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
     tests,
   } = useCourseContext();
 
-  // Auto-mark the current module as completed when it's viewed
+  // Auto-mark the current module as completed when it's viewed for a reasonable amount of time (e.g. 3 seconds)
   useEffect(() => {
     if (modules.length > 0 && !isTestMode) {
-      markModuleAsCompleted(currentModuleIndex);
+      const timer = setTimeout(() => {
+        markModuleAsCompleted(currentModuleIndex);
+      }, 3000); // 3-second delay before marking as complete
+
+      return () => clearTimeout(timer);
     }
   }, [currentModuleIndex, modules.length, isTestMode, markModuleAsCompleted]);
 
