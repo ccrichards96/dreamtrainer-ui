@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Save, X, AlertCircle, Copy, Check, UserPlus, Trash2, Loader2 } from "lucide-react";
+import { Save, X, AlertCircle, Copy, Check, UserPlus, Trash2, Loader2, ChevronDown } from "lucide-react";
 import { Course, CourseExpert, CourseStatus, ListingStatus } from "../../types/modules";
 import { Category } from "../../types/categories";
 import { User } from "../../types/user";
@@ -130,10 +130,13 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
   // Selection state for adding a new expert
   const [expertSearch, setExpertSearch] = useState("");
   const [selectedExpertProfileId, setSelectedExpertProfileId] = useState("");
+  const [selectedExpertLabel, setSelectedExpertLabel] = useState("");
+  const [showExpertDropdown, setShowExpertDropdown] = useState(false);
   const [selectedRole, setSelectedRole] = useState<"owner" | "support-expert">("support-expert");
+  const comboboxRef = useRef<HTMLDivElement>(null);
 
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const [loadingExpertsList, setLoadingExpertsList] = useState(true);
+  const [loadingExpertsList, setLoadingExpertsList] = useState(false);
   const [loadingCourseExperts, setLoadingCourseExperts] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
@@ -150,6 +153,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
       .finally(() => setLoadingCategories(false));
 
     if (course.id) {
+      setLoadingCourseExperts(true);
       courseExpertsService
         .getExpertsByCourse(course.id)
         .then((experts) => setCourseExperts(experts))
@@ -160,42 +164,53 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     }
   }, [course.id]);
 
-  // Debounced server-side search for experts
+  // Debounced expert search - only fires when user is actively searching
   useEffect(() => {
-    if (expertSearch.trim() === "") {
-      // Re-fetch initial list if search is cleared
-      getUsersPaginated({ limit: 100 })
-        .then((res) => setExpertUsers(res.users.filter((u) => u.expertProfile !== null)))
-        .catch(() => {});
-      return;
-    }
+    if (!showExpertDropdown && expertSearch.trim() === "") return;
 
-    const timer = setTimeout(() => {
+    const fetchExperts = async () => {
       setLoadingExpertsList(true);
-      getUsersPaginated({ search: expertSearch, limit: 100 })
-        .then((res) => {
-          setExpertUsers(res.users.filter((u) => u.expertProfile !== null));
-        })
-        .catch(() => setError("Expert search failed"))
-        .finally(() => setLoadingExpertsList(false));
-    }, 500);
+      try {
+        const res = await getUsersPaginated({
+          search: expertSearch.trim() || undefined,
+          limit: 20,
+        });
+        const experts = res.users.filter(
+          (u) => u.expertProfile && u.expertProfile.id
+        );
+        setExpertUsers(experts);
+      } catch (err) {
+        console.error("Expert search error:", err);
+      } finally {
+        setLoadingExpertsList(false);
+      }
+    };
 
+    const timer = setTimeout(fetchExperts, 300);
     return () => clearTimeout(timer);
-  }, [expertSearch]);
+  }, [expertSearch, showExpertDropdown]);
+
+  // Close combobox dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (comboboxRef.current && !comboboxRef.current.contains(e.target as Node)) {
+        setShowExpertDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const filteredExperts = expertUsers.filter((u) => {
-    // Only show experts not already assigned
-    if (courseExperts.some((ce) => ce.expertProfileId === u.expertProfile?.id)) {
-      return false;
-    }
-    const q = expertSearch.toLowerCase();
-    return (
-      u.expertProfile!.displayName.toLowerCase().includes(q) ||
-      u.firstName.toLowerCase().includes(q) ||
-      u.lastName.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q)
-    );
+    return !courseExperts.some((ce) => ce.expertProfileId === u.expertProfile?.id);
   });
+
+  const handleSelectExpert = useCallback((user: User) => {
+    setSelectedExpertProfileId(user.expertProfile!.id);
+    setSelectedExpertLabel(`${user.expertProfile!.displayName} (${user.email})`);
+    setShowExpertDropdown(false);
+    setExpertSearch("");
+  }, []);
 
   const handleAddExpert = async () => {
     if (!selectedExpertProfileId || !course.id) return;
@@ -214,6 +229,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
       }
       setCourseExperts((prev) => [...prev, newExpert]);
       setSelectedExpertProfileId("");
+      setSelectedExpertLabel("");
       setExpertSearch("");
       setExpertSuccess("Course experts updated successfully");
       setTimeout(() => setExpertSuccess(null), 3000);
@@ -749,29 +765,99 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                   <label className="block text-xs font-medium text-blue-800 mb-1">
                     Search & Select Expert
                   </label>
-                  <div className="flex flex-col border border-blue-200 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-blue-500">
-                    <input
-                      type="text"
-                      value={expertSearch}
-                      onChange={(e) => setExpertSearch(e.target.value)}
-                      placeholder="Search name or email…"
-                      className="w-full px-3 py-1.5 text-sm border-b border-gray-100 outline-none"
-                    />
-                    <select
-                      value={selectedExpertProfileId}
-                      onChange={(e) => setSelectedExpertProfileId(e.target.value)}
-                      disabled={loadingExpertsList}
-                      className="w-full px-3 py-2 text-sm outline-none bg-transparent"
-                    >
-                      <option value="" disabled>
-                        {loadingExpertsList ? "Loading..." : "— Choose Expert —"}
-                      </option>
-                      {filteredExperts.map((u) => (
-                        <option key={u.expertProfile!.id} value={u.expertProfile!.id}>
-                          {u.expertProfile!.displayName} ({u.email})
-                        </option>
-                      ))}
-                    </select>
+                  <div ref={comboboxRef} className="relative">
+                    {/* Combobox Input */}
+                    <div className="relative">
+                      <input
+                        type="text"
+                        role="combobox"
+                        aria-expanded={showExpertDropdown}
+                        value={showExpertDropdown ? expertSearch : selectedExpertLabel || expertSearch}
+                        onChange={(e) => {
+                          setExpertSearch(e.target.value);
+                          setShowExpertDropdown(true);
+                          // Clear selection if user is editing
+                          if (selectedExpertProfileId) {
+                            setSelectedExpertProfileId("");
+                            setSelectedExpertLabel("");
+                          }
+                        }}
+                        onFocus={() => {
+                          setShowExpertDropdown(true);
+                          if (selectedExpertLabel) {
+                            setExpertSearch("");
+                          }
+                        }}
+                        placeholder="Search by name or email…"
+                        className="w-full px-3 py-2.5 pe-9 bg-white border border-blue-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <div className="absolute top-1/2 right-3 -translate-y-1/2 flex items-center gap-1">
+                        {loadingExpertsList && (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
+                        )}
+                        {selectedExpertProfileId && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedExpertProfileId("");
+                              setSelectedExpertLabel("");
+                              setExpertSearch("");
+                            }}
+                            className="text-gray-400 hover:text-gray-600"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        {!loadingExpertsList && !selectedExpertProfileId && (
+                          <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Combobox Dropdown */}
+                    {showExpertDropdown && (
+                      <div
+                        className="absolute z-50 w-full mt-1 max-h-60 p-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-y-auto"
+                        role="listbox"
+                      >
+                        {filteredExperts.length === 0 ? (
+                          <div className="py-3 px-4 text-sm text-gray-500 text-center">
+                            {loadingExpertsList
+                              ? "Searching…"
+                              : expertSearch.trim()
+                              ? "No matching experts found"
+                              : "Type to search for experts"}
+                          </div>
+                        ) : (
+                          filteredExperts.map((u) => (
+                            <div
+                              key={u.expertProfile!.id}
+                              role="option"
+                              aria-selected={selectedExpertProfileId === u.expertProfile!.id}
+                              className={`cursor-pointer py-2 px-3 w-full text-sm rounded-lg flex justify-between items-center ${
+                                selectedExpertProfileId === u.expertProfile!.id
+                                  ? "bg-blue-50 text-blue-800"
+                                  : "text-gray-800 hover:bg-gray-100"
+                              }`}
+                              onClick={() => handleSelectExpert(u)}
+                            >
+                              <div>
+                                <span className="font-medium">
+                                  {u.expertProfile!.displayName}
+                                </span>
+                                <span className="text-gray-500 ml-1.5 text-xs">
+                                  {u.email}
+                                </span>
+                              </div>
+                              {selectedExpertProfileId === u.expertProfile!.id && (
+                                <Check className="w-4 h-4 text-blue-600 shrink-0" />
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="md:col-span-4">
