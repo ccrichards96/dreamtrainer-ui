@@ -3,9 +3,11 @@ import { useAuthContext } from "../contexts";
 import AvatarDropdown from "./AvatarDropdown";
 import { useEffect, useState } from "react";
 import { Play } from "lucide-react";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Navigation() {
   const { isAuthenticated, login } = useAuthContext();
+  const { loginWithRedirect } = useAuth0();
   const navigate = useNavigate();
   const location = useLocation();
   const [lastCourseSlug, setLastCourseSlug] = useState<string | null>(null);
@@ -88,7 +90,7 @@ export default function Navigation() {
                   Login
                 </button>
                 <button
-                  onClick={() => login()}
+                  onClick={() => loginWithRedirect({ authorizationParams: { screen_hint: "signup" } })}
                   className="bg-[#c5a8de] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#b399d6] border border-[#c5a8de]"
                 >
                   Sign Up
