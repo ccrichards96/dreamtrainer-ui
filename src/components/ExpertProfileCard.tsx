@@ -89,7 +89,8 @@ export default function ExpertProfileCard({ expertProfile }: ExpertProfileCardPr
     return null;
   }
 
-  const { displayName, bio, avatarUrl, socialLinks, slug } = expertProfile;
+  const { displayName, bio, socialLinks, slug } = expertProfile;
+  const avatarUrl = expertProfile.user?.avatarUrl || expertProfile.avatarUrl;
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
