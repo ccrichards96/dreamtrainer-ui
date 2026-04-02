@@ -42,7 +42,7 @@ export default function AvatarDropdown({ className = "" }: AvatarDropdownProps) 
 
   const displayName = user?.name || user?.email || "User";
   const firstName = getFirstName(user?.name || user?.email);
-  const avatarUrl = user?.picture;
+  const avatarUrl = userProfile?.avatarUrl || user?.picture;
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>

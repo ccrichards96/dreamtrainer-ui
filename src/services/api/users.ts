@@ -51,11 +51,35 @@ export const sendSupportMessage = async (messageData: DraftSupportMessage): Prom
   }
 };
 
+/**
+ * Upload avatar image for current user
+ * @param file - Image file to upload
+ * @returns Promise<string> - New avatar URL
+ */
+export const uploadAvatar = async (file: File): Promise<string> => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await apiClient.post<APIResponse<{ avatarUrl: string }>>(
+      "/users/me/avatar",
+      formData,
+      { headers: { "Content-Type": undefined } }
+    );
+    return response.data.data.avatarUrl;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("An unexpected error occurred while uploading avatar");
+  }
+};
+
 // Export all user-related functions as a service object
 export const userService = {
   getCurrentUser,
   updateCurrentUser,
   sendSupportMessage,
+  uploadAvatar,
 };
 
 export default userService;
