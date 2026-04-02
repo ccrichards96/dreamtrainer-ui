@@ -185,6 +185,19 @@ export const getAllPublicCourses = async (): Promise<APIResponse<Course[]>> => {
   }
 };
 
+export const getMyCourses = async (): Promise<APIResponse<Course[]>> => {
+  try {
+    const response = await apiClient.get<APIResponse<Course[]>>(`/courses/me`);
+    return response.data;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || "Failed to fetch your courses",
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
 /**
  * Get a course by ID
  * GET /courses/:id

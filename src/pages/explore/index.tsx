@@ -1,11 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { Loader2, Search } from "lucide-react";
-import { getAllPublicCourses } from "../../services/api/modules";
-import { getUserEnrollments } from "../../services/api/enrollment";
+import { getAllPublicCourses, getMyCourses } from "../../services/api/modules";
 import { getAllCategories } from "../../services/api/categories";
 import { CourseProvider } from "../../contexts/CourseContext";
 import type { Course } from "../../types/modules";
-import type { CourseEnrollment } from "../../types/enrollment";
 import type { Category } from "../../types/categories";
 import { AllCoursesView } from "./AllCoursesView";
 
@@ -14,8 +12,8 @@ type TabType = "my-courses" | "explore";
 const HERO_BG_IMAGE = "";
 
 const ExploreCoursesContent = () => {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [enrollments, setEnrollments] = useState<CourseEnrollment[]>([]);
+  const [exploreCourses, setExploreCourses] = useState<Course[]>([]);
+  const [myCourses, setMyCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,17 +26,19 @@ const ExploreCoursesContent = () => {
       try {
         setLoading(true);
         setError(null);
-        const [coursesResponse, enrollmentsData, categoriesData] = await Promise.all([
+        const [publicCoursesResponse, myCoursesResponse, categoriesData] = await Promise.all([
           getAllPublicCourses(),
-          getUserEnrollments(),
+          getMyCourses(),
           getAllCategories(),
         ]);
-        const sortedCourses = (coursesResponse.data || []).sort((a: Course, b: Course) => {
+        const sortedPublic = (publicCoursesResponse.data || []).sort((a: Course, b: Course) => {
           if (a.order !== b.order) return a.order - b.order;
           return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
         });
-        setCourses(sortedCourses);
-        setEnrollments(enrollmentsData);
+        const myCoursesData = myCoursesResponse.data || [];
+        const myCourseIds = new Set(myCoursesData.map((c) => c.id));
+        setExploreCourses(sortedPublic.filter((c) => !myCourseIds.has(c.id)));
+        setMyCourses(myCoursesData);
         setCategories(categoriesData);
       } catch (err) {
         console.error("Error fetching courses:", err);
@@ -50,19 +50,8 @@ const ExploreCoursesContent = () => {
     fetchData();
   }, []);
 
-  const enrolledCourseIds = useMemo(
-    () => new Set(enrollments.filter((e) => e.courseId && !e.deletedAt).map((e) => e.courseId)),
-    [enrollments]
-  );
-
   const filteredCourses = useMemo(() => {
-    let filtered = courses;
-
-    if (activeTab === "my-courses") {
-      filtered = filtered.filter((course) => enrolledCourseIds.has(course.id));
-    } else {
-      filtered = filtered.filter((course) => !enrolledCourseIds.has(course.id));
-    }
+    let filtered = activeTab === "my-courses" ? myCourses : exploreCourses;
 
     if (selectedCategoryId) {
       filtered = filtered.filter((course) => course.categoryId === selectedCategoryId);
@@ -78,7 +67,7 @@ const ExploreCoursesContent = () => {
     }
 
     return filtered;
-  }, [courses, activeTab, enrolledCourseIds, selectedCategoryId, searchQuery]);
+  }, [exploreCourses, myCourses, activeTab, selectedCategoryId, searchQuery]);
 
   if (loading) {
     return (
@@ -220,7 +209,7 @@ const ExploreCoursesContent = () => {
           </div>
         </div>
 
-        <AllCoursesView courses={filteredCourses} enrollments={enrollments} />
+        <AllCoursesView courses={filteredCourses} />
       </div>
     </div>
   );
