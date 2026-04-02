@@ -674,9 +674,9 @@ function DashboardContent() {
                   <div className="flex flex-col gap-6 items-center text-center">
                     <div className="flex-shrink-0">
                       <div className="relative w-32 h-32 mx-auto">
-                        {expert.avatarUrl ? (
+                        {(expert.user?.avatarUrl || expert.avatarUrl) ? (
                           <img
-                            src={expert.avatarUrl}
+                            src={expert.user?.avatarUrl || expert.avatarUrl!}
                             alt={expert.displayName}
                             className="w-full h-full rounded-full object-cover shadow-xl ring-4 ring-[#c5a8de]/20"
                           />
