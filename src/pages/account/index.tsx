@@ -5,7 +5,7 @@ import { generateBillingPortalLink, getUserSubscriptions } from "../../services/
 import { BillingData } from "../../types/billing";
 import SupportMessageForm from "../../components/forms/SupportMessageForm";
 import { useApp } from "../../contexts";
-import { updateCurrentUser } from "../../services/api/users";
+import { updateCurrentUser, uploadAvatar } from "../../services/api/users";
 import ExpertProfileTab from "./ExpertProfileTab";
 import type { ExpertProfileTabHandle } from "./ExpertProfileTab";
 
@@ -15,13 +15,16 @@ const AccountPage = () => {
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | null>(user?.picture || null);
+  const [profileImage, setProfileImage] = useState<string | null>(
+    userProfile?.avatarUrl || user?.picture || null
+  );
   const [billingData, setBillingData] = useState<BillingData | null>(null);
   const [isLoadingBilling, setIsLoadingBilling] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"account" | "expert">("account");
   const expertProfileRef = useRef<ExpertProfileTabHandle>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [expertTabState, setExpertTabState] = useState({
     hasUnsavedChanges: false,
     isSaving: false,
@@ -39,7 +42,7 @@ const AccountPage = () => {
     lastName: userProfile?.lastName || "",
   });
 
-  // Check if user logged in via social provider
+  // Sync profile data when userProfile loads/updates
   useEffect(() => {
     if (userProfile) {
       setFormData((prev) => ({
@@ -47,8 +50,9 @@ const AccountPage = () => {
         firstName: userProfile.firstName || "",
         lastName: userProfile.lastName || "",
       }));
+      setProfileImage(userProfile.avatarUrl || user?.picture || null);
     }
-  }, [userProfile]);
+  }, [userProfile, user?.picture]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -141,63 +145,44 @@ const AccountPage = () => {
     }
   };
 
-  const handleProfileImageUpload = async (event: Event) => {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+  const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      alert("Please select an image file.");
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!validTypes.includes(file.type)) {
+      alert("Please upload a JPEG, PNG, WebP, or GIF image.");
+      e.target.value = "";
       return;
     }
-
-    // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      alert("Please select an image smaller than 5MB.");
+      alert("Image must be under 5MB.");
+      e.target.value = "";
       return;
     }
 
+    const previousImage = profileImage;
+    const objectUrl = URL.createObjectURL(file);
+    setProfileImage(objectUrl);
     setIsUploadingImage(true);
 
     try {
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(file);
-
-      // Simulate API call to upload image
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // TODO: Replace with actual API call
-      // const formData = new FormData();
-      // formData.append('profileImage', file);
-      // const response = await fetch('/api/account/upload-profile-image', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Authorization': `Bearer ${getAccessTokenSilently()}`
-      //   },
-      //   body: formData
-      // });
-      // const { imageUrl } = await response.json();
-
-      // For now, use the preview URL as the new profile image
-      setProfileImage(previewUrl);
+      const newAvatarUrl = await uploadAvatar(file);
+      await refreshUserProfile();
+      setProfileImage(newAvatarUrl);
       alert("Profile picture updated successfully!");
     } catch (error) {
-      console.error("Error uploading profile image:", error);
-      alert("Failed to upload profile image. Please try again.");
+      setProfileImage(previousImage);
+      alert(error instanceof Error ? error.message : "Upload failed. Please try again.");
     } finally {
       setIsUploadingImage(false);
-      // Reset file input
-      input.value = "";
+      URL.revokeObjectURL(objectUrl);
+      e.target.value = "";
     }
   };
 
   const triggerImageUpload = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = handleProfileImageUpload;
-    input.click();
+    avatarInputRef.current?.click();
   };
 
   if (isAuthLoading) {
@@ -292,6 +277,15 @@ const AccountPage = () => {
             {/* Profile Section */}
             <div className="bg-white rounded-xl shadow p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Profile</h2>
+
+              {/* Hidden file input */}
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={handleProfileImageUpload}
+              />
 
               {/* Profile Image Section */}
               <div className="flex items-center space-x-6 mb-6 pb-6 border-b border-gray-100">

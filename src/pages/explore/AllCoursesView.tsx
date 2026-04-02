@@ -83,11 +83,7 @@ export const AllCoursesView = ({ courses, enrollments = [] }: AllCoursesViewProp
                 </div>
 
                 {/* Badge and Button row */}
-                <div className="flex items-center justify-between">
-                  <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                    {course.numberOfSections ?? 0} Section
-                    {(course.numberOfSections ?? 0) !== 1 ? "s" : ""}
-                  </span>
+                <div className="flex items-center justify-end">
                   {isEnrolled ? (
                     <button className="px-8 py-3 bg-purple-600 text-white text-base font-medium rounded-lg hover:bg-purple-700 hover:scale-105 transition-all duration-200 inline-flex items-center gap-2">
                       Continue Course

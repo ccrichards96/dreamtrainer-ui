@@ -30,6 +30,8 @@ import SupportMessageForm from "../../components/forms/SupportMessageForm";
 import { Section } from "../../types/modules";
 import { CourseAsset, AssetType } from "../../types/course-assets";
 import { getCourseBySlug, getCourseSectionsBySlug } from "../../services/api/modules";
+import { isEnrolledInCourse } from "../../services/api/enrollment";
+import { useApp } from "../../contexts/useAppContext";
 import { sanitizeHtml } from "../../utils/htmlSanitizer";
 import posthog from "posthog-js";
 
@@ -262,6 +264,7 @@ function CourseResourcesSection({ courseId }: { courseId?: string }) {
 function DashboardContent() {
   const { slug } = useParams<{ slug: string }>();
   const { user, isAuthenticated } = useAuth0();
+  const { userProfile } = useApp();
   const firstName = user?.given_name || "there";
 
   // Welcome modal state
@@ -313,6 +316,7 @@ function DashboardContent() {
   // State for available sections within the current course
   const [availableSections, setAvailableSections] = useState<Section[]>([]);
   const [switchingSection, setSwitchingSection] = useState<string | null>(null);
+  const [enrollmentStatus, setEnrollmentStatus] = useState<"checking" | "enrolled" | "not-enrolled">("checking");
 
   // Ref to track if initialization has been done to prevent duplicate calls
   const isInitialized = useRef(false);
@@ -341,6 +345,17 @@ function DashboardContent() {
         // For now, let's fetch the course to get the ID.
         const courseResponse = await getCourseBySlug(targetSlug);
         const courseData = courseResponse.data;
+
+        // Check enrollment — admins can access any course dashboard
+        if (userProfile?.role !== "admin") {
+          const enrolled = await isEnrolledInCourse(courseData.id);
+          if (!enrolled) {
+            setEnrollmentStatus("not-enrolled");
+            return;
+          }
+        }
+        setEnrollmentStatus("enrolled");
+
         await loadCourse(courseData.id);
 
         // Fetch sections for this course using the NEW slug-based API
@@ -399,8 +414,8 @@ function DashboardContent() {
     // Course completion handling - no longer navigating to assessment
   };
 
-  // Combined loading state
-  const loading = dashboardLoading || courseLoading;
+  // Combined loading state — also block render until enrollment is confirmed
+  const loading = enrollmentStatus === "checking" || dashboardLoading || courseLoading;
   const error = dashboardError || courseError;
 
   // Loading state
@@ -412,6 +427,29 @@ function DashboardContent() {
             <div className="flex items-center gap-3">
               <RefreshCw className="w-6 h-6 animate-spin text-[#c5a8de]" />
               <span className="text-lg text-gray-600">Loading your dashboard...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Not enrolled state
+  if (enrollmentStatus === "not-enrolled") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
+              <p className="text-gray-600 mb-6">You are not enrolled in this course.</p>
+              <a
+                href={`/courses/${slug}`}
+                className="bg-[#c5a8de] text-white px-6 py-2 rounded-lg hover:bg-[#b399d6] transition-colors inline-block"
+              >
+                View Course
+              </a>
             </div>
           </div>
         </div>
