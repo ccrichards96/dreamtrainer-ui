@@ -204,9 +204,19 @@ export default function CourseManage() {
     }
   };
 
+  const visibleSections = useMemo(() => {
+    if (!isSupportExpert) return sidebarSections;
+    return sidebarSections
+      .map((section) => ({
+        ...section,
+        items: section.items.filter((item) => SUPPORT_EXPERT_TABS.includes(item.id as ManageTab)),
+      }))
+      .filter((section) => section.items.length > 0);
+  }, [isSupportExpert]);
+
   return (
     <DashboardLayout
-      sections={sidebarSections}
+      sections={visibleSections}
       activeTab={activeTab}
       onTabChange={(tab) => setActiveTab(tab as ManageTab)}
       title="Manage Course"

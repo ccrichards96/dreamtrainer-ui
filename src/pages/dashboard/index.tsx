@@ -299,6 +299,7 @@ function DashboardContent() {
     announcements,
     loading: dashboardLoading,
     error: dashboardError,
+    fetchAnnouncementsForCourse,
   } = useDashboardContext();
 
   // Use Course context for module management
@@ -356,7 +357,7 @@ function DashboardContent() {
         }
         setEnrollmentStatus("enrolled");
 
-        await loadCourse(courseData.id);
+        await Promise.all([loadCourse(courseData.id), fetchAnnouncementsForCourse(courseData.id)]);
 
         // Fetch sections for this course using the NEW slug-based API
         const sections = await getCourseSectionsBySlug(targetSlug);
