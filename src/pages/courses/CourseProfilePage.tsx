@@ -130,10 +130,10 @@ export default function CourseProfilePage() {
 
             {/* Course Image or Video */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="h-64 bg-gradient-to-br from-[#c5a8de] to-[#b399d6] flex items-center justify-center">
+              <div className="relative w-full aspect-video bg-gradient-to-br from-[#c5a8de] to-[#b399d6]">
                 {course.featuredVideoUrl ? (
                   <iframe
-                    className="w-full h-full"
+                    className="absolute inset-0 w-full h-full"
                     src={
                       course.featuredVideoUrl.includes("watch?v=")
                         ? course.featuredVideoUrl.replace("watch?v=", "embed/")
@@ -149,10 +149,10 @@ export default function CourseProfilePage() {
                   <img
                     src={course.imageUrl}
                     alt={course.name}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="text-white opacity-20">
+                  <div className="absolute inset-0 flex items-center justify-center text-white opacity-20">
                     <BookOpen className="w-32 h-32" />
                   </div>
                 )}
