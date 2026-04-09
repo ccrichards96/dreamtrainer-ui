@@ -1,6 +1,6 @@
 import React, { createContext, ReactNode, useState, useCallback, useEffect } from "react";
 import { Announcement } from "../types/announcements";
-import { getAllAnnouncements } from "../services/api/announcements";
+import { listCourseAnnouncements } from "../services/api/announcements";
 
 // Define the module interface
 export interface Module {
@@ -20,6 +20,7 @@ export interface DashboardContextType {
   loading: boolean;
   error: string | null;
   refetchDashboard: () => Promise<void>;
+  fetchAnnouncementsForCourse: (courseId: string) => Promise<void>;
   getTestScores: (courseId: string) => Promise<void>;
 }
 
@@ -45,32 +46,19 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     return;
   }, []);
 
-  // Refetch function that can be called to update dashboard data
-  const refetchDashboard = useCallback(async (): Promise<void> => {
-    setLoading(true);
-    setError(null);
+  const fetchAnnouncementsForCourse = useCallback(async (courseId: string): Promise<void> => {
     try {
-      // Fetch both dashboard data and announcements in parallel
-      const [announcementsData] = await Promise.all([getAllAnnouncements()]);
-
-      // Set announcements data
-      setAnnouncements(announcementsData);
+      const { data } = await listCourseAnnouncements(courseId);
+      setAnnouncements(data);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "An unknown error occurred while fetching dashboard data";
-      setError(errorMessage);
-      console.error("Dashboard API Error:", err);
-    } finally {
-      setLoading(false);
+      console.error("Failed to fetch course announcements:", err);
     }
   }, []);
 
-  // Initialize dashboard data on first mount
-  useEffect(() => {
-    refetchDashboard();
-  }, [refetchDashboard]);
+  // Refetch function that can be called to update dashboard data
+  const refetchDashboard = useCallback(async (): Promise<void> => {
+    // Announcements are fetched per-course via fetchAnnouncementsForCourse
+  }, []);
 
   const value: DashboardContextType = {
     startingScore,
@@ -81,6 +69,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     loading,
     error,
     refetchDashboard,
+    fetchAnnouncementsForCourse,
     getTestScores,
   };
 
