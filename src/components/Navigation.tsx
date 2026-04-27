@@ -40,6 +40,12 @@ export default function Navigation() {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
+                <Link
+                  to="/courses"
+                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Courses
+                </Link>
                 {lastCourseSlug && (
                   <button
                     onClick={handleContinueLearning}
@@ -49,18 +55,6 @@ export default function Navigation() {
                     Dashboard
                   </button>
                 )}
-                <Link
-                  to="/courses"
-                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Courses
-                </Link>
-                {/* <Link
-                  to="/blog"
-                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Insights
-                </Link> */}
                 <AvatarDropdown />
               </>
             ) : (
@@ -71,18 +65,14 @@ export default function Navigation() {
                 >
                   Home
                 </Link>
-                {/* <Link
-                  to="/p/about"
-                  className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  About Us
-                </Link>
+
+                {/* Always show Courses link */}
                 <Link
-                  to="/blog"
+                  to="/courses"
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Insights
-                </Link> */}
+                  Courses
+                </Link>
                 <button
                   onClick={() => login()}
                   className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
