@@ -696,10 +696,11 @@ function DashboardContent() {
                     </div>
                     <div className="flex flex-col">
                       <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                        Want to schedule time with {expert.displayName}?
+                        Need help/support from {expert.displayName}?
                       </h2>
                       <p className="text-gray-600 mb-4">
-                        Or want to send a message to ask for help:
+                        Struggling, confused, or not improving? We'll get you back on track right
+                        away:
                       </p>
 
                       {activeSocials.length > 0 && (

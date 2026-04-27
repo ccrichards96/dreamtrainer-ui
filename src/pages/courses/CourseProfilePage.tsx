@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth0 } from "@auth0/auth0-react";
 import {
   Loader2,
   BookOpen,
@@ -20,7 +19,6 @@ import type { CoursePricing } from "../../types/billing";
 export default function CourseProfilePage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated, loginWithRedirect } = useAuth0();
   const { loadCheckoutData } = useCheckoutContext();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,20 +43,10 @@ export default function CourseProfilePage() {
         setPricing(checkoutData.pricing);
         setLoadingPricing(false);
 
-        // Only check enrollment if the user is authenticated
-        if (isAuthenticated) {
-          setCheckingEnrollment(true);
-          try {
-            const enrolled = await isEnrolledInCourse(checkoutData.course.id);
-            setIsEnrolled(enrolled);
-          } catch (err) {
-            console.warn("Failed to check enrollment:", err);
-            setIsEnrolled(false);
-          }
-        } else {
-          // Guest user — not enrolled by definition
-          setIsEnrolled(false);
-        }
+        // Check if user is already enrolled
+        setCheckingEnrollment(true);
+        const enrolled = await isEnrolledInCourse(checkoutData.course.id);
+        setIsEnrolled(enrolled);
       } catch (err) {
         console.error("Error fetching course:", err);
         setError(err instanceof Error ? err.message : "Failed to load course");
@@ -70,48 +58,18 @@ export default function CourseProfilePage() {
     };
 
     fetchCourse();
-  }, [slug, loadCheckoutData, isAuthenticated]);
-
-  /**
-   * Determine CTA button label and action based on auth state + pricing
-   */
-  const isFree = !pricing || pricing.amount === 0;
+  }, [slug, loadCheckoutData]);
 
   const handleJoinCourse = () => {
     if (!course) return;
 
     if (isEnrolled) {
-      // Already enrolled → go to course dashboard
+      // Already enrolled, go to course dashboard
       navigate(`/courses/${course.slug}/dashboard`);
-      return;
+    } else {
+      // Not enrolled, go to checkout
+      navigate(`/courses/${course.slug}/checkout`);
     }
-
-    if (!isAuthenticated) {
-      // Not signed in → redirect to Auth0 signup, then return to this course page
-      loginWithRedirect({
-        authorizationParams: { screen_hint: "signup" },
-        appState: { returnTo: `/courses/${slug}` },
-      });
-      return;
-    }
-
-    // Signed in, not enrolled → go to checkout (handles both free enrollment and paid)
-    navigate(`/courses/${course.slug}/checkout`);
-  };
-
-  /**
-   * Get the CTA button label based on current state
-   */
-  const getButtonLabel = (): string => {
-    if (isEnrolled) return "Continue Learning";
-
-    if (!isAuthenticated) {
-      // Guest user
-      return isFree ? "Sign Up to Join Course" : "Sign Up to Join with a Free 3-day Trial";
-    }
-
-    // Authenticated user
-    return isFree ? "Join Course" : "Join with a Free 3-day Trial";
   };
 
   if (loading) {
@@ -324,9 +282,14 @@ export default function CourseProfilePage() {
                       <Loader2 className="w-5 h-5 animate-spin" />
                       Checking...
                     </>
+                  ) : isEnrolled ? (
+                    <>
+                      Continue Learning
+                      <ArrowRight className="w-5 h-5" />
+                    </>
                   ) : (
                     <>
-                      {getButtonLabel()}
+                      Join Course
                       <ArrowRight className="w-5 h-5" />
                     </>
                   )}
