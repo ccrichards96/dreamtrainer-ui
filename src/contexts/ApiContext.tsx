@@ -120,7 +120,7 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
       responseInterceptor = apiClient.interceptors.response.use(
         (response) => response,
         (error) => {
-          if (error?.response?.status === 401 && isAuthenticated) {
+          if (error?.response?.status === 401) {
             forceLogout();
           }
           return Promise.reject(error);

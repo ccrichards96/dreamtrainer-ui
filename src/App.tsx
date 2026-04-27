@@ -26,7 +26,6 @@ import { AppProvider } from "./contexts/AppContext";
 import NotFound from "./pages/NotFound";
 import { Role } from "./types/user";
 import usePageTracking from "./hooks/usePageTracking";
-import Home from "./pages/home";
 
 // Component to handle page tracking (must be inside Router)
 function PageTracker() {
@@ -92,14 +91,26 @@ function App() {
                   <div className="pt-16">
                     <Routes>
                       <Route path="/" element={<CMSRoute />} />
-                      <Route path="/home" element={<Home />} />
-
                       <Route path="/blog" element={<BlogPage />} />
                       <Route path="/login" element={<Login />} />
                       <Route path="/signup" element={<Signup />} />
                       <Route path="/invite/accept" element={<InviteAccept />} />
-                      <Route path="/courses" element={<ExploreCourses />} />
-                      <Route path="/courses/:slug" element={<CourseProfilePage />} />
+                      <Route
+                        path="/courses"
+                        element={
+                          <ProtectedRoute requireSubscription={true}>
+                            <ExploreCourses />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/courses/:slug"
+                        element={
+                          <ProtectedRoute requireSubscription={true}>
+                            <CourseProfilePage />
+                          </ProtectedRoute>
+                        }
+                      />
                       <Route
                         path="/courses/:slug/checkout"
                         element={
