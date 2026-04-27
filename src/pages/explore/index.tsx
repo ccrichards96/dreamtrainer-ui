@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Loader2, Search } from "lucide-react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { getAllPublicCourses, getMyCourses } from "../../services/api/modules";
 import { getAllCategories } from "../../services/api/categories";
 import { CourseProvider } from "../../contexts/CourseContext";
@@ -12,6 +13,7 @@ type TabType = "my-courses" | "explore";
 const HERO_BG_IMAGE = "";
 
 const ExploreCoursesContent = () => {
+  const { isAuthenticated } = useAuth0();
   const [exploreCourses, setExploreCourses] = useState<Course[]>([]);
   const [myCourses, setMyCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -26,16 +28,28 @@ const ExploreCoursesContent = () => {
       try {
         setLoading(true);
         setError(null);
-        const [publicCoursesResponse, myCoursesResponse, categoriesData] = await Promise.all([
+
+        // Always fetch public courses and categories
+        const [publicCoursesResponse, categoriesData] = await Promise.all([
           getAllPublicCourses(),
-          getMyCourses(),
           getAllCategories(),
         ]);
+
+        // Only fetch user's courses if authenticated
+        let myCoursesData: Course[] = [];
+        if (isAuthenticated) {
+          try {
+            const myCoursesResponse = await getMyCourses();
+            myCoursesData = myCoursesResponse.data || [];
+          } catch (err) {
+            console.warn("Failed to fetch user courses (may not be authenticated):", err);
+          }
+        }
+
         const sortedPublic = (publicCoursesResponse.data || []).sort((a: Course, b: Course) => {
           if (a.order !== b.order) return a.order - b.order;
           return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
         });
-        const myCoursesData = myCoursesResponse.data || [];
         const myCourseIds = new Set(myCoursesData.map((c) => c.id));
         setExploreCourses(sortedPublic.filter((c) => !myCourseIds.has(c.id)));
         setMyCourses(myCoursesData);
@@ -48,7 +62,7 @@ const ExploreCoursesContent = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [isAuthenticated]);
 
   const filteredCourses = useMemo(() => {
     let filtered = activeTab === "my-courses" ? myCourses : exploreCourses;
@@ -183,31 +197,33 @@ const ExploreCoursesContent = () => {
 
       {/* ── Tabs + Course Grid ────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
-        {/* Tabs */}
-        <div className="mb-6">
-          <div className="flex space-x-1 bg-white p-1 rounded-xl shadow-sm border border-gray-200">
-            <button
-              onClick={() => setActiveTab("explore")}
-              className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
-                activeTab === "explore"
-                  ? "bg-purple-600 text-white shadow-sm"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-              }`}
-            >
-              Explore New Courses
-            </button>
-            <button
-              onClick={() => setActiveTab("my-courses")}
-              className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
-                activeTab === "my-courses"
-                  ? "bg-purple-600 text-white shadow-sm"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-              }`}
-            >
-              My Courses
-            </button>
+        {/* Tabs — only show when authenticated */}
+        {isAuthenticated && (
+          <div className="mb-6">
+            <div className="flex space-x-1 bg-white p-1 rounded-xl shadow-sm border border-gray-200">
+              <button
+                onClick={() => setActiveTab("explore")}
+                className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
+                  activeTab === "explore"
+                    ? "bg-purple-600 text-white shadow-sm"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                }`}
+              >
+                Explore New Courses
+              </button>
+              <button
+                onClick={() => setActiveTab("my-courses")}
+                className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
+                  activeTab === "my-courses"
+                    ? "bg-purple-600 text-white shadow-sm"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                }`}
+              >
+                My Courses
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         <AllCoursesView courses={filteredCourses} />
       </div>
@@ -222,3 +238,4 @@ export default function ExploreCourses() {
     </CourseProvider>
   );
 }
+
