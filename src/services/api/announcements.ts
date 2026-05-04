@@ -123,6 +123,25 @@ export const listCourseAnnouncements = async (
   }
 };
 
+export const listCourseAnnouncementsExpert = async (
+  courseId: string,
+  params?: ListCourseAnnouncementsParams
+): Promise<PaginatedAnnouncementsResponse> => {
+  try {
+    const response = await apiClient.get<{
+      success: boolean;
+      data: Announcement[];
+      meta: { page: number; limit: number; total: number; totalPages: number };
+    }>(`/courses/${courseId}/announcements/expert`, { params });
+    return { data: response.data.data, meta: response.data.meta };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to list course announcements: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while fetching course announcements");
+  }
+};
+
 // Export all announcement-related functions as a service object
 export const announcementService = {
   getAllAnnouncements,
@@ -131,6 +150,7 @@ export const announcementService = {
   deleteAnnouncement,
   createCourseAnnouncement,
   listCourseAnnouncements,
+  listCourseAnnouncementsExpert,
 };
 
 export default announcementService;
