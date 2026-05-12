@@ -31,6 +31,36 @@ const emptyForm: CreateCourseAnnouncementPayload = {
   priority: "normal",
 };
 
+const quillModules = {
+  toolbar: {
+    container: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link"],
+      ["clean"],
+    ],
+  },
+};
+
+function attachLinkHandler(ref: ReactQuill | null) {
+  if (!ref) return;
+  const quill = ref.getEditor();
+  const toolbar = quill.getModule("toolbar") as { addHandler: (name: string, fn: (v: boolean) => void) => void } | null;
+  if (!toolbar) return;
+  toolbar.addHandler("link", (value: boolean) => {
+    if (value) {
+      const url = window.prompt("Enter URL:");
+      if (url) {
+        const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+        quill.format("link", normalized);
+      }
+    } else {
+      quill.format("link", false);
+    }
+  });
+}
+
 export default function CourseAnnouncements() {
   const { id: courseId } = useParams<{ id: string }>();
   const { updateAnnouncements } = useExpertDashboardContext();
@@ -378,35 +408,13 @@ export default function CourseAnnouncements() {
             <label className="block text-sm font-medium text-gray-900 mb-1.5">Message *</label>
             <div className="border border-gray-300 rounded-lg overflow-hidden">
               <ReactQuill
+                ref={attachLinkHandler}
                 theme="snow"
                 value={formData.message}
                 onChange={(content) => setFormData((prev) => ({ ...prev, message: content }))}
                 placeholder="Write your announcement message..."
                 style={{ minHeight: "150px", backgroundColor: "white" }}
-                modules={{
-                  toolbar: {
-                    container: [
-                      [{ header: [1, 2, 3, false] }],
-                      ["bold", "italic", "underline", "strike"],
-                      [{ list: "ordered" }, { list: "bullet" }],
-                      ["link"],
-                      ["clean"],
-                    ],
-                    handlers: {
-                      link: function (value: boolean) {
-                        if (value) {
-                          const url = window.prompt("Enter URL:");
-                          if (url) {
-                            const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
-                            (this as any).quill.format("link", normalized);
-                          }
-                        } else {
-                          (this as any).quill.format("link", false);
-                        }
-                      },
-                    },
-                  },
-                }}
+                modules={quillModules}
               />
             </div>
           </div>

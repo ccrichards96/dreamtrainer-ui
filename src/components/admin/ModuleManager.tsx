@@ -31,6 +31,51 @@ interface ModuleFormData {
   lessonContent: string;
 }
 
+const quillModules = {
+  toolbar: {
+    container: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ color: [] }, { background: [] }],
+      ["link", "image"],
+      ["clean"],
+    ],
+  },
+};
+
+function attachLinkHandler(ref: ReactQuill | null) {
+  if (!ref) return;
+  const quill = ref.getEditor();
+  const toolbar = quill.getModule("toolbar") as { addHandler: (name: string, fn: (v: boolean) => void) => void } | null;
+  if (!toolbar) return;
+  toolbar.addHandler("link", (value: boolean) => {
+    if (value) {
+      const url = window.prompt("Enter URL:");
+      if (url) {
+        const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+        quill.format("link", normalized);
+      }
+    } else {
+      quill.format("link", false);
+    }
+  });
+}
+
+const quillFormats = [
+  "header",
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "list",
+  "bullet",
+  "color",
+  "background",
+  "link",
+  "image",
+];
+
 const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
   const [moduleList, setModuleList] = useState<Module[]>(
     [...modules].sort((a, b) => a.order - b.order)
@@ -355,50 +400,15 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                   <ReactQuill
                     theme="snow"
                     value={formData.lessonContent}
+                    ref={attachLinkHandler}
                     onChange={handleQuillChange}
                     placeholder="Enter the lesson content..."
                     style={{
                       minHeight: "150px",
                       backgroundColor: "white",
                     }}
-                    modules={{
-                      toolbar: {
-                        container: [
-                          [{ header: [1, 2, 3, false] }],
-                          ["bold", "italic", "underline", "strike"],
-                          [{ list: "ordered" }, { list: "bullet" }],
-                          [{ color: [] }, { background: [] }],
-                          ["link", "image"],
-                          ["clean"],
-                        ],
-                        handlers: {
-                          link: function (value: boolean) {
-                            if (value) {
-                              const url = window.prompt("Enter URL:");
-                              if (url) {
-                                const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
-                                (this as any).quill.format("link", normalized);
-                              }
-                            } else {
-                              (this as any).quill.format("link", false);
-                            }
-                          },
-                        },
-                      },
-                    }}
-                    formats={[
-                      "header",
-                      "bold",
-                      "italic",
-                      "underline",
-                      "strike",
-                      "list",
-                      "bullet",
-                      "color",
-                      "background",
-                      "link",
-                      "image",
-                    ]}
+                    modules={quillModules}
+                    formats={quillFormats}
                   />
                 </div>
               </div>
