@@ -10,8 +10,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import RichTextEditor from "../../../components/RichTextEditor";
 import { useExpertDashboardContext } from "../../../contexts";
 import {
   createCourseAnnouncement,
@@ -30,36 +29,6 @@ const emptyForm: CreateCourseAnnouncementPayload = {
   type: "general",
   priority: "normal",
 };
-
-const quillModules = {
-  toolbar: {
-    container: [
-      [{ header: [1, 2, 3, false] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["link"],
-      ["clean"],
-    ],
-  },
-};
-
-function attachLinkHandler(ref: ReactQuill | null) {
-  if (!ref) return;
-  const quill = ref.getEditor();
-  const toolbar = quill.getModule("toolbar") as { addHandler: (name: string, fn: (v: boolean) => void) => void } | null;
-  if (!toolbar) return;
-  toolbar.addHandler("link", (value: boolean) => {
-    if (value) {
-      const url = window.prompt("Enter URL:");
-      if (url) {
-        const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
-        quill.format("link", normalized);
-      }
-    } else {
-      quill.format("link", false);
-    }
-  });
-}
 
 export default function CourseAnnouncements() {
   const { id: courseId } = useParams<{ id: string }>();
@@ -263,7 +232,7 @@ export default function CourseAnnouncements() {
                         {priorityBadge(announcement.priority)}
                       </div>
                       <div
-                        className="text-sm text-gray-600 [&>p]:mb-1 [&>ul]:ml-4 [&>ol]:ml-4 [&>li]:mb-0.5 [&>strong]:font-semibold [&>em]:italic [&>u]:underline [&>a]:text-purple-600 [&>a]:underline"
+                        className="text-sm text-gray-600 [&>p]:mb-1 [&>ul]:ml-4 [&>ol]:ml-4 [&>li]:mb-0.5 [&>strong]:font-semibold [&>em]:italic [&>u]:underline [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800"
                         dangerouslySetInnerHTML={{ __html: sanitizeHtml(announcement.message) }}
                       />
                       <p className="mt-2 text-xs text-gray-400">
@@ -407,14 +376,10 @@ export default function CourseAnnouncements() {
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-1.5">Message *</label>
             <div className="border border-gray-300 rounded-lg overflow-hidden">
-              <ReactQuill
-                ref={attachLinkHandler}
-                theme="snow"
+              <RichTextEditor
                 value={formData.message}
                 onChange={(content) => setFormData((prev) => ({ ...prev, message: content }))}
                 placeholder="Write your announcement message..."
-                style={{ minHeight: "150px", backgroundColor: "white" }}
-                modules={quillModules}
               />
             </div>
           </div>

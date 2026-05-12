@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -13,8 +13,7 @@ import {
   Layers,
   GripVertical,
 } from "lucide-react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import RichTextEditor, { TOOLBAR_WITH_IMAGE } from "../RichTextEditor";
 import { Section, Module } from "../../types/modules";
 import { createModule, updateModule, deleteModule } from "../../services/api/modules";
 
@@ -30,51 +29,6 @@ interface ModuleFormData {
   botIframeUrl: string;
   lessonContent: string;
 }
-
-const quillModules = {
-  toolbar: {
-    container: [
-      [{ header: [1, 2, 3, false] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      [{ color: [] }, { background: [] }],
-      ["link", "image"],
-      ["clean"],
-    ],
-  },
-};
-
-function attachLinkHandler(ref: ReactQuill | null) {
-  if (!ref) return;
-  const quill = ref.getEditor();
-  const toolbar = quill.getModule("toolbar") as { addHandler: (name: string, fn: (v: boolean) => void) => void } | null;
-  if (!toolbar) return;
-  toolbar.addHandler("link", (value: boolean) => {
-    if (value) {
-      const url = window.prompt("Enter URL:");
-      if (url) {
-        const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
-        quill.format("link", normalized);
-      }
-    } else {
-      quill.format("link", false);
-    }
-  });
-}
-
-const quillFormats = [
-  "header",
-  "bold",
-  "italic",
-  "underline",
-  "strike",
-  "list",
-  "bullet",
-  "color",
-  "background",
-  "link",
-  "image",
-];
 
 const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
   const [moduleList, setModuleList] = useState<Module[]>(
@@ -397,18 +351,11 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                   Lesson Content
                 </label>
                 <div className="border border-gray-300 rounded-lg overflow-hidden">
-                  <ReactQuill
-                    theme="snow"
+                  <RichTextEditor
                     value={formData.lessonContent}
-                    ref={attachLinkHandler}
                     onChange={handleQuillChange}
                     placeholder="Enter the lesson content..."
-                    style={{
-                      minHeight: "150px",
-                      backgroundColor: "white",
-                    }}
-                    modules={quillModules}
-                    formats={quillFormats}
+                    toolbar={TOOLBAR_WITH_IMAGE}
                   />
                 </div>
               </div>
