@@ -17,23 +17,39 @@ interface GridBlok extends SbBlokData {
   margin?: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "8" | "10" | "12" | "16" | "20" | "24";
 }
 
+// Static map so Tailwind JIT can detect every class string at build time.
+// Mobile-first: always single column, stepping up at sm/lg breakpoints.
+const responsiveColsMap: Record<string, string> = {
+  "1":  "grid-cols-1",
+  "2":  "grid-cols-1 sm:grid-cols-2",
+  "3":  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+  "4":  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+  "5":  "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5",
+  "6":  "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6",
+  "7":  "grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7",
+  "8":  "grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8",
+  "9":  "grid-cols-1 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9",
+  "10": "grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-10",
+  "11": "grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-11",
+  "12": "grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-12",
+};
+
 const defaultGridStyles = {
-  cols: "2", // Default to two columns
-  gap: "4", // Default gap-4 (1rem)
-  flow: "row", // Default flow direction
+  cols: "2",
+  gap: "4",
+  flow: "row",
   padding: "0",
   margin: "0",
 };
 
 const Grid: React.FC<{ blok: GridBlok }> = ({ blok }) => {
-  // Build class names using Preline UI patterns
+  const colsKey = blok.cols ?? defaultGridStyles.cols;
+
   const gridClasses = [
-    "grid", // Base grid class
+    "grid",
 
-    // Grid template columns - use standard Tailwind grid-cols-n pattern
-    blok.cols ? `grid-cols-${blok.cols}` : `grid-cols-${defaultGridStyles.cols}`,
+    responsiveColsMap[colsKey] ?? responsiveColsMap["2"],
 
-    // Grid template rows if specified
     blok.rows && `grid-rows-${blok.rows}`,
 
     // Gap handling - prefer individual gap-x and gap-y over general gap

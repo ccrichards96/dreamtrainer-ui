@@ -384,13 +384,28 @@ export default function CourseAnnouncements() {
                 placeholder="Write your announcement message..."
                 style={{ minHeight: "150px", backgroundColor: "white" }}
                 modules={{
-                  toolbar: [
-                    [{ header: [1, 2, 3, false] }],
-                    ["bold", "italic", "underline", "strike"],
-                    [{ list: "ordered" }, { list: "bullet" }],
-                    ["link"],
-                    ["clean"],
-                  ],
+                  toolbar: {
+                    container: [
+                      [{ header: [1, 2, 3, false] }],
+                      ["bold", "italic", "underline", "strike"],
+                      [{ list: "ordered" }, { list: "bullet" }],
+                      ["link"],
+                      ["clean"],
+                    ],
+                    handlers: {
+                      link: function (value: boolean) {
+                        if (value) {
+                          const url = window.prompt("Enter URL:");
+                          if (url) {
+                            const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+                            (this as any).quill.format("link", normalized);
+                          }
+                        } else {
+                          (this as any).quill.format("link", false);
+                        }
+                      },
+                    },
+                  },
                 }}
               />
             </div>

@@ -107,7 +107,7 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
   };
 
   return (
-    <div className="py-8 px-4 pr-20 lg:pr-24">
+    <div className="pt-0 sm:pt-8 px-0 sm:px-4 pb-24 lg:pb-8 lg:pr-24 overflow-x-hidden">
       <div className="w-full max-w-none">
         {/* Main Content Area - Full width with sidebar space */}
         <div className="w-full">

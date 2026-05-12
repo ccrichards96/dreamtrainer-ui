@@ -28,7 +28,7 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
       {!isFirstModule && onPrevious && (
         <motion.button
           onClick={onPrevious}
-          className="group flex items-center space-x-3 px-6 py-4 rounded-lg font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 shadow-lg transition-all"
+          className="group flex items-center space-x-3 px-4 sm:px-6 py-3 sm:py-4 rounded-lg font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 shadow-lg transition-all"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           whileInView={{ y: [10, 0] }}
@@ -48,7 +48,7 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
       {!(isLastModule && !hasTests) && (
         <motion.button
           onClick={onNext}
-          className={`group flex items-center space-x-3 px-8 py-4 rounded-lg font-semibold text-white shadow-lg transition-all ${
+          className={`group flex items-center space-x-3 px-5 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-white shadow-lg transition-all ${
             isLastModule
               ? "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
               : "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"

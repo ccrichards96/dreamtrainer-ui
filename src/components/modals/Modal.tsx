@@ -77,16 +77,16 @@ const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.3 }}
-            className={`relative bg-white rounded-2xl shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden`}
+            className={`relative bg-white rounded-2xl shadow-2xl w-full ${sizeClasses[size]} max-h-[85vh] sm:max-h-[90vh] overflow-hidden`}
           >
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                {title && <h2 className="text-xl font-semibold text-gray-900">{title}</h2>}
+              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+                {title && <h2 className="text-base sm:text-xl font-semibold text-gray-900">{title}</h2>}
                 {showCloseButton && (
                   <button
                     onClick={onClose}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                    className="p-3 hover:bg-gray-100 rounded-lg transition-colors duration-200 flex-shrink-0"
                     aria-label="Close modal"
                   >
                     <X className="h-5 w-5 text-gray-500" />
@@ -96,7 +96,7 @@ const Modal: React.FC<ModalProps> = ({
             )}
 
             {/* Content */}
-            <div className="overflow-y-auto max-h-[calc(90vh-8rem)]">{children}</div>
+            <div className="overflow-y-auto max-h-[calc(85vh-5rem)] sm:max-h-[calc(90vh-8rem)]">{children}</div>
           </motion.div>
         </div>
       )}

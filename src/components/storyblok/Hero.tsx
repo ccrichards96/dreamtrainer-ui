@@ -76,7 +76,7 @@ const Hero: React.FC<{ blok: HeroBlok }> = ({ blok }) => {
       )}
 
       <div className="relative z-10">
-        <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
+        <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-16">
           <div className="max-w-2xl text-center mx-auto">
             {/* Subtitle */}
             {blok.subtitle && (
@@ -103,11 +103,11 @@ const Hero: React.FC<{ blok: HeroBlok }> = ({ blok }) => {
 
             {/* Buttons */}
             {(blok.primaryButtonText || blok.secondaryButtonText) && (
-              <div className="mt-8 gap-3 flex justify-center">
+              <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
                 {/* Primary Button */}
                 {blok.primaryButtonText && (
                   <a
-                    className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none"
+                    className="w-full sm:w-auto justify-center py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none"
                     href={typeof blok.primaryButtonLink === "string" ? blok.primaryButtonLink : blok.primaryButtonLink?.url || "#"}
                   >
                     {blok.primaryButtonText}
@@ -131,7 +131,7 @@ const Hero: React.FC<{ blok: HeroBlok }> = ({ blok }) => {
                 {/* Secondary Button */}
                 {blok.secondaryButtonText && (
                   <a
-                    className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
+                    className="w-full sm:w-auto justify-center py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
                     href={typeof blok.secondaryButtonLink === "string" ? blok.secondaryButtonLink : blok.secondaryButtonLink?.url || "#"}
                   >
                     {blok.secondaryButtonIcon && (
