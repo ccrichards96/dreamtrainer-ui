@@ -15,7 +15,7 @@ import "react-quill/dist/quill.snow.css";
 import { useExpertDashboardContext } from "../../../contexts";
 import {
   createCourseAnnouncement,
-  listCourseAnnouncements,
+  listCourseAnnouncementsExpert,
   updateAnnouncement,
   deleteAnnouncement,
 } from "../../../services/api/announcements";
@@ -59,7 +59,11 @@ export default function CourseAnnouncements() {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await listCourseAnnouncements(courseId, { page, limit: 20, sort: "desc" });
+      const result = await listCourseAnnouncementsExpert(courseId, {
+        page,
+        limit: 20,
+        sort: "desc",
+      });
       setAnnouncements(result.data);
       setMeta(result.meta);
       updateAnnouncements(result.data);
