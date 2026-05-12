@@ -482,15 +482,15 @@ function DashboardContent() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-lg p-8 mb-8"
+          className="bg-white rounded-2xl shadow-lg p-5 sm:p-8 mb-8"
         >
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900">Welcome back, {firstName}!</h1>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Welcome back, {firstName}!</h1>
             <button
               onClick={() => setWelcomeModalOpen(true)}
-              className="text-base font-medium bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors shadow-md flex items-center flex-shrink-0"
+              className="text-sm sm:text-base font-medium bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg transition-colors shadow-md flex items-center justify-center sm:flex-shrink-0"
             >
-              <Play className="w-5 h-5 mr-2" /> Watch Your Welcome Video!
+              <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2" /> Watch Your Welcome Video!
             </button>
           </div>
         </motion.div>

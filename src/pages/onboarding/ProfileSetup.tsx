@@ -133,19 +133,19 @@ export default function ProfileSetup({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-8">
+    <div className="bg-white rounded-xl shadow-lg p-5 sm:p-8">
       {/* Progress Steps */}
       <ProgressIndicator currentStep={currentStep} totalSteps={totalSteps} />
 
       {/* Content */}
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">Let's Set Up Your Profile</h2>
-        <p className="text-lg text-gray-600">
+      <div className="text-center mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Let's Set Up Your Profile</h2>
+        <p className="text-base sm:text-lg text-gray-600">
           Enter your name, add a profile photo, and tell us how you discovered DreamTrainer
         </p>
       </div>
 
-      <div className="max-w-md mx-auto space-y-8">
+      <div className="max-w-md mx-auto space-y-6 sm:space-y-8">
         {/* Name Fields */}
         <div className="space-y-4">
           <div>
@@ -193,7 +193,7 @@ export default function ProfileSetup({
           <div className="relative inline-block">
             <div
               onClick={triggerFileInput}
-              className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 hover:border-blue-500 cursor-pointer flex items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors overflow-hidden"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-2 border-dashed border-gray-300 hover:border-blue-500 cursor-pointer flex items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors overflow-hidden"
             >
               {previewUrl ? (
                 <img

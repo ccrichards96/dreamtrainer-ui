@@ -93,7 +93,7 @@ export default function ExpertProfileCard({ expertProfile }: ExpertProfileCardPr
   const avatarUrl = expertProfile.user?.avatarUrl || expertProfile.avatarUrl;
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
       <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
         Your Instructor
       </h3>
