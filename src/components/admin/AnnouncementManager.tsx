@@ -12,8 +12,7 @@ import {
   AlertTriangle,
   Info,
 } from "lucide-react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import RichTextEditor, { TOOLBAR_FULL } from "../RichTextEditor";
 import { Announcement } from "../../types/announcements";
 import {
   getAllAnnouncements,
@@ -26,54 +25,9 @@ import { sanitizeHtml, getPlainTextLength } from "../../utils/htmlSanitizer";
 interface AnnouncementFormData {
   name: string;
   message: string;
-  type: "general" | "account" | "support" | "other";
+  type: "general" | "account" | "support" | "other" | "update" | "alert";
   priority: "low" | "normal" | "high" | "urgent";
 }
-
-const quillModules = {
-  toolbar: {
-    container: [
-      [{ header: [1, 2, 3, false] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      [{ color: [] }, { background: [] }],
-      ["link"],
-      ["clean"],
-    ],
-  },
-};
-
-// Called after Quill mounts so we win the race against snow theme's own addHandler call.
-function attachLinkHandler(ref: ReactQuill | null) {
-  if (!ref) return;
-  const quill = ref.getEditor();
-  const toolbar = quill.getModule("toolbar") as { addHandler: (name: string, fn: (v: boolean) => void) => void } | null;
-  if (!toolbar) return;
-  toolbar.addHandler("link", (value: boolean) => {
-    if (value) {
-      const url = window.prompt("Enter URL:");
-      if (url) {
-        const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
-        quill.format("link", normalized);
-      }
-    } else {
-      quill.format("link", false);
-    }
-  });
-}
-
-const quillFormats = [
-  "header",
-  "bold",
-  "italic",
-  "underline",
-  "strike",
-  "list",
-  "bullet",
-  "color",
-  "background",
-  "link",
-];
 
 const AnnouncementManager: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -401,18 +355,11 @@ const AnnouncementManager: React.FC = () => {
                   Message *
                 </label>
                 <div className="border border-gray-300 rounded-lg overflow-hidden">
-                  <ReactQuill
-                    ref={attachLinkHandler}
-                    theme="snow"
+                  <RichTextEditor
                     value={formData.message}
                     onChange={handleQuillChange}
                     placeholder="Enter the announcement message that will be displayed to users..."
-                    style={{
-                      minHeight: "150px",
-                      backgroundColor: "white",
-                    }}
-                    modules={quillModules}
-                    formats={quillFormats}
+                    toolbar={TOOLBAR_FULL}
                   />
                 </div>
               </div>
@@ -485,7 +432,7 @@ const AnnouncementManager: React.FC = () => {
                       </span>
                     </div>
                     <div
-                      className="text-gray-600 mb-3 prose prose-sm max-w-none [&>*]:mb-2 [&>h1]:text-lg [&>h2]:text-base [&>h3]:text-sm [&>p]:text-sm [&>ul]:text-sm [&>ol]:text-sm [&>strong]:font-semibold [&>em]:italic [&>u]:underline"
+                      className="text-gray-600 mb-3 prose prose-sm max-w-none [&>*]:mb-2 [&>h1]:text-lg [&>h2]:text-base [&>h3]:text-sm [&>p]:text-sm [&>ul]:text-sm [&>ol]:text-sm [&>strong]:font-semibold [&>em]:italic [&>u]:underline [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800"
                       dangerouslySetInnerHTML={{ __html: sanitizeHtml(announcement.message) }}
                     />
                     <div className="flex items-center gap-4 text-sm text-gray-500">

@@ -41,7 +41,7 @@ const NotFound: React.FC = () => {
         {/* Footer */}
         <footer className="mt-auto text-center py-5">
           <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-sm text-gray-500">© 2025 Dream Trainer. All rights reserved.</p>
+            <p className="text-sm text-gray-500">© 2026 Dream Trainer. All rights reserved.</p>
           </div>
         </footer>
       </div>
