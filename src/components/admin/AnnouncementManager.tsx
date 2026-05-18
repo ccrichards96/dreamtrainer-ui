@@ -12,8 +12,7 @@ import {
   AlertTriangle,
   Info,
 } from "lucide-react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import RichTextEditor, { TOOLBAR_FULL } from "../RichTextEditor";
 import { Announcement } from "../../types/announcements";
 import {
   getAllAnnouncements,
@@ -26,8 +25,8 @@ import { sanitizeHtml, getPlainTextLength } from "../../utils/htmlSanitizer";
 interface AnnouncementFormData {
   name: string;
   message: string;
-  type: "general" | "account" | "support" | "other";
-  priority: "low" | "normal" | "high";
+  type: "general" | "account" | "support" | "other" | "update" | "alert";
+  priority: "low" | "normal" | "high" | "urgent";
 }
 
 const AnnouncementManager: React.FC = () => {
@@ -346,6 +345,7 @@ const AnnouncementManager: React.FC = () => {
                   <option value="low">Low</option>
                   <option value="normal">Normal</option>
                   <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
                 </select>
               </div>
 
@@ -355,37 +355,11 @@ const AnnouncementManager: React.FC = () => {
                   Message *
                 </label>
                 <div className="border border-gray-300 rounded-lg overflow-hidden">
-                  <ReactQuill
-                    theme="snow"
+                  <RichTextEditor
                     value={formData.message}
                     onChange={handleQuillChange}
                     placeholder="Enter the announcement message that will be displayed to users..."
-                    style={{
-                      minHeight: "150px",
-                      backgroundColor: "white",
-                    }}
-                    modules={{
-                      toolbar: [
-                        [{ header: [1, 2, 3, false] }],
-                        ["bold", "italic", "underline", "strike"],
-                        [{ list: "ordered" }, { list: "bullet" }],
-                        [{ color: [] }, { background: [] }],
-                        ["link"],
-                        ["clean"],
-                      ],
-                    }}
-                    formats={[
-                      "header",
-                      "bold",
-                      "italic",
-                      "underline",
-                      "strike",
-                      "list",
-                      "bullet",
-                      "color",
-                      "background",
-                      "link",
-                    ]}
+                    toolbar={TOOLBAR_FULL}
                   />
                 </div>
               </div>
@@ -458,7 +432,7 @@ const AnnouncementManager: React.FC = () => {
                       </span>
                     </div>
                     <div
-                      className="text-gray-600 mb-3 prose prose-sm max-w-none [&>*]:mb-2 [&>h1]:text-lg [&>h2]:text-base [&>h3]:text-sm [&>p]:text-sm [&>ul]:text-sm [&>ol]:text-sm [&>strong]:font-semibold [&>em]:italic [&>u]:underline"
+                      className="text-gray-600 mb-3 prose prose-sm max-w-none [&>*]:mb-2 [&>h1]:text-lg [&>h2]:text-base [&>h3]:text-sm [&>p]:text-sm [&>ul]:text-sm [&>ol]:text-sm [&>strong]:font-semibold [&>em]:italic [&>u]:underline [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800"
                       dangerouslySetInnerHTML={{ __html: sanitizeHtml(announcement.message) }}
                     />
                     <div className="flex items-center gap-4 text-sm text-gray-500">

@@ -139,7 +139,9 @@ export default function ProfileSetup({
 
       {/* Content */}
       <div className="text-center mb-6 sm:mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Let's Set Up Your Profile</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+          Let's Set Up Your Profile
+        </h2>
         <p className="text-base sm:text-lg text-gray-600">
           Enter your name, add a profile photo, and tell us how you discovered DreamTrainer
         </p>

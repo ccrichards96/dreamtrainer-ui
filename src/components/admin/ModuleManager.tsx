@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -13,8 +13,7 @@ import {
   Layers,
   GripVertical,
 } from "lucide-react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import RichTextEditor, { TOOLBAR_WITH_IMAGE } from "../RichTextEditor";
 import { Section, Module } from "../../types/modules";
 import { createModule, updateModule, deleteModule } from "../../services/api/modules";
 
@@ -94,8 +93,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
     });
   };
 
-  const handleSubmitModule = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmitModule = async () => {
     setLoading(true);
     setError(null);
 
@@ -214,6 +212,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
               <h3 className="text-lg font-medium text-gray-900">Manage Modules</h3>
             </div>
             <button
+              type="button"
               onClick={handleAddModule}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
             >
@@ -242,6 +241,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
           <AlertCircle className="w-5 h-5 text-red-500" />
           <span className="text-red-700">{error}</span>
           <button
+            type="button"
             onClick={() => setError(null)}
             className="ml-auto text-red-400 hover:text-red-600"
           >
@@ -262,13 +262,17 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
               <h4 className="text-lg font-medium text-gray-900">
                 {editingModule ? "Edit Module" : "Add New Module"}
               </h4>
-              <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="text-gray-400 hover:text-gray-600"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          <form onSubmit={handleSubmitModule} className="p-6">
+          <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Module Topic */}
               <div className="md:col-span-2">
@@ -351,38 +355,11 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                   Lesson Content
                 </label>
                 <div className="border border-gray-300 rounded-lg overflow-hidden">
-                  <ReactQuill
-                    theme="snow"
+                  <RichTextEditor
                     value={formData.lessonContent}
                     onChange={handleQuillChange}
                     placeholder="Enter the lesson content..."
-                    style={{
-                      minHeight: "150px",
-                      backgroundColor: "white",
-                    }}
-                    modules={{
-                      toolbar: [
-                        [{ header: [1, 2, 3, false] }],
-                        ["bold", "italic", "underline", "strike"],
-                        [{ list: "ordered" }, { list: "bullet" }],
-                        [{ color: [] }, { background: [] }],
-                        ["link", "image"],
-                        ["clean"],
-                      ],
-                    }}
-                    formats={[
-                      "header",
-                      "bold",
-                      "italic",
-                      "underline",
-                      "strike",
-                      "list",
-                      "bullet",
-                      "color",
-                      "background",
-                      "link",
-                      "image",
-                    ]}
+                    toolbar={TOOLBAR_WITH_IMAGE}
                   />
                 </div>
               </div>
@@ -398,7 +375,8 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                 Cancel
               </button>
               <button
-                type="submit"
+                type="button"
+                onClick={handleSubmitModule}
                 disabled={!isFormValid || loading}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
@@ -415,7 +393,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                 )}
               </button>
             </div>
-          </form>
+          </div>
         </motion.div>
       )}
 
@@ -443,6 +421,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                   {/* Reorder Controls */}
                   <div className="flex flex-col items-center gap-1 pt-1">
                     <button
+                      type="button"
                       onClick={() => handleMoveModule(module.id, "up")}
                       disabled={index === 0 || reorderingModuleId !== null}
                       className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
@@ -452,6 +431,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                     </button>
                     <GripVertical className="w-5 h-5 text-gray-300" />
                     <button
+                      type="button"
                       onClick={() => handleMoveModule(module.id, "down")}
                       disabled={index === moduleList.length - 1 || reorderingModuleId !== null}
                       className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
@@ -476,6 +456,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                   {/* Action Buttons */}
                   <div className="flex items-center gap-2">
                     <button
+                      type="button"
                       onClick={() => handleEditModule(module)}
                       disabled={reorderingModuleId !== null}
                       className="text-purple-600 hover:text-purple-800 p-2 disabled:opacity-50"
@@ -483,6 +464,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                       <Edit3 className="w-4 h-4" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDeleteModule(module.id)}
                       disabled={reorderingModuleId !== null}
                       className="text-red-600 hover:text-red-800 p-2 disabled:opacity-50"
