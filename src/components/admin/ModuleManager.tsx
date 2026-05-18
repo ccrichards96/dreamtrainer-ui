@@ -262,7 +262,11 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
               <h4 className="text-lg font-medium text-gray-900">
                 {editingModule ? "Edit Module" : "Add New Module"}
               </h4>
-              <button type="button" onClick={handleCancel} className="text-gray-400 hover:text-gray-600">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="text-gray-400 hover:text-gray-600"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>

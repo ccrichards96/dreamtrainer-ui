@@ -63,7 +63,7 @@ export default function CheckoutSuccess() {
         // Clear the referral ID and course slug from localStorage after successful conversion
         localStorage.removeItem("rewardful_referral_id");
         localStorage.removeItem("signup_course_slug");
-        
+
         setProcessComplete(true);
       } catch (error) {
         console.error("Failed to update user onboarding status:", error);
@@ -89,10 +89,12 @@ export default function CheckoutSuccess() {
 
   // Show loading state while Auth0 is loading, API not ready, or processing updates
   if (auth0Loading || !apiInitialized || isUpdating || !processComplete) {
-    const loadingMessage = isUpdating 
-      ? (isFree ? "Enrolling in your course..." : "Setting up your account...")
+    const loadingMessage = isUpdating
+      ? isFree
+        ? "Enrolling in your course..."
+        : "Setting up your account..."
       : "Initializing...";
-    
+
     const loadingSubMessage = isUpdating
       ? `Please wait while we complete your ${isFree ? "enrollment" : "subscription"} setup.`
       : "Please wait while we prepare your account setup.";

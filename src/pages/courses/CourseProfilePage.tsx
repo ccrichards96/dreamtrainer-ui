@@ -161,10 +161,10 @@ export default function CourseProfilePage() {
         {/* Course Content */}
         <div className="grid md:grid-cols-3 gap-8">
           {/* Main Content - Left Side */}
-          <div className="md:col-span-2 space-y-6">
+          <div className="md:col-span-2 space-y-6 order-2 md:order-none">
             {/* Course Details */}
             <div className="bg-white rounded-xl shadow-sm p-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{course.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{course.name}</h1>
               <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap">
                 {course.description}
               </p>
@@ -269,7 +269,7 @@ export default function CourseProfilePage() {
           </div>
 
           {/* Sidebar - Right Side */}
-          <div className="md:col-span-1">
+          <div className="md:col-span-1 order-1 md:order-none">
             <div className="sticky top-24 space-y-6">
               {/* Price Card */}
               <div className="bg-white rounded-xl shadow-lg p-6">

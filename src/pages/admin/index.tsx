@@ -531,101 +531,177 @@ const AdminDashboard: React.FC = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Course
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Description
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Created
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredCourses.map((course, index) => (
-                          <tr key={course.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-start gap-3">
-                                <div className="flex flex-col items-center gap-1 pt-1">
-                                  <button
-                                    onClick={() => handleMoveCourse(course.id, "up")}
-                                    disabled={index === 0 || reorderingCourseId !== null}
-                                    className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
-                                    title="Move up"
-                                  >
-                                    <ChevronUp className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleMoveCourse(course.id, "down")}
-                                    disabled={
-                                      index === filteredCourses.length - 1 ||
-                                      reorderingCourseId !== null
-                                    }
-                                    className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
-                                    title="Move down"
-                                  >
-                                    <ChevronDown className="w-4 h-4" />
-                                  </button>
-                                </div>
-                                <div>
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {course.name}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    ID: {course.id.slice(0, 8)}...
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm text-gray-900 max-w-xs truncate">
-                                {course.description || "No description"}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {new Date(course.createdAt).toLocaleDateString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => handleEditCourse(course)}
-                                  disabled={reorderingCourseId !== null}
-                                  className="text-blue-600 hover:text-blue-900 flex items-center gap-1 disabled:opacity-50"
-                                >
-                                  <Edit3 className="w-4 h-4" />
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() => handleManageSections(course)}
-                                  disabled={reorderingCourseId !== null}
-                                  className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50"
-                                >
-                                  <Layers className="w-4 h-4" />
-                                  Sections
-                                </button>
-                                <button
-                                  onClick={() => setCourseToDelete(course)}
-                                  disabled={reorderingCourseId !== null}
-                                  className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                  Delete
-                                </button>
-                              </div>
-                            </td>
+                  <>
+                    {/* Mobile card list */}
+                    <div className="block md:hidden divide-y divide-gray-200">
+                      {filteredCourses.map((course, index) => (
+                        <div key={course.id} className="p-4 bg-white hover:bg-gray-50">
+                          <div className="flex items-start gap-3">
+                            <div className="flex flex-col items-center gap-1 pt-0.5 flex-shrink-0">
+                              <button
+                                onClick={() => handleMoveCourse(course.id, "up")}
+                                disabled={index === 0 || reorderingCourseId !== null}
+                                className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                                title="Move up"
+                              >
+                                <ChevronUp className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleMoveCourse(course.id, "down")}
+                                disabled={
+                                  index === filteredCourses.length - 1 ||
+                                  reorderingCourseId !== null
+                                }
+                                className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                                title="Move down"
+                              >
+                                <ChevronDown className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {course.name}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                ID: {course.id.slice(0, 8)}…
+                              </p>
+                              {course.description && (
+                                <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                                  {course.description}
+                                </p>
+                              )}
+                              <p className="text-xs text-gray-400 mt-1">
+                                {new Date(course.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-3 flex items-center gap-2 pl-10">
+                            <button
+                              onClick={() => handleEditCourse(course)}
+                              disabled={reorderingCourseId !== null}
+                              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleManageSections(course)}
+                              disabled={reorderingCourseId !== null}
+                              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 disabled:opacity-50"
+                            >
+                              <Layers className="w-3.5 h-3.5" />
+                              Sections
+                            </button>
+                            <button
+                              onClick={() => setCourseToDelete(course)}
+                              disabled={reorderingCourseId !== null}
+                              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Desktop table */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Course
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Description
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Created
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Actions
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {filteredCourses.map((course, index) => (
+                            <tr key={course.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex flex-col items-center gap-1 pt-1">
+                                    <button
+                                      onClick={() => handleMoveCourse(course.id, "up")}
+                                      disabled={index === 0 || reorderingCourseId !== null}
+                                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                                      title="Move up"
+                                    >
+                                      <ChevronUp className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleMoveCourse(course.id, "down")}
+                                      disabled={
+                                        index === filteredCourses.length - 1 ||
+                                        reorderingCourseId !== null
+                                      }
+                                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                                      title="Move down"
+                                    >
+                                      <ChevronDown className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                  <div>
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {course.name}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                      ID: {course.id.slice(0, 8)}...
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="text-sm text-gray-900 max-w-xs truncate">
+                                  {course.description || "No description"}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {new Date(course.createdAt).toLocaleDateString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => handleEditCourse(course)}
+                                    disabled={reorderingCourseId !== null}
+                                    className="text-blue-600 hover:text-blue-900 flex items-center gap-1 disabled:opacity-50"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => handleManageSections(course)}
+                                    disabled={reorderingCourseId !== null}
+                                    className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50"
+                                  >
+                                    <Layers className="w-4 h-4" />
+                                    Sections
+                                  </button>
+                                  <button
+                                    onClick={() => setCourseToDelete(course)}
+                                    disabled={reorderingCourseId !== null}
+                                    className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    Delete
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
