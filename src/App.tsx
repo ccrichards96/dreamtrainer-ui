@@ -12,6 +12,8 @@ import BlogPage from "./pages/blog";
 import ExploreCourses from "./pages/explore";
 import ExpertDashboard from "./pages/expert-dashboard";
 import CourseManage from "./pages/expert-dashboard/CourseManage";
+import PartnerDashboard from "./pages/partner-dashboard";
+import OfferDetail from "./pages/partner-dashboard/offers/OfferDetail";
 import { CourseProfilePage, CourseCheckout } from "./pages/courses";
 import ExpertProfilePage from "./pages/experts";
 import AdminDashboard from "./pages/admin";
@@ -135,6 +137,33 @@ function App() {
                               <ExpertDashboardProvider>
                                 <CourseManage />
                               </ExpertDashboardProvider>
+                            </ProtectedRoute>
+                          }
+                        />
+                      </Route>
+
+                      <Route path="/partner">
+                        <Route
+                          path="/partner/dashboard/offers/new"
+                          element={
+                            <ProtectedRoute>
+                              <OfferDetail />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/partner/dashboard/offers/:id/edit"
+                          element={
+                            <ProtectedRoute>
+                              <OfferDetail />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/partner/dashboard/:tab?"
+                          element={
+                            <ProtectedRoute>
+                              <PartnerDashboard />
                             </ProtectedRoute>
                           }
                         />

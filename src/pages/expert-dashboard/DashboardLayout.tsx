@@ -65,7 +65,7 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white">
       {/* Mobile breadcrumb / sidebar toggle */}
       <div className="sticky top-16 inset-x-0 z-20 bg-white border-y border-gray-200 px-4 sm:px-6 lg:px-8 lg:hidden">
         <div className="flex items-center py-2">
