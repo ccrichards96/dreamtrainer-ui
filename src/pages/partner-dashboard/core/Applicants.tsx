@@ -11,7 +11,8 @@ import {
   ApplicantFilterValues,
   ApplicantStatus,
 } from "../applicants/types";
-import { mockApplicants, mockCohorts, mockCourses } from "../applicants/mockApplicants";
+import { mockApplicants, mockCohorts } from "../applicants/mockApplicants";
+import { usePartnerDashboardContext } from "../../../contexts/usePartnerDashboardContext";
 
 const PAGE_SIZE = 7;
 
@@ -22,7 +23,7 @@ const emptyFilters: ApplicantFilterValues = {
 };
 
 export default function Applicants() {
-  const [activeCourseId, setActiveCourseId] = useState(mockCourses[0]?.id ?? "");
+  const { courses, activeCourseId, setActiveCourseId } = usePartnerDashboardContext();
   const [applicants, setApplicants] = useState(mockApplicants);
 
   // `draftFilters` track the form; `appliedFilters` drive the results (committed on Search).
@@ -100,7 +101,7 @@ export default function Applicants() {
   return (
     <div className="space-y-6">
       <CourseSelector
-        courses={mockCourses}
+        courses={courses}
         selectedCourseId={activeCourseId}
         onChange={setActiveCourseId}
       />

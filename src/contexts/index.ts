@@ -32,3 +32,9 @@ export {
   type ResourcesFormData,
 } from "./ExpertDashboardContext";
 export { useExpertDashboardContext } from "./useExpertDashboardContext";
+export {
+  PartnerDashboardProvider,
+  PartnerDashboardContext,
+  type PartnerDashboardContextType,
+} from "./PartnerDashboardContext";
+export { usePartnerDashboardContext } from "./usePartnerDashboardContext";

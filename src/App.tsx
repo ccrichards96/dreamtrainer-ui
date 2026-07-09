@@ -14,6 +14,7 @@ import ExpertDashboard from "./pages/expert-dashboard";
 import CourseManage from "./pages/expert-dashboard/CourseManage";
 import PartnerDashboard from "./pages/partner-dashboard";
 import OfferDetail from "./pages/partner-dashboard/offers/OfferDetail";
+import StudentOffers from "./pages/offers";
 import { CourseProfilePage, CourseCheckout } from "./pages/courses";
 import ExpertProfilePage from "./pages/experts";
 import AdminDashboard from "./pages/admin";
@@ -23,7 +24,13 @@ import CMSRoute from "./components/routes/CMSRoute";
 import InviteAccept from "./pages/invite/InviteAccept";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
-import { AuthProvider, ApiProvider, CheckoutProvider, ExpertDashboardProvider } from "./contexts";
+import {
+  AuthProvider,
+  ApiProvider,
+  CheckoutProvider,
+  ExpertDashboardProvider,
+  PartnerDashboardProvider,
+} from "./contexts";
 import { AppProvider } from "./contexts/AppContext";
 import NotFound from "./pages/NotFound";
 import { Role } from "./types/user";
@@ -147,7 +154,9 @@ function App() {
                           path="/partner/dashboard/offers/new"
                           element={
                             <ProtectedRoute>
-                              <OfferDetail />
+                              <PartnerDashboardProvider>
+                                <OfferDetail />
+                              </PartnerDashboardProvider>
                             </ProtectedRoute>
                           }
                         />
@@ -155,7 +164,9 @@ function App() {
                           path="/partner/dashboard/offers/:id/edit"
                           element={
                             <ProtectedRoute>
-                              <OfferDetail />
+                              <PartnerDashboardProvider>
+                                <OfferDetail />
+                              </PartnerDashboardProvider>
                             </ProtectedRoute>
                           }
                         />
@@ -163,11 +174,22 @@ function App() {
                           path="/partner/dashboard/:tab?"
                           element={
                             <ProtectedRoute>
-                              <PartnerDashboard />
+                              <PartnerDashboardProvider>
+                                <PartnerDashboard />
+                              </PartnerDashboardProvider>
                             </ProtectedRoute>
                           }
                         />
                       </Route>
+
+                      <Route
+                        path="/offers/:tab?"
+                        element={
+                          <ProtectedRoute>
+                            <StudentOffers />
+                          </ProtectedRoute>
+                        }
+                      />
 
                       <Route path="/experts/:slug" element={<ExpertProfilePage />} />
                       <Route

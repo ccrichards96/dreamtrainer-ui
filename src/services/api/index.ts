@@ -29,6 +29,10 @@ export { default as courseProgressService } from "./course-progress";
 export * from "./modules";
 export { default as modulesService } from "./modules";
 
+// Export offers services
+export * from "./offers";
+export { default as offersService } from "./offers";
+
 // Export types
 export type { AssessmentSubmission, AssessmentResponse } from "./assessment";
 export type { UserBillingInfo, CheckoutSessionRequest } from "./billing";

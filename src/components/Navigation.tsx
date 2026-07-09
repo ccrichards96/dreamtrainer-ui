@@ -55,6 +55,12 @@ export default function Navigation() {
                   >
                     Courses
                   </Link>
+                  <Link
+                    to="/offers"
+                    className="text-black hover:text-[#c5a8de] px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Offers
+                  </Link>
                   {lastCourseSlug && (
                     <button
                       onClick={handleContinueLearning}
@@ -143,6 +149,12 @@ export default function Navigation() {
                 className="text-gray-800 hover:text-[#c5a8de] hover:bg-purple-50 px-3 py-3 rounded-md text-base font-medium"
               >
                 Courses
+              </Link>
+              <Link
+                to="/offers"
+                className="text-gray-800 hover:text-[#c5a8de] hover:bg-purple-50 px-3 py-3 rounded-md text-base font-medium"
+              >
+                Offers
               </Link>
               {lastCourseSlug && (
                 <button
