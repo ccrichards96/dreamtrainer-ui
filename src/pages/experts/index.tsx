@@ -324,7 +324,7 @@ export default function ExpertProfilePage() {
             {/* Avatar - Overlapping the banner */}
             <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-16 mb-4">
               <div className="flex-shrink-0">
-                {(expert.user?.avatarUrl || expert.avatarUrl) ? (
+                {expert.user?.avatarUrl || expert.avatarUrl ? (
                   <img
                     src={expert.user?.avatarUrl || expert.avatarUrl!}
                     alt={expert.displayName}

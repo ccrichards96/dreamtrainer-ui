@@ -39,7 +39,9 @@ export default function Navigation() {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
-                <span className="text-xl font-bold text-gray-900 dark:text-black">Dream Trainer</span>
+                <span className="text-xl font-bold text-gray-900 dark:text-black">
+                  Dream Trainer
+                </span>
               </Link>
             </div>
 
@@ -85,7 +87,9 @@ export default function Navigation() {
                     Login
                   </button>
                   <button
-                    onClick={() => loginWithRedirect({ authorizationParams: { screen_hint: "signup" } })}
+                    onClick={() =>
+                      loginWithRedirect({ authorizationParams: { screen_hint: "signup" } })
+                    }
                     className="bg-[#c5a8de] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#b399d6] border border-[#c5a8de]"
                   >
                     Sign Up
@@ -111,10 +115,7 @@ export default function Navigation() {
 
       {/* Backdrop */}
       {drawerOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/40"
-          onClick={() => setDrawerOpen(false)}
-        />
+        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setDrawerOpen(false)} />
       )}
 
       {/* Side drawer */}
@@ -175,7 +176,9 @@ export default function Navigation() {
                   Login
                 </button>
                 <button
-                  onClick={() => loginWithRedirect({ authorizationParams: { screen_hint: "signup" } })}
+                  onClick={() =>
+                    loginWithRedirect({ authorizationParams: { screen_hint: "signup" } })
+                  }
                   className="w-full bg-[#c5a8de] text-white px-3 py-3 rounded-md text-base font-medium hover:bg-[#b399d6] transition-colors"
                 >
                   Sign Up

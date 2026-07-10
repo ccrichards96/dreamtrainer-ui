@@ -177,7 +177,7 @@ const UsersManager: React.FC = () => {
       {/* Header */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Manage Users</h3>
               <p className="text-sm text-gray-500">Create and manage platform users</p>
@@ -445,53 +445,34 @@ const UsersManager: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Name</th>
-                  <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Email</th>
-                  <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">Role</th>
-                  <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
-                    Created
-                  </th>
-                  <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr
-                    key={user.id}
-                    onClick={() => setSelectedUser(user)}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
-                  >
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium">
-                          {user.firstName?.[0]?.toUpperCase()}
-                          {user.lastName?.[0]?.toUpperCase()}
-                        </div>
-                        <span className="text-sm font-medium text-gray-900">
-                          {user.firstName} {user.lastName}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6 text-sm text-gray-600">{user.email}</td>
-                    <td className="py-4 px-6">
+          <>
+            {/* Mobile card list */}
+            <div className="block md:hidden divide-y divide-gray-100">
+              {users.map((user) => (
+                <div
+                  key={user.id}
+                  onClick={() => setSelectedUser(user)}
+                  className="p-4 flex items-center gap-3 hover:bg-gray-50 active:bg-gray-100 cursor-pointer transition-colors"
+                >
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-semibold">
+                    {user.firstName?.[0]?.toUpperCase()}
+                    {user.lastName?.[0]?.toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {user.firstName} {user.lastName}
+                      </p>
                       <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleBadgeColor(user.role)}`}
+                        className={`px-2 py-0.5 text-xs font-medium rounded-full flex-shrink-0 ${getRoleBadgeColor(user.role)}`}
                       >
                         {user.role}
                       </span>
-                    </td>
-                    <td className="py-4 px-6 text-sm text-gray-500">
-                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "\u2014"}
-                    </td>
-                    <td className="py-4 px-6">
+                    </div>
+                    <p className="text-xs text-gray-500 truncate mt-0.5">{user.email}</p>
+                    <div className="flex items-center gap-2 mt-1">
                       <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                           user.isEmailVerified
                             ? "bg-green-100 text-green-800"
                             : "bg-yellow-100 text-yellow-800"
@@ -499,41 +480,115 @@ const UsersManager: React.FC = () => {
                       >
                         {user.isEmailVerified ? "Verified" : "Unverified"}
                       </span>
-                    </td>
+                      <span className="text-xs text-gray-400">
+                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "\u2014"}
+                      </span>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
+                      Name
+                    </th>
+                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
+                      Email
+                    </th>
+                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
+                      Role
+                    </th>
+                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
+                      Created
+                    </th>
+                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600">
+                      Status
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr
+                      key={user.id}
+                      onClick={() => setSelectedUser(user)}
+                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-medium">
+                            {user.firstName?.[0]?.toUpperCase()}
+                            {user.lastName?.[0]?.toUpperCase()}
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">
+                            {user.firstName} {user.lastName}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-6 text-sm text-gray-600">{user.email}</td>
+                      <td className="py-4 px-6">
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleBadgeColor(user.role)}`}
+                        >
+                          {user.role}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-sm text-gray-500">
+                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "\u2014"}
+                      </td>
+                      <td className="py-4 px-6">
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            user.isEmailVerified
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {user.isEmailVerified ? "Verified" : "Unverified"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         {/* Pagination */}
         {pagination.total > 0 && (
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-            <p className="text-sm text-gray-600">
-              Showing {(page - 1) * pagination.limit + 1} to{" "}
-              {Math.min(page * pagination.limit, pagination.total)} of {pagination.total} users
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <span className="text-sm text-gray-600">
-                Page {page} of {pagination.totalPages || 1}
-              </span>
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
-                disabled={page >= pagination.totalPages}
-                className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
+          <div className="px-4 sm:px-6 py-4 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <p className="text-sm text-gray-600 text-center sm:text-left">
+                Showing {(page - 1) * pagination.limit + 1} to{" "}
+                {Math.min(page * pagination.limit, pagination.total)} of {pagination.total} users
+              </p>
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-sm text-gray-600 whitespace-nowrap">
+                  Page {page} of {pagination.totalPages || 1}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                  disabled={page >= pagination.totalPages}
+                  className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         )}

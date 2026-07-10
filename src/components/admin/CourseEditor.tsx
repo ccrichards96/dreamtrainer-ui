@@ -1,6 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Save, X, AlertCircle, Copy, Check, UserPlus, Trash2, Loader2, ChevronDown } from "lucide-react";
+import {
+  Save,
+  X,
+  AlertCircle,
+  Copy,
+  Check,
+  UserPlus,
+  Trash2,
+  Loader2,
+  ChevronDown,
+} from "lucide-react";
 import { Course, CourseExpert, CourseStatus, ListingStatus } from "../../types/modules";
 import { Category } from "../../types/categories";
 import { User } from "../../types/user";
@@ -178,9 +188,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
           search: expertSearch.trim() || undefined,
           limit: 20,
         });
-        const experts = res.users.filter(
-          (u) => u.expertProfile && u.expertProfile.id
-        );
+        const experts = res.users.filter((u) => u.expertProfile && u.expertProfile.id);
         setExpertUsers(experts);
       } catch (err) {
         console.error("Expert search error:", err);
@@ -717,17 +725,17 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
               </div>
             ) : courseExperts.length > 0 ? (
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <div className="border border-gray-200 rounded-lg overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 text-sm">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Expert
                       </th>
-                      <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Role
                       </th>
-                      <th className="px-6 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -735,7 +743,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                   <tbody className="bg-white divide-y divide-gray-200">
                     {courseExperts.map((expert) => (
                       <tr key={expert.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
                           <div className="flex items-center">
                             {expert.expertProfile?.avatarUrl ? (
                               <img
@@ -755,7 +763,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
                           {actionLoadingId === expert.id ? (
                             <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                           ) : (
@@ -767,21 +775,21 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                                   e.target.value as "owner" | "support-expert"
                                 )
                               }
-                              className="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              className="w-full min-w-[120px] text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
                               <option value="owner">Owner</option>
                               <option value="support-expert">Support Expert</option>
                             </select>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
                           <button
                             type="button"
                             onClick={() => handleRemoveExpert(expert.id)}
                             disabled={actionLoadingId === expert.id}
-                            className="text-red-500 hover:text-red-700 disabled:opacity-50"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 disabled:opacity-50 transition-colors"
                           >
-                            <Trash2 className="w-4 h-4 inline" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </td>
                       </tr>
@@ -816,7 +824,9 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                         type="text"
                         role="combobox"
                         aria-expanded={showExpertDropdown}
-                        value={showExpertDropdown ? expertSearch : selectedExpertLabel || expertSearch}
+                        value={
+                          showExpertDropdown ? expertSearch : selectedExpertLabel || expertSearch
+                        }
                         onChange={(e) => {
                           setExpertSearch(e.target.value);
                           setShowExpertDropdown(true);
@@ -870,8 +880,8 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                             {loadingExpertsList
                               ? "Searching…"
                               : expertSearch.trim()
-                              ? "No matching experts found"
-                              : "Type to search for experts"}
+                                ? "No matching experts found"
+                                : "Type to search for experts"}
                           </div>
                         ) : (
                           filteredExperts.map((u) => (
@@ -887,12 +897,8 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                               onClick={() => handleSelectExpert(u)}
                             >
                               <div>
-                                <span className="font-medium">
-                                  {u.expertProfile!.displayName}
-                                </span>
-                                <span className="text-gray-500 ml-1.5 text-xs">
-                                  {u.email}
-                                </span>
+                                <span className="font-medium">{u.expertProfile!.displayName}</span>
+                                <span className="text-gray-500 ml-1.5 text-xs">{u.email}</span>
                               </div>
                               {selectedExpertProfileId === u.expertProfile!.id && (
                                 <Check className="w-4 h-4 text-blue-600 shrink-0" />
