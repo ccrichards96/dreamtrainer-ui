@@ -128,6 +128,8 @@ interface Course {
   status: CourseStatus;
   price: number;
   stripeProductId: string | null;
+  mailingListId: string | null;
+  courseAgreementText: string | null;
   listingStatus: ListingStatus;
   order: number;
   learningObjectives?: string[];

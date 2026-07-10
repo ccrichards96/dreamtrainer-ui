@@ -5,6 +5,7 @@ import { Course, CourseExpert, CourseStatus, ListingStatus } from "../../types/m
 import { Category } from "../../types/categories";
 import { User } from "../../types/user";
 import { updateCourse } from "../../services/api/modules";
+import RichTextEditor, { TOOLBAR_BASIC } from "../RichTextEditor";
 import courseExpertsService from "../../services/api/course-experts";
 import { getAllCategories } from "../../services/api/categories";
 import { getUsersPaginated } from "../../services/api/admin";
@@ -121,6 +122,8 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     prerequisites: course.prerequisites || [],
     targetAudiences: course.targetAudiences || [],
     stripeProductId: course.stripeProductId || "",
+    mailingListId: course.mailingListId || "",
+    courseAgreementText: course.courseAgreementText || "",
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -298,6 +301,8 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
         prerequisites: formData.prerequisites,
         targetAudiences: formData.targetAudiences,
         stripeProductId: formData.stripeProductId || null,
+        mailingListId: formData.mailingListId || null,
+        courseAgreementText: formData.courseAgreementText || null,
       });
 
       setSuccess(true);
@@ -575,6 +580,28 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
           </div>
         </section>
 
+        {/* Section: Course Agreement */}
+        <section>
+          <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+            Course Agreement
+          </h4>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Agreement Text
+            </label>
+            <p className="text-xs text-gray-400 mb-2">
+              Shown as a confirmation popup before a student joins this course. Leave empty to
+              skip the popup.
+            </p>
+            <RichTextEditor
+              value={formData.courseAgreementText}
+              onChange={(html) => setFormData((p) => ({ ...p, courseAgreementText: html }))}
+              placeholder="Enter the terms students must agree to before joining…"
+              toolbar={TOOLBAR_BASIC}
+            />
+          </div>
+        </section>
+
         {/* Section: Metadata (read-only) */}
         <section>
           <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
@@ -596,6 +623,23 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
                 placeholder="prod_..."
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="mailingListId"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Mailing List ID
+              </label>
+              <input
+                type="text"
+                id="mailingListId"
+                name="mailingListId"
+                value={formData.mailingListId}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                placeholder="e.g. list_..."
               />
             </div>
             {formData.slug && (
