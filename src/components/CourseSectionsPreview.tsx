@@ -33,12 +33,14 @@ export default function CourseSectionsPreview({ sections }: CourseSectionsPrevie
 
             {/* Section content */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-start gap-2 min-w-0">
+              <div className="flex items-start gap-2">
                 <BookOpen className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
-                <h3 className="font-semibold text-gray-900">{section.name}</h3>
+                <h3 className="font-semibold text-gray-900 break-words">{section.name}</h3>
               </div>
               {section.description && (
-                <p className="mt-1 text-sm text-gray-600 line-clamp-2">{section.description}</p>
+                <p className="mt-1 text-sm text-gray-600 line-clamp-2 break-words">
+                  {section.description}
+                </p>
               )}
             </div>
           </div>
