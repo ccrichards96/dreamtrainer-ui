@@ -35,7 +35,7 @@ export function CheckoutProvider({ children }: CheckoutProviderProps) {
 
   // Use a ref to keep track of activeCheckout for the stable callback
   const activeCheckoutRef = useRef<ActiveCheckoutData | null>(null);
-  
+
   // Sync ref with state
   useEffect(() => {
     activeCheckoutRef.current = activeCheckout;

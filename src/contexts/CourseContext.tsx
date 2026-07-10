@@ -391,11 +391,11 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children }) => {
 
         // A section is only completed when all its modules are in the newCompleted set
         const isSectionCompleted = newCompleted.size === modules.length;
-        
+
         if (isSectionCompleted) {
           if (currentSectionId && !completedSections.has(currentSectionId)) {
             setCompletedSections((prevSections) => new Set([...prevSections, currentSectionId]));
-            
+
             if (allCompletedModuleIdsRef.current.size === totalCourseModulesRef.current) {
               setAllModulesCompleted(true);
             }

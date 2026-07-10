@@ -340,6 +340,8 @@ export const updateCourse = async (
     welcomeVideoUrl?: string | null;
     featuredVideoUrl?: string | null;
     stripeProductId?: string | null;
+    mailingListId?: string | null;
+    courseAgreementText?: string | null;
   }
 ): Promise<Course> => {
   try {

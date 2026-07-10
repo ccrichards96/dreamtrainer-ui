@@ -317,7 +317,9 @@ function DashboardContent() {
   // State for available sections within the current course
   const [availableSections, setAvailableSections] = useState<Section[]>([]);
   const [switchingSection, setSwitchingSection] = useState<string | null>(null);
-  const [enrollmentStatus, setEnrollmentStatus] = useState<"checking" | "enrolled" | "not-enrolled">("checking");
+  const [enrollmentStatus, setEnrollmentStatus] = useState<
+    "checking" | "enrolled" | "not-enrolled"
+  >("checking");
 
   // Ref to track if initialization has been done to prevent duplicate calls
   const isInitialized = useRef(false);
@@ -485,7 +487,9 @@ function DashboardContent() {
           className="bg-white rounded-2xl shadow-lg p-5 sm:p-8 mb-8"
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Welcome back, {firstName}!</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Welcome back, {firstName}!
+            </h1>
             <button
               onClick={() => setWelcomeModalOpen(true)}
               className="text-sm sm:text-base font-medium bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg transition-colors shadow-md flex items-center justify-center sm:flex-shrink-0"
@@ -675,7 +679,7 @@ function DashboardContent() {
                   <div className="flex flex-col gap-6 items-center text-center">
                     <div className="flex-shrink-0">
                       <div className="relative w-32 h-32 mx-auto">
-                        {(expert.user?.avatarUrl || expert.avatarUrl) ? (
+                        {expert.user?.avatarUrl || expert.avatarUrl ? (
                           <img
                             src={expert.user?.avatarUrl || expert.avatarUrl!}
                             alt={expert.displayName}

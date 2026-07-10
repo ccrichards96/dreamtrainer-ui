@@ -283,7 +283,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                       >
                         {module.topic}
                       </p>
-                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{module.description}</p>
+                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                        {module.description}
+                      </p>
                       <span
                         className={`inline-block mt-1 text-[10px] font-medium px-2 py-0.5 rounded-full ${
                           completedModules.has(index)

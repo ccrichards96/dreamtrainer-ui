@@ -14,6 +14,7 @@ import { isEnrolledInCourse } from "../../services/api/enrollment";
 import { useCheckoutContext } from "../../contexts";
 import ExpertProfileCard from "../../components/ExpertProfileCard";
 import CourseSectionsPreview from "../../components/CourseSectionsPreview";
+import CourseAgreementModal from "../../components/CourseAgreementModal";
 import type { Course } from "../../types/modules";
 import type { CoursePricing } from "../../types/billing";
 
@@ -29,6 +30,7 @@ export default function CourseProfilePage() {
   const [checkingEnrollment, setCheckingEnrollment] = useState(true);
   const [pricing, setPricing] = useState<CoursePricing | null>(null);
   const [loadingPricing, setLoadingPricing] = useState(false);
+  const [showAgreementModal, setShowAgreementModal] = useState(false);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -77,14 +79,8 @@ export default function CourseProfilePage() {
    */
   const isFree = !pricing || pricing.amount === 0;
 
-  const handleJoinCourse = () => {
+  const proceedToJoin = () => {
     if (!course) return;
-
-    if (isEnrolled) {
-      // Already enrolled → go to course dashboard
-      navigate(`/courses/${course.slug}/dashboard`);
-      return;
-    }
 
     if (!isAuthenticated) {
       // Not signed in → redirect to Auth0 signup, then return to this course page
@@ -97,6 +93,24 @@ export default function CourseProfilePage() {
 
     // Signed in, not enrolled → go to checkout (handles both free enrollment and paid)
     navigate(`/courses/${course.slug}/checkout`);
+  };
+
+  const handleJoinCourse = () => {
+    if (!course) return;
+
+    if (isEnrolled) {
+      // Already enrolled → go to course dashboard
+      navigate(`/courses/${course.slug}/dashboard`);
+      return;
+    }
+
+    if (course.courseAgreementText) {
+      // Gate on the agreement popup before proceeding to signup/checkout
+      setShowAgreementModal(true);
+      return;
+    }
+
+    proceedToJoin();
   };
 
   /**
@@ -161,10 +175,10 @@ export default function CourseProfilePage() {
         {/* Course Content */}
         <div className="grid md:grid-cols-3 gap-8">
           {/* Main Content - Left Side */}
-          <div className="md:col-span-2 space-y-6">
+          <div className="md:col-span-2 space-y-6 order-2 md:order-none">
             {/* Course Details */}
             <div className="bg-white rounded-xl shadow-sm p-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{course.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{course.name}</h1>
               <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap">
                 {course.description}
               </p>
@@ -269,7 +283,7 @@ export default function CourseProfilePage() {
           </div>
 
           {/* Sidebar - Right Side */}
-          <div className="md:col-span-1">
+          <div className="md:col-span-1 order-1 md:order-none">
             <div className="sticky top-24 space-y-6">
               {/* Price Card */}
               <div className="bg-white rounded-xl shadow-lg p-6">
@@ -368,6 +382,16 @@ export default function CourseProfilePage() {
           </div>
         </div>
       </div>
+
+      <CourseAgreementModal
+        isOpen={showAgreementModal}
+        agreementHtml={course.courseAgreementText ?? ""}
+        onConfirm={() => {
+          setShowAgreementModal(false);
+          proceedToJoin();
+        }}
+        onClose={() => setShowAgreementModal(false)}
+      />
     </div>
   );
 }
