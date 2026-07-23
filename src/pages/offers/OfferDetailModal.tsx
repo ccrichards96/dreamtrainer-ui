@@ -27,12 +27,7 @@ export default function OfferDetailModal({
   if (!offer) return null;
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={offer.title}
-      size="lg"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={offer.title} size="lg">
       <div className="flex flex-col h-full overflow-y-auto">
         {/* Banner / Header Info */}
         <div className="bg-purple-50 p-6 border-b border-purple-100">
@@ -105,7 +100,10 @@ export default function OfferDetailModal({
                 </h4>
                 <ul className="space-y-2.5">
                   {offer.requirements.map((req, idx) => (
-                    <li key={idx} className="flex items-start gap-x-3 text-gray-700 text-sm sm:text-base">
+                    <li
+                      key={idx}
+                      className="flex items-start gap-x-3 text-gray-700 text-sm sm:text-base"
+                    >
                       <div className="flex size-5 items-center justify-center rounded-full bg-purple-100 text-purple-600 mt-0.5 flex-shrink-0">
                         <Check className="size-3" />
                       </div>
@@ -124,7 +122,9 @@ export default function OfferDetailModal({
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
               <div className="flex items-center gap-x-2 text-purple-600 mb-2">
                 <Briefcase className="size-4" />
-                <h5 className="font-semibold text-gray-800 text-sm">Traits (Desired Characteristics)</h5>
+                <h5 className="font-semibold text-gray-800 text-sm">
+                  Traits (Desired Characteristics)
+                </h5>
               </div>
               <p className="text-gray-600 text-sm leading-relaxed">{offer.characteristics}</p>
             </div>

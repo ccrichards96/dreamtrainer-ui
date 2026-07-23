@@ -24,7 +24,7 @@ export default function CreateCohortModal({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [courseId, setCourseId] = useState("");
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
@@ -105,7 +105,9 @@ export default function CreateCohortModal({
             }}
             placeholder="e.g. Summer 2026 Batch"
             className={`w-full py-3 px-4 border rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 ${
-              nameError ? "border-red-300 ring-2 ring-red-500/10 focus:border-red-500 focus:ring-red-500/20" : "border-gray-200"
+              nameError
+                ? "border-red-300 ring-2 ring-red-500/10 focus:border-red-500 focus:ring-red-500/20"
+                : "border-gray-200"
             }`}
             autoFocus
             disabled={isSubmitting}
@@ -115,7 +117,10 @@ export default function CreateCohortModal({
 
         {/* Course Selection */}
         <div>
-          <label htmlFor="cohort-course" className="block text-sm font-semibold text-gray-700 mb-1.5">
+          <label
+            htmlFor="cohort-course"
+            className="block text-sm font-semibold text-gray-700 mb-1.5"
+          >
             Select Course <span className="text-red-500">*</span>
           </label>
           <select
@@ -125,7 +130,9 @@ export default function CreateCohortModal({
             className="w-full py-3 px-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
             disabled={isSubmitting}
           >
-            <option value="" disabled>-- Select a Course --</option>
+            <option value="" disabled>
+              -- Select a Course --
+            </option>
             {courses.map((course) => (
               <option key={course.id} value={course.id}>
                 {course.name}
@@ -136,7 +143,10 @@ export default function CreateCohortModal({
 
         {/* Description */}
         <div>
-          <label htmlFor="cohort-description" className="block text-sm font-semibold text-gray-700 mb-1.5">
+          <label
+            htmlFor="cohort-description"
+            className="block text-sm font-semibold text-gray-700 mb-1.5"
+          >
             Description
           </label>
           <textarea

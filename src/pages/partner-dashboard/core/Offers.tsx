@@ -52,7 +52,7 @@ export default function Offers() {
       navigate(`/partner/dashboard/offers/${offer.id}/edit?courseId=${activeCourseId}`);
       return;
     }
-    
+
     if (action === "delete") {
       if (!activeCourseId) return;
       if (window.confirm("Are you sure you want to delete this offer?")) {

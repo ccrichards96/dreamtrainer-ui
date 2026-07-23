@@ -58,7 +58,8 @@ export default function ExploreOffers({
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Explore Offers</h1>
         <p className="mt-1 text-sm sm:text-base text-gray-600">
-          Find and apply to course-aligned internships, design apprenticeships, and entry-level developer positions.
+          Find and apply to course-aligned internships, design apprenticeships, and entry-level
+          developer positions.
         </p>
       </div>
 

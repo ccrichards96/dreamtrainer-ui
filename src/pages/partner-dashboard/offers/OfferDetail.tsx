@@ -5,7 +5,11 @@ import OfferDetailsSection from "./forms/OfferDetailsSection";
 import IdealCandidatesSection from "./forms/IdealCandidatesSection";
 import { OfferFormData } from "./types";
 import { CourseOffer } from "../../../types/offers";
-import { getCourseOfferById, createCourseOffer, updateCourseOffer } from "../../../services/api/offers";
+import {
+  getCourseOfferById,
+  createCourseOffer,
+  updateCourseOffer,
+} from "../../../services/api/offers";
 import { usePartnerDashboardContext } from "../../../contexts/usePartnerDashboardContext";
 import { ApiError } from "../../../services/api/client";
 import { toast } from "../../../components/toast";
@@ -14,7 +18,8 @@ const toFormData = (offer: CourseOffer): OfferFormData => ({
   name: offer.title,
   description: offer.description ?? "",
   imageUrl: offer.imageUrl ?? "",
-  requirements: offer.requirements && offer.requirements.length > 0 ? offer.requirements : ["", "", ""],
+  requirements:
+    offer.requirements && offer.requirements.length > 0 ? offer.requirements : ["", "", ""],
   characteristics: offer.characteristics ?? "",
   expectations: offer.expectations ?? "",
   outcomes: offer.outcomes ?? "",

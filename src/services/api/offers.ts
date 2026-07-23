@@ -9,7 +9,6 @@ import type {
   ListOffersParams,
 } from "../../types/offers";
 
-
 /**
  * Get all offers for a specific course
  */
@@ -28,9 +27,14 @@ export const getCourseOffers = async (courseId: string): Promise<CourseOffer[]> 
 /**
  * Get a specific course offer by ID
  */
-export const getCourseOfferById = async (courseId: string, offerId: string): Promise<CourseOffer> => {
+export const getCourseOfferById = async (
+  courseId: string,
+  offerId: string
+): Promise<CourseOffer> => {
   try {
-    const response = await apiClient.get<APIResponse<CourseOffer>>(`/courses/${courseId}/offers/${offerId}`);
+    const response = await apiClient.get<APIResponse<CourseOffer>>(
+      `/courses/${courseId}/offers/${offerId}`
+    );
     return response.data.data;
   } catch (error: any) {
     throw {
@@ -43,9 +47,15 @@ export const getCourseOfferById = async (courseId: string, offerId: string): Pro
 /**
  * Create a new offer for a specific course
  */
-export const createCourseOffer = async (courseId: string, data: CreateCourseOfferData): Promise<CourseOffer> => {
+export const createCourseOffer = async (
+  courseId: string,
+  data: CreateCourseOfferData
+): Promise<CourseOffer> => {
   try {
-    const response = await apiClient.post<APIResponse<CourseOffer>>(`/courses/${courseId}/offers`, data);
+    const response = await apiClient.post<APIResponse<CourseOffer>>(
+      `/courses/${courseId}/offers`,
+      data
+    );
     return response.data.data;
   } catch (error: any) {
     throw {
@@ -58,9 +68,16 @@ export const createCourseOffer = async (courseId: string, data: CreateCourseOffe
 /**
  * Update an existing course offer
  */
-export const updateCourseOffer = async (courseId: string, offerId: string, data: UpdateCourseOfferData): Promise<CourseOffer> => {
+export const updateCourseOffer = async (
+  courseId: string,
+  offerId: string,
+  data: UpdateCourseOfferData
+): Promise<CourseOffer> => {
   try {
-    const response = await apiClient.put<APIResponse<CourseOffer>>(`/courses/${courseId}/offers/${offerId}`, data);
+    const response = await apiClient.put<APIResponse<CourseOffer>>(
+      `/courses/${courseId}/offers/${offerId}`,
+      data
+    );
     return response.data.data;
   } catch (error: any) {
     throw {
