@@ -5,8 +5,8 @@ import CourseSelector from "../shared/CourseSelector";
 import Pagination from "../shared/Pagination";
 import OfferCard from "../offers/OfferCard";
 import { Offer, OfferAction } from "../offers/types";
+import { CourseOffer } from "../../../types/offers";
 import { offersService } from "../../../services/api";
-import { CourseOffer } from "../../../services/api/offers";
 import { usePartnerDashboardContext } from "../../../contexts/usePartnerDashboardContext";
 
 const PAGE_SIZE = 6;
@@ -42,11 +42,14 @@ export default function Offers() {
   const totalPages = Math.max(1, Math.ceil(offers.length / PAGE_SIZE));
   const pageOffers = offers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  const handleAddOffer = () => navigate("/partner/dashboard/offers/new");
+  const handleAddOffer = () => {
+    if (!activeCourseId) return;
+    navigate(`/partner/dashboard/offers/new?courseId=${activeCourseId}`);
+  };
 
   const handleOfferAction = async (action: OfferAction, offer: Offer) => {
     if (action === "edit") {
-      navigate(`/partner/dashboard/offers/${offer.id}/edit`);
+      navigate(`/partner/dashboard/offers/${offer.id}/edit?courseId=${activeCourseId}`);
       return;
     }
     
@@ -69,7 +72,7 @@ export default function Offers() {
   };
 
   const handleViewEdit = (offer: Offer) => {
-    navigate(`/partner/dashboard/offers/${offer.id}/edit`);
+    navigate(`/partner/dashboard/offers/${offer.id}/edit?courseId=${activeCourseId}`);
   };
 
   return (

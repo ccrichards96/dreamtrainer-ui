@@ -37,3 +37,11 @@ export { default as offersService } from "./offers";
 export type { AssessmentSubmission, AssessmentResponse } from "./assessment";
 export type { UserBillingInfo, CheckoutSessionRequest } from "./billing";
 export type { CourseProgress, UpdateProgressDTO } from "../../types/course-progress";
+export type {
+  Offer,
+  OfferApplication,
+  MyOfferApplication,
+  OfferApplicationStatus,
+  CourseApplicant,
+  ListOffersParams,
+} from "../../types/offers";

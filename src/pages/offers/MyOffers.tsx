@@ -1,122 +1,120 @@
 import React from "react";
-import { StudentOffer } from "./types";
-import { Briefcase, Building, Clock, ArrowRight, Compass } from "lucide-react";
+import { applicationStatusConfig } from "./statusConfig";
+import { Briefcase, Compass, ArrowRight, Loader2 } from "lucide-react";
+import type { MyOfferApplication, OfferApplicationStatus, CourseOffer } from "../../types/offers";
 
 interface MyOffersProps {
-  offers: StudentOffer[];
-  appliedIds: string[];
-  onViewDetails: (offer: StudentOffer) => void;
+  applications: MyOfferApplication[];
+  statuses: Record<string, OfferApplicationStatus>;
+  busyIds: string[];
+  onApply: (id: string) => void;
+  onWithdraw: (id: string) => void;
+  onViewDetails: (offer: CourseOffer) => void;
   onExploreRedirect: () => void;
 }
 
-type OfferStatus = "Applied" | "Under Review" | "Offered" | "Accepted" | "Rejected";
+// Get initials for the logo avatar fallback (falls back to the offer title when no partner name).
+const getInitials = (name: string) =>
+  name
+    .split(" ")
+    .map((n) => n[0])
+    .filter(Boolean)
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
 
-// Simulated mapping of status per offer ID
-const getSimulatedStatus = (offerId: string): { status: OfferStatus; date: string } => {
-  switch (offerId) {
-    case "offer-1":
-      return { status: "Applied", date: "Applied today" };
-    case "offer-2":
-      return { status: "Under Review", date: "Applied 3 days ago" };
-    case "offer-3":
-      return { status: "Offered", date: "Applied 1 week ago" };
-    case "offer-4":
-      return { status: "Accepted", date: "Applied 2 weeks ago" };
-    default:
-      return { status: "Applied", date: "Applied recently" };
-  }
-};
-
-const statusBadgeClasses: Record<OfferStatus, string> = {
-  "Applied": "bg-amber-50 text-amber-700 border-amber-200",
-  "Under Review": "bg-blue-50 text-blue-700 border-blue-200",
-  "Offered": "bg-emerald-50 text-emerald-700 border-emerald-250",
-  "Accepted": "bg-purple-50 text-purple-700 border-purple-200",
-  "Rejected": "bg-red-50 text-red-700 border-red-250"
-};
+// Curated gradient array based on card index
+const gradientStyles = [
+  "from-purple-500 to-indigo-500",
+  "from-pink-500 to-rose-500",
+  "from-blue-500 to-teal-500",
+  "from-amber-500 to-orange-500",
+];
 
 export default function MyOffers({
-  offers,
-  appliedIds,
+  applications,
+  statuses,
+  busyIds,
+  onApply,
+  onWithdraw,
   onViewDetails,
   onExploreRedirect,
 }: MyOffersProps) {
-  const appliedOffers = offers.filter((offer) => appliedIds.includes(offer.id));
-
-  // Get initials for partner logo avatar fallback
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .substring(0, 2)
-      .toUpperCase();
-  };
-
-  // Curated gradient array based on offer index
-  const gradientStyles = [
-    "from-purple-500 to-indigo-500",
-    "from-pink-500 to-rose-500",
-    "from-blue-500 to-teal-500",
-    "from-amber-500 to-orange-500",
-  ];
-
   return (
     <div className="space-y-6">
       {/* Header Info */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">My Offers</h1>
         <p className="mt-1 text-sm sm:text-base text-gray-600">
-          Track the status of your applications and manage your current offers.
+          Track the offers you've applied to and their status.
         </p>
       </div>
 
-      {/* Applied Offers Grid / List */}
-      {appliedOffers.length > 0 ? (
+      {/* Applications Grid */}
+      {applications.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
-          {appliedOffers.map((offer, index) => {
-            const { status, date } = getSimulatedStatus(offer.id);
+          {applications.map((application, index) => {
+            const offer = application.courseOffer;
+            const status = statuses[application.courseOfferId] ?? application.status;
+            const badge = applicationStatusConfig[status];
             const logoGradient = gradientStyles[index % gradientStyles.length];
+            const isBusy = busyIds.includes(offer.id);
+            const canReapply = status === "withdrawn" || status === "rejected";
+            const isInactive = canReapply; // greyed-out treatment for withdrawn/rejected
 
             return (
               <div
-                key={offer.id}
-                className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-150 hover:shadow-md hover:border-purple-250 transition duration-300"
+                key={application.id}
+                className={`flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-150 hover:shadow-md hover:border-purple-250 transition duration-300 ${
+                  isInactive ? "opacity-70" : ""
+                }`}
               >
                 {/* Card Header */}
                 <div className="p-5 flex-1 space-y-4">
-                  <div className="flex items-start justify-between gap-x-4">
+                  <div className="flex items-start justify-between gap-x-3">
                     <div className="flex items-center gap-x-3">
                       {/* Logo Fallback Gradient */}
                       <div
                         className={`flex size-11 items-center justify-center rounded-xl bg-gradient-to-br ${logoGradient} text-white font-bold text-sm shadow-sm flex-shrink-0`}
                       >
-                        {getInitials(offer.partnerName)}
+                        {getInitials(offer.partnerName || offer.title)}
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-purple-600 uppercase tracking-wider">
-                          {offer.partnerName}
-                        </h4>
+                        {offer.partnerName && (
+                          <h4 className="text-xs font-bold text-purple-600 uppercase tracking-wider">
+                            {offer.partnerName}
+                          </h4>
+                        )}
                         <h3 className="font-bold text-gray-800 text-base mt-0.5 line-clamp-1">
                           {offer.title}
                         </h3>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Date and Status Line */}
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <div className="flex items-center gap-x-1.5">
-                      <Clock className="size-3.5 text-gray-400" />
-                      <span>{date}</span>
-                    </div>
-
+                    {/* Status badge */}
                     <span
-                      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold shadow-sm ${statusBadgeClasses[status]}`}
+                      className={`inline-flex flex-shrink-0 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${badge.className}`}
                     >
-                      {status}
+                      {badge.label}
                     </span>
                   </div>
+
+                  {/* Requirements Snippet */}
+                  {offer.requirements && offer.requirements.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        Key Requirements
+                      </p>
+                      <ul className="text-sm text-gray-600 space-y-1">
+                        {offer.requirements.slice(0, 2).map((req, idx) => (
+                          <li key={idx} className="line-clamp-1 flex items-start gap-x-2">
+                            <span className="text-purple-500 font-bold">•</span>
+                            <span>{req}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Footer Actions */}
@@ -129,6 +127,30 @@ export default function MyOffers({
                     View Details
                     <ArrowRight className="size-4" />
                   </button>
+
+                  {status === "pending" && (
+                    <button
+                      type="button"
+                      onClick={() => onWithdraw(offer.id)}
+                      disabled={isBusy}
+                      className="inline-flex items-center gap-x-1.5 text-xs font-semibold text-gray-500 hover:text-red-600 focus:outline-none disabled:opacity-50"
+                    >
+                      {isBusy && <Loader2 className="size-3.5 animate-spin" />}
+                      Withdraw
+                    </button>
+                  )}
+
+                  {canReapply && (
+                    <button
+                      type="button"
+                      onClick={() => onApply(offer.id)}
+                      disabled={isBusy}
+                      className="inline-flex items-center gap-x-1.5 rounded-lg bg-purple-600 px-4 py-2 text-xs font-semibold text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-sm transition disabled:opacity-50"
+                    >
+                      {isBusy && <Loader2 className="size-3.5 animate-spin" />}
+                      Re-apply
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -139,7 +161,7 @@ export default function MyOffers({
           <Briefcase className="mx-auto size-12 text-gray-300" />
           <h3 className="mt-4 text-lg font-semibold text-gray-800">No applications yet</h3>
           <p className="mt-1 text-sm text-gray-500 max-w-sm mx-auto">
-            You haven't applied to any offers yet. Explore the available placements and launch your application.
+            You haven't applied to any offers yet. Explore the available offers to get started.
           </p>
           <div className="mt-6">
             <button

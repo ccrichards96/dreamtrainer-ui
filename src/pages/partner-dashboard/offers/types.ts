@@ -11,6 +11,7 @@ export interface Offer {
 export interface OfferFormData {
   name: string;
   description: string;
+  imageUrl: string;
   requirements: string[];
   characteristics: string;
   expectations: string;

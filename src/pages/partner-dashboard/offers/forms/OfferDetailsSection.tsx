@@ -37,6 +37,17 @@ export default function OfferDetailsSection({ form, onChange }: OfferDetailsSect
           />
         </FormField>
 
+        <FormField label="Offer Image URL" htmlFor="offer-image-url">
+          <input
+            id="offer-image-url"
+            type="url"
+            value={form.imageUrl}
+            onChange={(e) => onChange({ imageUrl: e.target.value })}
+            placeholder="https://example.com/image.jpg"
+            className={fieldInputClass}
+          />
+        </FormField>
+
         <FormField label="Requirements">
           <RequirementsList
             requirements={form.requirements}

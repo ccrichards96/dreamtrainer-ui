@@ -1,14 +1,17 @@
 import React from "react";
 import Modal from "../../components/modals/Modal";
 import { StudentOffer } from "./types";
-import { Building, Check, Briefcase, Award, ArrowRight } from "lucide-react";
+import { Building, Check, Briefcase, Award, ArrowRight, Loader2 } from "lucide-react";
 
 interface OfferDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   offer: StudentOffer | null;
   hasApplied: boolean;
+  canWithdraw: boolean;
+  isLoading: boolean;
   onApply: () => void;
+  onWithdraw: () => void;
 }
 
 export default function OfferDetailModal({
@@ -16,7 +19,10 @@ export default function OfferDetailModal({
   onClose,
   offer,
   hasApplied,
+  canWithdraw,
+  isLoading,
   onApply,
+  onWithdraw,
 }: OfferDetailModalProps) {
   if (!offer) return null;
 
@@ -36,24 +42,38 @@ export default function OfferDetailModal({
                 <Building className="size-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">{offer.partnerName}</h3>
+                <h3 className="text-lg font-bold text-gray-900">
+                  {offer.partnerName || offer.title}
+                </h3>
               </div>
             </div>
 
-            <div className="flex-shrink-0">
+            <div className="flex flex-shrink-0 items-center gap-x-3">
               {hasApplied ? (
-                <span className="inline-flex items-center gap-x-1.5 rounded-lg bg-green-100 px-4 py-2 text-sm font-semibold text-green-800 border border-green-200">
-                  <Check className="size-4" />
-                  Applied
-                </span>
+                <>
+                  <span className="inline-flex items-center gap-x-1.5 rounded-lg bg-green-100 px-4 py-2 text-sm font-semibold text-green-800 border border-green-200">
+                    <Check className="size-4" />
+                    Applied
+                  </span>
+                  {canWithdraw && (
+                    <button
+                      type="button"
+                      onClick={onWithdraw}
+                      disabled={isLoading}
+                      className="text-sm font-semibold text-gray-500 hover:text-red-600 focus:outline-none disabled:opacity-50"
+                    >
+                      Withdraw
+                    </button>
+                  )}
+                </>
               ) : (
                 <button
                   type="button"
-                  onClick={() => {
-                    onApply();
-                  }}
-                  className="inline-flex items-center gap-x-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-sm transition"
+                  onClick={onApply}
+                  disabled={isLoading}
+                  className="inline-flex items-center gap-x-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-sm transition disabled:opacity-50"
                 >
+                  {isLoading && <Loader2 className="size-4 animate-spin" />}
                   Apply Now
                   <ArrowRight className="size-4" />
                 </button>
@@ -77,23 +97,27 @@ export default function OfferDetailModal({
           <hr className="border-gray-200" />
 
           {/* Requirements */}
-          <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">
-              Requirements
-            </h4>
-            <ul className="space-y-2.5">
-              {offer.requirements.map((req, idx) => (
-                <li key={idx} className="flex items-start gap-x-3 text-gray-700 text-sm sm:text-base">
-                  <div className="flex size-5 items-center justify-center rounded-full bg-purple-100 text-purple-600 mt-0.5 flex-shrink-0">
-                    <Check className="size-3" />
-                  </div>
-                  <span>{req}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {offer.requirements && offer.requirements.length > 0 && (
+            <>
+              <div>
+                <h4 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">
+                  Requirements
+                </h4>
+                <ul className="space-y-2.5">
+                  {offer.requirements.map((req, idx) => (
+                    <li key={idx} className="flex items-start gap-x-3 text-gray-700 text-sm sm:text-base">
+                      <div className="flex size-5 items-center justify-center rounded-full bg-purple-100 text-purple-600 mt-0.5 flex-shrink-0">
+                        <Check className="size-3" />
+                      </div>
+                      <span>{req}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          <hr className="border-gray-200" />
+              <hr className="border-gray-200" />
+            </>
+          )}
 
           {/* Ideal Candidate Profile Details */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

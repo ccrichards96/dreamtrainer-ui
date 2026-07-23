@@ -1,43 +1,44 @@
 import React, { useState } from "react";
 import { StudentOffer } from "./types";
-import { Search, Building, ArrowRight, Check } from "lucide-react";
+import { Search, Building } from "lucide-react";
+import OfferCardFooter from "./OfferCardFooter";
 
 interface ExploreOffersProps {
   offers: StudentOffer[];
   appliedIds: string[];
+  withdrawableIds: string[];
+  busyIds: string[];
   onApply: (id: string) => void;
+  onWithdraw: (id: string) => void;
   onViewDetails: (offer: StudentOffer) => void;
 }
-
-const ALL_FILTER_TAGS = ["All", "Remote", "Part-Time", "UX/UI", "Frontend", "Data Analytics", "Internship"];
 
 export default function ExploreOffers({
   offers,
   appliedIds,
+  withdrawableIds,
+  busyIds,
   onApply,
+  onWithdraw,
   onViewDetails,
 }: ExploreOffersProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTag, setSelectedTag] = useState("All");
 
   const filteredOffers = offers.filter((offer) => {
-    const matchesSearch =
-      offer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      offer.partnerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      offer.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesTag =
-      selectedTag === "All" ||
-      offer.tags.some((tag) => tag.toLowerCase() === selectedTag.toLowerCase());
-
-    return matchesSearch && matchesTag;
+    const query = searchQuery.toLowerCase();
+    return (
+      offer.title.toLowerCase().includes(query) ||
+      (offer.partnerName?.toLowerCase().includes(query) ?? false) ||
+      offer.description.toLowerCase().includes(query)
+    );
   });
 
-  // Get initials for partner logo avatar fallback
+  // Get initials for the logo avatar fallback (falls back to the offer title when no partner name).
   const getInitials = (name: string) => {
     return name
       .split(" ")
       .map((n) => n[0])
+      .filter(Boolean)
       .join("")
       .substring(0, 2)
       .toUpperCase();
@@ -102,12 +103,14 @@ export default function ExploreOffers({
                       <div
                         className={`flex size-11 items-center justify-center rounded-xl bg-gradient-to-br ${logoGradient} text-white font-bold text-sm shadow-sm flex-shrink-0`}
                       >
-                        {getInitials(offer.partnerName)}
+                        {getInitials(offer.partnerName || offer.title)}
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-purple-600 uppercase tracking-wider">
-                          {offer.partnerName}
-                        </h4>
+                        {offer.partnerName && (
+                          <h4 className="text-xs font-bold text-purple-600 uppercase tracking-wider">
+                            {offer.partnerName}
+                          </h4>
+                        )}
                         <h3 className="font-bold text-gray-800 text-base mt-0.5 line-clamp-1">
                           {offer.title}
                         </h3>
@@ -116,59 +119,45 @@ export default function ExploreOffers({
                   </div>
 
                   {/* Tags */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {offer.tags.map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-xs font-semibold text-purple-700"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+                  {/* {offer.tags && offer.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {offer.tags.map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-xs font-semibold text-purple-700"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )} */}
 
                   {/* Requirements Snippet */}
-                  <div className="space-y-1.5">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                      Key Requirements
-                    </p>
-                    <ul className="text-sm text-gray-600 space-y-1">
-                      {offer.requirements.slice(0, 2).map((req, idx) => (
-                        <li key={idx} className="line-clamp-1 flex items-start gap-x-2">
-                          <span className="text-purple-500 font-bold">•</span>
-                          <span>{req}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Card Footer Actions */}
-                <div className="bg-gray-50 px-5 py-4 flex items-center justify-between border-t border-gray-100 flex-shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => onViewDetails(offer)}
-                    className="text-sm font-semibold text-purple-600 hover:text-purple-700 flex items-center gap-x-1.5 focus:outline-none"
-                  >
-                    View Details
-                    <ArrowRight className="size-4" />
-                  </button>
-
-                  {hasApplied ? (
-                    <span className="inline-flex items-center gap-x-1 rounded-lg bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-800">
-                      <Check className="size-3.5" />
-                      Applied
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => onApply(offer.id)}
-                      className="rounded-lg bg-purple-600 px-4 py-2 text-xs font-semibold text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-sm transition"
-                    >
-                      Apply
-                    </button>
+                  {offer.requirements && offer.requirements.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        Key Requirements
+                      </p>
+                      <ul className="text-sm text-gray-600 space-y-1">
+                        {offer.requirements.slice(0, 2).map((req, idx) => (
+                          <li key={idx} className="line-clamp-1 flex items-start gap-x-2">
+                            <span className="text-purple-500 font-bold">•</span>
+                            <span>{req}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
                 </div>
+                <OfferCardFooter
+                  offer={offer}
+                  hasApplied={hasApplied}
+                  canWithdraw={withdrawableIds.includes(offer.id)}
+                  isBusy={busyIds.includes(offer.id)}
+                  onApply={onApply}
+                  onWithdraw={onWithdraw}
+                  onViewDetails={onViewDetails}
+                />
               </div>
             );
           })}
