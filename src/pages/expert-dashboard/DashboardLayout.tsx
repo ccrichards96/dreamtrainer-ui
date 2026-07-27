@@ -113,7 +113,7 @@ export default function DashboardLayout({
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 start-0 z-60 w-60 h-full bg-purple-950 transition-transform duration-300 transform pt-16
+        className={`fixed inset-y-0 start-0 z-[60] w-60 h-full bg-purple-950 transition-transform duration-300 transform pt-16
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0 lg:block lg:z-30`}
         role="dialog"
