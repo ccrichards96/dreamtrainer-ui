@@ -356,6 +356,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                 </label>
                 <div className="border border-gray-300 rounded-lg overflow-hidden">
                   <RichTextEditor
+                    key={editingModule?.id ?? "new"}
                     value={formData.lessonContent}
                     onChange={handleQuillChange}
                     placeholder="Enter the lesson content..."
