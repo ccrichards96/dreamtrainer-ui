@@ -9,6 +9,8 @@ interface ProgressTrackerProps {
   completedModules: Set<number>;
   getProgressPercentage: () => number;
   onModuleClick?: (index: number) => void;
+  isCollapsed: boolean;
+  onCollapsedChange: (isCollapsed: boolean) => void;
 }
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({
@@ -17,8 +19,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   completedModules,
   getProgressPercentage,
   onModuleClick,
+  isCollapsed,
+  onCollapsedChange,
 }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const handleModuleClick = (index: number) => {
@@ -31,6 +34,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   return (
     <>
       {/* ── Desktop sidebar (lg+) ──
+          Pinned flush to the viewport's right edge. The page reserves matching
+          space on its outermost (full-width) wrapper so nothing ever renders
+          underneath it — see the dashboard page's dynamic lg:pr-* padding.
           Wrapped in a plain hidden lg:block so Framer Motion never renders this
           into the mobile DOM — prevents the animated width causing horizontal overflow. */}
       <div className="hidden lg:block">
@@ -61,7 +67,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
             </AnimatePresence>
 
             <motion.button
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={() => onCollapsedChange(!isCollapsed)}
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

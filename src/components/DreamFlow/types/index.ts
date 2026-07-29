@@ -3,4 +3,6 @@ export type { Module } from "../../../types/modules";
 
 export interface DreamFlowProps {
   onComplete?: () => void;
+  testSubmitted: boolean;
+  onTestSubmittedChange: (testSubmitted: boolean) => void;
 }
