@@ -1,39 +1,48 @@
 import { Plus, X } from "lucide-react";
 import { fieldInputClass } from "./FormField";
 
-interface RequirementsListProps {
-  requirements: string[];
-  onChange: (requirements: string[]) => void;
+interface DynamicListFieldProps {
+  values: string[];
+  onChange: (values: string[]) => void;
+  /** Singular noun used for the add/remove aria labels, e.g. "requirement". */
+  itemLabel: string;
+  placeholder?: string;
 }
 
-export default function RequirementsList({ requirements, onChange }: RequirementsListProps) {
+/** A repeatable single-line input: rows can be added and removed one at a time. */
+export default function DynamicListField({
+  values,
+  onChange,
+  itemLabel,
+  placeholder = "-",
+}: DynamicListFieldProps) {
   const updateAt = (index: number, value: string) => {
-    onChange(requirements.map((req, i) => (i === index ? value : req)));
+    onChange(values.map((item, i) => (i === index ? value : item)));
   };
 
-  const addRequirement = () => onChange([...requirements, ""]);
+  const addItem = () => onChange([...values, ""]);
 
   const removeAt = (index: number) => {
-    onChange(requirements.filter((_, i) => i !== index));
+    onChange(values.filter((_, i) => i !== index));
   };
 
   return (
     <div className="flex items-start gap-3">
       <div className="flex-1 space-y-3">
-        {requirements.map((requirement, index) => (
+        {values.map((value, index) => (
           <div key={index} className="group flex items-center gap-2">
             <input
               type="text"
-              value={requirement}
+              value={value}
               onChange={(e) => updateAt(index, e.target.value)}
-              placeholder="-"
+              placeholder={placeholder}
               className={fieldInputClass}
             />
-            {requirements.length > 1 && (
+            {values.length > 1 && (
               <button
                 type="button"
                 onClick={() => removeAt(index)}
-                aria-label={`Remove requirement ${index + 1}`}
+                aria-label={`Remove ${itemLabel} ${index + 1}`}
                 className="text-gray-300 transition hover:text-red-500 group-hover:text-gray-400"
               >
                 <X className="size-4" />
@@ -45,8 +54,8 @@ export default function RequirementsList({ requirements, onChange }: Requirement
 
       <button
         type="button"
-        onClick={addRequirement}
-        aria-label="Add requirement"
+        onClick={addItem}
+        aria-label={`Add ${itemLabel}`}
         className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-gray-900 text-white transition hover:bg-gray-700"
       >
         <Plus className="size-4" />

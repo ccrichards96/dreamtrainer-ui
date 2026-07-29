@@ -5,6 +5,7 @@ import DashboardLayout, { type SidebarItem } from "../expert-dashboard/Dashboard
 import ExploreOffers from "./ExploreOffers";
 import MyOffers from "./MyOffers";
 import OfferDetailModal from "./OfferDetailModal";
+import ApplicationSubmissionModal from "./ApplicationSubmissionModal";
 import { StudentOffer } from "./types";
 import {
   getOffers,
@@ -61,6 +62,10 @@ export default function StudentOffers() {
   const [selectedOffer, setSelectedOffer] = useState<StudentOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Offer being applied to in the submission modal (null = closed). Applying goes
+  // through this modal so the student can attach supporting documents.
+  const [applyingOffer, setApplyingOffer] = useState<StudentOffer | null>(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -91,20 +96,23 @@ export default function StudentOffers() {
     }
   };
 
-  // Offers the user has an active application for (shown as "Applied").
+  // Offers the user has an active application for (shown as "Applied") — anything
+  // that hasn't reached a terminal state.
   const appliedIds = useMemo(
     () =>
       Object.entries(appStatuses)
-        .filter(([, status]) => status === "pending" || status === "approved")
+        .filter(([, status]) => status !== "opportunity_archived" && status !== "declined")
         .map(([id]) => id),
     [appStatuses]
   );
 
-  // Only a pending application can be withdrawn.
+  // An application can only be withdrawn before the partner starts working it.
   const withdrawableIds = useMemo(
     () =>
       Object.entries(appStatuses)
-        .filter(([, status]) => status === "pending")
+        .filter(
+          ([, status]) => status === "new" || status === "reviewing" || status === "in_review"
+        )
         .map(([id]) => id),
     [appStatuses]
   );
@@ -112,24 +120,69 @@ export default function StudentOffers() {
   const setStatus = (id: string, status: OfferApplicationStatus) =>
     setAppStatuses((prev) => ({ ...prev, [id]: status }));
 
-  const handleApply = async (id: string) => {
+  /** The submission modal renders the offer itself, so applying needs the whole record.
+   * Re-applying from My Offers can target an offer that has since left the active
+   * explore list, so fall back to the copy embedded in the user's own application. */
+  const resolveOffer = (id: string): StudentOffer | null => {
+    const listed = offers.find((offer) => offer.id === id);
+    if (listed) return listed;
+
+    const courseOffer = myApplications.find(
+      (application) => application.courseOfferId === id
+    )?.courseOffer;
+    if (!courseOffer) return null;
+
+    return {
+      id: courseOffer.id,
+      title: courseOffer.title,
+      partnerName: courseOffer.partnerName ?? "",
+      description: courseOffer.description,
+      requirements: courseOffer.requirements ?? [],
+      characteristics: courseOffer.characteristics ?? "",
+      expectations: courseOffer.expectations ?? "",
+      outcomes: courseOffer.outcomes ?? "",
+      imageUrl: courseOffer.imageUrl,
+    };
+  };
+
+  // Applying is a two-step flow: open the submission modal, then submit with any
+  // documents the student attached there.
+  const handleApply = (id: string) => {
     if (busyIds.includes(id) || appliedIds.includes(id)) return;
-    setBusyIds((prev) => [...prev, id]);
+    const offer = resolveOffer(id);
+    if (!offer) {
+      toast.error("That offer is no longer available");
+      return;
+    }
+    setApplyingOffer(offer);
+  };
+
+  const handleSubmitApplication = async (files: File[]) => {
+    const offer = applyingOffer;
+    if (!offer || busyIds.includes(offer.id)) return;
+
+    setBusyIds((prev) => [...prev, offer.id]);
     try {
-      const application = await applyToOffer(id);
-      setStatus(id, application.status);
-      toast.success("Applied to offer");
+      const application = await applyToOffer(offer.id, files);
+      setStatus(offer.id, application.status);
+      setApplyingOffer(null);
+      toast.success(
+        files.length > 0
+          ? `Applied to offer with ${files.length} document${files.length === 1 ? "" : "s"}`
+          : "Applied to offer"
+      );
       await refreshApplications();
     } catch (err) {
       const apiError = err as ApiError;
       // "Already applied" is idempotent from the user's perspective — treat as applied (defensive).
       if (apiError.status === 400 && /already applied/i.test(apiError.message)) {
-        setStatus(id, "pending");
+        setStatus(offer.id, "new");
+        setApplyingOffer(null);
       } else {
         toast.error(apiError.message || "Failed to apply to offer");
       }
     } finally {
-      setBusyIds((prev) => prev.filter((busyId) => busyId !== id));
+      setBusyIds((prev) => prev.filter((busyId) => busyId !== offer.id));
     }
   };
 
@@ -242,6 +295,14 @@ export default function StudentOffers() {
         isBusy={selectedBusy}
         onApply={() => selectedOffer && handleApply(selectedOffer.id)}
         onWithdraw={() => selectedOffer && handleWithdraw(selectedOffer.id)}
+      />
+
+      <ApplicationSubmissionModal
+        isOpen={applyingOffer !== null}
+        onClose={() => setApplyingOffer(null)}
+        offer={applyingOffer}
+        isSubmitting={applyingOffer ? busyIds.includes(applyingOffer.id) : false}
+        onSubmit={handleSubmitApplication}
       />
     </DashboardLayout>
   );

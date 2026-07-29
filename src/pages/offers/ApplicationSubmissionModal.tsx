@@ -1,12 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "../../components/modals/Modal";
-import type { CourseOffer } from "../../types/offers";
+import type { StudentOffer } from "./types";
+import { toast } from "../../components/toast";
 import { Check, FileText, Loader2, Paperclip, Upload, X } from "lucide-react";
+
+// Mirrors the limits enforced by the attachments upload middleware on the API.
+const MAX_FILES = 10;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 interface ApplicationSubmissionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  offer: CourseOffer | null;
+  offer: StudentOffer | null;
   isSubmitting: boolean;
   onSubmit: (files: File[]) => void;
 }
@@ -25,13 +30,35 @@ export default function ApplicationSubmissionModal({
 }: ApplicationSubmissionModalProps) {
   const [files, setFiles] = useState<File[]>([]);
 
+  // The modal stays mounted between openings, so clear the previous selection
+  // rather than carrying one offer's documents over to the next.
+  useEffect(() => {
+    if (!isOpen) setFiles([]);
+  }, [isOpen]);
+
   if (!offer) return null;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files;
-    if (!selected || selected.length === 0) return;
-    setFiles((prev) => [...prev, ...Array.from(selected)]);
     e.target.value = "";
+    if (!selected || selected.length === 0) return;
+
+    const picked = Array.from(selected);
+    const oversized = picked.filter((file) => file.size > MAX_FILE_SIZE);
+    if (oversized.length > 0) {
+      toast.error("File too large", {
+        description: `${oversized[0].name} is over the ${MAX_FILE_SIZE / 1024 / 1024}MB limit.`,
+      });
+    }
+
+    const accepted = picked.filter((file) => file.size <= MAX_FILE_SIZE);
+    setFiles((prev) => {
+      const room = MAX_FILES - prev.length;
+      if (accepted.length > room) {
+        toast.error(`You can attach at most ${MAX_FILES} documents`);
+      }
+      return [...prev, ...accepted.slice(0, Math.max(0, room))];
+    });
   };
 
   const handleRemoveFile = (index: number) => {

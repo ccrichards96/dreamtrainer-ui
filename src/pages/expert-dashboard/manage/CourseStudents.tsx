@@ -1,18 +1,32 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
-import { listCourseStudents } from "../../../services/api/enrollment";
-import type { CourseStudent } from "../../../types/enrollment";
+import { listCourseStudents, updateCourseStudentStatus } from "../../../services/api/enrollment";
+import type { CourseStudent, CourseStudentStatus } from "../../../types/enrollment";
+import { useExpertDashboardContext } from "../../../contexts";
+import { toast } from "../../../components/toast";
 import ManagePageHeader from "./ManagePageHeader";
+import StudentStatusDropdown from "./StudentStatusDropdown";
+import StudentStatusConfirmModal from "./StudentStatusConfirmModal";
+
+/** A status change awaiting confirmation in the modal. */
+interface PendingStatusChange {
+  student: CourseStudent;
+  status: CourseStudentStatus;
+}
 
 export default function CourseStudents() {
   const { id: courseId } = useParams<{ id: string }>();
+  const { course } = useExpertDashboardContext();
 
   const [students, setStudents] = useState<CourseStudent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
+
+  const [pendingChange, setPendingChange] = useState<PendingStatusChange | null>(null);
+  const [isSubmittingStatus, setIsSubmittingStatus] = useState(false);
 
   const fetchStudents = useCallback(async () => {
     if (!courseId) return;
@@ -32,6 +46,37 @@ export default function CourseStudents() {
   useEffect(() => {
     fetchStudents();
   }, [fetchStudents]);
+
+  const getStudentName = (student: CourseStudent) =>
+    `${student.user.firstName ?? ""} ${student.user.lastName ?? ""}`.trim() || student.user.email;
+
+  const handleConfirmStatus = async () => {
+    if (!courseId || !pendingChange) return;
+
+    const { student, status } = pendingChange;
+    setIsSubmittingStatus(true);
+    try {
+      const updated = await updateCourseStudentStatus(courseId, student.id, status);
+      setStudents((prev) =>
+        prev.map((row) =>
+          row.id === student.id
+            ? { ...row, status: updated.status, passedAt: updated.passedAt }
+            : row
+        )
+      );
+      toast.success(
+        status === "passed"
+          ? `${getStudentName(student)} marked as passed`
+          : `${getStudentName(student)} marked as not passed`,
+        status === "passed" ? { description: "They've been emailed the good news." } : undefined
+      );
+      setPendingChange(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update student status");
+    } finally {
+      setIsSubmittingStatus(false);
+    }
+  };
 
   const getInitials = (student: CourseStudent) => {
     const first = student.user.firstName?.[0] ?? "";
@@ -86,6 +131,9 @@ export default function CourseStudents() {
                     <th scope="col" className="px-6 py-3 text-start">
                       <span className="text-xs font-semibold uppercase text-gray-800">Joined</span>
                     </th>
+                    <th scope="col" className="px-6 py-3 text-start">
+                      <span className="text-xs font-semibold uppercase text-gray-800">Status</span>
+                    </th>
                   </tr>
                 </thead>
 
@@ -124,6 +172,16 @@ export default function CourseStudents() {
                           <span className="text-sm text-gray-500">
                             {formatDate(student.dateJoined)}
                           </span>
+                        </div>
+                      </td>
+                      <td className="size-px whitespace-nowrap">
+                        <div className="px-6 py-3">
+                          <StudentStatusDropdown
+                            status={student.status}
+                            studentName={getStudentName(student)}
+                            isBusy={isSubmittingStatus && pendingChange?.student.id === student.id}
+                            onSelect={(status) => setPendingChange({ student, status })}
+                          />
                         </div>
                       </td>
                     </tr>
@@ -165,6 +223,16 @@ export default function CourseStudents() {
           </>
         )}
       </div>
+
+      <StudentStatusConfirmModal
+        isOpen={pendingChange !== null}
+        status={pendingChange?.status ?? null}
+        studentName={pendingChange ? getStudentName(pendingChange.student) : ""}
+        courseName={course?.name}
+        isSubmitting={isSubmittingStatus}
+        onConfirm={handleConfirmStatus}
+        onCancel={() => setPendingChange(null)}
+      />
     </div>
   );
 }

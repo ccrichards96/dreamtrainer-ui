@@ -14,15 +14,31 @@ import { usePartnerDashboardContext } from "../../../contexts/usePartnerDashboar
 import { ApiError } from "../../../services/api/client";
 import { toast } from "../../../components/toast";
 
+/** Comma-separated API value -> editable list rows (always at least one blank row). */
+const toListField = (value?: string): string[] => {
+  const items = (value ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item !== "");
+  return items.length > 0 ? items : [""];
+};
+
+/** Editable list rows -> the comma-separated string the API stores. */
+const fromListField = (values: string[]): string =>
+  values
+    .map((value) => value.trim())
+    .filter((value) => value !== "")
+    .join(", ");
+
 const toFormData = (offer: CourseOffer): OfferFormData => ({
   name: offer.title,
   description: offer.description ?? "",
   imageUrl: offer.imageUrl ?? "",
   requirements:
     offer.requirements && offer.requirements.length > 0 ? offer.requirements : ["", "", ""],
-  characteristics: offer.characteristics ?? "",
-  expectations: offer.expectations ?? "",
-  outcomes: offer.outcomes ?? "",
+  characteristics: toListField(offer.characteristics),
+  expectations: toListField(offer.expectations),
+  outcomes: toListField(offer.outcomes),
 });
 
 /** Empty form used when creating a new offer or as a fallback. */
@@ -31,9 +47,9 @@ export const emptyOfferForm: OfferFormData = {
   description: "",
   imageUrl: "",
   requirements: ["", "", ""],
-  characteristics: "",
-  expectations: "",
-  outcomes: "",
+  characteristics: [""],
+  expectations: [""],
+  outcomes: [""],
 };
 
 export default function OfferDetail() {
@@ -91,9 +107,9 @@ export default function OfferDetail() {
       description: form.description,
       imageUrl: form.imageUrl.trim() || null,
       requirements: form.requirements.filter((req) => req.trim() !== ""),
-      characteristics: form.characteristics,
-      expectations: form.expectations,
-      outcomes: form.outcomes,
+      characteristics: fromListField(form.characteristics),
+      expectations: fromListField(form.expectations),
+      outcomes: fromListField(form.outcomes),
     };
 
     try {
@@ -235,7 +251,7 @@ export default function OfferDetail() {
 
       <div className="mt-6 rounded-3xl bg-white p-8 shadow-sm lg:p-10">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
-          <OfferDetailsSection form={form} onChange={updateForm} />
+          <OfferDetailsSection form={form} onChange={updateForm} courseId={courseId} />
           <IdealCandidatesSection form={form} onChange={updateForm} />
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { OfferFormData } from "../types";
-import FormField, { fieldInputClass } from "./FormField";
+import FormField from "./FormField";
+import DynamicListField from "./DynamicListField";
 
 interface IdealCandidatesSectionProps {
   form: OfferFormData;
@@ -14,36 +15,29 @@ export default function IdealCandidatesSection({ form, onChange }: IdealCandidat
       </h2>
 
       <div className="mt-6 space-y-5">
-        <FormField label="Characteristics (Desired Traits)" htmlFor="offer-characteristics">
-          <input
-            id="offer-characteristics"
-            type="text"
-            value={form.characteristics}
-            onChange={(e) => onChange({ characteristics: e.target.value })}
-            placeholder="-"
-            className={fieldInputClass}
+        <FormField label="Characteristics (Desired Traits)">
+          <DynamicListField
+            values={form.characteristics}
+            onChange={(characteristics) => onChange({ characteristics })}
+            itemLabel="characteristic"
           />
         </FormField>
 
-        <FormField label="Expectations (Desired Behaviors)" htmlFor="offer-expectations">
-          <input
-            id="offer-expectations"
-            type="text"
-            value={form.expectations}
-            onChange={(e) => onChange({ expectations: e.target.value })}
+        <FormField label="Expectations (Desired Behaviors)">
+          <DynamicListField
+            values={form.expectations}
+            onChange={(expectations) => onChange({ expectations })}
+            itemLabel="expectation"
             placeholder="Attend at least 90% of classes"
-            className={fieldInputClass}
           />
         </FormField>
 
-        <FormField label="Desired Offer Outcomes" htmlFor="offer-outcomes">
-          <input
-            id="offer-outcomes"
-            type="text"
-            value={form.outcomes}
-            onChange={(e) => onChange({ outcomes: e.target.value })}
+        <FormField label="Desired Offer Outcomes">
+          <DynamicListField
+            values={form.outcomes}
+            onChange={(outcomes) => onChange({ outcomes })}
+            itemLabel="outcome"
             placeholder="Graduate from Tufts"
-            className={fieldInputClass}
           />
         </FormField>
       </div>

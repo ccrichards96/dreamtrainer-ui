@@ -59,8 +59,8 @@ export default function MyOffers({
             const badge = applicationStatusConfig[status];
             const logoGradient = gradientStyles[index % gradientStyles.length];
             const isBusy = busyIds.includes(offer.id);
-            const canReapply = status === "withdrawn" || status === "rejected";
-            const isInactive = canReapply; // greyed-out treatment for withdrawn/rejected
+            const canReapply = status === "opportunity_archived" || status === "declined";
+            const isInactive = canReapply; // greyed-out treatment for archived/declined
 
             return (
               <div
@@ -128,7 +128,7 @@ export default function MyOffers({
                     <ArrowRight className="size-4" />
                   </button>
 
-                  {status === "pending" && (
+                  {(status === "new" || status === "reviewing" || status === "in_review") && (
                     <button
                       type="button"
                       onClick={() => onWithdraw(offer.id)}

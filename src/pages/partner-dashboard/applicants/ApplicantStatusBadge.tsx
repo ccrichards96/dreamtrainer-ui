@@ -1,8 +1,8 @@
-import { ApplicantStatus } from "./types";
+import type { OfferApplicationStatus } from "../../../types/offers";
 import { statusConfig } from "./statusConfig";
 
 interface ApplicantStatusBadgeProps {
-  status: ApplicantStatus;
+  status: OfferApplicationStatus;
 }
 
 export default function ApplicantStatusBadge({ status }: ApplicantStatusBadgeProps) {

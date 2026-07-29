@@ -13,7 +13,8 @@ export interface OfferFormData {
   description: string;
   imageUrl: string;
   requirements: string[];
-  characteristics: string;
-  expectations: string;
-  outcomes: string;
+  /** Stored on the API as a single comma-separated string; edited as a list. */
+  characteristics: string[];
+  expectations: string[];
+  outcomes: string[];
 }

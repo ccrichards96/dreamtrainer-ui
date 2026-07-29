@@ -1,13 +1,20 @@
 import { OfferFormData } from "../types";
 import FormField, { fieldInputClass } from "./FormField";
-import RequirementsList from "./RequirementsList";
+import OfferImageField from "./OfferImageField";
+import DynamicListField from "./DynamicListField";
 
 interface OfferDetailsSectionProps {
   form: OfferFormData;
   onChange: (patch: Partial<OfferFormData>) => void;
+  /** Course the offer belongs to — needed to upload the cover image. */
+  courseId: string | null;
 }
 
-export default function OfferDetailsSection({ form, onChange }: OfferDetailsSectionProps) {
+export default function OfferDetailsSection({
+  form,
+  onChange,
+  courseId,
+}: OfferDetailsSectionProps) {
   return (
     <div>
       <h2 className="text-xl font-semibold text-gray-800 underline underline-offset-4">
@@ -37,21 +44,19 @@ export default function OfferDetailsSection({ form, onChange }: OfferDetailsSect
           />
         </FormField>
 
-        <FormField label="Offer Image URL" htmlFor="offer-image-url">
-          <input
-            id="offer-image-url"
-            type="url"
+        <FormField label="Offer Image">
+          <OfferImageField
             value={form.imageUrl}
-            onChange={(e) => onChange({ imageUrl: e.target.value })}
-            placeholder="https://example.com/image.jpg"
-            className={fieldInputClass}
+            onChange={(imageUrl) => onChange({ imageUrl })}
+            courseId={courseId}
           />
         </FormField>
 
         <FormField label="Requirements">
-          <RequirementsList
-            requirements={form.requirements}
+          <DynamicListField
+            values={form.requirements}
             onChange={(requirements) => onChange({ requirements })}
+            itemLabel="requirement"
           />
         </FormField>
       </div>

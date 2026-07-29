@@ -5,17 +5,14 @@ import ApplicantFilters from "../applicants/ApplicantFilters";
 import ApplicantsTable from "../applicants/ApplicantsTable";
 import ViewApplicationModal from "../applicants/ViewApplicationModal";
 import ViewProfileModal from "../applicants/ViewProfileModal";
-import {
-  Applicant,
-  ApplicantAction,
-  ApplicantFilterValues,
-  ApplicantStatus,
-} from "../applicants/types";
-import { getCourseApplicants } from "../../../services/api/offers";
+import { Applicant, ApplicantAction, ApplicantFilterValues } from "../applicants/types";
+import { statusConfig } from "../applicants/statusConfig";
+import { getCourseApplicants, updateApplicantStatus } from "../../../services/api/offers";
 import { listCohortsByCourse, listCohortMembers } from "../../../services/api/cohorts";
 import { CourseApplicant, OfferApplicationStatus } from "../../../types/offers";
 import { Cohort } from "../../../types/cohorts";
 import { ApiError } from "../../../services/api/client";
+import { toast } from "../../../components/toast";
 import { usePartnerDashboardContext } from "../../../contexts/usePartnerDashboardContext";
 
 const PAGE_SIZE = 7;
@@ -26,19 +23,13 @@ const emptyFilters: ApplicantFilterValues = {
   status: "all",
 };
 
-/** Map the real application status onto the existing display enum. The review queue only ever
- * returns "pending" today, but we translate the others for forward-compatibility. */
-const statusFromApplication = (status: OfferApplicationStatus): ApplicantStatus => {
-  switch (status) {
-    case "approved":
-      return ApplicantStatus.OfferAccepted;
-    case "rejected":
-    case "withdrawn":
-      return ApplicantStatus.Declined;
-    case "pending":
-    default:
-      return ApplicantStatus.New;
-  }
+/** The status each partner-driven action moves an applicant to. */
+const actionStatus: Partial<Record<ApplicantAction, OfferApplicationStatus>> = {
+  request_meeting: "meeting_requested",
+  schedule_meeting: "meeting_scheduled",
+  complete_meeting: "meeting_completed",
+  submit_offer: "offer_made",
+  move_to_not_selected: "declined",
 };
 
 /** Adapt a course applicant from the API into the shape the applicants table renders.
@@ -48,13 +39,19 @@ const toApplicant = (record: CourseApplicant, cohortId: string | null): Applican
   const name = `${record.user.firstName ?? ""} ${record.user.lastName ?? ""}`.trim();
   return {
     id: record.id,
+    userId: record.userId,
     appliedAt: record.appliedAt,
     name: name || record.user.email,
+    email: record.user.email,
     avatarUrl: record.user.avatarUrl ?? undefined,
     // The student User has no bio field; surface their email + the offer they applied to instead.
     bio: [record.user.email, record.courseOffer?.title].filter(Boolean).join(" · "),
-    status: statusFromApplication(record.status),
+    status: record.status,
     cohortId,
+    offer: record.courseOffer,
+    reviewedAt: record.reviewedAt,
+    meetingAt: record.meetingAt,
+    updatedAt: record.updatedAt,
   };
 };
 
@@ -163,33 +160,65 @@ export default function Applicants() {
     );
   };
 
-  const handleAction = (action: ApplicantAction, applicant: Applicant) => {
-    switch (action) {
-      case "schedule_meeting":
-        setApplicants((prev) =>
-          prev.map((a) =>
-            a.id === applicant.id ? { ...a, status: ApplicantStatus.MeetingScheduled } : a
-          )
-        );
-        break;
-      case "submit_offer":
-        setApplicants((prev) =>
-          prev.map((a) =>
-            a.id === applicant.id ? { ...a, status: ApplicantStatus.PendingOfferResponse } : a
-          )
-        );
-        break;
-      case "move_to_not_selected":
-        setApplicants((prev) =>
-          prev.map((a) => (a.id === applicant.id ? { ...a, status: ApplicantStatus.Declined } : a))
-        );
-        break;
-      case "view_application":
-        setViewingApplication(applicant);
-        break;
-      case "view_profile":
-        setViewingProfile(applicant);
-        break;
+  const handleAction = async (action: ApplicantAction, applicant: Applicant) => {
+    if (action === "view_application") {
+      setViewingApplication(applicant);
+      return;
+    }
+    if (action === "view_profile") {
+      setViewingProfile(applicant);
+      return;
+    }
+
+    const nextStatus = actionStatus[action];
+    if (!nextStatus || !activeCourseId) return;
+
+    // Scheduling needs a time — the backend rejects the transition without one.
+    let meetingAt: string | undefined;
+    if (nextStatus === "meeting_scheduled") {
+      const entered = window.prompt(
+        "Meeting date and time (e.g. 2026-08-14 15:30)",
+        applicant.meetingAt ? new Date(applicant.meetingAt).toISOString().slice(0, 16) : ""
+      );
+      if (!entered) return;
+      const parsed = new Date(entered);
+      if (Number.isNaN(parsed.getTime())) {
+        toast.error("Couldn't read that date", {
+          description: "Try a format like 2026-08-14 15:30.",
+        });
+        return;
+      }
+      meetingAt = parsed.toISOString();
+    }
+
+    const previous = applicant.status;
+    // Optimistic — reverted below if the request fails.
+    setApplicants((prev) =>
+      prev.map((a) =>
+        a.id === applicant.id
+          ? { ...a, status: nextStatus, meetingAt: meetingAt ?? a.meetingAt }
+          : a
+      )
+    );
+
+    try {
+      const updated = await updateApplicantStatus(
+        activeCourseId,
+        applicant.id,
+        nextStatus,
+        meetingAt
+      );
+      setApplicants((prev) =>
+        prev.map((a) =>
+          a.id === applicant.id ? { ...a, status: updated.status, meetingAt: updated.meetingAt } : a
+        )
+      );
+      toast.success(`Moved to ${statusConfig[nextStatus].label}`);
+    } catch (err) {
+      setApplicants((prev) =>
+        prev.map((a) => (a.id === applicant.id ? { ...a, status: previous } : a))
+      );
+      toast.error((err as ApiError).message || "Failed to update applicant status");
     }
   };
 
@@ -240,10 +269,15 @@ export default function Applicants() {
 
       <ViewApplicationModal
         applicant={viewingApplication}
+        courseId={activeCourseId}
         onClose={() => setViewingApplication(null)}
       />
 
-      <ViewProfileModal applicant={viewingProfile} onClose={() => setViewingProfile(null)} />
+      <ViewProfileModal
+        applicant={viewingProfile}
+        cohorts={cohorts}
+        onClose={() => setViewingProfile(null)}
+      />
     </div>
   );
 }

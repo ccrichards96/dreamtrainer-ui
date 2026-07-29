@@ -2,6 +2,7 @@ import apiClient, { APIResponse } from "./client";
 import type {
   CourseEnrollment,
   CourseStudent,
+  CourseStudentStatus,
   ListCourseStudentsParams,
   PaginatedCourseStudentsResponse,
 } from "../../types/enrollment";
@@ -98,12 +99,35 @@ export const listCourseStudentLeaders = async (
   }
 };
 
+/**
+ * Set a course student's pass state.
+ * PATCH /courses/:courseId/students/:studentId/status
+ *
+ * Marking a student as passed triggers the course-passed email on the backend.
+ */
+export const updateCourseStudentStatus = async (
+  courseId: string,
+  studentId: string,
+  status: CourseStudentStatus
+): Promise<CourseStudent> => {
+  try {
+    const response = await apiClient.patch<APIResponse<CourseStudent>>(
+      `/courses/${courseId}/students/${studentId}/status`,
+      { status }
+    );
+    return response.data.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to update student status");
+  }
+};
+
 const enrollmentService = {
   getUserEnrollments,
   isEnrolledInCourse,
   enrollInCourse,
   listCourseStudents,
   listCourseStudentLeaders,
+  updateCourseStudentStatus,
 };
 
 export default enrollmentService;

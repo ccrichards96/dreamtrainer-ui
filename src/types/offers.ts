@@ -1,7 +1,20 @@
+import type { Attachment } from "./attachments";
+
 export type CourseOfferStatus = "draft" | "active" | "archived";
 
-/** A student's application lifecycle for a given offer. */
-export type OfferApplicationStatus = "pending" | "approved" | "rejected" | "withdrawn";
+/**
+ * A student's application lifecycle for a given offer.
+ */
+export type OfferApplicationStatus =
+  | "new" // opportunity available, not yet reviewed by the applicant
+  | "reviewing" // applicant is looking at the opportunity
+  | "in_review" // partner is looking at the submitted application
+  | "meeting_requested" // partner requested a meeting
+  | "meeting_scheduled" // applicant accepted and picked a time
+  | "meeting_completed" // the meeting date has passed
+  | "offer_made" // partner has made a formal offer
+  | "opportunity_archived" // applicant is not interested
+  | "declined"; // applicant has been rejected by the partner
 
 export interface CourseOffer {
   id: string;
@@ -42,6 +55,13 @@ export interface OfferApplication {
   status: OfferApplicationStatus;
   appliedAt: string;
   reviewedAt: string | null;
+  /** When the meeting is/was scheduled for, if one has been booked. */
+  meetingAt: string | null;
+  /**
+   * Supporting documents submitted with the application. Only returned by the
+   * apply endpoint; elsewhere fetch them on demand (see `getApplicantDocuments`).
+   */
+  documents?: Attachment[];
   createdAt: string;
   updatedAt: string;
 }

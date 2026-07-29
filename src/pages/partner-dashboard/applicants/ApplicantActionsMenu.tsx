@@ -3,7 +3,9 @@ import {
   MoreVertical,
   User,
   FileText,
+  CalendarClock,
   CalendarPlus,
+  CalendarCheck,
   Send,
   XCircle,
   LucideIcon,
@@ -32,7 +34,9 @@ export default function ApplicantActionsMenu({ applicant, onAction }: ApplicantA
   const items: MenuItem[] = [
     { action: "view_profile", label: "View Profile", icon: User },
     { action: "view_application", label: "View Application", icon: FileText },
+    { action: "request_meeting", label: "Request Meeting", icon: CalendarClock },
     { action: "schedule_meeting", label: "Schedule Meeting", icon: CalendarPlus },
+    { action: "complete_meeting", label: "Mark Meeting Completed", icon: CalendarCheck },
     { action: "submit_offer", label: `Submit Offer to ${firstName}`, icon: Send },
     {
       action: "move_to_not_selected",

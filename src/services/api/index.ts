@@ -38,7 +38,7 @@ export type { AssessmentSubmission, AssessmentResponse } from "./assessment";
 export type { UserBillingInfo, CheckoutSessionRequest } from "./billing";
 export type { CourseProgress, UpdateProgressDTO } from "../../types/course-progress";
 export type {
-  Offer,
+  CourseOffer,
   OfferApplication,
   MyOfferApplication,
   OfferApplicationStatus,
