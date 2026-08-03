@@ -356,6 +356,7 @@ const AnnouncementManager: React.FC = () => {
                 </label>
                 <div className="border border-gray-300 rounded-lg overflow-hidden">
                   <RichTextEditor
+                    key={editingAnnouncement?.id ?? "new"}
                     value={formData.message}
                     onChange={handleQuillChange}
                     placeholder="Enter the announcement message that will be displayed to users..."
