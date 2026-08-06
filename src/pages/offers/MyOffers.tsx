@@ -1,7 +1,8 @@
 import React from "react";
 import { applicationStatusConfig } from "./statusConfig";
+import { toStudentOffer, StudentOffer } from "./types";
 import { Briefcase, Compass, ArrowRight, Loader2 } from "lucide-react";
-import type { MyOfferApplication, OfferApplicationStatus, CourseOffer } from "../../types/offers";
+import type { MyOfferApplication, OfferApplicationStatus } from "../../types/offers";
 
 interface MyOffersProps {
   applications: MyOfferApplication[];
@@ -9,7 +10,7 @@ interface MyOffersProps {
   busyIds: string[];
   onApply: (id: string) => void;
   onWithdraw: (id: string) => void;
-  onViewDetails: (offer: CourseOffer) => void;
+  onViewDetails: (offer: StudentOffer) => void;
   onExploreRedirect: () => void;
 }
 
@@ -56,7 +57,10 @@ export default function MyOffers({
           {applications.map((application, index) => {
             const offer = application.courseOffer;
             const status = statuses[application.courseOfferId] ?? application.status;
-            const badge = applicationStatusConfig[status];
+            const badge = applicationStatusConfig[status] ?? {
+              label: status ?? "Unknown",
+              className: "bg-gray-100 text-gray-600 border-gray-200",
+            };
             const logoGradient = gradientStyles[index % gradientStyles.length];
             const isBusy = busyIds.includes(offer.id);
             const canReapply = status === "opportunity_archived" || status === "declined";
@@ -121,7 +125,7 @@ export default function MyOffers({
                 <div className="bg-gray-50 px-5 py-4 flex items-center justify-between border-t border-gray-100 flex-shrink-0">
                   <button
                     type="button"
-                    onClick={() => onViewDetails(offer)}
+                    onClick={() => onViewDetails(toStudentOffer(offer))}
                     className="text-sm font-semibold text-purple-600 hover:text-purple-700 flex items-center gap-x-1.5 focus:outline-none"
                   >
                     View Details

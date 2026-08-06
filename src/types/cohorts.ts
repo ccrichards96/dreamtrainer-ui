@@ -14,6 +14,7 @@ export interface Cohort {
   course?: Course;
   user?: User;
   members?: CohortMember[];
+  numberOfMembers?: number;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;

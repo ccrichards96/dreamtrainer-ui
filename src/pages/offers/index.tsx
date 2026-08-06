@@ -6,7 +6,7 @@ import ExploreOffers from "./ExploreOffers";
 import MyOffers from "./MyOffers";
 import OfferDetailModal from "./OfferDetailModal";
 import ApplicationSubmissionModal from "./ApplicationSubmissionModal";
-import { StudentOffer } from "./types";
+import { StudentOffer, toStudentOffer } from "./types";
 import {
   getOffers,
   getMyApplications,
@@ -72,7 +72,7 @@ export default function StudentOffers() {
         setLoading(true);
         setError(null);
         const [offersData, applications] = await Promise.all([getOffers(), getMyApplications()]);
-        setOffers(offersData);
+        setOffers(offersData.map(toStudentOffer));
         setMyApplications(applications);
         setAppStatuses(seedStatuses(applications));
       } catch (err) {
@@ -132,17 +132,7 @@ export default function StudentOffers() {
     )?.courseOffer;
     if (!courseOffer) return null;
 
-    return {
-      id: courseOffer.id,
-      title: courseOffer.title,
-      partnerName: courseOffer.partnerName ?? "",
-      description: courseOffer.description,
-      requirements: courseOffer.requirements ?? [],
-      characteristics: courseOffer.characteristics ?? "",
-      expectations: courseOffer.expectations ?? "",
-      outcomes: courseOffer.outcomes ?? "",
-      imageUrl: courseOffer.imageUrl,
-    };
+    return toStudentOffer(courseOffer);
   };
 
   // Applying is a two-step flow: open the submission modal, then submit with any
@@ -164,7 +154,12 @@ export default function StudentOffers() {
     setBusyIds((prev) => [...prev, offer.id]);
     try {
       const application = await applyToOffer(offer.id, files);
-      setStatus(offer.id, application.status);
+      // Guard against a missing/partial response body — a 2xx means the apply
+      // succeeded server-side even if this particular field is absent, and
+      // refreshApplications() below reconciles the authoritative status anyway.
+      if (application?.status) {
+        setStatus(offer.id, application.status);
+      }
       setApplyingOffer(null);
       toast.success(
         files.length > 0
@@ -191,7 +186,9 @@ export default function StudentOffers() {
     setBusyIds((prev) => [...prev, id]);
     try {
       const application = await withdrawApplication(id);
-      setStatus(id, application.status);
+      if (application?.status) {
+        setStatus(id, application.status);
+      }
       toast.success("Application withdrawn");
       await refreshApplications();
     } catch (err) {

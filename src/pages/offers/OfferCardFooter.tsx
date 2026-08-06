@@ -5,7 +5,7 @@ interface OfferCardFooterProps {
   offer: StudentOffer;
   hasApplied: boolean;
   canWithdraw: boolean;
-  isLoading: boolean;
+  isBusy: boolean;
   onApply: (id: string) => void;
   onWithdraw: (id: string) => void;
   onViewDetails: (offer: StudentOffer) => void;
@@ -16,7 +16,7 @@ export default function OfferCardFooter({
   offer,
   hasApplied,
   canWithdraw,
-  isLoading,
+  isBusy,
   onApply,
   onWithdraw,
   onViewDetails,
@@ -42,7 +42,7 @@ export default function OfferCardFooter({
             <button
               type="button"
               onClick={() => onWithdraw(offer.id)}
-              disabled={isLoading}
+              disabled={isBusy}
               className="text-xs font-semibold text-gray-500 hover:text-red-600 focus:outline-none disabled:opacity-50"
             >
               Withdraw
@@ -53,10 +53,10 @@ export default function OfferCardFooter({
         <button
           type="button"
           onClick={() => onApply(offer.id)}
-          disabled={isLoading}
+          disabled={isBusy}
           className="inline-flex items-center gap-x-1.5 rounded-lg bg-purple-600 px-4 py-2 text-xs font-semibold text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-sm transition disabled:opacity-50"
         >
-          {isLoading && <Loader2 className="size-3.5 animate-spin" />}
+          {isBusy && <Loader2 className="size-3.5 animate-spin" />}
           Apply
         </button>
       )}

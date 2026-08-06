@@ -25,6 +25,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Routes that don't require onboarding completion
   const onboardingExemptRoutes = [
     "/expert-onboarding",
+    "/partner/setup",
     "/onboarding",
     "/checkout/success",
     "/teach",

@@ -121,8 +121,8 @@ export default function TeamSetup({ data, updateData, onNext, onBack, currentSte
         </div>
 
         <p className="text-sm text-gray-900 max-w-xs">
-          We will send email invites once you complete all onboarding - or skip this step; you can
-          always add teammates later.
+          Teammate invites aren&apos;t sent automatically yet — we&apos;ll follow up with next
+          steps. Feel free to skip this step for now.
         </p>
       </div>
 

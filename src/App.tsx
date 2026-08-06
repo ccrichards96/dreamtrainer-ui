@@ -14,6 +14,7 @@ import ExpertDashboard from "./pages/expert-dashboard";
 import CourseManage from "./pages/expert-dashboard/CourseManage";
 import PartnerDashboard from "./pages/partner-dashboard";
 import OfferDetail from "./pages/partner-dashboard/offers/OfferDetail";
+import PartnerOnboarding from "./pages/partner-onboarding";
 import StudentOffers from "./pages/offers";
 import { CourseProfilePage, CourseCheckout } from "./pages/courses";
 import ExpertProfilePage from "./pages/experts";
@@ -150,6 +151,14 @@ function App() {
                       </Route>
 
                       <Route path="/partner">
+                        <Route
+                          path="/partner/setup"
+                          element={
+                            <ProtectedRoute>
+                              <PartnerOnboarding />
+                            </ProtectedRoute>
+                          }
+                        />
                         <Route
                           path="/partner/dashboard/offers/new"
                           element={

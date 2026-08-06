@@ -3,7 +3,7 @@ import { CheckCircle } from "lucide-react";
 import WizardHeader from "./WizardHeader";
 import { OnboardingPartnerData } from "./types";
 import { updateCurrentUser, uploadAvatar } from "../../services/api/users";
-import { updateMyPartnerProfile, uploadPartnerLogo, inviteTeamMembers } from "../../services/api/partners";
+import { updateMyPartnerProfile, uploadPartnerLogo } from "../../services/api/partners";
 
 interface FinalizeSetupProps {
   data: OnboardingPartnerData;
@@ -25,6 +25,13 @@ export default function FinalizeSetup({ data, onBack, onComplete, currentStep }:
         await uploadAvatar(data.profileImage);
       }
 
+      // Upload the logo first (if a new one was chosen) so its URL can be
+      // included in the same profile update — the upload endpoint itself
+      // doesn't persist it.
+      const logoUrl = data.logoImage
+        ? await uploadPartnerLogo(data.logoImage)
+        : data.logoUrl ?? undefined;
+
       await updateMyPartnerProfile({
         orgName: data.orgName?.trim(),
         description: data.orgBio?.trim() || undefined,
@@ -32,15 +39,8 @@ export default function FinalizeSetup({ data, onBack, onComplete, currentStep }:
         title: data.title?.trim() || undefined,
         calendarLink: data.calendarLink?.trim() || undefined,
         bio: data.bio?.trim() || undefined,
+        logoUrl,
       });
-
-      if (data.logoImage) {
-        await uploadPartnerLogo(data.logoImage);
-      }
-
-      if (data.teamInvites.length > 0) {
-        await inviteTeamMembers(data.teamInvites);
-      }
 
       await updateCurrentUser({
         firstName: data.firstName,

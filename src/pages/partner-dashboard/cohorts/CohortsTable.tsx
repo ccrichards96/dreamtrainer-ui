@@ -11,7 +11,7 @@ interface CohortsTableProps {
   onDelete: (cohort: Cohort) => void;
 }
 
-const columns = ["Created At", "Name", "# of Applicants", "Status", "Actions"];
+const columns = ["Created At", "Name", "# of Members", "Status", "Actions"];
 
 export default function CohortsTable({
   cohorts,

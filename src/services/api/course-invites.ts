@@ -1,18 +1,27 @@
 import apiClient, { APIResponse } from "./client";
 import axios from "axios";
+import { PartnerCourseRole } from "../../types/partner";
 
 export interface CourseInvite {
   id: string;
   courseId: string;
   email: string;
-  role: "support_expert" | "stakeholder";
+  role: "support_expert" | "stakeholder" | "partner";
   token: string;
   status: "pending" | "accepted" | "expired";
   stakeholderRole: "viewer" | "reviewer" | "collaborator" | null;
+  partnerRole: PartnerCourseRole | null;
   invitedById: string;
   expiresAt: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AcceptPartnerInviteResponse {
+  id: string;
+  partnerProfileId: string;
+  courseId: string;
+  role: PartnerCourseRole;
 }
 
 export interface AcceptSupportExpertResponse {
@@ -211,6 +220,83 @@ export const inviteStakeholders = async (
   }
 };
 
+/**
+ * Invite partners to a course by email
+ * POST /courses/:courseId/invite/partners
+ */
+export const invitePartners = async (
+  courseId: string,
+  emails: string[],
+  partnerRole: PartnerCourseRole = "partner"
+): Promise<CourseInvite[]> => {
+  try {
+    const response = await apiClient.post<APIResponse<CourseInvite[]>>(
+      `/courses/${courseId}/invite/partners`,
+      { emails, partnerRole }
+    );
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to send partner invitations: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while sending invitations");
+  }
+};
+
+/**
+ * Get all partner invites for a course
+ * GET /courses/:courseId/invites/partners
+ */
+export const getPartnerInvites = async (courseId: string): Promise<CourseInvite[]> => {
+  try {
+    const response = await apiClient.get<APIResponse<CourseInvite[]>>(
+      `/courses/${courseId}/invites/partners`
+    );
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch partner invites: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while fetching invites");
+  }
+};
+
+/**
+ * Delete / revoke a partner invite
+ * DELETE /courses/:courseId/invite/partners/:inviteId
+ */
+export const deletePartnerInvite = async (courseId: string, inviteId: string): Promise<void> => {
+  try {
+    await apiClient.delete(`/courses/${courseId}/invite/partners/${inviteId}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to remove partner invite: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while removing partner invite");
+  }
+};
+
+export const acceptPartnerInvite = async (token: string): Promise<AcceptPartnerInviteResponse> => {
+  try {
+    const response = await apiClient.post<APIResponse<AcceptPartnerInviteResponse>>(
+      `/courses/invite/accept-partner`,
+      { token }
+    );
+    return response.data.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("Error accepting partner invite:", error);
+      throw new Error(
+        `Failed to accept invite: ${error?.response?.data?.message || error.message}`
+      );
+    }
+    if (error instanceof Error) {
+      throw new Error(`Failed to accept invite: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while accepting invite");
+  }
+};
+
 export const acceptSupportExpertInvite = async (
   token: string
 ): Promise<AcceptSupportExpertResponse> => {
@@ -260,8 +346,12 @@ export const courseInvitesService = {
   getCourseStakeholders,
   deleteStakeholderInvite,
   inviteStakeholders,
+  invitePartners,
+  getPartnerInvites,
+  deletePartnerInvite,
   acceptSupportExpertInvite,
   acceptStakeholderInvite,
+  acceptPartnerInvite,
 };
 
 export default courseInvitesService;

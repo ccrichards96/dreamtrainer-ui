@@ -38,9 +38,7 @@ export default function ApplicationSubmissionModal({
 
   if (!offer) return null;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files;
-    e.target.value = "";
+  const addFiles = (selected: FileList | null) => {
     if (!selected || selected.length === 0) return;
 
     const picked = Array.from(selected);
@@ -59,6 +57,24 @@ export default function ApplicationSubmissionModal({
       }
       return [...prev, ...accepted.slice(0, Math.max(0, room))];
     });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files;
+    e.target.value = "";
+    addFiles(selected);
+  };
+
+  // Without these, dropping a file on the dropzone falls through to the browser's
+  // default behavior — navigating the tab to open the dropped file.
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    addFiles(e.dataTransfer.files);
   };
 
   const handleRemoveFile = (index: number) => {
@@ -147,6 +163,8 @@ export default function ApplicationSubmissionModal({
 
             <label
               htmlFor="application-documents"
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
               className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-purple-400 hover:bg-purple-50/50 transition-colors"
             >
               <Upload className="size-8 text-gray-400 mb-2" />

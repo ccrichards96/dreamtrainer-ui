@@ -23,7 +23,7 @@ export default function CohortRow({
   onManageMembers,
   onDelete,
 }: CohortRowProps) {
-  const applicantCount = cohort.members?.length ?? 0;
+  const memberCount = cohort.numberOfMembers ?? cohort.members?.length ?? 0;
 
   const menuItems: DropdownMenuItem[] = [
     { key: "edit", label: "Edit", icon: Pencil, onSelect: () => onEdit(cohort) },
@@ -50,8 +50,8 @@ export default function CohortRow({
       {/* Name */}
       <span className="font-semibold text-gray-800">{cohort.name}</span>
 
-      {/* # of Applicants */}
-      <span className="text-sm text-gray-700">{applicantCount}</span>
+      {/* # of Members */}
+      <span className="text-sm text-gray-700">{memberCount}</span>
 
       {/* Status */}
       <div>

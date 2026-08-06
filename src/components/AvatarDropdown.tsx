@@ -111,6 +111,17 @@ export default function AvatarDropdown({ className = "" }: AvatarDropdownProps) 
               </Link>
             )}
 
+            {/* Partner Dashboard - Only show for users with a partner profile */}
+            {userProfile?.partnerProfile && (
+              <Link
+                to="/partner/dashboard"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                onClick={() => setIsOpen(false)}
+              >
+                Partner Dashboard
+              </Link>
+            )}
+
             {/* Admin Link - Only show for admin users */}
             {userProfile?.role === Role.Admin && (
               <Link

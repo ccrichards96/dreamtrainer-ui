@@ -26,7 +26,7 @@ export default function PartnerDashboard() {
           <h1 className="text-2xl font-bold text-gray-800">Support</h1>
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
             <a
-              href="https://help.dreamtrainer.com"
+              href="mailto:support@thedreamtrainer.com"
               className="group block rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-purple-300 transition"
             >
               <div className="flex items-center gap-x-4">

@@ -1,5 +1,6 @@
 import { User as Auth0User } from "@auth0/auth0-react";
 import { ExpertProfile, ExpertSocialLinks } from "./modules";
+import { PartnerProfile } from "./partner";
 
 export enum Role {
   Admin = "admin",
@@ -18,6 +19,7 @@ interface User {
   avatarUrl: string | null;
   role: Role;
   expertProfile: ExpertProfile | null;
+  partnerProfile: PartnerProfile | null;
   lastLoginAt: Date | null;
   createdAt: Date | null;
   updatedAt: Date | null;

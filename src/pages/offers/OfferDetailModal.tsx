@@ -9,7 +9,7 @@ interface OfferDetailModalProps {
   offer: StudentOffer | null;
   hasApplied: boolean;
   canWithdraw: boolean;
-  isLoading: boolean;
+  isBusy: boolean;
   onApply: () => void;
   onWithdraw: () => void;
 }
@@ -20,7 +20,7 @@ export default function OfferDetailModal({
   offer,
   hasApplied,
   canWithdraw,
-  isLoading,
+  isBusy,
   onApply,
   onWithdraw,
 }: OfferDetailModalProps) {
@@ -54,7 +54,7 @@ export default function OfferDetailModal({
                     <button
                       type="button"
                       onClick={onWithdraw}
-                      disabled={isLoading}
+                      disabled={isBusy}
                       className="text-sm font-semibold text-gray-500 hover:text-red-600 focus:outline-none disabled:opacity-50"
                     >
                       Withdraw
@@ -65,10 +65,10 @@ export default function OfferDetailModal({
                 <button
                   type="button"
                   onClick={onApply}
-                  disabled={isLoading}
+                  disabled={isBusy}
                   className="inline-flex items-center gap-x-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-sm transition disabled:opacity-50"
                 >
-                  {isLoading && <Loader2 className="size-4 animate-spin" />}
+                  {isBusy && <Loader2 className="size-4 animate-spin" />}
                   Apply Now
                   <ArrowRight className="size-4" />
                 </button>

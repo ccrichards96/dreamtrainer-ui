@@ -1,4 +1,5 @@
 import { Test } from "./tests";
+import { PartnerCourseRole } from "./partner";
 
 /**
  * Course status enum
@@ -64,6 +65,22 @@ export interface CourseExpert {
   courseId: string;
   role: "owner" | "support-expert";
   expertProfile?: ExpertProfile;
+}
+
+/**
+ * Course Partner - connects a course with a partner profile
+ */
+export interface CoursePartner {
+  id: string;
+  partnerProfileId: string;
+  courseId: string;
+  role: PartnerCourseRole;
+  partnerProfile?: {
+    id: string;
+    orgName: string;
+    logoUrl: string | null;
+    user?: { firstName: string; lastName: string; email: string; avatarUrl?: string | null };
+  };
 }
 
 /**

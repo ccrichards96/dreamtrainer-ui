@@ -8,6 +8,7 @@ import { RefreshCw, AlertCircle, CheckCircle } from "lucide-react";
 import {
   acceptSupportExpertInvite,
   acceptStakeholderInvite,
+  acceptPartnerInvite,
 } from "../../services/api/course-invites";
 
 type InviteStatus = "loading" | "success" | "error";
@@ -43,7 +44,7 @@ export default function InviteAccept() {
 
     if (!isAuthenticated) {
       loginWithRedirect({
-        appState: { returnTo: "/expert-onboarding" },
+        appState: { returnTo: role === "partner" ? "/partner/setup" : "/expert-onboarding" },
         authorizationParams: { screen_hint: "signup" },
       });
       return;
@@ -59,6 +60,8 @@ export default function InviteAccept() {
         await acceptSupportExpertInvite(inviteToken);
       } else if (inviteRole === "stakeholder") {
         await acceptStakeholderInvite(inviteToken);
+      } else if (inviteRole === "partner") {
+        await acceptPartnerInvite(inviteToken);
       } else {
         setStatus("error");
         setErrorMessage("Invalid invite role.");
@@ -69,7 +72,9 @@ export default function InviteAccept() {
       setStatus("success");
 
       setTimeout(() => {
-        navigate(`/expert-onboarding`, { replace: true });
+        navigate(inviteRole === "partner" ? "/partner/setup" : "/expert-onboarding", {
+          replace: true,
+        });
       }, 2000);
     } catch (err) {
       setStatus("error");

@@ -5,10 +5,16 @@ import ApplicantFilters from "../applicants/ApplicantFilters";
 import ApplicantsTable from "../applicants/ApplicantsTable";
 import ViewApplicationModal from "../applicants/ViewApplicationModal";
 import ViewProfileModal from "../applicants/ViewProfileModal";
+import ScheduleMeetingModal from "../applicants/ScheduleMeetingModal";
 import { Applicant, ApplicantAction, ApplicantFilterValues } from "../applicants/types";
 import { statusConfig } from "../applicants/statusConfig";
 import { getCourseApplicants, updateApplicantStatus } from "../../../services/api/offers";
-import { listCohortsByCourse, listCohortMembers } from "../../../services/api/cohorts";
+import {
+  listCohortsByCourse,
+  listCohortMembers,
+  addCohortMembers,
+  removeCohortMember,
+} from "../../../services/api/cohorts";
 import { CourseApplicant, OfferApplicationStatus } from "../../../types/offers";
 import { Cohort } from "../../../types/cohorts";
 import { ApiError } from "../../../services/api/client";
@@ -127,6 +133,8 @@ export default function Applicants() {
   const [viewingApplication, setViewingApplication] = useState<Applicant | null>(null);
   // Applicant whose profile is open in the modal (null = closed)
   const [viewingProfile, setViewingProfile] = useState<Applicant | null>(null);
+  // Applicant whose "Schedule Meeting" modal is open (null = closed)
+  const [schedulingApplicant, setSchedulingApplicant] = useState<Applicant | null>(null);
 
   const filteredApplicants = useMemo(() => {
     return applicants.filter((applicant) => {
@@ -152,44 +160,38 @@ export default function Applicants() {
     setCurrentPage(1);
   };
 
-  const handleAssignCohort = (applicantId: string, cohortId: string) => {
+  const handleAssignCohort = async (applicantId: string, cohortId: string) => {
+    const applicant = applicants.find((a) => a.id === applicantId);
+    if (!applicant || applicant.cohortId === cohortId) return;
+
+    const previousCohortId = applicant.cohortId;
+    // Optimistic — reverted below if the request fails.
     setApplicants((prev) =>
-      prev.map((applicant) =>
-        applicant.id === applicantId ? { ...applicant, cohortId } : applicant
-      )
+      prev.map((a) => (a.id === applicantId ? { ...a, cohortId } : a))
     );
+
+    try {
+      await addCohortMembers(cohortId, applicant.userId);
+      // Membership resolution treats a user as belonging to a single cohort, so drop
+      // the old membership once the new one is confirmed.
+      if (previousCohortId) {
+        await removeCohortMember(previousCohortId, applicant.userId).catch(() => {});
+      }
+      toast.success("Cohort assignment updated");
+    } catch (err) {
+      setApplicants((prev) =>
+        prev.map((a) => (a.id === applicantId ? { ...a, cohortId: previousCohortId } : a))
+      );
+      toast.error((err as ApiError).message || "Failed to assign cohort");
+    }
   };
 
-  const handleAction = async (action: ApplicantAction, applicant: Applicant) => {
-    if (action === "view_application") {
-      setViewingApplication(applicant);
-      return;
-    }
-    if (action === "view_profile") {
-      setViewingProfile(applicant);
-      return;
-    }
-
-    const nextStatus = actionStatus[action];
-    if (!nextStatus || !activeCourseId) return;
-
-    // Scheduling needs a time — the backend rejects the transition without one.
-    let meetingAt: string | undefined;
-    if (nextStatus === "meeting_scheduled") {
-      const entered = window.prompt(
-        "Meeting date and time (e.g. 2026-08-14 15:30)",
-        applicant.meetingAt ? new Date(applicant.meetingAt).toISOString().slice(0, 16) : ""
-      );
-      if (!entered) return;
-      const parsed = new Date(entered);
-      if (Number.isNaN(parsed.getTime())) {
-        toast.error("Couldn't read that date", {
-          description: "Try a format like 2026-08-14 15:30.",
-        });
-        return;
-      }
-      meetingAt = parsed.toISOString();
-    }
+  const applyStatusChange = async (
+    applicant: Applicant,
+    nextStatus: OfferApplicationStatus,
+    meetingAt?: string
+  ) => {
+    if (!activeCourseId) return;
 
     const previous = applicant.status;
     // Optimistic — reverted below if the request fails.
@@ -220,6 +222,32 @@ export default function Applicants() {
       );
       toast.error((err as ApiError).message || "Failed to update applicant status");
     }
+  };
+
+  const handleAction = async (action: ApplicantAction, applicant: Applicant) => {
+    if (action === "view_application") {
+      setViewingApplication(applicant);
+      return;
+    }
+    if (action === "view_profile") {
+      setViewingProfile(applicant);
+      return;
+    }
+    if (action === "schedule_meeting") {
+      setSchedulingApplicant(applicant);
+      return;
+    }
+
+    const nextStatus = actionStatus[action];
+    if (!nextStatus) return;
+    await applyStatusChange(applicant, nextStatus);
+  };
+
+  const handleConfirmSchedule = async (meetingAt: string) => {
+    if (!schedulingApplicant) return;
+    const applicant = schedulingApplicant;
+    setSchedulingApplicant(null);
+    await applyStatusChange(applicant, "meeting_scheduled", meetingAt);
   };
 
   return (
@@ -277,6 +305,12 @@ export default function Applicants() {
         applicant={viewingProfile}
         cohorts={cohorts}
         onClose={() => setViewingProfile(null)}
+      />
+
+      <ScheduleMeetingModal
+        applicant={schedulingApplicant}
+        onClose={() => setSchedulingApplicant(null)}
+        onConfirm={handleConfirmSchedule}
       />
     </div>
   );

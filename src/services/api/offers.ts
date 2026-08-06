@@ -185,7 +185,6 @@ export const applyToOffer = async (
       `/offers/${offerId}/apply`,
       formData,
       {
-        // Let the browser set the multipart boundary rather than the client default.
         headers: { "Content-Type": undefined },
         timeout: 120000, // uploads need more headroom than the 10s default
       }

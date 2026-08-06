@@ -10,12 +10,22 @@ import {
   Trash2,
   Loader2,
   ChevronDown,
+  Mail,
+  MoreHorizontal,
 } from "lucide-react";
-import { Course, CourseExpert, CourseStatus, ListingStatus } from "../../types/modules";
+import { Course, CourseExpert, CoursePartner, CourseStatus, ListingStatus } from "../../types/modules";
+import { PartnerCourseRole } from "../../types/partner";
 import { Category } from "../../types/categories";
 import { User } from "../../types/user";
 import { updateCourse } from "../../services/api/modules";
 import courseExpertsService from "../../services/api/course-experts";
+import coursePartnersService from "../../services/api/course-partners";
+import {
+  invitePartners,
+  getPartnerInvites,
+  deletePartnerInvite,
+  CourseInvite,
+} from "../../services/api/course-invites";
 import { getAllCategories } from "../../services/api/categories";
 import { getUsersPaginated } from "../../services/api/admin";
 
@@ -150,6 +160,31 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
   const [loadingCourseExperts, setLoadingCourseExperts] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
+  // Selection state for adding a new partner
+  const [partnerSearch, setPartnerSearch] = useState("");
+  const [selectedPartnerProfileId, setSelectedPartnerProfileId] = useState("");
+  const [selectedPartnerLabel, setSelectedPartnerLabel] = useState("");
+  const [showPartnerDropdown, setShowPartnerDropdown] = useState(false);
+  const [selectedPartnerRole, setSelectedPartnerRole] = useState<PartnerCourseRole>("partner");
+  const partnerComboboxRef = useRef<HTMLDivElement>(null);
+
+  const [partnerUsers, setPartnerUsers] = useState<User[]>([]);
+  const [coursePartners, setCoursePartners] = useState<CoursePartner[]>([]);
+  const [loadingPartnersList, setLoadingPartnersList] = useState(false);
+  const [loadingCoursePartners, setLoadingCoursePartners] = useState(true);
+  const [partnerActionLoadingId, setPartnerActionLoadingId] = useState<string | null>(null);
+  const [partnerSuccess, setPartnerSuccess] = useState<string | null>(null);
+
+  // Invite-by-email state for partners who don't have an account yet
+  const [partnerEmailInput, setPartnerEmailInput] = useState("");
+  const [partnerEmails, setPartnerEmails] = useState<string[]>([]);
+  const [partnerInviteRole, setPartnerInviteRole] = useState<PartnerCourseRole>("partner");
+  const [isInvitingPartners, setIsInvitingPartners] = useState(false);
+  const [partnerInvites, setPartnerInvites] = useState<CourseInvite[]>([]);
+  const [loadingPartnerInvites, setLoadingPartnerInvites] = useState(true);
+  const [deletingPartnerInviteId, setDeletingPartnerInviteId] = useState<string | null>(null);
+  const [openPartnerInviteMenuId, setOpenPartnerInviteMenuId] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -169,8 +204,23 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
         .then((experts) => setCourseExperts(experts))
         .catch(() => setError("Failed to load course experts"))
         .finally(() => setLoadingCourseExperts(false));
+
+      setLoadingCoursePartners(true);
+      coursePartnersService
+        .getPartnersByCourse(course.id)
+        .then((partners) => setCoursePartners(partners))
+        .catch(() => setError("Failed to load course partners"))
+        .finally(() => setLoadingCoursePartners(false));
+
+      setLoadingPartnerInvites(true);
+      getPartnerInvites(course.id)
+        .then((invites) => setPartnerInvites(invites))
+        .catch(() => setPartnerInvites([]))
+        .finally(() => setLoadingPartnerInvites(false));
     } else {
       setLoadingCourseExperts(false);
+      setLoadingCoursePartners(false);
+      setLoadingPartnerInvites(false);
     }
   }, [course.id]);
 
@@ -198,11 +248,38 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     return () => clearTimeout(timer);
   }, [expertSearch, showExpertDropdown]);
 
+  // Debounced partner search - only fires when user is actively searching
+  useEffect(() => {
+    if (!showPartnerDropdown && partnerSearch.trim() === "") return;
+
+    const fetchPartners = async () => {
+      setLoadingPartnersList(true);
+      try {
+        const res = await getUsersPaginated({
+          search: partnerSearch.trim() || undefined,
+          limit: 20,
+        });
+        const partners = res.users.filter((u) => u.partnerProfile && u.partnerProfile.id);
+        setPartnerUsers(partners);
+      } catch (err) {
+        console.error("Partner search error:", err);
+      } finally {
+        setLoadingPartnersList(false);
+      }
+    };
+
+    const timer = setTimeout(fetchPartners, 300);
+    return () => clearTimeout(timer);
+  }, [partnerSearch, showPartnerDropdown]);
+
   // Close combobox dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (comboboxRef.current && !comboboxRef.current.contains(e.target as Node)) {
         setShowExpertDropdown(false);
+      }
+      if (partnerComboboxRef.current && !partnerComboboxRef.current.contains(e.target as Node)) {
+        setShowPartnerDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -211,6 +288,10 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
 
   const filteredExperts = expertUsers.filter((u) => {
     return !courseExperts.some((ce) => ce.expertProfileId === u.expertProfile?.id);
+  });
+
+  const filteredPartners = partnerUsers.filter((u) => {
+    return !coursePartners.some((cp) => cp.partnerProfileId === u.partnerProfile?.id);
   });
 
   const handleSelectExpert = useCallback((user: User) => {
@@ -275,6 +356,133 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
       setError(err.message || "Failed to remove expert");
     } finally {
       setActionLoadingId(null);
+    }
+  };
+
+  const handleSelectPartner = useCallback((user: User) => {
+    setSelectedPartnerProfileId(user.partnerProfile!.id);
+    setSelectedPartnerLabel(`${user.partnerProfile!.orgName} (${user.email})`);
+    setShowPartnerDropdown(false);
+    setPartnerSearch("");
+  }, []);
+
+  const handleAddPartner = async () => {
+    if (!selectedPartnerProfileId || !course.id) return;
+
+    setPartnerActionLoadingId("add");
+    try {
+      const newPartner = await coursePartnersService.createCoursePartner({
+        partnerProfileId: selectedPartnerProfileId,
+        courseId: course.id,
+        role: selectedPartnerRole,
+      });
+      const matchedUser = partnerUsers.find(
+        (u) => u.partnerProfile?.id === selectedPartnerProfileId
+      );
+      if (matchedUser && matchedUser.partnerProfile) {
+        newPartner.partnerProfile = {
+          id: matchedUser.partnerProfile.id,
+          orgName: matchedUser.partnerProfile.orgName,
+          logoUrl: matchedUser.partnerProfile.logoUrl,
+          user: matchedUser.partnerProfile.user || undefined,
+        };
+      }
+      setCoursePartners((prev) => [...prev, newPartner]);
+      setSelectedPartnerProfileId("");
+      setSelectedPartnerLabel("");
+      setPartnerSearch("");
+      setPartnerSuccess("Course partners updated successfully");
+      setTimeout(() => setPartnerSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to add partner");
+    } finally {
+      setPartnerActionLoadingId(null);
+    }
+  };
+
+  const handleUpdatePartnerRole = async (partnerId: string, newRole: PartnerCourseRole) => {
+    setPartnerActionLoadingId(partnerId);
+    try {
+      const updated = await coursePartnersService.updateCoursePartner(partnerId, {
+        role: newRole,
+      });
+      setCoursePartners((prev) =>
+        prev.map((cp) => (cp.id === partnerId ? { ...cp, role: updated.role } : cp))
+      );
+      setPartnerSuccess("Course partners updated successfully");
+      setTimeout(() => setPartnerSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to update partner role");
+    } finally {
+      setPartnerActionLoadingId(null);
+    }
+  };
+
+  const handleRemovePartner = async (partnerId: string) => {
+    setPartnerActionLoadingId(partnerId);
+    try {
+      await coursePartnersService.deleteCoursePartner(partnerId);
+      setCoursePartners((prev) => prev.filter((cp) => cp.id !== partnerId));
+      setPartnerSuccess("Course partners updated successfully");
+      setTimeout(() => setPartnerSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to remove partner");
+    } finally {
+      setPartnerActionLoadingId(null);
+    }
+  };
+
+  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const addPartnerEmail = () => {
+    const email = partnerEmailInput.trim().toLowerCase();
+    if (email && isValidEmail(email) && !partnerEmails.includes(email)) {
+      setPartnerEmails((prev) => [...prev, email]);
+      setPartnerEmailInput("");
+    }
+  };
+
+  const removePartnerEmail = (emailToRemove: string) => {
+    setPartnerEmails((prev) => prev.filter((e) => e !== emailToRemove));
+  };
+
+  const handlePartnerEmailKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addPartnerEmail();
+    }
+  };
+
+  const handleInvitePartners = async () => {
+    if (partnerEmails.length === 0 || !course.id) return;
+
+    setIsInvitingPartners(true);
+    try {
+      const invited = await invitePartners(course.id, partnerEmails, partnerInviteRole);
+      setPartnerInvites((prev) => [...prev, ...invited]);
+      setPartnerEmails([]);
+      setPartnerSuccess(
+        `Successfully sent ${invited.length} partner invitation${invited.length > 1 ? "s" : ""}.`
+      );
+      setTimeout(() => setPartnerSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to send partner invitations");
+    } finally {
+      setIsInvitingPartners(false);
+    }
+  };
+
+  const handleDeletePartnerInvite = async (inviteId: string) => {
+    if (!course.id) return;
+    setDeletingPartnerInviteId(inviteId);
+    setOpenPartnerInviteMenuId(null);
+    try {
+      await deletePartnerInvite(course.id, inviteId);
+      setPartnerInvites((prev) => prev.filter((i) => i.id !== inviteId));
+    } catch (err: any) {
+      setError(err.message || "Failed to remove partner invite");
+    } finally {
+      setDeletingPartnerInviteId(null);
     }
   };
 
@@ -888,6 +1096,406 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       "Assign Expert"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section: Course Partners Management */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+              Course Partners
+            </h4>
+          </div>
+          <div className="space-y-4">
+            {partnerSuccess && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span className="text-green-700">{partnerSuccess}</span>
+              </div>
+            )}
+
+            {loadingCoursePartners ? (
+              <div className="flex justify-center p-6 border border-gray-200 border-dashed rounded-lg">
+                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+              </div>
+            ) : coursePartners.length > 0 ? (
+              <div className="border border-gray-200 rounded-lg overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Partner
+                      </th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Role
+                      </th>
+                      <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {coursePartners.map((partner) => (
+                      <tr key={partner.id}>
+                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {partner.partnerProfile?.logoUrl ? (
+                              <img
+                                className="h-8 w-8 rounded-full object-cover border border-gray-300"
+                                src={partner.partnerProfile.logoUrl}
+                                alt=""
+                              />
+                            ) : (
+                              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium border border-blue-200">
+                                {partner.partnerProfile?.orgName?.charAt(0) || "?"}
+                              </div>
+                            )}
+                            <div className="ml-3">
+                              <p className="text-sm font-medium text-gray-900">
+                                {partner.partnerProfile?.orgName || "Unknown Partner"}
+                              </p>
+                              {partner.partnerProfile?.user?.email && (
+                                <p className="text-xs text-gray-500">
+                                  {partner.partnerProfile.user.email}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                          {partnerActionLoadingId === partner.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                          ) : (
+                            <select
+                              value={partner.role}
+                              onChange={(e) =>
+                                handleUpdatePartnerRole(
+                                  partner.id,
+                                  e.target.value as PartnerCourseRole
+                                )
+                              }
+                              className="w-full min-w-[120px] text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                              <option value="owner">Owner</option>
+                              <option value="partner">Partner</option>
+                            </select>
+                          )}
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePartner(partner.id)}
+                            disabled={partnerActionLoadingId === partner.id}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-6 border border-gray-200 border-dashed rounded-lg bg-gray-50 text-center">
+                <p className="text-sm text-gray-500 mb-1">No partners assigned yet.</p>
+                <p className="text-xs text-gray-400">
+                  Assign an existing partner or invite a new one below.
+                </p>
+              </div>
+            )}
+
+            {/* Pending Partner Invites */}
+            {!loadingPartnerInvites && partnerInvites.length > 0 && (
+              <div className="border border-gray-200 rounded-lg overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Pending Invite
+                      </th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Role
+                      </th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {partnerInvites.map((invite) => (
+                      <tr key={invite.id}>
+                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                              <Mail className="w-4 h-4 text-gray-400" />
+                            </div>
+                            <p className="text-sm text-gray-900">{invite.email}</p>
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap capitalize text-gray-700">
+                          {invite.partnerRole || "partner"}
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                              invite.status === "accepted"
+                                ? "bg-green-100 text-green-700"
+                                : invite.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {invite.status}
+                          </span>
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-right">
+                          <div className="relative inline-block text-left">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setOpenPartnerInviteMenuId(
+                                  openPartnerInviteMenuId === invite.id ? null : invite.id
+                                )
+                              }
+                              disabled={deletingPartnerInviteId === invite.id}
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                            >
+                              {deletingPartnerInviteId === invite.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <MoreHorizontal className="w-4 h-4" />
+                              )}
+                            </button>
+                            {openPartnerInviteMenuId === invite.id && (
+                              <>
+                                <div
+                                  className="fixed inset-0 z-10"
+                                  onClick={() => setOpenPartnerInviteMenuId(null)}
+                                />
+                                <div className="absolute right-0 z-20 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeletePartnerInvite(invite.id)}
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    Revoke
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Assign Existing Partner Panel */}
+            <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg">
+              <h5 className="text-sm font-medium text-blue-900 mb-3 flex items-center gap-2">
+                <UserPlus className="w-4 h-4" />
+                Assign Existing Partner
+              </h5>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                <div className="md:col-span-5">
+                  <label className="block text-xs font-medium text-blue-800 mb-1">
+                    Search & Select Partner
+                  </label>
+                  <div ref={partnerComboboxRef} className="relative">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        role="combobox"
+                        aria-expanded={showPartnerDropdown}
+                        value={
+                          showPartnerDropdown ? partnerSearch : selectedPartnerLabel || partnerSearch
+                        }
+                        onChange={(e) => {
+                          setPartnerSearch(e.target.value);
+                          setShowPartnerDropdown(true);
+                          if (selectedPartnerProfileId) {
+                            setSelectedPartnerProfileId("");
+                            setSelectedPartnerLabel("");
+                          }
+                        }}
+                        onFocus={() => {
+                          setShowPartnerDropdown(true);
+                          if (selectedPartnerLabel) {
+                            setPartnerSearch("");
+                          }
+                        }}
+                        placeholder="Search by org name or email…"
+                        className="w-full px-3 py-2.5 pe-9 bg-white border border-blue-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <div className="absolute top-1/2 right-3 -translate-y-1/2 flex items-center gap-1">
+                        {loadingPartnersList && (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
+                        )}
+                        {selectedPartnerProfileId && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedPartnerProfileId("");
+                              setSelectedPartnerLabel("");
+                              setPartnerSearch("");
+                            }}
+                            className="text-gray-400 hover:text-gray-600"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        {!loadingPartnersList && !selectedPartnerProfileId && (
+                          <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                        )}
+                      </div>
+                    </div>
+
+                    {showPartnerDropdown && (
+                      <div
+                        className="absolute z-50 w-full mt-1 max-h-60 p-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-y-auto"
+                        role="listbox"
+                      >
+                        {filteredPartners.length === 0 ? (
+                          <div className="py-3 px-4 text-sm text-gray-500 text-center">
+                            {loadingPartnersList
+                              ? "Searching…"
+                              : partnerSearch.trim()
+                                ? "No matching partners found"
+                                : "Type to search for partners"}
+                          </div>
+                        ) : (
+                          filteredPartners.map((u) => (
+                            <div
+                              key={u.partnerProfile!.id}
+                              role="option"
+                              aria-selected={selectedPartnerProfileId === u.partnerProfile!.id}
+                              className={`cursor-pointer py-2 px-3 w-full text-sm rounded-lg flex justify-between items-center ${
+                                selectedPartnerProfileId === u.partnerProfile!.id
+                                  ? "bg-blue-50 text-blue-800"
+                                  : "text-gray-800 hover:bg-gray-100"
+                              }`}
+                              onClick={() => handleSelectPartner(u)}
+                            >
+                              <div>
+                                <span className="font-medium">{u.partnerProfile!.orgName}</span>
+                                <span className="text-gray-500 ml-1.5 text-xs">{u.email}</span>
+                              </div>
+                              {selectedPartnerProfileId === u.partnerProfile!.id && (
+                                <Check className="w-4 h-4 text-blue-600 shrink-0" />
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="md:col-span-4">
+                  <label className="block text-xs font-medium text-blue-800 mb-1">Role</label>
+                  <select
+                    value={selectedPartnerRole}
+                    onChange={(e) => setSelectedPartnerRole(e.target.value as PartnerCourseRole)}
+                    className="w-full px-3 py-2.5 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  >
+                    <option value="owner">Owner (Full Access)</option>
+                    <option value="partner">Partner</option>
+                  </select>
+                </div>
+                <div className="md:col-span-3">
+                  <button
+                    type="button"
+                    onClick={handleAddPartner}
+                    disabled={!selectedPartnerProfileId || partnerActionLoadingId === "add"}
+                    className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex items-center justify-center gap-2"
+                  >
+                    {partnerActionLoadingId === "add" ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "Assign Partner"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Invite New Partner by Email Panel */}
+            <div className="bg-purple-50 border border-purple-100 p-4 rounded-lg">
+              <h5 className="text-sm font-medium text-purple-900 mb-3 flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Invite Partner by Email
+              </h5>
+              <p className="text-xs text-purple-800 mb-3">
+                For partners who don&apos;t have a Dream Trainer account yet. They&apos;ll receive
+                an email invite to sign up and complete partner onboarding.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                <div className="md:col-span-5">
+                  <label className="block text-xs font-medium text-purple-800 mb-1">
+                    Email Addresses
+                  </label>
+                  <div className="min-h-[46px] flex flex-wrap items-center gap-2 p-2 rounded-lg border border-purple-200 bg-white focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent">
+                    {partnerEmails.map((email) => (
+                      <span
+                        key={email}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 text-xs"
+                      >
+                        <Mail className="w-3 h-3" />
+                        {email}
+                        <button
+                          type="button"
+                          onClick={() => removePartnerEmail(email)}
+                          className="ml-0.5 p-0.5 hover:bg-purple-200 rounded-full"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                    <input
+                      type="email"
+                      value={partnerEmailInput}
+                      onChange={(e) => setPartnerEmailInput(e.target.value)}
+                      onKeyDown={handlePartnerEmailKeyDown}
+                      onBlur={addPartnerEmail}
+                      placeholder={partnerEmails.length === 0 ? "Enter email and press Enter" : ""}
+                      className="flex-1 min-w-[160px] border-0 p-1 text-sm text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="md:col-span-4">
+                  <label className="block text-xs font-medium text-purple-800 mb-1">Role</label>
+                  <select
+                    value={partnerInviteRole}
+                    onChange={(e) => setPartnerInviteRole(e.target.value as PartnerCourseRole)}
+                    className="w-full px-3 py-2.5 bg-white border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                  >
+                    <option value="owner">Owner (Full Access)</option>
+                    <option value="partner">Partner</option>
+                  </select>
+                </div>
+                <div className="md:col-span-3">
+                  <button
+                    type="button"
+                    onClick={handleInvitePartners}
+                    disabled={partnerEmails.length === 0 || isInvitingPartners}
+                    className="w-full px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex items-center justify-center gap-2"
+                  >
+                    {isInvitingPartners ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "Invite Partner"
                     )}
                   </button>
                 </div>

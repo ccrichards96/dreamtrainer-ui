@@ -1,9 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { useApp } from "../../../contexts/useAppContext";
-
-// Placeholder illustration — swap for a real asset later
-const PLACEHOLDER_IMAGE = "https://placehold.co/120x120/4c1d95/ffffff?text=DT";
 
 interface QuickstartCard {
   id: string;
@@ -18,46 +14,33 @@ const quickstartCards: QuickstartCard[] = [
     id: "applicants",
     label: "View All Applicants",
     to: "/partner/dashboard/applicants",
-    image: PLACEHOLDER_IMAGE,
+    image: "https://img.icons8.com/?size=100&id=4DqMzI0F7ksp&format=png&color=4c1d95",
+  },
+    {
+    id: "offers",
+    label: "View Offers",
+    to: "/partner/dashboard/offers",
+    image: "https://img.icons8.com/?size=100&id=8291&format=png&color=4c1d95",
   },
   {
     id: "cohorts",
     label: "View Cohorts",
     to: "/partner/dashboard/cohorts",
-    image: PLACEHOLDER_IMAGE,
+    image: "https://img.icons8.com/?size=100&id=9542&format=png&color=4c1d95",
   },
   {
     id: "support",
     label: "Partner Support",
     to: "/partner/dashboard/support",
-    image: PLACEHOLDER_IMAGE,
-  },
-];
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-}
-
-const initialNotifications: Notification[] = [
-  {
-    id: "1",
-    title: "New Student Applicants",
-    message: "Cammie K. applied to the TOEFL Offer",
+    image: "https://img.icons8.com/?size=100&id=7857&format=png&color=4c1d95",
   },
 ];
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { userProfile } = useApp();
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
 
   const firstName = userProfile?.firstName || "there";
-
-  const dismissNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
 
   return (
     <div>
@@ -68,7 +51,7 @@ export default function Dashboard() {
         <h2 className="text-lg font-semibold text-gray-800 underline underline-offset-4">
           Quickstart
         </h2>
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {quickstartCards.map((card) => (
             <button
               key={card.id}
@@ -88,7 +71,7 @@ export default function Dashboard() {
       </section>
 
       {/* Notifications */}
-      <section className="mt-8">
+      {/* <section className="mt-8">
         <h2 className="text-lg font-semibold text-gray-800 underline underline-offset-4">
           Notifications
         </h2>
@@ -120,7 +103,7 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }

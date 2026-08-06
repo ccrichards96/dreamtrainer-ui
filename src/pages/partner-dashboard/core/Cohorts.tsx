@@ -4,11 +4,14 @@ import CourseSelector from "../shared/CourseSelector";
 import Pagination from "../shared/Pagination";
 import CohortFilters from "../cohorts/CohortFilters";
 import CohortsTable from "../cohorts/CohortsTable";
-import { listCohorts, updateCohort, deleteCohort } from "../../../services/api/cohorts";
+import { listCohorts, updateCohort } from "../../../services/api/cohorts";
 import { Cohort, CohortStatus } from "../../../types/cohorts";
 import { ApiError } from "../../../types/api";
 import { usePartnerDashboardContext } from "../../../contexts/usePartnerDashboardContext";
 import CreateCohortModal from "../cohorts/CreateCohortModal";
+import EditCohortModal from "../cohorts/EditCohortModal";
+import ManageMembersModal from "../cohorts/ManageMembersModal";
+import DeleteCohortModal from "../cohorts/DeleteCohortModal";
 
 const PAGE_SIZE = 10;
 
@@ -19,6 +22,9 @@ export default function Cohorts() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingCohort, setEditingCohort] = useState<Cohort | null>(null);
+  const [managingCohort, setManagingCohort] = useState<Cohort | null>(null);
+  const [deletingCohort, setDeletingCohort] = useState<Cohort | null>(null);
 
   // `draftName` tracks the input; `appliedName` filters the results (on Search).
   const [draftName, setDraftName] = useState("");
@@ -69,14 +75,8 @@ export default function Cohorts() {
     }
   };
 
-  const handleDelete = async (cohort: Cohort) => {
-    const previous = cohorts;
-    setCohorts((prev) => prev.filter((c) => c.id !== cohort.id));
-    try {
-      await deleteCohort(cohort.id);
-    } catch {
-      setCohorts(previous); // revert on failure
-    }
+  const handleDelete = (cohort: Cohort) => {
+    setDeletingCohort(cohort);
   };
 
   const handleAddCohort = () => {
@@ -84,13 +84,11 @@ export default function Cohorts() {
   };
 
   const handleEdit = (cohort: Cohort) => {
-    // Placeholder — cohort detail/edit page to be implemented
-    console.log("Edit cohort", cohort.id);
+    setEditingCohort(cohort);
   };
 
   const handleManageMembers = (cohort: Cohort) => {
-    // Placeholder — member management to be implemented
-    console.log("Manage members", cohort.id);
+    setManagingCohort(cohort);
   };
 
   return (
@@ -140,6 +138,25 @@ export default function Cohorts() {
         courses={courses}
         activeCourseId={activeCourseId}
         onSuccess={loadCohorts}
+      />
+
+      <EditCohortModal
+        isOpen={editingCohort !== null}
+        onClose={() => setEditingCohort(null)}
+        cohort={editingCohort}
+        onSuccess={loadCohorts}
+      />
+
+      <ManageMembersModal
+        cohort={managingCohort}
+        onClose={() => setManagingCohort(null)}
+        onMemberRemoved={loadCohorts}
+      />
+
+      <DeleteCohortModal
+        cohort={deletingCohort}
+        onClose={() => setDeletingCohort(null)}
+        onDeleted={loadCohorts}
       />
     </div>
   );

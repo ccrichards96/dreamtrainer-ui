@@ -38,8 +38,14 @@ export interface PartnerProfile {
   id: string;
   userId: string;
   orgName: string;
+  /** The contact person's title/role at the org (e.g. "Program Director"). */
+  title: string | null;
   slug: string;
   description: string | null;
+  /** Individual contact bio, distinct from `description` (the org's own bio). */
+  bio: string | null;
+  orgBio: string | null;
+  calendarLink: string | null;
   logoUrl: string | null;
   websiteUrl: string | null;
   contactEmail: string | null;
@@ -53,4 +59,19 @@ export interface PartnerProfile {
   user: PartnerProfileUser | null;
   /** Always an array; empty when none assigned. Unfiltered (includes draft/archived). */
   courses: PartnerAssignedCourse[];
+}
+
+export interface UpdatePartnerProfileDTO {
+  orgName?: string;
+  title?: string | null;
+  description?: string | null;
+  bio?: string | null;
+  orgBio?: string | null;
+  calendarLink?: string | null;
+  logoUrl?: string | null;
+  websiteUrl?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  socialLinks?: PartnerSocialLinks;
+  listingStatus?: ListingStatus;
 }
