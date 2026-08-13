@@ -1,7 +1,7 @@
 import React from "react";
 import { applicationStatusConfig } from "./statusConfig";
 import { toStudentOffer, StudentOffer } from "./types";
-import { Briefcase, Compass, ArrowRight, Loader2 } from "lucide-react";
+import { Briefcase, Compass, ArrowRight, Loader2, ImageIcon } from "lucide-react";
 import type { MyOfferApplication, OfferApplicationStatus } from "../../types/offers";
 
 interface MyOffersProps {
@@ -56,6 +56,7 @@ export default function MyOffers({
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
           {applications.map((application, index) => {
             const offer = application.courseOffer;
+            const partnerName = offer.partnerProfile?.orgName ?? "";
             const status = statuses[application.courseOfferId] ?? application.status;
             const badge = applicationStatusConfig[status] ?? {
               label: status ?? "Unknown",
@@ -73,20 +74,40 @@ export default function MyOffers({
                   isInactive ? "opacity-70" : ""
                 }`}
               >
+                {/* Cover image */}
+                <div className="flex h-44 items-center justify-center bg-gray-100">
+                  {offer.imageUrl ? (
+                    <img
+                      src={offer.imageUrl}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <ImageIcon className="size-10 text-gray-300" />
+                  )}
+                </div>
+
                 {/* Card Header */}
                 <div className="p-5 flex-1 space-y-4">
                   <div className="flex items-start justify-between gap-x-3">
                     <div className="flex items-center gap-x-3">
-                      {/* Logo Fallback Gradient */}
-                      <div
-                        className={`flex size-11 items-center justify-center rounded-xl bg-gradient-to-br ${logoGradient} text-white font-bold text-sm shadow-sm flex-shrink-0`}
-                      >
-                        {getInitials(offer.partnerName || offer.title)}
-                      </div>
+                      {offer.partnerProfile?.logoUrl ? (
+                        <img
+                          src={offer.partnerProfile.logoUrl}
+                          alt=""
+                          className="size-11 flex-shrink-0 rounded-xl object-cover shadow-sm"
+                        />
+                      ) : (
+                        <div
+                          className={`flex size-11 items-center justify-center rounded-xl bg-gradient-to-br ${logoGradient} text-white font-bold text-sm shadow-sm flex-shrink-0`}
+                        >
+                          {getInitials(partnerName || offer.title)}
+                        </div>
+                      )}
                       <div>
-                        {offer.partnerName && (
+                        {partnerName && (
                           <h4 className="text-xs font-bold text-purple-600 uppercase tracking-wider">
-                            {offer.partnerName}
+                            {partnerName}
                           </h4>
                         )}
                         <h3 className="font-bold text-gray-800 text-base mt-0.5 line-clamp-1">

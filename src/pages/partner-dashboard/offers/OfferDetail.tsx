@@ -4,7 +4,8 @@ import PartnerShell from "../PartnerShell";
 import OfferDetailsSection from "./forms/OfferDetailsSection";
 import IdealCandidatesSection from "./forms/IdealCandidatesSection";
 import { OfferFormData } from "./types";
-import { CourseOffer } from "../../../types/offers";
+import { offerStatusConfig } from "./statusConfig";
+import { CourseOffer, CourseOfferStatus } from "../../../types/offers";
 import {
   getCourseOfferById,
   createCourseOffer,
@@ -65,7 +66,7 @@ export default function OfferDetail() {
 
   const [form, setForm] = useState<OfferFormData>(emptyOfferForm);
   const [title, setTitle] = useState("New Offer");
-  const [status, setStatus] = useState<string>("draft");
+  const [status, setStatus] = useState<CourseOfferStatus>("draft");
   const [isLoading, setIsLoading] = useState(isEditing);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -187,15 +188,9 @@ export default function OfferDetail() {
           <h1 className="text-3xl font-bold text-gray-900">{isEditing ? title : "New Offer"}</h1>
           {isEditing && (
             <span
-              className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${
-                status === "active"
-                  ? "border-green-200 bg-green-50 text-green-700"
-                  : status === "archived"
-                    ? "border-gray-200 bg-gray-100 text-gray-600"
-                    : "border-amber-200 bg-amber-50 text-amber-700"
-              }`}
+              className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${offerStatusConfig[status].className}`}
             >
-              {status}
+              {offerStatusConfig[status].label}
             </span>
           )}
         </div>

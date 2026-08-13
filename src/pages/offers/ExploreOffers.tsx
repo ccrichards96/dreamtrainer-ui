@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { StudentOffer } from "./types";
-import { Search, Building } from "lucide-react";
+import { Search, Building, ImageIcon } from "lucide-react";
 import OfferCardFooter from "./OfferCardFooter";
 
 interface ExploreOffersProps {
@@ -96,16 +96,36 @@ export default function ExploreOffers({
                 key={offer.id}
                 className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-150 hover:shadow-md hover:border-purple-250 transition duration-300"
               >
+                {/* Cover image */}
+                <div className="flex h-40 items-center justify-center bg-gray-100">
+                  {offer.imageUrl ? (
+                    <img
+                      src={offer.imageUrl}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <ImageIcon className="size-10 text-gray-300" />
+                  )}
+                </div>
+
                 {/* Card Header */}
                 <div className="p-5 flex-1 space-y-4">
                   <div className="flex items-start justify-between gap-x-4">
                     <div className="flex items-center gap-x-3">
-                      {/* Logo Fallback Gradient */}
-                      <div
-                        className={`flex size-11 items-center justify-center rounded-xl bg-gradient-to-br ${logoGradient} text-white font-bold text-sm shadow-sm flex-shrink-0`}
-                      >
-                        {getInitials(offer.partnerName || offer.title)}
-                      </div>
+                      {offer.partnerLogoUrl ? (
+                        <img
+                          src={offer.partnerLogoUrl}
+                          alt=""
+                          className="size-11 flex-shrink-0 rounded-xl object-cover shadow-sm"
+                        />
+                      ) : (
+                        <div
+                          className={`flex size-11 items-center justify-center rounded-xl bg-gradient-to-br ${logoGradient} text-white font-bold text-sm shadow-sm flex-shrink-0`}
+                        >
+                          {getInitials(offer.partnerName || offer.title)}
+                        </div>
+                      )}
                       <div>
                         {offer.partnerName && (
                           <h4 className="text-xs font-bold text-purple-600 uppercase tracking-wider">

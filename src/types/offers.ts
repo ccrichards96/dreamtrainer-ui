@@ -2,6 +2,16 @@ import type { Attachment } from "./attachments";
 
 export type CourseOfferStatus = "draft" | "active" | "archived";
 
+export interface OfferPartnerProfile {
+  id: string;
+  orgName: string;
+  title: string | null;
+  slug: string;
+  orgBio: string | null;
+  logoUrl: string | null;
+  websiteUrl: string | null;
+}
+
 /**
  * A student's application lifecycle for a given offer.
  */
@@ -20,7 +30,7 @@ export interface CourseOffer {
   id: string;
   courseId?: string;
   title: string;
-  partnerName?: string;
+  partnerProfile?: OfferPartnerProfile | null;
   description: string;
   status: CourseOfferStatus;
   requirements?: string[];

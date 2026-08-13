@@ -1,8 +1,11 @@
+import type { CourseOfferStatus } from "../../../types/offers";
+
 export type OfferAction = "edit" | "duplicate" | "delete";
 
 export interface Offer {
   id: string;
   title: string;
+  status: CourseOfferStatus;
   /** Optional cover/preview image for the offer */
   imageUrl?: string;
 }

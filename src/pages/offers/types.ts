@@ -4,6 +4,8 @@ export interface StudentOffer {
   id: string;
   title: string;
   partnerName: string;
+  partnerLogoUrl?: string;
+  partnerWebsiteUrl?: string;
   description: string;
   requirements: string[];
   characteristics: string;
@@ -16,7 +18,9 @@ export interface StudentOffer {
 export const toStudentOffer = (courseOffer: CourseOffer): StudentOffer => ({
   id: courseOffer.id,
   title: courseOffer.title,
-  partnerName: courseOffer.partnerName ?? "",
+  partnerName: courseOffer.partnerProfile?.orgName ?? courseOffer.partnerName ?? "",
+  partnerLogoUrl: courseOffer.partnerProfile?.logoUrl ?? undefined,
+  partnerWebsiteUrl: courseOffer.partnerProfile?.websiteUrl ?? undefined,
   description: courseOffer.description,
   requirements: courseOffer.requirements ?? [],
   characteristics: courseOffer.characteristics ?? "",

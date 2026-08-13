@@ -60,9 +60,10 @@ export default function ApplicationSubmissionModal({
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files;
+    // Read the picked files before clearing the input — resetting `.value` first can
+    // empty the FileList we already grabbed a reference to, silently dropping the pick.
+    addFiles(e.target.files);
     e.target.value = "";
-    addFiles(selected);
   };
 
   // Without these, dropping a file on the dropzone falls through to the browser's

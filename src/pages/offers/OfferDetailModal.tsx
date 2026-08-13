@@ -33,13 +33,31 @@ export default function OfferDetailModal({
         <div className="bg-purple-50 p-6 border-b border-purple-100">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-x-3">
-              <div className="flex size-12 items-center justify-center rounded-xl bg-purple-600 text-white shadow-sm flex-shrink-0">
-                <Building className="size-6" />
-              </div>
+              {offer.partnerLogoUrl ? (
+                <img
+                  src={offer.partnerLogoUrl}
+                  alt=""
+                  className="size-12 flex-shrink-0 rounded-xl object-cover shadow-sm"
+                />
+              ) : (
+                <div className="flex size-12 items-center justify-center rounded-xl bg-purple-600 text-white shadow-sm flex-shrink-0">
+                  <Building className="size-6" />
+                </div>
+              )}
               <div>
                 <h3 className="text-lg font-bold text-gray-900">
                   {offer.partnerName || offer.title}
                 </h3>
+                {offer.partnerWebsiteUrl && (
+                  <a
+                    href={offer.partnerWebsiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-semibold text-purple-600 hover:text-purple-700"
+                  >
+                    Visit website
+                  </a>
+                )}
               </div>
             </div>
 
