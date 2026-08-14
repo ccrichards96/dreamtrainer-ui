@@ -454,11 +454,41 @@ export const deleteModule = async (moduleId: string): Promise<void> => {
   }
 };
 
+/**
+ * Upload an image for module rich text content
+ * POST /modules/upload-image
+ * @param file - The image file to upload
+ * @returns Promise<string> - The public S3 image URL
+ */
+export const uploadModuleImage = async (file: File): Promise<string> => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await apiClient.post<
+      APIResponse<{ url: string; key: string; originalName: string }>
+    >(`/modules/upload-image`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data.data.url;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || "Failed to upload image",
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
 // Default export object with key service functions
 const modulesService = {
   getModuleById,
   getSectionWithModules,
   getModulesBySection,
+  uploadModuleImage,
 };
 
 export default modulesService;
+

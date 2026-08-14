@@ -15,7 +15,12 @@ import {
 } from "lucide-react";
 import RichTextEditor, { TOOLBAR_WITH_IMAGE } from "../RichTextEditor";
 import { Section, Module } from "../../types/modules";
-import { createModule, updateModule, deleteModule } from "../../services/api/modules";
+import {
+  createModule,
+  updateModule,
+  deleteModule,
+  uploadModuleImage,
+} from "../../services/api/modules";
 
 interface ModuleManagerProps {
   section: Section;
@@ -359,6 +364,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                     key={editingModule?.id ?? "new"}
                     value={formData.lessonContent}
                     onChange={handleQuillChange}
+                    onImageUpload={uploadModuleImage}
                     placeholder="Enter the lesson content..."
                     toolbar={TOOLBAR_WITH_IMAGE}
                   />
