@@ -9,6 +9,12 @@ export {
 export { useDashboardContext } from "./useDashboardContext";
 export { ApiProvider, ApiContext } from "./ApiContext";
 export { useApiContext } from "./useApiContext";
+export {
+  ImpersonationProvider,
+  ImpersonationContext,
+  type ImpersonationContextType,
+} from "./ImpersonationContext";
+export { useImpersonationContext } from "./useImpersonationContext";
 export { AppProvider, AppContext } from "./AppContext";
 export { useApp } from "./useAppContext";
 export { CourseProvider, CourseContext, type CourseContextType } from "./CourseContext";

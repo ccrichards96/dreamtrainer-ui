@@ -21,7 +21,14 @@ import CMSRoute from "./components/routes/CMSRoute";
 import InviteAccept from "./pages/invite/InviteAccept";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
-import { AuthProvider, ApiProvider, CheckoutProvider, ExpertDashboardProvider } from "./contexts";
+import ImpersonationBanner from "./components/admin/ImpersonationBanner";
+import {
+  AuthProvider,
+  ApiProvider,
+  ImpersonationProvider,
+  CheckoutProvider,
+  ExpertDashboardProvider,
+} from "./contexts";
 import { AppProvider } from "./contexts/AppContext";
 import NotFound from "./pages/NotFound";
 import { Role } from "./types/user";
@@ -82,128 +89,133 @@ function App() {
   return (
     <Router>
       <Auth0ProviderWithNavigate>
-        <AuthProvider>
-          <ApiProvider>
-            <AppProvider>
-              <CheckoutProvider>
-                <PageTracker />
-                <div className="min-h-screen bg-gray-100">
-                  <Navigation />
-                  <div className="pt-16">
-                    <Routes>
-                      <Route path="/" element={<CMSRoute />} />
-                      <Route path="/home" element={<Home />} />
+        {/* ImpersonationProvider sits above AuthProvider so the auth identity
+            exposed to the app can be swapped for the impersonated user. */}
+        <ImpersonationProvider>
+          <AuthProvider>
+            <ApiProvider>
+              <AppProvider>
+                <CheckoutProvider>
+                  <PageTracker />
+                  <div className="min-h-screen bg-gray-100">
+                    <Navigation />
+                    <ImpersonationBanner />
+                    <div className="pt-16">
+                      <Routes>
+                        <Route path="/" element={<CMSRoute />} />
+                        <Route path="/home" element={<Home />} />
 
-                      <Route path="/blog" element={<BlogPage />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/signup" element={<Signup />} />
-                      <Route path="/invite/accept" element={<InviteAccept />} />
-                      <Route path="/courses" element={<ExploreCourses />} />
-                      <Route path="/courses/:slug" element={<CourseProfilePage />} />
-                      <Route
-                        path="/courses/:slug/checkout"
-                        element={
-                          <ProtectedRoute requireSubscription={true}>
-                            <CourseCheckout />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/courses/:slug/dashboard"
-                        element={
-                          <ProtectedRoute requireSubscription={true}>
-                            <Dashboard />
-                          </ProtectedRoute>
-                        }
-                      />
-
-                      <Route path="/expert">
+                        <Route path="/blog" element={<BlogPage />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/signup" element={<Signup />} />
+                        <Route path="/invite/accept" element={<InviteAccept />} />
+                        <Route path="/courses" element={<ExploreCourses />} />
+                        <Route path="/courses/:slug" element={<CourseProfilePage />} />
                         <Route
-                          path="/expert/dashboard/:tab?"
+                          path="/courses/:slug/checkout"
                           element={
-                            <ProtectedRoute requireExpertProfile>
-                              <ExpertDashboardProvider>
-                                <ExpertDashboard />
-                              </ExpertDashboardProvider>
+                            <ProtectedRoute requireSubscription={true}>
+                              <CourseCheckout />
                             </ProtectedRoute>
                           }
                         />
                         <Route
-                          path="/expert/dashboard/courses/:id/manage"
+                          path="/courses/:slug/dashboard"
                           element={
-                            <ProtectedRoute requireExpertProfile>
-                              <ExpertDashboardProvider>
-                                <CourseManage />
-                              </ExpertDashboardProvider>
+                            <ProtectedRoute requireSubscription={true}>
+                              <Dashboard />
                             </ProtectedRoute>
                           }
                         />
-                      </Route>
 
-                      <Route path="/experts/:slug" element={<ExpertProfilePage />} />
-                      <Route
-                        path="/onboarding"
-                        element={
-                          <ProtectedRoute>
-                            <Onboarding />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/expert-onboarding"
-                        element={
-                          <ProtectedRoute>
-                            <ExpertOnboarding />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                      <Route
-                        path="/renew"
-                        element={
-                          <ProtectedRoute>
-                            <SubscriptionRequired />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/account"
-                        element={
-                          <ProtectedRoute>
-                            <AccountPage />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/admin"
-                        element={
-                          <ProtectedRoute allowedRoles={[Role.Admin]}>
-                            <AdminDashboard />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/teach"
-                        element={
-                          <ProtectedRoute>
-                            <TeachOnDreamTrainer />
-                          </ProtectedRoute>
-                        }
-                      />
-                      {/* CMS Routes */}
-                      <Route path="/site/*" element={<CMSRoute />} />
-                      <Route path="/site" element={<CMSRoute />} />
+                        <Route path="/expert">
+                          <Route
+                            path="/expert/dashboard/:tab?"
+                            element={
+                              <ProtectedRoute requireExpertProfile>
+                                <ExpertDashboardProvider>
+                                  <ExpertDashboard />
+                                </ExpertDashboardProvider>
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/expert/dashboard/courses/:id/manage"
+                            element={
+                              <ProtectedRoute requireExpertProfile>
+                                <ExpertDashboardProvider>
+                                  <CourseManage />
+                                </ExpertDashboardProvider>
+                              </ProtectedRoute>
+                            }
+                          />
+                        </Route>
 
-                      {/* 404 Catch-all route - must be last */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
+                        <Route path="/experts/:slug" element={<ExpertProfilePage />} />
+                        <Route
+                          path="/onboarding"
+                          element={
+                            <ProtectedRoute>
+                              <Onboarding />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/expert-onboarding"
+                          element={
+                            <ProtectedRoute>
+                              <ExpertOnboarding />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                        <Route
+                          path="/renew"
+                          element={
+                            <ProtectedRoute>
+                              <SubscriptionRequired />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/account"
+                          element={
+                            <ProtectedRoute>
+                              <AccountPage />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin"
+                          element={
+                            <ProtectedRoute allowedRoles={[Role.Admin]}>
+                              <AdminDashboard />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/teach"
+                          element={
+                            <ProtectedRoute>
+                              <TeachOnDreamTrainer />
+                            </ProtectedRoute>
+                          }
+                        />
+                        {/* CMS Routes */}
+                        <Route path="/site/*" element={<CMSRoute />} />
+                        <Route path="/site" element={<CMSRoute />} />
+
+                        {/* 404 Catch-all route - must be last */}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </div>
+                    <Footer />
                   </div>
-                  <Footer />
-                </div>
-              </CheckoutProvider>
-            </AppProvider>
-          </ApiProvider>
-        </AuthProvider>
+                </CheckoutProvider>
+              </AppProvider>
+            </ApiProvider>
+          </AuthProvider>
+        </ImpersonationProvider>
       </Auth0ProviderWithNavigate>
     </Router>
   );
