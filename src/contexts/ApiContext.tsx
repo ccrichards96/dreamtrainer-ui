@@ -1,6 +1,11 @@
 import React, { createContext, useEffect, ReactNode } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import apiClient from "../services/api/client";
+import {
+  getActiveImpersonation,
+  clearImpersonation,
+  isTokenExpired,
+} from "../services/impersonation";
 
 interface ApiContextType {
   // We can extend this later with additional API-related functionality
@@ -14,17 +19,6 @@ export const ApiContext = createContext<ApiContextType>({
 interface ApiProviderProps {
   children: ReactNode;
 }
-
-// Decode a JWT and check whether it has passed its `exp` claim
-const isTokenExpired = (token: string): boolean => {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    if (!payload.exp) return false;
-    return Date.now() >= payload.exp * 1000;
-  } catch {
-    return true; // treat malformed tokens as expired
-  }
-};
 
 export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
   const { getAccessTokenSilently, isAuthenticated, isLoading, logout } = useAuth0();
@@ -50,7 +44,12 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
       requestInterceptor = apiClient.interceptors.request.use(
         async (config) => {
           try {
-            if (isAuthenticated) {
+            // An active impersonation session always takes priority — otherwise the
+            // Auth0 branch below would overwrite it with the admin's own token.
+            const impersonation = getActiveImpersonation();
+            if (impersonation) {
+              config.headers.Authorization = `Bearer ${impersonation.accessToken}`;
+            } else if (isAuthenticated) {
               // Get Auth0 token (auto-refreshes via refresh token when possible)
               const token = await getAccessTokenSilently({
                 authorizationParams: {
@@ -120,8 +119,15 @@ export const ApiProvider: React.FC<ApiProviderProps> = ({ children }) => {
       responseInterceptor = apiClient.interceptors.response.use(
         (response) => response,
         (error) => {
-          if (error?.response?.status === 401 && isAuthenticated) {
-            forceLogout();
+          if (error?.response?.status === 401) {
+            if (getActiveImpersonation()) {
+              // The impersonation token expired/was rejected — drop back to the
+              // admin's own (still-valid) Auth0 session rather than logging them out.
+              clearImpersonation();
+              window.location.reload();
+            } else if (isAuthenticated) {
+              forceLogout();
+            }
           }
           return Promise.reject(error);
         }

@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { UserCog } from "lucide-react";
 import { useAuthContext } from "../contexts";
 import { useApp } from "../contexts/useAppContext";
+import { useImpersonationContext } from "../contexts/useImpersonationContext";
 import { Role } from "../types/user";
 
 interface AvatarDropdownProps {
@@ -9,8 +11,9 @@ interface AvatarDropdownProps {
 }
 
 export default function AvatarDropdown({ className = "" }: AvatarDropdownProps) {
-  const { user, logout } = useAuthContext();
+  const { user, logout, isImpersonating } = useAuthContext();
   const { userProfile } = useApp();
+  const { returnToAdmin } = useImpersonationContext();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -40,8 +43,14 @@ export default function AvatarDropdown({ className = "" }: AvatarDropdownProps) 
     return name.split(" ")[0];
   };
 
-  const displayName = user?.name || user?.email || "User";
-  const firstName = getFirstName(user?.name || user?.email);
+  // `userProfile` is fetched under the active token (impersonated when impersonating),
+  // so it's the freshest source; `user` from AuthContext is already impersonation-aware.
+  const profileName = userProfile
+    ? `${userProfile.firstName ?? ""} ${userProfile.lastName ?? ""}`.trim()
+    : "";
+  const email = userProfile?.email || user?.email;
+  const displayName = profileName || user?.name || email || "User";
+  const firstName = getFirstName(profileName || user?.name || email);
   const avatarUrl = userProfile?.avatarUrl || user?.picture;
 
   return (
@@ -87,8 +96,14 @@ export default function AvatarDropdown({ className = "" }: AvatarDropdownProps) 
           <div className="py-1">
             {/* User Info Section */}
             <div className="px-4 py-3 border-b border-gray-100">
+              {isImpersonating && (
+                <p className="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-amber-600">
+                  <UserCog className="h-3 w-3 flex-shrink-0" />
+                  Viewing as
+                </p>
+              )}
               <p className="text-sm font-medium text-gray-900 truncate">{displayName}</p>
-              {user?.email && <p className="text-sm text-gray-500 truncate">{user.email}</p>}
+              {email && <p className="text-sm text-gray-500 truncate">{email}</p>}
             </div>
 
             {/* Menu Items */}
@@ -125,16 +140,29 @@ export default function AvatarDropdown({ className = "" }: AvatarDropdownProps) 
             {/* Divider */}
             <div className="border-t border-gray-100 my-1"></div>
 
-            {/* Logout */}
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                logout();
-              }}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-            >
-              Sign out
-            </button>
+            {/* While impersonating, ending the session returns the admin to their own
+                account rather than signing them out of Auth0 entirely. */}
+            {isImpersonating ? (
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  returnToAdmin();
+                }}
+                className="block w-full text-left px-4 py-2 text-sm font-medium text-amber-700 hover:bg-amber-50"
+              >
+                Return to Admin
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  logout();
+                }}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              >
+                Sign out
+              </button>
+            )}
           </div>
         </div>
       )}

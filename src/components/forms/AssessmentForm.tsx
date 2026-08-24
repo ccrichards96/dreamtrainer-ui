@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuthContext } from "../../contexts";
 import { CheckCircle, Clock, Star, TrendingUp, ArrowRight, RefreshCw } from "lucide-react";
 import { submitAssessment, type AssessmentSubmission } from "../../services/api";
 import { useCourseContext } from "../../contexts/useCourseContext";
@@ -32,7 +32,7 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({
   onSuccess,
   showHeader = true,
 }) => {
-  const { user } = useAuth0();
+  const { user } = useAuthContext();
   const { currentTest } = useCourseContext();
 
   const [form, setForm] = useState<AssessmentFormData>({

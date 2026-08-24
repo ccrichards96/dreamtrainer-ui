@@ -1,16 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Loader2, Info, Save, LifeBuoy, Camera, User } from "lucide-react";
-import { useAuth0 } from "@auth0/auth0-react";
 import { generateBillingPortalLink, getUserSubscriptions } from "../../services/api/billing";
 import { BillingData } from "../../types/billing";
 import SupportMessageForm from "../../components/forms/SupportMessageForm";
-import { useApp } from "../../contexts";
+import { useApp, useAuthContext } from "../../contexts";
 import { updateCurrentUser, uploadAvatar } from "../../services/api/users";
 import ExpertProfileTab from "./ExpertProfileTab";
 import type { ExpertProfileTabHandle } from "./ExpertProfileTab";
 
 const AccountPage = () => {
-  const { user, isLoading: isAuthLoading } = useAuth0();
+  const { user, loading: isAuthLoading, isImpersonating } = useAuthContext();
   const { userProfile, refreshUserProfile } = useApp();
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -41,6 +40,8 @@ const AccountPage = () => {
     firstName: userProfile?.firstName || "",
     lastName: userProfile?.lastName || "",
   });
+
+  const displayEmail = userProfile?.email || user?.email || "";
 
   // Sync profile data when userProfile loads/updates
   useEffect(() => {
@@ -319,7 +320,7 @@ const AccountPage = () => {
                       ? `${userProfile.firstName} ${userProfile.lastName}`.trim() || "User"
                       : user?.name || "User"}
                   </h3>
-                  <p className="text-sm text-gray-500">{user?.email}</p>
+                  <p className="text-sm text-gray-500">{displayEmail}</p>
                   <button
                     onClick={triggerImageUpload}
                     disabled={isUploadingImage}
@@ -355,7 +356,8 @@ const AccountPage = () => {
                     type="email"
                     disabled
                     className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm"
-                    defaultValue={user.email || ""}
+                    value={displayEmail}
+                    readOnly
                   />
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -423,7 +425,7 @@ const AccountPage = () => {
                   ) : null}
                   <button
                     onClick={handleManagePlan}
-                    disabled={isUpgrading || isLoadingBilling}
+                    disabled={isUpgrading || isLoadingBilling || isImpersonating}
                     className="w-full bg-[#c5a8de] text-white py-2 px-4 rounded-md hover:bg-[#7c5e99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isUpgrading ? (
@@ -435,6 +437,11 @@ const AccountPage = () => {
                       "Manage Plan"
                     )}
                   </button>
+                  {isImpersonating && (
+                    <p className="text-xs text-gray-500 text-center">
+                      Billing management is unavailable while logged in as another user.
+                    </p>
+                  )}
                 </div>
               </div>
 
