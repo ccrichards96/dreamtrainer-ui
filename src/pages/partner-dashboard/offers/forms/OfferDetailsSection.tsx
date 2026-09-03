@@ -28,7 +28,7 @@ export default function OfferDetailsSection({
             type="text"
             value={form.name}
             onChange={(e) => onChange({ name: e.target.value })}
-            placeholder="Guaranteed Admission Review for Tufts"
+            placeholder="Guaranteed Admission Review for Dream School"
             className={fieldInputClass}
           />
         </FormField>

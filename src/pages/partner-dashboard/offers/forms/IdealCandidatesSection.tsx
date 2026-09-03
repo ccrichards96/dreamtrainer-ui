@@ -37,7 +37,7 @@ export default function IdealCandidatesSection({ form, onChange }: IdealCandidat
             values={form.outcomes}
             onChange={(outcomes) => onChange({ outcomes })}
             itemLabel="outcome"
-            placeholder="Graduate from Tufts"
+            placeholder="Graduate from the program with a job offer"
           />
         </FormField>
       </div>
