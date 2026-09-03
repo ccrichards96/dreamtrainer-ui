@@ -1,0 +1,605 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  Edit3,
+  Trash2,
+  BookOpen,
+  Users,
+  Search,
+  ChevronUp,
+  ChevronDown,
+  Plus,
+  X,
+  Save,
+  Layers,
+} from "lucide-react";
+import { Course } from "../../types/modules";
+import { Category } from "../../types/categories";
+import { createCourse, deleteCourse, updateCourse } from "../../services/api/modules";
+
+interface CoursesOverviewProps {
+  courses: Course[];
+  categories: Category[];
+  loadingCategories: boolean;
+  loading: boolean;
+  error: string | null;
+  setError: (error: string | null) => void;
+  refreshCourses: () => Promise<void>;
+  setCourses: React.Dispatch<React.SetStateAction<Course[]>>;
+}
+
+const CoursesOverview: React.FC<CoursesOverviewProps> = ({
+  courses,
+  categories,
+  loadingCategories,
+  loading,
+  error,
+  setError,
+  refreshCourses,
+  setCourses,
+}) => {
+  const navigate = useNavigate();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [reorderingCourseId, setReorderingCourseId] = useState<string | null>(null);
+  const [showNewCourseForm, setShowNewCourseForm] = useState(false);
+  const [newCourseData, setNewCourseData] = useState({
+    name: "",
+    description: "",
+    categoryId: "",
+  });
+  const [creatingCourse, setCreatingCourse] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
+  const [deletingCourse, setDeletingCourse] = useState(false);
+
+  const filteredCourses = courses.filter(
+    (course) =>
+      course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleCreateCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCourseData.name.trim()) return;
+
+    try {
+      setCreatingCourse(true);
+      setError(null);
+      await createCourse({
+        name: newCourseData.name.trim(),
+        description: newCourseData.description.trim() || undefined,
+        categoryId: newCourseData.categoryId || undefined,
+      });
+
+      setSuccessMessage("Course created successfully!");
+      setNewCourseData({ name: "", description: "", categoryId: "" });
+      setShowNewCourseForm(false);
+      await refreshCourses();
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to create course";
+      setError(errorMessage);
+    } finally {
+      setCreatingCourse(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!courseToDelete) return;
+    try {
+      setDeletingCourse(true);
+      await deleteCourse(courseToDelete.id);
+      setCourseToDelete(null);
+      setSuccessMessage(`"${courseToDelete.name}" has been deleted.`);
+      await refreshCourses();
+      setTimeout(() => setSuccessMessage(null), 4000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to delete course";
+      setError(errorMessage);
+    } finally {
+      setDeletingCourse(false);
+    }
+  };
+
+  const handleMoveCourse = async (movedCourseId: string, direction: "up" | "down") => {
+    const currentIndex = courses.findIndex((c) => c.id === movedCourseId);
+    if (currentIndex === -1) return;
+
+    if (direction === "up" && currentIndex === 0) return;
+    if (direction === "down" && currentIndex === courses.length - 1) return;
+
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    const newList = [...courses];
+
+    [newList[currentIndex], newList[newIndex]] = [newList[newIndex], newList[currentIndex]];
+
+    newList.forEach((course, index) => {
+      course.order = index;
+    });
+
+    setCourses(newList);
+    setReorderingCourseId(movedCourseId);
+
+    try {
+      await Promise.all([
+        updateCourse(newList[currentIndex].id, { order: newList[currentIndex].order }),
+        updateCourse(newList[newIndex].id, { order: newList[newIndex].order }),
+      ]);
+    } catch (err) {
+      setError("Failed to reorder courses. Please refresh the page.");
+      console.error("Error reordering courses:", err);
+      await refreshCourses();
+    } finally {
+      setReorderingCourseId(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-4">Error: {error}</div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Page header with action */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Courses</h2>
+        <button
+          onClick={() => setShowNewCourseForm(!showNewCourseForm)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
+        >
+          <Plus className="w-4 h-4" />
+          New Course
+        </button>
+      </div>
+
+      {/* Success Message */}
+      {successMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2"
+        >
+          <div className="text-green-600 font-medium">{successMessage}</div>
+        </motion.div>
+      )}
+
+      {/* Inline New Course Form */}
+      {showNewCourseForm && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          className="bg-white rounded-lg shadow mb-6"
+        >
+          <div className="px-6 py-4 border-b border-gray-200 bg-blue-50">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900">Create New Course</h3>
+              <button
+                onClick={() => setShowNewCourseForm(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          <form onSubmit={handleCreateCourse} className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Course Name *
+                </label>
+                <input
+                  type="text"
+                  value={newCourseData.name}
+                  onChange={(e) => setNewCourseData({ ...newCourseData, name: e.target.value })}
+                  placeholder="Enter course name"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description *
+                </label>
+                <input
+                  type="text"
+                  value={newCourseData.description}
+                  required
+                  onChange={(e) =>
+                    setNewCourseData({ ...newCourseData, description: e.target.value })
+                  }
+                  placeholder="Enter description"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select
+                  value={newCourseData.categoryId}
+                  onChange={(e) =>
+                    setNewCourseData({ ...newCourseData, categoryId: e.target.value })
+                  }
+                  disabled={loadingCategories}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                >
+                  <option value="">
+                    {loadingCategories ? "Loading categories…" : "— No Category —"}
+                  </option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNewCourseForm(false);
+                  setNewCourseData({ name: "", description: "", categoryId: "" });
+                }}
+                className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={creatingCourse || !newCourseData.name.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {creatingCourse ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Create Course
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      )}
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-lg shadow p-6"
+        >
+          <div className="flex items-center">
+            <BookOpen className="w-8 h-8 text-blue-600" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Total Courses</p>
+              <p className="text-2xl font-semibold text-gray-900">{courses.length}</p>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white rounded-lg shadow p-6"
+        >
+          <div className="flex items-center">
+            <Users className="w-8 h-8 text-green-600" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Active Students</p>
+              <p className="text-2xl font-semibold text-gray-900">0</p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Search and Filter */}
+      <div className="bg-white rounded-lg shadow mb-6">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search courses..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Courses Grouped by Course Groups */}
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+            <div className="flex items-center gap-3">
+              <BookOpen className="w-6 h-6 text-blue-600" />
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">All Courses</h3>
+                <p className="text-sm text-gray-500">Manage courses and their sections</p>
+              </div>
+              <span className="ml-auto text-sm text-gray-500">
+                {filteredCourses.length} course(s)
+              </span>
+            </div>
+          </div>
+          {filteredCourses.length === 0 ? (
+            <div className="p-8 text-center">
+              <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">
+                No courses found. Create your first course to get started.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Mobile card list */}
+              <div className="block md:hidden divide-y divide-gray-200">
+                {filteredCourses.map((course, index) => (
+                  <div key={course.id} className="p-4 bg-white hover:bg-gray-50">
+                    <div className="flex items-start gap-3">
+                      <div className="flex flex-col items-center gap-1 pt-0.5 flex-shrink-0">
+                        <button
+                          onClick={() => handleMoveCourse(course.id, "up")}
+                          disabled={index === 0 || reorderingCourseId !== null}
+                          className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                          title="Move up"
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleMoveCourse(course.id, "down")}
+                          disabled={
+                            index === filteredCourses.length - 1 || reorderingCourseId !== null
+                          }
+                          className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                          title="Move down"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {course.name}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          ID: {course.id.slice(0, 8)}…
+                        </p>
+                        {course.description && (
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                            {course.description}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(course.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center gap-2 pl-10">
+                      <button
+                        onClick={() => navigate(`/admin/courses/${course.id}`)}
+                        disabled={reorderingCourseId !== null}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => navigate(`/admin/courses/${course.id}/sections`)}
+                        disabled={reorderingCourseId !== null}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 disabled:opacity-50"
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                        Sections
+                      </button>
+                      <button
+                        onClick={() => setCourseToDelete(course)}
+                        disabled={reorderingCourseId !== null}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Course
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Created
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredCourses.map((course, index) => (
+                      <tr key={course.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-start gap-3">
+                            <div className="flex flex-col items-center gap-1 pt-1">
+                              <button
+                                onClick={() => handleMoveCourse(course.id, "up")}
+                                disabled={index === 0 || reorderingCourseId !== null}
+                                className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                                title="Move up"
+                              >
+                                <ChevronUp className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleMoveCourse(course.id, "down")}
+                                disabled={
+                                  index === filteredCourses.length - 1 ||
+                                  reorderingCourseId !== null
+                                }
+                                className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                                title="Move down"
+                              >
+                                <ChevronDown className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {course.name}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                ID: {course.id.slice(0, 8)}...
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900 max-w-xs truncate">
+                            {course.description || "No description"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(course.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => navigate(`/admin/courses/${course.id}`)}
+                              disabled={reorderingCourseId !== null}
+                              className="text-blue-600 hover:text-blue-900 flex items-center gap-1 disabled:opacity-50"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => navigate(`/admin/courses/${course.id}/sections`)}
+                              disabled={reorderingCourseId !== null}
+                              className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50"
+                            >
+                              <Layers className="w-4 h-4" />
+                              Sections
+                            </button>
+                            <button
+                              onClick={() => setCourseToDelete(course)}
+                              disabled={reorderingCourseId !== null}
+                              className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {courseToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-200 flex items-center gap-3">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Delete Course</h3>
+                <p className="text-sm text-gray-500">"{courseToDelete.name}"</p>
+              </div>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm font-semibold text-red-600 mb-3">
+                This action is irreversible — by deleting this course you remove the following:
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700">
+                {[
+                  "All Course Details",
+                  "Related Stripe Products become Archived",
+                  "All Students & Their Subscriptions Are to Be Cancelled",
+                  "Any Related Course Assets",
+                  "Any Other Course Details",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <span className="mt-0.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => setCourseToDelete(null)}
+                disabled={deletingCourse}
+                className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                disabled={deletingCourse}
+                className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {deletingCourse ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Yes, Delete Course
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default CoursesOverview;

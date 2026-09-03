@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import {
   Save,
@@ -184,6 +185,10 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
   const [loadingPartnerInvites, setLoadingPartnerInvites] = useState(true);
   const [deletingPartnerInviteId, setDeletingPartnerInviteId] = useState<string | null>(null);
   const [openPartnerInviteMenuId, setOpenPartnerInviteMenuId] = useState<string | null>(null);
+  const [partnerInviteMenuPosition, setPartnerInviteMenuPosition] = useState<{
+    top: number;
+    right: number;
+  } | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -215,7 +220,10 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
       setLoadingPartnerInvites(true);
       getPartnerInvites(course.id)
         .then((invites) => setPartnerInvites(invites))
-        .catch(() => setPartnerInvites([]))
+        .catch((err) => {
+          console.error("Error fetching partner invites:", err);
+          setPartnerInvites([]);
+        })
         .finally(() => setLoadingPartnerInvites(false));
     } else {
       setLoadingCourseExperts(false);
@@ -1119,11 +1127,11 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
               </div>
             )}
 
-            {loadingCoursePartners ? (
+            {loadingCoursePartners || loadingPartnerInvites ? (
               <div className="flex justify-center p-6 border border-gray-200 border-dashed rounded-lg">
                 <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
               </div>
-            ) : coursePartners.length > 0 ? (
+            ) : coursePartners.length > 0 || partnerInvites.length > 0 ? (
               <div className="border border-gray-200 rounded-lg overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 text-sm">
                   <thead className="bg-gray-50">
@@ -1134,6 +1142,9 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                       <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Role
                       </th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
                       <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
@@ -1141,7 +1152,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {coursePartners.map((partner) => (
-                      <tr key={partner.id}>
+                      <tr key={`partner-${partner.id}`}>
                         <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
                           <div className="flex items-center">
                             {partner.partnerProfile?.logoUrl ? (
@@ -1186,6 +1197,11 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                             </select>
                           )}
                         </td>
+                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            active
+                          </span>
+                        </td>
                         <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
                           <button
                             type="button"
@@ -1198,41 +1214,8 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                         </td>
                       </tr>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="p-6 border border-gray-200 border-dashed rounded-lg bg-gray-50 text-center">
-                <p className="text-sm text-gray-500 mb-1">No partners assigned yet.</p>
-                <p className="text-xs text-gray-400">
-                  Assign an existing partner or invite a new one below.
-                </p>
-              </div>
-            )}
-
-            {/* Pending Partner Invites */}
-            {!loadingPartnerInvites && partnerInvites.length > 0 && (
-              <div className="border border-gray-200 rounded-lg overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 text-sm">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Pending Invite
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Role
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
                     {partnerInvites.map((invite) => (
-                      <tr key={invite.id}>
+                      <tr key={`invite-${invite.id}`}>
                         <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
                           <div className="flex items-center gap-3">
                             <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
@@ -1261,11 +1244,19 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                           <div className="relative inline-block text-left">
                             <button
                               type="button"
-                              onClick={() =>
-                                setOpenPartnerInviteMenuId(
-                                  openPartnerInviteMenuId === invite.id ? null : invite.id
-                                )
-                              }
+                              onClick={(e) => {
+                                if (openPartnerInviteMenuId === invite.id) {
+                                  setOpenPartnerInviteMenuId(null);
+                                  setPartnerInviteMenuPosition(null);
+                                  return;
+                                }
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setPartnerInviteMenuPosition({
+                                  top: rect.bottom + 4,
+                                  right: window.innerWidth - rect.right,
+                                });
+                                setOpenPartnerInviteMenuId(invite.id);
+                              }}
                               disabled={deletingPartnerInviteId === invite.id}
                               className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-50"
                             >
@@ -1275,30 +1266,52 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                                 <MoreHorizontal className="w-4 h-4" />
                               )}
                             </button>
-                            {openPartnerInviteMenuId === invite.id && (
-                              <>
-                                <div
-                                  className="fixed inset-0 z-10"
-                                  onClick={() => setOpenPartnerInviteMenuId(null)}
-                                />
-                                <div className="absolute right-0 z-20 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeletePartnerInvite(invite.id)}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                            {openPartnerInviteMenuId === invite.id &&
+                              partnerInviteMenuPosition &&
+                              createPortal(
+                                <>
+                                  <div
+                                    className="fixed inset-0 z-40"
+                                    onClick={() => {
+                                      setOpenPartnerInviteMenuId(null);
+                                      setPartnerInviteMenuPosition(null);
+                                    }}
+                                  />
+                                  <div
+                                    className="fixed z-50 w-36 bg-white border border-gray-200 rounded-lg shadow-lg py-1"
+                                    style={{
+                                      top: partnerInviteMenuPosition.top,
+                                      right: partnerInviteMenuPosition.right,
+                                    }}
                                   >
-                                    <Trash2 className="w-4 h-4" />
-                                    Revoke
-                                  </button>
-                                </div>
-                              </>
-                            )}
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setPartnerInviteMenuPosition(null);
+                                        handleDeletePartnerInvite(invite.id);
+                                      }}
+                                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                      Revoke
+                                    </button>
+                                  </div>
+                                </>,
+                                document.body
+                              )}
                           </div>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+            ) : (
+              <div className="p-6 border border-gray-200 border-dashed rounded-lg bg-gray-50 text-center">
+                <p className="text-sm text-gray-500 mb-1">No partners assigned yet.</p>
+                <p className="text-xs text-gray-400">
+                  Assign an existing partner or invite a new one below.
+                </p>
               </div>
             )}
 

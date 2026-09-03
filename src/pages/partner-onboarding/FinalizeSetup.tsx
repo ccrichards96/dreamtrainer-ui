@@ -97,20 +97,6 @@ export default function FinalizeSetup({ data, onBack, onComplete, currentStep }:
             {data.orgWebsite && <p className="text-gray-500">{data.orgWebsite}</p>}
           </div>
 
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-1">Team</h3>
-            {data.teamInvites.length === 0 ? (
-              <p className="text-gray-500">No teammates invited yet.</p>
-            ) : (
-              <ul className="text-gray-600 space-y-0.5">
-                {data.teamInvites.map((invite) => (
-                  <li key={invite.email}>
-                    {invite.firstName} {invite.lastName} — {invite.email}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
         </div>
 
         <div className="pt-8 flex justify-end gap-3">

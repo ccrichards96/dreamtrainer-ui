@@ -12,19 +12,18 @@ import {
   ChevronDown,
   BookOpen,
 } from "lucide-react";
-import { Course, Section, Module } from "../../types/modules";
+import { Course, Section } from "../../types/modules";
 import {
   getCourseSections,
   createSection,
   updateSection,
   deleteSection,
-  getSectionWithModules,
 } from "../../services/api/modules";
 import axios from "axios";
 
 interface SectionManagerProps {
   course: Course;
-  onManageModules: (section: Section, modules: Module[]) => void;
+  onManageModules: (section: Section) => void;
 }
 
 interface SectionFormData {
@@ -41,7 +40,6 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
   const [loadingSections, setLoadingSections] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reorderingSectionId, setReorderingSectionId] = useState<string | null>(null);
-  const [loadingModulesForSection, setLoadingModulesForSection] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<SectionFormData>({
     name: "",
@@ -201,19 +199,6 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
       setSectionList(sections.sort((a, b) => a.order - b.order));
     } finally {
       setReorderingSectionId(null);
-    }
-  };
-
-  const handleManageModules = async (section: Section) => {
-    try {
-      setLoadingModulesForSection(section.id);
-      const sectionWithModules = await getSectionWithModules(section.id);
-      onManageModules(section, sectionWithModules.modules || []);
-    } catch (err) {
-      setError("Failed to load section modules");
-      console.error("Error fetching section modules:", err);
-    } finally {
-      setLoadingModulesForSection(null);
     }
   };
 
@@ -448,17 +433,11 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                   {/* Actions */}
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => handleManageModules(section)}
-                      disabled={
-                        reorderingSectionId !== null || loadingModulesForSection === section.id
-                      }
+                      onClick={() => onManageModules(section)}
+                      disabled={reorderingSectionId !== null}
                       className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50 px-3 py-1.5 border border-green-200 rounded-lg hover:bg-green-50"
                     >
-                      {loadingModulesForSection === section.id ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
-                      ) : (
-                        <BookOpen className="w-4 h-4" />
-                      )}
+                      <BookOpen className="w-4 h-4" />
                       Modules
                     </button>
                     <button

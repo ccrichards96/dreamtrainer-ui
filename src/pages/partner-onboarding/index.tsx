@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import WizardHeader from "./WizardHeader";
 import ProfileSetup from "./ProfileSetup";
 import PartnerDetailsSetup from "./PartnerDetailsSetup";
-import TeamSetup from "./TeamSetup";
 import FinalizeSetup from "./FinalizeSetup";
 import { OnboardingPartnerData } from "./types";
 import { useAuthContext } from "../../contexts/useAuthContext";
@@ -13,12 +12,12 @@ import { getCurrentUser } from "../../services/api/users";
 import { getMyPartnerProfile } from "../../services/api/partners";
 import { acceptPartnerInvite } from "../../services/api/course-invites";
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 
 export default function PartnerOnboarding() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const [data, setData] = useState<OnboardingPartnerData>({ teamInvites: [] });
+  const [data, setData] = useState<OnboardingPartnerData>({});
   const [isLoadingUserData, setIsLoadingUserData] = useState(true);
   const { user, isAuthenticated } = useAuthContext();
   const { refreshUserProfile } = useApp();
@@ -150,15 +149,6 @@ export default function PartnerOnboarding() {
                 />
               )}
               {currentStep === 3 && (
-                <TeamSetup
-                  data={data}
-                  updateData={updateData}
-                  onNext={nextStep}
-                  onBack={prevStep}
-                  currentStep={currentStep}
-                />
-              )}
-              {currentStep === 4 && (
                 <FinalizeSetup
                   data={data}
                   onBack={prevStep}
