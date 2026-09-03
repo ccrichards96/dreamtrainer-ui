@@ -1,6 +1,6 @@
 import apiClient, { APIResponse } from "./client";
 import axios from "axios";
-import { PartnerCourseRole } from "../../types/partner";
+import { PartnerCourseRole, PartnerPrefillData } from "../../types/partner";
 
 export interface CourseInvite {
   id: string;
@@ -221,25 +221,48 @@ export const inviteStakeholders = async (
 };
 
 /**
- * Invite partners to a course by email
+ * Invite a partner to a course by email, optionally prefilling their
+ * onboarding details (name, org, bio, etc.) so they only need to verify
+ * the data during onboarding instead of typing it from scratch.
  * POST /courses/:courseId/invite/partners
  */
 export const invitePartners = async (
   courseId: string,
-  emails: string[],
-  partnerRole: PartnerCourseRole = "partner"
-): Promise<CourseInvite[]> => {
+  email: string,
+  partnerRole: PartnerCourseRole = "partner",
+  prefillData?: PartnerPrefillData
+): Promise<CourseInvite> => {
   try {
-    const response = await apiClient.post<APIResponse<CourseInvite[]>>(
+    const response = await apiClient.post<APIResponse<CourseInvite>>(
       `/courses/${courseId}/invite/partners`,
-      { emails, partnerRole }
+      { email, partnerRole, prefillData }
     );
     return response.data.data;
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Failed to send partner invitations: ${error.message}`);
+      throw new Error(`Failed to send partner invitation: ${error.message}`);
     }
-    throw new Error("An unexpected error occurred while sending invitations");
+    throw new Error("An unexpected error occurred while sending the invitation");
+  }
+};
+
+/**
+ * Look up prefill data for a pending partner invite by token. Called by the
+ * onboarding wizard before the invitee is authenticated. Returns null if the
+ * invite carries no prefill data, has expired, or has already been used.
+ * GET /courses/invite/prefill?token=...
+ */
+export const getInvitePrefillData = async (
+  token: string
+): Promise<PartnerPrefillData | null> => {
+  try {
+    const response = await apiClient.get<APIResponse<PartnerPrefillData | null>>(
+      `/courses/invite/prefill`,
+      { params: { token } }
+    );
+    return response.data.data;
+  } catch (error) {
+    return null;
   }
 };
 
@@ -347,6 +370,7 @@ export const courseInvitesService = {
   deleteStakeholderInvite,
   inviteStakeholders,
   invitePartners,
+  getInvitePrefillData,
   getPartnerInvites,
   deletePartnerInvite,
   acceptSupportExpertInvite,

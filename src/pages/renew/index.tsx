@@ -11,11 +11,13 @@ import {
 } from "lucide-react";
 import { useApp } from "../../contexts/useAppContext";
 import { billingService } from "../../services/api/billing";
+import SupportMessageForm from "../../components/forms/SupportMessageForm";
 
 export default function SubscriptionRequired() {
   const { userBilling, refreshUserBilling } = useApp();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [products, setProducts] = useState<Array<{ priceId?: string; id: string; name?: string }>>(
     []
   );
@@ -256,13 +258,14 @@ export default function SubscriptionRequired() {
                 If you're having trouble reactivating your subscription or have questions, our
                 support team is here to help.
               </p>
-              <a
-                href="mailto:support@dreamtrainer.com"
+              <button
+                type="button"
+                onClick={() => setIsSupportModalOpen(true)}
                 className="inline-flex items-center gap-2 text-[#c5a8de] hover:text-[#b399d6] font-medium transition-colors"
               >
                 Contact Support
                 <ArrowRight className="w-4 h-4" />
-              </a>
+              </button>
             </div>
 
             {/* Reactivation Benefits */}
@@ -286,6 +289,10 @@ export default function SubscriptionRequired() {
           </div>
         </motion.div>
       </div>
+      <SupportMessageForm
+        isOpen={isSupportModalOpen}
+        onClose={() => setIsSupportModalOpen(false)}
+      />
     </div>
   );
 }

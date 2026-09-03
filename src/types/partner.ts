@@ -61,6 +61,17 @@ export interface PartnerProfile {
   courses: PartnerAssignedCourse[];
 }
 
+export interface PartnerPrefillData {
+  firstName?: string;
+  lastName?: string;
+  orgName?: string;
+  title?: string;
+  bio?: string;
+  orgBio?: string;
+  websiteUrl?: string;
+  calendarLink?: string;
+}
+
 export interface UpdatePartnerProfileDTO {
   orgName?: string;
   title?: string | null;

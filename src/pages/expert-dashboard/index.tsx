@@ -8,6 +8,7 @@ import GettingStarted from "./core/GettingStarted";
 import Performance from "./core/Performance";
 import { getExpertPerformance } from "../../services/api/experts";
 import { ExpertPerformanceData } from "../../types/expert";
+import SupportMessageForm from "../../components/forms/SupportMessageForm";
 
 type Tab = "getting-started" | "courses" | "communications" | "performance" | "support";
 
@@ -29,6 +30,7 @@ export default function ExpertDashboard() {
 
   const [performanceData, setPerformanceData] = useState<ExpertPerformanceData | null>(null);
   const [performanceLoading, setPerformanceLoading] = useState(false);
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
 
   useEffect(() => {
     setPerformanceLoading(true);
@@ -63,9 +65,10 @@ export default function ExpertDashboard() {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Support</h1>
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <a
-              href="mailto:support@thedreamtrainer.com"
-              className="group block rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-purple-300 transition"
+            <button
+              type="button"
+              onClick={() => setIsSupportModalOpen(true)}
+              className="group block text-left rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-purple-300 transition"
             >
               <div className="flex items-center gap-x-4">
                 <div className="flex size-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
@@ -80,10 +83,14 @@ export default function ExpertDashboard() {
                   </p>
                 </div>
               </div>
-            </a>
+            </button>
           </div>
         </div>
       )}
+      <SupportMessageForm
+        isOpen={isSupportModalOpen}
+        onClose={() => setIsSupportModalOpen(false)}
+      />
     </DashboardLayout>
   );
 }

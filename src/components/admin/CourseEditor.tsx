@@ -16,19 +16,17 @@ import {
 } from "lucide-react";
 import { Course, CourseExpert, CoursePartner, CourseStatus, ListingStatus } from "../../types/modules";
 import { PartnerCourseRole } from "../../types/partner";
+import InvitePartnerModal from "./InvitePartnerModal";
+import { toast } from "../toast";
 import { Category } from "../../types/categories";
 import { User } from "../../types/user";
 import { updateCourse } from "../../services/api/modules";
 import courseExpertsService from "../../services/api/course-experts";
 import coursePartnersService from "../../services/api/course-partners";
-import {
-  invitePartners,
-  getPartnerInvites,
-  deletePartnerInvite,
-  CourseInvite,
-} from "../../services/api/course-invites";
+import { invitePartners, getPartnerInvites, CourseInvite } from "../../services/api/course-invites";
 import { getAllCategories } from "../../services/api/categories";
 import { getUsersPaginated } from "../../services/api/admin";
+import RevokeInviteModal from "./RevokeInviteModal";
 
 interface CourseEditorProps {
   course: Course;
@@ -178,12 +176,14 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
 
   // Invite-by-email state for partners who don't have an account yet
   const [partnerEmailInput, setPartnerEmailInput] = useState("");
-  const [partnerEmails, setPartnerEmails] = useState<string[]>([]);
   const [partnerInviteRole, setPartnerInviteRole] = useState<PartnerCourseRole>("partner");
   const [isInvitingPartners, setIsInvitingPartners] = useState(false);
+  const [isInvitePartnerModalOpen, setIsInvitePartnerModalOpen] = useState(false);
   const [partnerInvites, setPartnerInvites] = useState<CourseInvite[]>([]);
   const [loadingPartnerInvites, setLoadingPartnerInvites] = useState(true);
-  const [deletingPartnerInviteId, setDeletingPartnerInviteId] = useState<string | null>(null);
+  const [invitePendingRevocation, setInvitePendingRevocation] = useState<CourseInvite | null>(
+    null
+  );
   const [openPartnerInviteMenuId, setOpenPartnerInviteMenuId] = useState<string | null>(null);
   const [partnerInviteMenuPosition, setPartnerInviteMenuPosition] = useState<{
     top: number;
@@ -442,55 +442,23 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const addPartnerEmail = () => {
-    const email = partnerEmailInput.trim().toLowerCase();
-    if (email && isValidEmail(email) && !partnerEmails.includes(email)) {
-      setPartnerEmails((prev) => [...prev, email]);
-      setPartnerEmailInput("");
-    }
-  };
-
-  const removePartnerEmail = (emailToRemove: string) => {
-    setPartnerEmails((prev) => prev.filter((e) => e !== emailToRemove));
-  };
-
-  const handlePartnerEmailKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      addPartnerEmail();
-    }
-  };
-
   const handleInvitePartners = async () => {
-    if (partnerEmails.length === 0 || !course.id) return;
+    const email = partnerEmailInput.trim().toLowerCase();
+    if (!email || !isValidEmail(email) || !course.id) return;
 
     setIsInvitingPartners(true);
     try {
-      const invited = await invitePartners(course.id, partnerEmails, partnerInviteRole);
-      setPartnerInvites((prev) => [...prev, ...invited]);
-      setPartnerEmails([]);
-      setPartnerSuccess(
-        `Successfully sent ${invited.length} partner invitation${invited.length > 1 ? "s" : ""}.`
-      );
+      const invited = await invitePartners(course.id, email, partnerInviteRole);
+      setPartnerInvites((prev) => [...prev, invited]);
+      setPartnerEmailInput("");
+      setPartnerSuccess("Successfully sent partner invitation.");
       setTimeout(() => setPartnerSuccess(null), 3000);
+      toast.success("Partner invitation sent", { description: email });
     } catch (err: any) {
-      setError(err.message || "Failed to send partner invitations");
+      setError(err.message || "Failed to send partner invitation");
+      toast.error(err.message || "Failed to send partner invitation");
     } finally {
       setIsInvitingPartners(false);
-    }
-  };
-
-  const handleDeletePartnerInvite = async (inviteId: string) => {
-    if (!course.id) return;
-    setDeletingPartnerInviteId(inviteId);
-    setOpenPartnerInviteMenuId(null);
-    try {
-      await deletePartnerInvite(course.id, inviteId);
-      setPartnerInvites((prev) => prev.filter((i) => i.id !== inviteId));
-    } catch (err: any) {
-      setError(err.message || "Failed to remove partner invite");
-    } finally {
-      setDeletingPartnerInviteId(null);
     }
   };
 
@@ -1257,14 +1225,9 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                                 });
                                 setOpenPartnerInviteMenuId(invite.id);
                               }}
-                              disabled={deletingPartnerInviteId === invite.id}
                               className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-50"
                             >
-                              {deletingPartnerInviteId === invite.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <MoreHorizontal className="w-4 h-4" />
-                              )}
+                              <MoreHorizontal className="w-4 h-4" />
                             </button>
                             {openPartnerInviteMenuId === invite.id &&
                               partnerInviteMenuPosition &&
@@ -1287,8 +1250,9 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                                     <button
                                       type="button"
                                       onClick={() => {
+                                        setOpenPartnerInviteMenuId(null);
                                         setPartnerInviteMenuPosition(null);
-                                        handleDeletePartnerInvite(invite.id);
+                                        setInvitePendingRevocation(invite);
                                       }}
                                       className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
                                     >
@@ -1456,38 +1420,16 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
               </p>
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                 <div className="md:col-span-5">
-                  <label className="block text-xs font-medium text-purple-800 mb-1">
-                    Email Addresses
-                  </label>
-                  <div className="min-h-[46px] flex flex-wrap items-center gap-2 p-2 rounded-lg border border-purple-200 bg-white focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent">
-                    {partnerEmails.map((email) => (
-                      <span
-                        key={email}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 text-xs"
-                      >
-                        <Mail className="w-3 h-3" />
-                        {email}
-                        <button
-                          type="button"
-                          onClick={() => removePartnerEmail(email)}
-                          className="ml-0.5 p-0.5 hover:bg-purple-200 rounded-full"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
-                    <input
-                      type="email"
-                      value={partnerEmailInput}
-                      onChange={(e) => setPartnerEmailInput(e.target.value)}
-                      onKeyDown={handlePartnerEmailKeyDown}
-                      onBlur={addPartnerEmail}
-                      placeholder={partnerEmails.length === 0 ? "Enter email and press Enter" : ""}
-                      className="flex-1 min-w-[160px] border-0 p-1 text-sm text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none"
-                    />
-                  </div>
+                  <label className="block text-xs font-medium text-purple-800 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={partnerEmailInput}
+                    onChange={(e) => setPartnerEmailInput(e.target.value)}
+                    placeholder="partner@example.com"
+                    className="w-full px-3 py-2.5 bg-white border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm text-gray-900 placeholder:text-gray-400"
+                  />
                 </div>
-                <div className="md:col-span-4">
+                <div className="md:col-span-3">
                   <label className="block text-xs font-medium text-purple-800 mb-1">Role</label>
                   <select
                     value={partnerInviteRole}
@@ -1498,11 +1440,11 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                     <option value="partner">Partner</option>
                   </select>
                 </div>
-                <div className="md:col-span-3">
+                <div className="md:col-span-2">
                   <button
                     type="button"
                     onClick={handleInvitePartners}
-                    disabled={partnerEmails.length === 0 || isInvitingPartners}
+                    disabled={!isValidEmail(partnerEmailInput.trim()) || isInvitingPartners}
                     className="w-full px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex items-center justify-center gap-2"
                   >
                     {isInvitingPartners ? (
@@ -1512,8 +1454,43 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                     )}
                   </button>
                 </div>
+                <div className="md:col-span-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsInvitePartnerModalOpen(true)}
+                    className="w-full px-4 py-2.5 bg-white border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-100 text-sm font-medium"
+                  >
+                    Add Details
+                  </button>
+                </div>
               </div>
+              <p className="text-xs text-purple-700 mt-2">
+                Already know this partner? Use{" "}
+                <span className="font-medium">Add Details</span> to prefill their name, org, and
+                bio so they only need to verify it during onboarding.
+              </p>
             </div>
+
+            <InvitePartnerModal
+              isOpen={isInvitePartnerModalOpen}
+              onClose={() => setIsInvitePartnerModalOpen(false)}
+              courseId={course.id || ""}
+              onInvited={(invite) => {
+                setPartnerInvites((prev) => [...prev, invite]);
+                setPartnerSuccess("Partner invitation sent successfully.");
+                setTimeout(() => setPartnerSuccess(null), 3000);
+                toast.success("Partner invitation sent", { description: invite.email });
+              }}
+            />
+
+            <RevokeInviteModal
+              courseId={course.id || ""}
+              invite={invitePendingRevocation}
+              onClose={() => setInvitePendingRevocation(null)}
+              onRevoked={(inviteId) => {
+                setPartnerInvites((prev) => prev.filter((i) => i.id !== inviteId));
+              }}
+            />
           </div>
         </section>
 

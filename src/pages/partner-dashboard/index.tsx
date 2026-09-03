@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { HelpCircle } from "lucide-react";
 import PartnerShell, { type PartnerTab } from "./PartnerShell";
@@ -5,11 +6,13 @@ import Dashboard from "./core/Dashboard";
 import Offers from "./core/Offers";
 import Applicants from "./core/Applicants";
 import Cohorts from "./core/Cohorts";
+import SupportMessageForm from "../../components/forms/SupportMessageForm";
 
 const validTabs: PartnerTab[] = ["dashboard", "offers", "applicants", "cohorts", "support"];
 
 export default function PartnerDashboard() {
   const { tab } = useParams<{ tab?: string }>();
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
 
   const activeTab: PartnerTab = validTabs.includes(tab as PartnerTab)
     ? (tab as PartnerTab)
@@ -25,9 +28,10 @@ export default function PartnerDashboard() {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Support</h1>
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <a
-              href="mailto:support@thedreamtrainer.com"
-              className="group block rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-purple-300 transition"
+            <button
+              type="button"
+              onClick={() => setIsSupportModalOpen(true)}
+              className="group block text-left rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-purple-300 transition"
             >
               <div className="flex items-center gap-x-4">
                 <div className="flex size-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
@@ -42,10 +46,14 @@ export default function PartnerDashboard() {
                   </p>
                 </div>
               </div>
-            </a>
+            </button>
           </div>
         </div>
       )}
+      <SupportMessageForm
+        isOpen={isSupportModalOpen}
+        onClose={() => setIsSupportModalOpen(false)}
+      />
     </PartnerShell>
   );
 }

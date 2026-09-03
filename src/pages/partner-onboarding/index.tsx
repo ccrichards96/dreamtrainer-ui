@@ -10,7 +10,7 @@ import { useAuthContext } from "../../contexts/useAuthContext";
 import { useApp } from "../../contexts/useAppContext";
 import { getCurrentUser } from "../../services/api/users";
 import { getMyPartnerProfile } from "../../services/api/partners";
-import { acceptPartnerInvite } from "../../services/api/course-invites";
+import { acceptPartnerInvite, getInvitePrefillData } from "../../services/api/course-invites";
 
 const TOTAL_STEPS = 3;
 
@@ -23,8 +23,10 @@ export default function PartnerOnboarding() {
   const { refreshUserProfile } = useApp();
 
   // Prefill from Auth0 or the existing user record so the partner isn't
-  // retyping their name if it's already known, then layer in anything they
-  // already saved on a previous visit to the wizard.
+  // retyping their name if it's already known, then layer in anything an
+  // admin prefilled on the invite (if this signup came from an invite link),
+  // then finally layer in anything they already saved on a previous visit to
+  // the wizard — real saved profile data always wins over invite-time prefill.
   useEffect(() => {
     const initializeUserData = async () => {
       try {
@@ -47,6 +49,34 @@ export default function PartnerOnboarding() {
             }));
           } catch (error) {
             console.error("Failed to fetch user data:", error);
+          }
+        }
+
+        // If this signup came from a partner invite link that carries
+        // admin-prefilled details, merge those in. No prefill data (or an
+        // expired/used invite) is a normal case, not an error.
+        const rawPendingInvite = sessionStorage.getItem("pendingInvite");
+        if (rawPendingInvite) {
+          try {
+            const pendingInvite = JSON.parse(rawPendingInvite);
+            if (pendingInvite.role === "partner" && pendingInvite.token) {
+              const prefillData = await getInvitePrefillData(pendingInvite.token);
+              if (prefillData) {
+                setData((prev) => ({
+                  ...prev,
+                  firstName: prefillData.firstName || prev.firstName,
+                  lastName: prefillData.lastName || prev.lastName,
+                  title: prefillData.title || prev.title,
+                  calendarLink: prefillData.calendarLink || prev.calendarLink,
+                  bio: prefillData.bio || prev.bio,
+                  orgName: prefillData.orgName || prev.orgName,
+                  orgBio: prefillData.orgBio || prev.orgBio,
+                  orgWebsite: prefillData.websiteUrl || prev.orgWebsite,
+                }));
+              }
+            }
+          } catch (error) {
+            console.error("Failed to fetch invite prefill data:", error);
           }
         }
 

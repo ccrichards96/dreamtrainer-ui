@@ -27,7 +27,7 @@ const SupportMessageForm: React.FC<SupportMessageFormProps> = ({
   isOpen,
   onClose,
 }) => {
-  const recipientName = expertName || "the Dream Trainer Team";
+  const recipientName = expertName || "Jospeh";
   const { userProfile } = useApp();
   const [formData, setFormData] = useState<FormData>({
     courseId: courseId || undefined,
