@@ -114,6 +114,18 @@ export interface ExpertProfile {
 }
 
 /**
+ * Course Level - a custom skill tier/rank within a course (e.g. "Beginner", "Black Belt")
+ */
+export interface CourseLevel {
+  id: string;
+  courseId: string;
+  name: string;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
  * Section - Middle layer between Course and Module
  */
 interface Section {

@@ -2,13 +2,21 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { HelpCircle } from "lucide-react";
 import PartnerShell, { type PartnerTab } from "./PartnerShell";
+import GetStarted from "./core/GetStarted";
 import Dashboard from "./core/Dashboard";
 import Offers from "./core/Offers";
 import Applicants from "./core/Applicants";
 import Cohorts from "./core/Cohorts";
 import SupportMessageForm from "../../components/forms/SupportMessageForm";
 
-const validTabs: PartnerTab[] = ["dashboard", "offers", "applicants", "cohorts", "support"];
+const validTabs: PartnerTab[] = [
+  "get-started",
+  "dashboard",
+  "offers",
+  "applicants",
+  "cohorts",
+  "support",
+];
 
 export default function PartnerDashboard() {
   const { tab } = useParams<{ tab?: string }>();
@@ -20,6 +28,7 @@ export default function PartnerDashboard() {
 
   return (
     <PartnerShell activeTab={activeTab}>
+      {activeTab === "get-started" && <GetStarted />}
       {activeTab === "dashboard" && <Dashboard />}
       {activeTab === "offers" && <Offers />}
       {activeTab === "applicants" && <Applicants />}

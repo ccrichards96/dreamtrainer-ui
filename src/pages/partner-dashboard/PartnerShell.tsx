@@ -1,10 +1,17 @@
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, Tag, Users, GraduationCap, HelpCircle } from "lucide-react";
+import { Wand2, LayoutDashboard, Tag, Users, GraduationCap, HelpCircle } from "lucide-react";
 import DashboardLayout, { type SidebarItem } from "../expert-dashboard/DashboardLayout";
 
-export type PartnerTab = "dashboard" | "offers" | "applicants" | "cohorts" | "support";
+export type PartnerTab =
+  | "get-started"
+  | "dashboard"
+  | "offers"
+  | "applicants"
+  | "cohorts"
+  | "support";
 
 export const partnerNavItems: SidebarItem[] = [
+  { id: "get-started", label: "Get Started", icon: Wand2 },
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "offers", label: "Offers", icon: Tag },
   { id: "applicants", label: "Applicants", icon: Users },
@@ -13,7 +20,6 @@ export const partnerNavItems: SidebarItem[] = [
 ];
 
 interface PartnerShellProps {
-  /** Sidebar item to highlight as active */
   activeTab: PartnerTab;
   children: React.ReactNode;
 }

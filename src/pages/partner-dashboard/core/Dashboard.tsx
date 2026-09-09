@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { Wand2, ChevronRight } from "lucide-react";
 import { useApp } from "../../../contexts/useAppContext";
 
 interface QuickstartCard {
@@ -45,6 +46,28 @@ export default function Dashboard() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-800">Welcome, {firstName}</h1>
+
+      {/* Get Started */}
+      <button
+        type="button"
+        onClick={() => navigate("/partner/dashboard/get-started")}
+        className="group mt-6 flex w-full items-center justify-between gap-4 rounded-2xl bg-purple-50 border border-purple-100 p-5 text-left hover:bg-purple-100/70 transition"
+      >
+        <div className="flex items-center gap-4">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-purple-600 text-white">
+            <Wand2 className="size-5" />
+          </div>
+          <div>
+            <span className="block text-sm font-semibold text-gray-800">
+              New here? Get started
+            </span>
+            <span className="block text-sm text-gray-600">
+              Set up your partnership with our onboarding guide.
+            </span>
+          </div>
+        </div>
+        <ChevronRight className="size-5 shrink-0 text-purple-600 group-hover:translate-x-0.5 transition-transform" />
+      </button>
 
       {/* Quickstart */}
       <section className="mt-8">

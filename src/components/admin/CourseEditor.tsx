@@ -11,10 +11,20 @@ import {
   Trash2,
   Loader2,
   ChevronDown,
+  ChevronUp,
   Mail,
   MoreHorizontal,
+  Plus,
+  Layers,
 } from "lucide-react";
-import { Course, CourseExpert, CoursePartner, CourseStatus, ListingStatus } from "../../types/modules";
+import {
+  Course,
+  CourseExpert,
+  CoursePartner,
+  CourseLevel,
+  CourseStatus,
+  ListingStatus,
+} from "../../types/modules";
 import { PartnerCourseRole } from "../../types/partner";
 import InvitePartnerModal from "./InvitePartnerModal";
 import { toast } from "../toast";
@@ -23,10 +33,12 @@ import { User } from "../../types/user";
 import { updateCourse } from "../../services/api/modules";
 import courseExpertsService from "../../services/api/course-experts";
 import coursePartnersService from "../../services/api/course-partners";
+import courseLevelsService from "../../services/api/course-levels";
 import { invitePartners, getPartnerInvites, CourseInvite } from "../../services/api/course-invites";
 import { getAllCategories } from "../../services/api/categories";
 import { getUsersPaginated } from "../../services/api/admin";
 import RevokeInviteModal from "./RevokeInviteModal";
+import DeleteCourseLevelModal from "./DeleteCourseLevelModal";
 
 interface CourseEditorProps {
   course: Course;
@@ -196,6 +208,17 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
   const [expertSuccess, setExpertSuccess] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  // Course Levels management state
+  const [courseLevels, setCourseLevels] = useState<CourseLevel[]>([]);
+  const [loadingCourseLevels, setLoadingCourseLevels] = useState(true);
+  const [levelActionLoadingId, setLevelActionLoadingId] = useState<string | null>(null);
+  const [reorderingLevelId, setReorderingLevelId] = useState<string | null>(null);
+  const [editingLevelId, setEditingLevelId] = useState<string | null>(null);
+  const [editingLevelName, setEditingLevelName] = useState("");
+  const [newLevelName, setNewLevelName] = useState("");
+  const [levelSuccess, setLevelSuccess] = useState<string | null>(null);
+  const [levelPendingDeletion, setLevelPendingDeletion] = useState<CourseLevel | null>(null);
+
   useEffect(() => {
     getAllCategories()
       .then((data) => setCategories(data.sort((a, b) => a.sortOrder - b.sortOrder)))
@@ -225,10 +248,18 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
           setPartnerInvites([]);
         })
         .finally(() => setLoadingPartnerInvites(false));
+
+      setLoadingCourseLevels(true);
+      courseLevelsService
+        .getLevelsByCourse(course.id)
+        .then((levels) => setCourseLevels([...levels].sort((a, b) => a.order - b.order)))
+        .catch(() => setError("Failed to load course levels"))
+        .finally(() => setLoadingCourseLevels(false));
     } else {
       setLoadingCourseExperts(false);
       setLoadingCoursePartners(false);
       setLoadingPartnerInvites(false);
+      setLoadingCourseLevels(false);
     }
   }, [course.id]);
 
@@ -460,6 +491,105 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     } finally {
       setIsInvitingPartners(false);
     }
+  };
+
+  const handleAddLevel = async () => {
+    const name = newLevelName.trim();
+    if (!name || !course.id) return;
+
+    const nextOrder =
+      courseLevels.length > 0 ? Math.max(...courseLevels.map((l) => l.order)) + 1 : 0;
+
+    setLevelActionLoadingId("add");
+    try {
+      const newLevel = await courseLevelsService.createCourseLevel(course.id, {
+        name,
+        order: nextOrder,
+      });
+      setCourseLevels((prev) => [...prev, newLevel]);
+      setNewLevelName("");
+      setLevelSuccess("Course levels updated successfully");
+      setTimeout(() => setLevelSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to add level");
+    } finally {
+      setLevelActionLoadingId(null);
+    }
+  };
+
+  const handleStartEditLevel = (level: CourseLevel) => {
+    setEditingLevelId(level.id);
+    setEditingLevelName(level.name);
+  };
+
+  const handleCancelEditLevel = () => {
+    setEditingLevelId(null);
+    setEditingLevelName("");
+  };
+
+  const handleSaveLevelName = async (levelId: string) => {
+    const name = editingLevelName.trim();
+    const level = courseLevels.find((l) => l.id === levelId);
+    if (!name || !level || !course.id || name === level.name) {
+      handleCancelEditLevel();
+      return;
+    }
+
+    setLevelActionLoadingId(levelId);
+    try {
+      const updated = await courseLevelsService.updateCourseLevel(course.id, levelId, { name });
+      setCourseLevels((prev) => prev.map((l) => (l.id === levelId ? updated : l)));
+      setLevelSuccess("Course levels updated successfully");
+      setTimeout(() => setLevelSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to rename level");
+    } finally {
+      setLevelActionLoadingId(null);
+      handleCancelEditLevel();
+    }
+  };
+
+  const handleMoveLevel = async (levelId: string, direction: "up" | "down") => {
+    if (!course.id) return;
+    const currentIndex = courseLevels.findIndex((l) => l.id === levelId);
+    if (currentIndex === -1) return;
+    if (direction === "up" && currentIndex === 0) return;
+    if (direction === "down" && currentIndex === courseLevels.length - 1) return;
+
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    const newList = [...courseLevels];
+    [newList[currentIndex], newList[newIndex]] = [newList[newIndex], newList[currentIndex]];
+
+    // Swap the two levels' order values (not sequential reindex) to avoid
+    // colliding with any other level's order under the unique-per-course constraint.
+    const currentOrder = newList[currentIndex].order;
+    const swappedOrder = newList[newIndex].order;
+    newList[currentIndex] = { ...newList[currentIndex], order: swappedOrder };
+    newList[newIndex] = { ...newList[newIndex], order: currentOrder };
+
+    setCourseLevels(newList);
+    setReorderingLevelId(levelId);
+
+    try {
+      await courseLevelsService.updateCourseLevel(course.id, newList[currentIndex].id, {
+        order: newList[currentIndex].order,
+      });
+      await courseLevelsService.updateCourseLevel(course.id, newList[newIndex].id, {
+        order: newList[newIndex].order,
+      });
+    } catch (err: any) {
+      setError(err.message || "Failed to reorder levels. Please refresh the page.");
+      const levels = await courseLevelsService.getLevelsByCourse(course.id);
+      setCourseLevels([...levels].sort((a, b) => a.order - b.order));
+    } finally {
+      setReorderingLevelId(null);
+    }
+  };
+
+  const handleLevelDeleted = (levelId: string) => {
+    setCourseLevels((prev) => prev.filter((l) => l.id !== levelId));
+    setLevelSuccess("Course levels updated successfully");
+    setTimeout(() => setLevelSuccess(null), 3000);
   };
 
   const handleInputChange = (
@@ -1490,6 +1620,150 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
               onRevoked={(inviteId) => {
                 setPartnerInvites((prev) => prev.filter((i) => i.id !== inviteId));
               }}
+            />
+          </div>
+        </section>
+
+        {/* Section: Course Levels Management */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+              Course Levels
+            </h4>
+          </div>
+          <div className="space-y-4">
+            {levelSuccess && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <span className="text-green-700">{levelSuccess}</span>
+              </div>
+            )}
+
+            {loadingCourseLevels ? (
+              <div className="flex justify-center p-6 border border-gray-200 border-dashed rounded-lg">
+                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+              </div>
+            ) : courseLevels.length > 0 ? (
+              <div className="border border-gray-200 rounded-lg divide-y divide-gray-200">
+                {courseLevels.map((level, index) => (
+                  <div key={level.id} className="flex items-center gap-4 px-4 py-3">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveLevel(level.id, "up")}
+                        disabled={index === 0 || reorderingLevelId !== null}
+                        className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-0.5"
+                        title="Move up"
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveLevel(level.id, "down")}
+                        disabled={index === courseLevels.length - 1 || reorderingLevelId !== null}
+                        className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-0.5"
+                        title="Move down"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <Layers className="w-4 h-4 text-blue-400 flex-shrink-0" />
+
+                    <div className="flex-1 min-w-0">
+                      {editingLevelId === level.id ? (
+                        <input
+                          type="text"
+                          autoFocus
+                          value={editingLevelName}
+                          onChange={(e) => setEditingLevelName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleSaveLevelName(level.id);
+                            } else if (e.key === "Escape") {
+                              handleCancelEditLevel();
+                            }
+                          }}
+                          onBlur={() => handleSaveLevelName(level.id)}
+                          className="w-full px-2 py-1 border border-blue-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleStartEditLevel(level)}
+                          className="text-sm font-medium text-gray-900 hover:text-blue-600 text-left truncate"
+                        >
+                          {level.name}
+                        </button>
+                      )}
+                    </div>
+
+                    {levelActionLoadingId === level.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-gray-400 flex-shrink-0" />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setLevelPendingDeletion(level)}
+                        disabled={reorderingLevelId !== null}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 disabled:opacity-50 transition-colors flex-shrink-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-6 border border-gray-200 border-dashed rounded-lg bg-gray-50 text-center">
+                <p className="text-sm text-gray-500 mb-1">No levels yet.</p>
+                <p className="text-xs text-gray-400">
+                  Add a level below to let students be assigned a rank or tier in this course.
+                </p>
+              </div>
+            )}
+
+            {/* Add New Level Panel */}
+            <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg">
+              <h5 className="text-sm font-medium text-blue-900 mb-3 flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Add Level
+              </h5>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={newLevelName}
+                  onChange={(e) => setNewLevelName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddLevel();
+                    }
+                  }}
+                  placeholder="e.g. Beginner"
+                  className="flex-1 px-3 py-2.5 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddLevel}
+                  disabled={!newLevelName.trim() || levelActionLoadingId === "add"}
+                  className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium flex items-center justify-center gap-2 flex-shrink-0"
+                >
+                  {levelActionLoadingId === "add" ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    "Add Level"
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <DeleteCourseLevelModal
+              courseId={course.id || ""}
+              level={levelPendingDeletion}
+              otherLevels={courseLevels.filter((l) => l.id !== levelPendingDeletion?.id)}
+              onClose={() => setLevelPendingDeletion(null)}
+              onDeleted={handleLevelDeleted}
             />
           </div>
         </section>

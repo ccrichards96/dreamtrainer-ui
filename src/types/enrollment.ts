@@ -1,4 +1,4 @@
-import type { Course } from "./modules";
+import type { Course, CourseLevel } from "./modules";
 
 export interface CourseEnrollment {
   id: string;
@@ -31,6 +31,8 @@ export interface CourseStudent {
   dateJoined: string | null;
   status: CourseStudentStatus;
   passedAt: string | null;
+  courseLevelId: string | null;
+  courseLevel: CourseLevel | null;
   createdAt: string;
   updatedAt: string;
   user: CourseStudentUser;

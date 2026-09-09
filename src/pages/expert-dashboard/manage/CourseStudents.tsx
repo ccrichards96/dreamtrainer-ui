@@ -2,12 +2,15 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { listCourseStudents, updateCourseStudentStatus } from "../../../services/api/enrollment";
+import { getLevelsByCourse, assignStudentLevel } from "../../../services/api/course-levels";
 import type { CourseStudent, CourseStudentStatus } from "../../../types/enrollment";
+import type { CourseLevel } from "../../../types/modules";
 import { useExpertDashboardContext } from "../../../contexts";
 import { toast } from "../../../components/toast";
 import ManagePageHeader from "./ManagePageHeader";
 import StudentStatusDropdown from "./StudentStatusDropdown";
 import StudentStatusConfirmModal from "./StudentStatusConfirmModal";
+import StudentLevelDropdown from "./StudentLevelDropdown";
 
 /** A status change awaiting confirmation in the modal. */
 interface PendingStatusChange {
@@ -28,6 +31,9 @@ export default function CourseStudents() {
   const [pendingChange, setPendingChange] = useState<PendingStatusChange | null>(null);
   const [isSubmittingStatus, setIsSubmittingStatus] = useState(false);
 
+  const [levels, setLevels] = useState<CourseLevel[]>([]);
+  const [submittingLevelStudentId, setSubmittingLevelStudentId] = useState<string | null>(null);
+
   const fetchStudents = useCallback(async () => {
     if (!courseId) return;
     setIsLoading(true);
@@ -46,6 +52,13 @@ export default function CourseStudents() {
   useEffect(() => {
     fetchStudents();
   }, [fetchStudents]);
+
+  useEffect(() => {
+    if (!courseId) return;
+    getLevelsByCourse(courseId)
+      .then((result) => setLevels([...result].sort((a, b) => a.order - b.order)))
+      .catch(() => setLevels([]));
+  }, [courseId]);
 
   const getStudentName = (student: CourseStudent) =>
     `${student.user.firstName ?? ""} ${student.user.lastName ?? ""}`.trim() || student.user.email;
@@ -75,6 +88,31 @@ export default function CourseStudents() {
       toast.error(err instanceof Error ? err.message : "Failed to update student status");
     } finally {
       setIsSubmittingStatus(false);
+    }
+  };
+
+  const handleSelectLevel = async (student: CourseStudent, levelId: string | null) => {
+    if (!courseId) return;
+
+    setSubmittingLevelStudentId(student.id);
+    try {
+      const updated = await assignStudentLevel(courseId, student.id, levelId);
+      setStudents((prev) =>
+        prev.map((row) =>
+          row.id === student.id
+            ? { ...row, courseLevelId: updated.courseLevelId, courseLevel: updated.courseLevel }
+            : row
+        )
+      );
+      toast.success(
+        levelId
+          ? `${getStudentName(student)} set to ${updated.courseLevel?.name ?? "the selected level"}`
+          : `${getStudentName(student)} unassigned from a level`
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update student level");
+    } finally {
+      setSubmittingLevelStudentId(null);
     }
   };
 
@@ -134,6 +172,9 @@ export default function CourseStudents() {
                     <th scope="col" className="px-6 py-3 text-start">
                       <span className="text-xs font-semibold uppercase text-gray-800">Status</span>
                     </th>
+                    <th scope="col" className="px-6 py-3 text-start">
+                      <span className="text-xs font-semibold uppercase text-gray-800">Level</span>
+                    </th>
                   </tr>
                 </thead>
 
@@ -181,6 +222,17 @@ export default function CourseStudents() {
                             studentName={getStudentName(student)}
                             isBusy={isSubmittingStatus && pendingChange?.student.id === student.id}
                             onSelect={(status) => setPendingChange({ student, status })}
+                          />
+                        </div>
+                      </td>
+                      <td className="size-px whitespace-nowrap">
+                        <div className="px-6 py-3">
+                          <StudentLevelDropdown
+                            levels={levels}
+                            levelId={student.courseLevelId}
+                            studentName={getStudentName(student)}
+                            isBusy={submittingLevelStudentId === student.id}
+                            onSelect={(levelId) => handleSelectLevel(student, levelId)}
                           />
                         </div>
                       </td>
