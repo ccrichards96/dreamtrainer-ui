@@ -22,14 +22,12 @@ export default function DeleteCourseLevelModal({
   onDeleted,
 }: DeleteCourseLevelModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [needsReassignment, setNeedsReassignment] = useState(false);
-  const [reassignmentMessage, setReassignmentMessage] = useState<string | null>(null);
   const [reassignToLevelId, setReassignToLevelId] = useState("");
+
+  const hasStudents = (level?.numberOfStudents ?? 0) > 0;
 
   const handleClose = () => {
     if (isSubmitting) return;
-    setNeedsReassignment(false);
-    setReassignmentMessage(null);
     setReassignToLevelId("");
     onClose();
   };
@@ -37,28 +35,21 @@ export default function DeleteCourseLevelModal({
   const handleConfirm = async () => {
     if (!level) return;
 
-    if (needsReassignment && !reassignToLevelId) return;
+    if (hasStudents && !reassignToLevelId) return;
 
     setIsSubmitting(true);
     try {
       await deleteCourseLevel(
         courseId,
         level.id,
-        needsReassignment ? { reassignToLevelId } : undefined
+        hasStudents ? { reassignToLevelId } : undefined
       );
       toast.success(`"${level.name}" deleted`);
-      onDeleted(level.id, needsReassignment ? reassignToLevelId : undefined);
+      onDeleted(level.id, hasStudents ? reassignToLevelId : undefined);
       handleClose();
     } catch (err) {
       const apiError = err as ApiError;
-      if (apiError.status === 400 && !needsReassignment) {
-        setNeedsReassignment(true);
-        setReassignmentMessage(
-          apiError.message || "Students are assigned to this level. Choose where to move them."
-        );
-      } else {
-        toast.error(apiError.message || "Failed to delete course level");
-      }
+      toast.error(apiError.message || "Failed to delete course level");
     } finally {
       setIsSubmitting(false);
     }
@@ -84,13 +75,16 @@ export default function DeleteCourseLevelModal({
               <span className="font-semibold text-gray-800">{level?.name}</span> will be
               permanently deleted. This can't be undone.
             </p>
-            {needsReassignment && (
-              <p className="mt-2">{reassignmentMessage}</p>
+            {hasStudents && (
+              <p className="mt-2">
+                {level?.numberOfStudents} student{level?.numberOfStudents === 1 ? "" : "s"} currently
+                assigned to this level. Choose where to move them.
+              </p>
             )}
           </div>
         </div>
 
-        {needsReassignment && (
+        {hasStudents && (
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Reassign students to
@@ -122,7 +116,7 @@ export default function DeleteCourseLevelModal({
           <button
             type="button"
             onClick={handleConfirm}
-            disabled={isSubmitting || (needsReassignment && !reassignToLevelId)}
+            disabled={isSubmitting || (hasStudents && !reassignToLevelId)}
             className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
           >
             {isSubmitting && <Loader2 className="size-4 animate-spin" />}

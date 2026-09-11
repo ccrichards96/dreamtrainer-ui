@@ -121,6 +121,7 @@ export interface CourseLevel {
   courseId: string;
   name: string;
   order: number;
+  numberOfStudents: number;
   createdAt: string;
   updatedAt: string;
 }
