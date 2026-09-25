@@ -7,8 +7,6 @@ import {
   BookOpen,
   Users,
   Search,
-  ChevronUp,
-  ChevronDown,
   Plus,
   X,
   Save,
@@ -16,7 +14,7 @@ import {
 } from "lucide-react";
 import { Course } from "../../types/modules";
 import { Category } from "../../types/categories";
-import { createCourse, deleteCourse, updateCourse } from "../../services/api/modules";
+import { createCourse, deleteCourse } from "../../services/api/modules";
 
 interface CoursesOverviewProps {
   courses: Course[];
@@ -42,7 +40,6 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [reorderingCourseId, setReorderingCourseId] = useState<string | null>(null);
   const [showNewCourseForm, setShowNewCourseForm] = useState(false);
   const [newCourseData, setNewCourseData] = useState({
     name: "",
@@ -100,39 +97,6 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
       setError(errorMessage);
     } finally {
       setDeletingCourse(false);
-    }
-  };
-
-  const handleMoveCourse = async (movedCourseId: string, direction: "up" | "down") => {
-    const currentIndex = courses.findIndex((c) => c.id === movedCourseId);
-    if (currentIndex === -1) return;
-
-    if (direction === "up" && currentIndex === 0) return;
-    if (direction === "down" && currentIndex === courses.length - 1) return;
-
-    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
-    const newList = [...courses];
-
-    [newList[currentIndex], newList[newIndex]] = [newList[newIndex], newList[currentIndex]];
-
-    newList.forEach((course, index) => {
-      course.order = index;
-    });
-
-    setCourses(newList);
-    setReorderingCourseId(movedCourseId);
-
-    try {
-      await Promise.all([
-        updateCourse(newList[currentIndex].id, { order: newList[currentIndex].order }),
-        updateCourse(newList[newIndex].id, { order: newList[newIndex].order }),
-      ]);
-    } catch (err) {
-      setError("Failed to reorder courses. Please refresh the page.");
-      console.error("Error reordering courses:", err);
-      await refreshCourses();
-    } finally {
-      setReorderingCourseId(null);
     }
   };
 
@@ -366,29 +330,9 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
             <>
               {/* Mobile card list */}
               <div className="block md:hidden divide-y divide-gray-200">
-                {filteredCourses.map((course, index) => (
+                {filteredCourses.map((course) => (
                   <div key={course.id} className="p-4 bg-white hover:bg-gray-50">
                     <div className="flex items-start gap-3">
-                      <div className="flex flex-col items-center gap-1 pt-0.5 flex-shrink-0">
-                        <button
-                          onClick={() => handleMoveCourse(course.id, "up")}
-                          disabled={index === 0 || reorderingCourseId !== null}
-                          className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
-                          title="Move up"
-                        >
-                          <ChevronUp className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleMoveCourse(course.id, "down")}
-                          disabled={
-                            index === filteredCourses.length - 1 || reorderingCourseId !== null
-                          }
-                          className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
-                          title="Move down"
-                        >
-                          <ChevronDown className="w-4 h-4" />
-                        </button>
-                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
                           {course.name}
@@ -409,7 +353,6 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                     <div className="mt-3 flex items-center gap-2 pl-10">
                       <button
                         onClick={() => navigate(`/admin/courses/${course.id}`)}
-                        disabled={reorderingCourseId !== null}
                         className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
@@ -417,7 +360,6 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                       </button>
                       <button
                         onClick={() => navigate(`/admin/courses/${course.id}/sections`)}
-                        disabled={reorderingCourseId !== null}
                         className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-600 border border-green-200 rounded-lg hover:bg-green-50 disabled:opacity-50"
                       >
                         <Layers className="w-3.5 h-3.5" />
@@ -425,7 +367,6 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                       </button>
                       <button
                         onClick={() => setCourseToDelete(course)}
-                        disabled={reorderingCourseId !== null}
                         className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -456,31 +397,10 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredCourses.map((course, index) => (
+                    {filteredCourses.map((course) => (
                       <tr key={course.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-start gap-3">
-                            <div className="flex flex-col items-center gap-1 pt-1">
-                              <button
-                                onClick={() => handleMoveCourse(course.id, "up")}
-                                disabled={index === 0 || reorderingCourseId !== null}
-                                className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
-                                title="Move up"
-                              >
-                                <ChevronUp className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleMoveCourse(course.id, "down")}
-                                disabled={
-                                  index === filteredCourses.length - 1 ||
-                                  reorderingCourseId !== null
-                                }
-                                className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
-                                title="Move down"
-                              >
-                                <ChevronDown className="w-4 h-4" />
-                              </button>
-                            </div>
                             <div>
                               <div className="text-sm font-medium text-gray-900">
                                 {course.name}
@@ -503,7 +423,6 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => navigate(`/admin/courses/${course.id}`)}
-                              disabled={reorderingCourseId !== null}
                               className="text-blue-600 hover:text-blue-900 flex items-center gap-1 disabled:opacity-50"
                             >
                               <Edit3 className="w-4 h-4" />
@@ -511,7 +430,6 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                             </button>
                             <button
                               onClick={() => navigate(`/admin/courses/${course.id}/sections`)}
-                              disabled={reorderingCourseId !== null}
                               className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50"
                             >
                               <Layers className="w-4 h-4" />
@@ -519,7 +437,6 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                             </button>
                             <button
                               onClick={() => setCourseToDelete(course)}
-                              disabled={reorderingCourseId !== null}
                               className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50"
                             >
                               <Trash2 className="w-4 h-4" />

@@ -66,9 +66,6 @@ export default function Offers() {
       }
       return;
     }
-
-    // Placeholder for duplicate to be implemented
-    console.log(action, offer.id);
   };
 
   const handleViewEdit = (offer: Offer) => {

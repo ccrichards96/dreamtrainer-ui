@@ -1,6 +1,6 @@
 import type { CourseOfferStatus } from "../../../types/offers";
 
-export type OfferAction = "edit" | "duplicate" | "delete";
+export type OfferAction = "edit" | "delete";
 
 export interface Offer {
   id: string;

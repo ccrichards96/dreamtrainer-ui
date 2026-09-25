@@ -1,4 +1,4 @@
-import { Pencil, Copy, Trash2, ImageIcon } from "lucide-react";
+import { Pencil, Trash2, ImageIcon } from "lucide-react";
 import DropdownMenu, { DropdownMenuItem } from "../shared/DropdownMenu";
 import { Offer, OfferAction } from "./types";
 import { offerStatusConfig } from "./statusConfig";
@@ -13,12 +13,6 @@ export default function OfferCard({ offer, onAction, onViewEdit }: OfferCardProp
   const statusStyle = offerStatusConfig[offer.status];
   const menuItems: DropdownMenuItem[] = [
     { key: "edit", label: "Edit", icon: Pencil, onSelect: () => onAction("edit", offer) },
-    {
-      key: "duplicate",
-      label: "Duplicate",
-      icon: Copy,
-      onSelect: () => onAction("duplicate", offer),
-    },
     {
       key: "delete",
       label: "Delete",

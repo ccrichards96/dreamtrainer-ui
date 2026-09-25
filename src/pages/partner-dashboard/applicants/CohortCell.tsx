@@ -16,15 +16,15 @@ export default function CohortCell({ cohortId, cohorts, onAssign }: CohortCellPr
   const isAssigned = cohortId !== null;
 
   return (
-    <div className="relative inline-flex items-center">
+    <div className="relative inline-flex items-center w-full max-w-[200px]">
       <select
         aria-label="Assign cohort"
         value={cohortId ?? ""}
         onChange={(e) => onAssign(e.target.value)}
-        className={`appearance-none bg-transparent pr-6 text-sm focus:outline-none cursor-pointer ${
+        className={`w-full appearance-none rounded-lg border py-1.5 pl-3 pr-8 text-sm font-medium transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-400 ${
           isAssigned
-            ? "font-semibold text-gray-800"
-            : "font-semibold text-purple-600 underline underline-offset-2"
+            ? "border-gray-200 bg-gray-200 text-gray-800 hover:bg-gray-200/70 hover:border-gray-300"
+            : "border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 hover:border-purple-300"
         }`}
       >
         {!isAssigned && (
@@ -39,8 +39,8 @@ export default function CohortCell({ cohortId, cohorts, onAssign }: CohortCellPr
         ))}
       </select>
       <ChevronDown
-        className={`pointer-events-none absolute right-0 size-4 ${
-          isAssigned ? "text-gray-400" : "text-purple-500"
+        className={`pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 size-4 ${
+          isAssigned ? "text-gray-500" : "text-purple-600"
         }`}
       />
     </div>

@@ -19,7 +19,7 @@ const quickstartCards: QuickstartCard[] = [
   },
     {
     id: "offers",
-    label: "View Offers",
+    label: "View & Create Offers",
     to: "/partner/dashboard/offers",
     image: "https://img.icons8.com/?size=100&id=8291&format=png&color=4c1d95",
   },
