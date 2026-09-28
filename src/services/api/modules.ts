@@ -357,6 +357,35 @@ export const updateCourse = async (
 };
 
 /**
+ * Upload a course image
+ * POST /courses/:id/image
+ * @param courseId - The ID of the course
+ * @param file - The image file to upload
+ * @returns Promise<Course> - The updated course with new imageUrl
+ */
+export const uploadCourseImage = async (courseId: string, file: File): Promise<Course> => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await apiClient.post<APIResponse<Course>>(
+      `/courses/${courseId}/image`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+        timeout: 30000, // 30s for uploads
+      }
+    );
+    return response.data.data;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || "Failed to upload course image",
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
+/**
  * Create a new course
  * POST /courses
  * @param courseData - The course data
