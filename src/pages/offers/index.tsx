@@ -6,7 +6,7 @@ import ExploreOffers from "./ExploreOffers";
 import MyOffers from "./MyOffers";
 import OfferDetailModal from "./OfferDetailModal";
 import ApplicationSubmissionModal from "./ApplicationSubmissionModal";
-import { StudentOffer, toStudentOffer } from "./types";
+import { StudentOffer, toStudentOffer, isApplyLocked } from "./types";
 import {
   getOffers,
   getMyApplications,
@@ -142,6 +142,12 @@ export default function StudentOffers() {
     const offer = resolveOffer(id);
     if (!offer) {
       toast.error("That offer is no longer available");
+      return;
+    }
+    if (isApplyLocked(offer)) {
+      toast.error(
+        `Pass ${offer.courseName ? `"${offer.courseName}"` : "the course"} to apply to this offer`
+      );
       return;
     }
     setApplyingOffer(offer);

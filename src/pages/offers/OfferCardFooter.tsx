@@ -1,5 +1,5 @@
-import { StudentOffer } from "./types";
-import { ArrowRight, Check, Loader2 } from "lucide-react";
+import { StudentOffer, isApplyLocked } from "./types";
+import { ArrowRight, Check, Loader2, Lock } from "lucide-react";
 
 interface OfferCardFooterProps {
   offer: StudentOffer;
@@ -49,6 +49,14 @@ export default function OfferCardFooter({
             </button>
           )}
         </div>
+      ) : isApplyLocked(offer) ? (
+        <span
+          title={`Pass ${offer.courseName ? `"${offer.courseName}"` : "the course"} to apply`}
+          className="inline-flex cursor-not-allowed items-center gap-x-1.5 rounded-lg bg-gray-200 px-4 py-2 text-xs font-semibold text-gray-500"
+        >
+          <Lock className="size-3.5" />
+          Pass course to apply
+        </span>
       ) : (
         <button
           type="button"

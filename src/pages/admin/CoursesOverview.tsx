@@ -15,6 +15,7 @@ import {
 import { Course } from "../../types/modules";
 import { Category } from "../../types/categories";
 import { createCourse, deleteCourse } from "../../services/api/modules";
+import CategoryMultiSelect from "../../components/admin/CategoryMultiSelect";
 
 interface CoursesOverviewProps {
   courses: Course[];
@@ -44,7 +45,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
   const [newCourseData, setNewCourseData] = useState({
     name: "",
     description: "",
-    categoryId: "",
+    categoryIds: [] as string[],
   });
   const [creatingCourse, setCreatingCourse] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -67,11 +68,14 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
       await createCourse({
         name: newCourseData.name.trim(),
         description: newCourseData.description.trim() || undefined,
-        categoryId: newCourseData.categoryId || undefined,
+        categories: newCourseData.categoryIds.map((categoryId, order) => ({
+          categoryId,
+          order,
+        })),
       });
 
       setSuccessMessage("Course created successfully!");
-      setNewCourseData({ name: "", description: "", categoryId: "" });
+      setNewCourseData({ name: "", description: "", categoryIds: [] });
       setShowNewCourseForm(false);
       await refreshCourses();
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -201,24 +205,16 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                <select
-                  value={newCourseData.categoryId}
-                  onChange={(e) =>
-                    setNewCourseData({ ...newCourseData, categoryId: e.target.value })
+                <label className="block text-sm font-medium text-gray-700 mb-1">Categories</label>
+                <CategoryMultiSelect
+                  categories={categories}
+                  selectedIds={newCourseData.categoryIds}
+                  onChange={(categoryIds) =>
+                    setNewCourseData({ ...newCourseData, categoryIds })
                   }
                   disabled={loadingCategories}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                >
-                  <option value="">
-                    {loadingCategories ? "Loading categories…" : "— No Category —"}
-                  </option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder={loadingCategories ? "Loading categories…" : "Select categories…"}
+                />
               </div>
             </div>
             <div className="mt-4 flex justify-end gap-2">
@@ -226,7 +222,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                 type="button"
                 onClick={() => {
                   setShowNewCourseForm(false);
-                  setNewCourseData({ name: "", description: "", categoryId: "" });
+                  setNewCourseData({ name: "", description: "", categoryIds: [] });
                 }}
                 className="px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
               >

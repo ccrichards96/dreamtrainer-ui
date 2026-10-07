@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Loader2, Search } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { getAllPublicCourses, getMyCourses } from "../../services/api/modules";
+import { getMyCourses } from "../../services/api/modules";
 import { getAllCategories } from "../../services/api/categories";
 import { CourseProvider } from "../../contexts/CourseContext";
 import type { Course } from "../../types/modules";
@@ -14,14 +15,29 @@ const HERO_BG_IMAGE = "";
 
 const ExploreCoursesContent = () => {
   const { isAuthenticated } = useAuth0();
-  const [exploreCourses, setExploreCourses] = useState<Course[]>([]);
   const [myCourses, setMyCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>("explore");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  // Selected category lives in the URL (?category=<slug>) so it can be linked to directly
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCategorySlug = searchParams.get("category");
+  const selectedCategoryId =
+    categories.find((c) => c.slug === selectedCategorySlug)?.id ?? null;
+
+  const setSelectedCategory = (slug: string | null) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (slug) next.set("category", slug);
+        else next.delete("category");
+        return next;
+      },
+      { replace: true }
+    );
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,11 +45,7 @@ const ExploreCoursesContent = () => {
         setLoading(true);
         setError(null);
 
-        // Always fetch public courses and categories
-        const [publicCoursesResponse, categoriesData] = await Promise.all([
-          getAllPublicCourses(),
-          getAllCategories(),
-        ]);
+        const categoriesData = await getAllCategories();
 
         // Only fetch user's courses if authenticated
         let myCoursesData: Course[] = [];
@@ -46,12 +58,6 @@ const ExploreCoursesContent = () => {
           }
         }
 
-        const sortedPublic = (publicCoursesResponse.data || []).sort((a: Course, b: Course) => {
-          if (a.order !== b.order) return a.order - b.order;
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        });
-        const myCourseIds = new Set(myCoursesData.map((c) => c.id));
-        setExploreCourses(sortedPublic.filter((c) => !myCourseIds.has(c.id)));
         setMyCourses(myCoursesData);
         setCategories(categoriesData);
       } catch (err) {
@@ -64,12 +70,40 @@ const ExploreCoursesContent = () => {
     fetchData();
   }, [isAuthenticated]);
 
+  const sortByOrder = (a: Course, b: Course) => {
+    if (a.order !== b.order) return a.order - b.order;
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  };
+
+  // Within a category, respect the admin-defined categoryOrder; fall back to global order
+  const sortByCategoryOrder = (a: Course, b: Course) => {
+    const aOrder = a.categoryOrder ?? Number.MAX_SAFE_INTEGER;
+    const bOrder = b.categoryOrder ?? Number.MAX_SAFE_INTEGER;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return sortByOrder(a, b);
+  };
+
+  // Union every category's courses, deduped by id, for the unfiltered "All" view
+  const allCourses = useMemo(() => {
+    const byId = new Map<string, Course>();
+    categories.forEach((category) => {
+      category.courses?.forEach((course) => byId.set(course.id, course));
+    });
+    return Array.from(byId.values()).sort(sortByOrder);
+  }, [categories]);
+
+  const exploreCourses = useMemo(() => {
+    const myCourseIds = new Set(myCourses.map((c) => c.id));
+    const base = selectedCategoryId
+      ? [...(categories.find((c) => c.id === selectedCategoryId)?.courses ?? [])].sort(
+          sortByCategoryOrder
+        )
+      : allCourses;
+    return base.filter((c) => !myCourseIds.has(c.id));
+  }, [allCourses, categories, selectedCategoryId, myCourses]);
+
   const filteredCourses = useMemo(() => {
     let filtered = activeTab === "my-courses" ? myCourses : exploreCourses;
-
-    if (selectedCategoryId) {
-      filtered = filtered.filter((course) => course.categoryId === selectedCategoryId);
-    }
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -81,7 +115,7 @@ const ExploreCoursesContent = () => {
     }
 
     return filtered;
-  }, [exploreCourses, myCourses, activeTab, selectedCategoryId, searchQuery]);
+  }, [exploreCourses, myCourses, activeTab, searchQuery]);
 
   if (loading) {
     return (
@@ -165,7 +199,7 @@ const ExploreCoursesContent = () => {
             {categories.length > 0 && (
               <div className="mt-5 flex flex-wrap justify-center gap-2">
                 <button
-                  onClick={() => setSelectedCategoryId(null)}
+                  onClick={() => setSelectedCategory(null)}
                   className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                     selectedCategoryId === null
                       ? "bg-white text-purple-700 shadow-md"
@@ -178,7 +212,7 @@ const ExploreCoursesContent = () => {
                   <button
                     key={category.id}
                     onClick={() =>
-                      setSelectedCategoryId(selectedCategoryId === category.id ? null : category.id)
+                      setSelectedCategory(selectedCategoryId === category.id ? null : category.slug)
                     }
                     className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                       selectedCategoryId === category.id

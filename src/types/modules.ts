@@ -1,5 +1,6 @@
 import { Test } from "./tests";
 import { PartnerCourseRole } from "./partner";
+import { Category } from "./categories";
 
 /**
  * Course status enum
@@ -144,6 +145,17 @@ interface Section {
 }
 
 /**
+ * CourseCategory - join row assigning a Category to a Course, with per-category order
+ */
+interface CourseCategory {
+  id: string;
+  courseId: string;
+  categoryId: string;
+  order: number;
+  category: Pick<Category, "id" | "name" | "slug" | "imageUrl">;
+}
+
+/**
  * Course - Top level container
  */
 interface Course {
@@ -154,12 +166,14 @@ interface Course {
   slug: string;
   expertProfileId: string | null;
   expertProfile?: ExpertProfile; // Nested expert profile data
-  categoryId?: string | null;
+  categoryId?: string | null; // Legacy single-category field, kept for backward compatibility
+  courseCategories?: CourseCategory[];
   status: CourseStatus;
   price: number;
   stripeProductId: string | null;
   listingStatus: ListingStatus;
   order: number;
+  categoryOrder?: number; // Position within a category, present when loaded via a category's courses
   learningObjectives?: string[];
   prerequisites?: string[];
   targetAudiences?: string[];
@@ -220,7 +234,7 @@ export type DraftSection = Pick<Section, "courseId" | "name"> & {
 
 export type UpdateSection = Partial<Pick<Section, "name" | "description" | "imageUrl" | "order">>;
 
-export type { Course, Module, Section };
+export type { Course, CourseCategory, Module, Section };
 
 export interface Message {
   id: string;

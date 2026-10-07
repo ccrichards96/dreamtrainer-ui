@@ -1,4 +1,4 @@
-import type { CourseOfferStatus } from "../../../types/offers";
+import type { CourseOfferStatus, OfferEmailTemplate } from "../../../types/offers";
 
 export type OfferAction = "edit" | "delete";
 
@@ -16,8 +16,9 @@ export interface OfferFormData {
   description: string;
   imageUrl: string;
   requirements: string[];
-  /** Stored on the API as a single comma-separated string; edited as a list. */
   characteristics: string[];
   expectations: string[];
   outcomes: string[];
+  acceptanceEmail: OfferEmailTemplate;
+  rejectionEmail: OfferEmailTemplate;
 }

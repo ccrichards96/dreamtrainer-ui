@@ -26,6 +26,12 @@ export type OfferApplicationStatus =
   | "opportunity_archived" // applicant is not interested
   | "declined"; // applicant has been rejected by the partner
 
+/** An email template stored as jsonb on the offer. `body` is rich-text HTML. */
+export interface OfferEmailTemplate {
+  subject: string;
+  body: string;
+}
+
 export interface CourseOffer {
   id: string;
   courseId?: string;
@@ -39,6 +45,10 @@ export interface CourseOffer {
   outcomes?: string;
   imageUrl?: string;
   expiresAt?: string | null;
+  acceptanceEmail?: OfferEmailTemplate | null;
+  rejectionEmail?: OfferEmailTemplate | null;
+  course?: { id: string; name: string; slug: string } | null;
+  studentPassed?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -53,6 +63,8 @@ export interface CreateCourseOfferData {
   expectations?: string;
   outcomes?: string;
   expiresAt?: Date | null;
+  acceptanceEmail?: OfferEmailTemplate | null;
+  rejectionEmail?: OfferEmailTemplate | null;
 }
 
 export interface UpdateCourseOfferData extends Partial<CreateCourseOfferData> {}

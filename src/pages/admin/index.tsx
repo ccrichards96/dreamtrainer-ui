@@ -16,6 +16,7 @@ import CoursesOverview from "./CoursesOverview";
 import CourseEditPage from "./CourseEditPage";
 import SectionManagePage from "./SectionManagePage";
 import ModuleManagePage from "./ModuleManagePage";
+import CategoryEditPage from "./CategoryEditPage";
 
 const sortCourses = (list: Course[]) =>
   [...list].sort((a, b) => {
@@ -68,6 +69,7 @@ const AdminDashboard: React.FC = () => {
   const courseEditMatch = useMatch("/admin/courses/:courseId");
   const sectionManageMatch = useMatch("/admin/courses/:courseId/sections");
   const moduleManageMatch = useMatch("/admin/courses/:courseId/sections/:sectionId/modules");
+  const categoryEditMatch = useMatch("/admin/categories/:categoryId");
 
   const activeView: AdminView = courseEditMatch
     ? "course-edit"
@@ -75,7 +77,9 @@ const AdminDashboard: React.FC = () => {
       ? "section-manage"
       : moduleManageMatch
         ? "module-manage"
-        : "overview";
+        : categoryEditMatch
+          ? "category-edit"
+          : "overview";
 
   const viewPaths: Record<AdminView, string> = {
     overview: "/admin",
@@ -84,6 +88,7 @@ const AdminDashboard: React.FC = () => {
     "module-manage": "/admin",
     "user-manage": "/admin/users",
     "category-manage": "/admin/categories",
+    "category-edit": "/admin/categories",
     "announcement-manage": "/admin/announcements",
   };
 
@@ -115,6 +120,15 @@ const AdminDashboard: React.FC = () => {
             Back to Courses
           </button>
         )}
+        {categoryEditMatch && (
+          <button
+            onClick={() => navigate("/admin/categories")}
+            className="mb-4 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 inline-flex items-center gap-1.5"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Categories
+          </button>
+        )}
 
         <Routes>
           <Route
@@ -144,6 +158,7 @@ const AdminDashboard: React.FC = () => {
           <Route path="announcements" element={<AnnouncementManager />} />
           <Route path="users" element={<UsersManager />} />
           <Route path="categories" element={<CategoryManager />} />
+          <Route path="categories/:categoryId" element={<CategoryEditPage />} />
         </Routes>
       </div>
     </div>

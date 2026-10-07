@@ -31,6 +31,7 @@ import { toast } from "../toast";
 import { Category } from "../../types/categories";
 import { User } from "../../types/user";
 import { updateCourse } from "../../services/api/modules";
+import CategoryMultiSelect from "./CategoryMultiSelect";
 import courseExpertsService from "../../services/api/course-experts";
 import coursePartnersService from "../../services/api/course-partners";
 import courseLevelsService from "../../services/api/course-levels";
@@ -143,7 +144,9 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     description: course.description || "",
     imageUrl: course.imageUrl || "",
     slug: course.slug || "",
-    categoryId: course.categoryId || "",
+    categoryIds:
+      course.courseCategories?.map((cc) => cc.categoryId) ??
+      (course.categoryId ? [course.categoryId] : []),
     status: course.status || CourseStatus.DRAFT,
     listingStatus: course.listingStatus || ListingStatus.PRIVATE,
     welcomeVideoUrl: course.welcomeVideoUrl || "",
@@ -611,7 +614,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
         description: formData.description,
         imageUrl: formData.imageUrl || null,
         slug: formData.slug || undefined,
-        categoryId: formData.categoryId || null,
+        categories: formData.categoryIds.map((categoryId, order) => ({ categoryId, order })),
         status: formData.status,
         listingStatus: formData.listingStatus,
         welcomeVideoUrl: formData.welcomeVideoUrl || null,
@@ -781,27 +784,16 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
               </div>
 
               <div>
-                <label
-                  htmlFor="categoryId"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Category
-                </label>
-                <select
-                  id="categoryId"
-                  name="categoryId"
-                  value={formData.categoryId}
-                  onChange={handleInputChange}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Categories</label>
+                <CategoryMultiSelect
+                  categories={categories}
+                  selectedIds={formData.categoryIds}
+                  onChange={(categoryIds) =>
+                    setFormData((prev) => ({ ...prev, categoryIds }))
+                  }
                   disabled={loadingCategories}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                >
-                  <option value="">{loadingCategories ? "Loading…" : "— No Category —"}</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
+                  placeholder={loadingCategories ? "Loading…" : "Select categories…"}
+                />
               </div>
             </div>
 

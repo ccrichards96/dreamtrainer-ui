@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -10,6 +11,7 @@ import {
   Tag,
   ChevronUp,
   ChevronDown,
+  BookOpen,
 } from "lucide-react";
 import { Category } from "../../types/categories";
 import {
@@ -26,6 +28,7 @@ interface CategoryFormData {
 }
 
 const CategoryManager: React.FC = () => {
+  const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -385,6 +388,14 @@ const CategoryManager: React.FC = () => {
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => navigate(`/admin/categories/${category.id}`)}
+                      disabled={reorderingId !== null}
+                      className="text-gray-600 hover:text-gray-900 flex items-center gap-1 disabled:opacity-50 px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50"
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      Manage Courses
+                    </button>
                     <button
                       onClick={() => handleEditCategory(category)}
                       disabled={reorderingId !== null}

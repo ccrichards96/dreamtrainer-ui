@@ -1,7 +1,8 @@
 import React from "react";
 import Modal from "../../components/modals/Modal";
-import { StudentOffer } from "./types";
-import { Building, Check, Briefcase, Award, ArrowRight, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { StudentOffer, isApplyLocked } from "./types";
+import { Building, Check, Briefcase, Award, ArrowRight, Loader2, Lock } from "lucide-react";
 
 interface OfferDetailModalProps {
   isOpen: boolean;
@@ -79,6 +80,11 @@ export default function OfferDetailModal({
                     </button>
                   )}
                 </>
+              ) : isApplyLocked(offer) ? (
+                <span className="inline-flex cursor-not-allowed items-center gap-x-2 rounded-lg bg-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-500">
+                  <Lock className="size-4" />
+                  Pass course to apply
+                </span>
               ) : (
                 <button
                   type="button"
@@ -94,6 +100,27 @@ export default function OfferDetailModal({
             </div>
           </div>
         </div>
+
+        {/* Course-completion gate */}
+        {!hasApplied && isApplyLocked(offer) && (
+          <div className="mx-6 mt-6 flex items-start gap-x-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <Lock className="size-4 mt-0.5 flex-shrink-0" />
+            <p>
+              You need to pass{" "}
+              {offer.courseSlug ? (
+                <Link
+                  to={`/courses/${offer.courseSlug}`}
+                  className="font-semibold underline hover:text-amber-900"
+                >
+                  {offer.courseName ?? "the course"}
+                </Link>
+              ) : (
+                <span className="font-semibold">{offer.courseName ?? "the course"}</span>
+              )}{" "}
+              before you can apply to this offer.
+            </p>
+          </div>
+        )}
 
         {/* Detailed Sections */}
         <div className="p-6 space-y-6">

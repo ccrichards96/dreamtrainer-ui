@@ -8,7 +8,8 @@ export type AdminView =
   | "module-manage"
   | "announcement-manage"
   | "user-manage"
-  | "category-manage";
+  | "category-manage"
+  | "category-edit";
 
 interface NavItem {
   id: AdminView;
@@ -35,7 +36,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeView, onNavigate }) =
     ["course-edit", "section-manage", "module-manage"] as AdminView[]
   ).includes(activeView)
     ? "overview"
-    : activeView;
+    : activeView === "category-edit"
+      ? "category-manage"
+      : activeView;
 
   // Derive label for breadcrumb
   const allItems = [...manageItems];

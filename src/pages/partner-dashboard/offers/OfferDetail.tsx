@@ -3,9 +3,11 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import PartnerShell from "../PartnerShell";
 import OfferDetailsSection from "./forms/OfferDetailsSection";
 import IdealCandidatesSection from "./forms/IdealCandidatesSection";
+import EmailTemplatesSection from "./forms/EmailTemplatesSection";
 import { OfferFormData } from "./types";
+import { DEFAULT_ACCEPTANCE_EMAIL, DEFAULT_REJECTION_EMAIL } from "./defaultEmailTemplates";
 import { offerStatusConfig } from "./statusConfig";
-import { CourseOffer, CourseOfferStatus } from "../../../types/offers";
+import { CourseOffer, CourseOfferStatus, OfferEmailTemplate } from "../../../types/offers";
 import {
   getCourseOfferById,
   createCourseOffer,
@@ -31,6 +33,23 @@ const fromListField = (values: string[]): string =>
     .filter((value) => value !== "")
     .join(", ");
 
+/** API template -> editable template, falling back to the standard one when none is saved. */
+const toEmailTemplate = (
+  template: OfferEmailTemplate | null | undefined,
+  fallback: OfferEmailTemplate
+): OfferEmailTemplate => (template ? { subject: template.subject, body: template.body } : fallback);
+
+/** Quill leaves markup like "<p><br></p>" behind when cleared, so check for real text. */
+const isBlankHtml = (html: string): boolean =>
+  html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim() === "";
+
+/** Editable template -> the jsonb value the API stores (null when left empty). */
+const fromEmailTemplate = (template: OfferEmailTemplate): OfferEmailTemplate | null => {
+  const subject = template.subject.trim();
+  const body = isBlankHtml(template.body) ? "" : template.body;
+  return subject || body ? { subject, body } : null;
+};
+
 const toFormData = (offer: CourseOffer): OfferFormData => ({
   name: offer.title,
   description: offer.description ?? "",
@@ -40,6 +59,8 @@ const toFormData = (offer: CourseOffer): OfferFormData => ({
   characteristics: toListField(offer.characteristics),
   expectations: toListField(offer.expectations),
   outcomes: toListField(offer.outcomes),
+  acceptanceEmail: toEmailTemplate(offer.acceptanceEmail, DEFAULT_ACCEPTANCE_EMAIL),
+  rejectionEmail: toEmailTemplate(offer.rejectionEmail, DEFAULT_REJECTION_EMAIL),
 });
 
 /** Empty form used when creating a new offer or as a fallback. */
@@ -51,6 +72,8 @@ export const emptyOfferForm: OfferFormData = {
   characteristics: [""],
   expectations: [""],
   outcomes: [""],
+  acceptanceEmail: DEFAULT_ACCEPTANCE_EMAIL,
+  rejectionEmail: DEFAULT_REJECTION_EMAIL,
 };
 
 export default function OfferDetail() {
@@ -111,6 +134,8 @@ export default function OfferDetail() {
       characteristics: fromListField(form.characteristics),
       expectations: fromListField(form.expectations),
       outcomes: fromListField(form.outcomes),
+      acceptanceEmail: fromEmailTemplate(form.acceptanceEmail),
+      rejectionEmail: fromEmailTemplate(form.rejectionEmail),
     };
 
     try {
@@ -249,6 +274,10 @@ export default function OfferDetail() {
           <OfferDetailsSection form={form} onChange={updateForm} courseId={courseId} />
           <IdealCandidatesSection form={form} onChange={updateForm} />
         </div>
+      </div>
+
+      <div className="mt-6 rounded-3xl bg-white p-8 shadow-sm lg:p-10">
+        <EmailTemplatesSection form={form} onChange={updateForm} />
       </div>
     </PartnerShell>
   );

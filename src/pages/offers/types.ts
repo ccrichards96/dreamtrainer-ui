@@ -12,7 +12,13 @@ export interface StudentOffer {
   expectations: string;
   outcomes: string;
   imageUrl?: string;
+  courseName?: string;
+  courseSlug?: string;
+  studentPassed?: boolean;
 }
+
+/** Applying is locked only when the API explicitly says the course hasn't been passed. */
+export const isApplyLocked = (offer: StudentOffer) => offer.studentPassed === false;
 
 /** Narrow the full API record down to what the offer cards/modals actually render. */
 export const toStudentOffer = (courseOffer: CourseOffer): StudentOffer => ({
@@ -27,4 +33,7 @@ export const toStudentOffer = (courseOffer: CourseOffer): StudentOffer => ({
   expectations: courseOffer.expectations ?? "",
   outcomes: courseOffer.outcomes ?? "",
   imageUrl: courseOffer.imageUrl,
+  courseName: courseOffer.course?.name,
+  courseSlug: courseOffer.course?.slug,
+  studentPassed: courseOffer.studentPassed,
 });

@@ -172,19 +172,6 @@ export const getAllCourses = async (): Promise<APIResponse<Course[]>> => {
   }
 };
 
-export const getAllPublicCourses = async (): Promise<APIResponse<Course[]>> => {
-  try {
-    const response = await apiClient.get<APIResponse<Course[]>>(`/courses/published`);
-    return response.data;
-  } catch (error: any) {
-    const apiError: ApiError = {
-      message: error.response?.data?.message || "Failed to fetch courses",
-      status: error.response?.status,
-    };
-    throw apiError;
-  }
-};
-
 export const getMyCourses = async (): Promise<APIResponse<Course[]>> => {
   try {
     const response = await apiClient.get<APIResponse<Course[]>>(`/courses/me`);
@@ -330,6 +317,9 @@ export const updateCourse = async (
     imageUrl?: string | null;
     slug?: string;
     categoryId?: string | null;
+    // Full replace: the complete set of assigned categories. Omit to leave categories
+    // untouched; send [] to clear all categories from the course.
+    categories?: { categoryId: string; order?: number }[];
     expertProfileId?: string | null;
     status?: string;
     listingStatus?: string;
@@ -364,6 +354,7 @@ export const createCourse = async (courseData: {
   name: string;
   description?: string;
   categoryId?: string;
+  categories?: { categoryId: string; order?: number }[];
 }): Promise<APIResponse<Course>> => {
   try {
     const response = await apiClient.post<APIResponse<Course>>(`/courses`, courseData);
