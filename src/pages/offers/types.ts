@@ -24,7 +24,7 @@ export const isApplyLocked = (offer: StudentOffer) => offer.studentPassed === fa
 export const toStudentOffer = (courseOffer: CourseOffer): StudentOffer => ({
   id: courseOffer.id,
   title: courseOffer.title,
-  partnerName: courseOffer.partnerProfile?.orgName ?? courseOffer.partnerName ?? "",
+  partnerName: courseOffer.partnerProfile?.orgName ?? "",
   partnerLogoUrl: courseOffer.partnerProfile?.logoUrl ?? undefined,
   partnerWebsiteUrl: courseOffer.partnerProfile?.websiteUrl ?? undefined,
   description: courseOffer.description,
