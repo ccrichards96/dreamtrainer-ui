@@ -8,6 +8,7 @@ import { Category } from "./categories";
 export enum CourseStatus {
   DRAFT = "draft",
   PENDING_REVIEW = "pending_review",
+  WAITLIST = "waitlist",
   PUBLISHED = "published",
   ARCHIVED = "archived",
 }
@@ -178,6 +179,7 @@ interface Course {
   prerequisites?: string[];
   targetAudiences?: string[];
   welcomeVideoUrl?: string | null;
+  welcomeContent?: string | null;
   featuredVideoUrl?: string | null;
   numberOfSections?: number; // Returned from /courses endpoint
   createdAt: string;

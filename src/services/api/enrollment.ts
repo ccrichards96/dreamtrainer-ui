@@ -67,6 +67,22 @@ export const enrollInFreeCourse = async (courseId: string): Promise<CourseEnroll
   }
 };
 
+/**
+ * Enroll the current expert in the expert onboarding course ("launch-your-course").
+ * Idempotent — returns the existing enrollment if there is one.
+ * POST /enrollments/expert-onboarding
+ */
+export const enrollInExpertOnboarding = async (): Promise<CourseEnrollment> => {
+  try {
+    const response = await apiClient.post<APIResponse<CourseEnrollment>>(
+      "/enrollments/expert-onboarding"
+    );
+    return response.data.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to enroll in expert onboarding");
+  }
+};
+
 export const listCourseStudents = async (
   courseId: string,
   params?: ListCourseStudentsParams

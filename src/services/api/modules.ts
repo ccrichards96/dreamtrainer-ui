@@ -328,6 +328,7 @@ export const updateCourse = async (
     prerequisites?: string[];
     targetAudiences?: string[];
     welcomeVideoUrl?: string | null;
+    welcomeContent?: string | null;
     featuredVideoUrl?: string | null;
     stripeProductId?: string | null;
   }

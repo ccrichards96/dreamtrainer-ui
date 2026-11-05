@@ -40,6 +40,8 @@ import { getAllCategories } from "../../services/api/categories";
 import { getUsersPaginated } from "../../services/api/admin";
 import RevokeInviteModal from "./RevokeInviteModal";
 import DeleteCourseLevelModal from "./DeleteCourseLevelModal";
+import RichTextEditor from "../RichTextEditor";
+import { getPlainTextLength } from "../../utils/htmlSanitizer";
 
 interface CourseEditorProps {
   course: Course;
@@ -50,6 +52,7 @@ interface CourseEditorProps {
 const STATUS_LABELS: Record<CourseStatus, string> = {
   [CourseStatus.DRAFT]: "Draft",
   [CourseStatus.PENDING_REVIEW]: "Pending Review",
+  [CourseStatus.WAITLIST]: "Waitlist",
   [CourseStatus.PUBLISHED]: "Published",
   [CourseStatus.ARCHIVED]: "Archived",
 };
@@ -57,6 +60,7 @@ const STATUS_LABELS: Record<CourseStatus, string> = {
 const STATUS_COLORS: Record<CourseStatus, string> = {
   [CourseStatus.DRAFT]: "bg-gray-100 text-gray-700",
   [CourseStatus.PENDING_REVIEW]: "bg-yellow-100 text-yellow-700",
+  [CourseStatus.WAITLIST]: "bg-blue-100 text-blue-700",
   [CourseStatus.PUBLISHED]: "bg-green-100 text-green-700",
   [CourseStatus.ARCHIVED]: "bg-red-100 text-red-700",
 };
@@ -150,6 +154,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     status: course.status || CourseStatus.DRAFT,
     listingStatus: course.listingStatus || ListingStatus.PRIVATE,
     welcomeVideoUrl: course.welcomeVideoUrl || "",
+    welcomeContent: course.welcomeContent || "",
     featuredVideoUrl: course.featuredVideoUrl || "",
     learningObjectives: course.learningObjectives || [],
     prerequisites: course.prerequisites || [],
@@ -618,6 +623,8 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
         status: formData.status,
         listingStatus: formData.listingStatus,
         welcomeVideoUrl: formData.welcomeVideoUrl || null,
+        welcomeContent:
+          getPlainTextLength(formData.welcomeContent) > 0 ? formData.welcomeContent : null,
         featuredVideoUrl: formData.featuredVideoUrl || null,
         learningObjectives: formData.learningObjectives,
         prerequisites: formData.prerequisites,
@@ -839,6 +846,16 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <p className="block text-sm font-medium text-gray-700 mb-1">Welcome Content</p>
+              <RichTextEditor
+                value={formData.welcomeContent}
+                onChange={(welcomeContent) => setFormData((prev) => ({ ...prev, welcomeContent }))}
+                placeholder="Welcome to the course..."
+                minHeight={220}
               />
             </div>
 

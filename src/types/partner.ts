@@ -1,6 +1,11 @@
 export type ApprovalStatus = "pending" | "approved" | "rejected" | "suspended";
 export type ListingStatus = "public" | "private";
-export type PartnerCourseStatus = "draft" | "pending_review" | "published" | "archived";
+export type PartnerCourseStatus =
+  | "draft"
+  | "pending_review"
+  | "waitlist"
+  | "published"
+  | "archived";
 export type PartnerCourseRole = "owner" | "partner";
 
 export interface PartnerSocialLinks {
@@ -21,7 +26,6 @@ export interface PartnerAssignedCourse {
   slug: string;
   status: PartnerCourseStatus;
   listingStatus: ListingStatus;
-  /** This partner's role on the course */
   role: PartnerCourseRole;
   assignedAt: string;
 }
@@ -38,11 +42,9 @@ export interface PartnerProfile {
   id: string;
   userId: string;
   orgName: string;
-  /** The contact person's title/role at the org (e.g. "Program Director"). */
   title: string | null;
   slug: string;
   description: string | null;
-  /** Individual contact bio, distinct from `description` (the org's own bio). */
   bio: string | null;
   orgBio: string | null;
   calendarLink: string | null;
@@ -57,7 +59,6 @@ export interface PartnerProfile {
   createdAt: string;
   updatedAt: string;
   user: PartnerProfileUser | null;
-  /** Always an array; empty when none assigned. Unfiltered (includes draft/archived). */
   courses: PartnerAssignedCourse[];
 }
 

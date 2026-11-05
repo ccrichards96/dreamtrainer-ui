@@ -26,14 +26,15 @@ import { CourseProvider } from "../../contexts/CourseContext";
 import { useCourseContext } from "../../contexts/useCourseContext";
 import DreamFlow from "../../components/DreamFlow";
 import StudentDashboardLayout from "./StudentDashboardLayout";
+import { audienceConfig, DashboardAudience } from "./audienceConfig";
 import Modal from "../../components/modals/Modal";
 import SupportMessageForm from "../../components/forms/SupportMessageForm";
 import { Section } from "../../types/modules";
 import { CourseAsset, AssetType } from "../../types/course-assets";
 import { getCourseBySlug, getCourseSectionsBySlug } from "../../services/api/modules";
-import { isEnrolledInCourse } from "../../services/api/enrollment";
+import { isEnrolledInCourse, enrollInExpertOnboarding } from "../../services/api/enrollment";
 import { useApp } from "../../contexts/useAppContext";
-import { sanitizeHtml } from "../../utils/htmlSanitizer";
+import { getPlainTextLength, sanitizeHtml } from "../../utils/htmlSanitizer";
 import posthog from "posthog-js";
 
 // Helper function to format file size
@@ -262,11 +263,18 @@ function CourseResourcesSection({ courseId }: { courseId?: string }) {
   );
 }
 
-function DashboardContent() {
-  const { slug } = useParams<{ slug: string }>();
+interface CourseDashboardProps {
+  slug?: string;
+  audience: DashboardAudience;
+}
+
+function DashboardContent({ slug, audience }: CourseDashboardProps) {
   const { user, isAuthenticated } = useAuth0();
   const { userProfile } = useApp();
   const firstName = user?.given_name || "there";
+  const copy = audienceConfig[audience];
+  // Only the student view drives the nav's "Continue Learning" / last-course tracking
+  const isStudent = audience === "student";
 
   // Welcome modal state
   const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
@@ -276,12 +284,12 @@ function DashboardContent() {
   useEffect(() => {
     const checkFirstLogin = () => {
       if (isAuthenticated) {
-        const storageKey = "hasVisitedDashboard";
+        const storageKey = copy.firstVisitStorageKey;
         const hasVisitedBefore = localStorage.getItem(storageKey);
         if (!hasVisitedBefore || hasVisitedBefore !== "true") {
           // This is the first login
           setWelcomeModalOpen(true);
-          posthog.capture("First Login", { user });
+          if (isStudent) posthog.capture("First Login", { user });
           // Mark as visited
           localStorage.setItem(storageKey, "true");
         }
@@ -289,7 +297,7 @@ function DashboardContent() {
     };
 
     checkFirstLogin();
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, copy.firstVisitStorageKey, isStudent]);
 
   // Use Dashboard context instead of dummy data
   const {
@@ -315,6 +323,12 @@ function DashboardContent() {
     loadSectionModules,
   } = useCourseContext();
 
+  // Expert-authored welcome message for the course (empty editor output counts as none)
+  const welcomeContent =
+    currentCourse?.welcomeContent && getPlainTextLength(currentCourse.welcomeContent) > 0
+      ? sanitizeHtml(currentCourse.welcomeContent)
+      : null;
+
   // State for available sections within the current course
   const [availableSections, setAvailableSections] = useState<Section[]>([]);
   const [switchingSection, setSwitchingSection] = useState<string | null>(null);
@@ -330,7 +344,7 @@ function DashboardContent() {
   useEffect(() => {
     const initializeDashboard = async () => {
       // Use slug from URL params, fallback to localStorage for backward compatibility
-      const targetSlug = slug || localStorage.getItem("selected_course_slug");
+      const targetSlug = slug || (isStudent ? localStorage.getItem("selected_course_slug") : null);
 
       // Skip if no slug or if we've already initialized with this course
       if (!targetSlug || (isInitialized.current && lastCourseId.current === targetSlug)) {
@@ -341,7 +355,8 @@ function DashboardContent() {
         isInitialized.current = true;
         lastCourseId.current = targetSlug;
 
-        const selectedSectionId = localStorage.getItem("selected_section_id");
+        // The section selection hand-off is student-only (set before navigating to a course)
+        const selectedSectionId = isStudent ? localStorage.getItem("selected_section_id") : null;
 
         // Load the course from URL or localStorage
         // Note: loadCourse currently expects an ID, so we need to fetch the course by slug first
@@ -352,7 +367,16 @@ function DashboardContent() {
 
         // Check enrollment — admins can access any course dashboard
         if (userProfile?.role !== "admin") {
-          const enrolled = await isEnrolledInCourse(courseData.id);
+          let enrolled = await isEnrolledInCourse(courseData.id);
+          // Experts are auto-enrolled in their onboarding course — backfill if missing
+          if (!enrolled && !isStudent) {
+            enrolled = await enrollInExpertOnboarding()
+              .then(() => true)
+              .catch((err) => {
+                console.error("Expert onboarding auto-enrollment failed:", err);
+                return false;
+              });
+          }
           if (!enrolled) {
             setEnrollmentStatus("not-enrolled");
             return;
@@ -379,13 +403,17 @@ function DashboardContent() {
         if (sectionToLoad) {
           await loadSectionModules(sectionToLoad);
           // Persist last visited course + section for the nav "Continue Learning" button
-          localStorage.setItem("last_course_slug", targetSlug);
-          localStorage.setItem("last_section_id", sectionToLoad);
+          if (isStudent) {
+            localStorage.setItem("last_course_slug", targetSlug);
+            localStorage.setItem("last_section_id", sectionToLoad);
+          }
         }
 
         // Clear localStorage selection after loading
-        localStorage.removeItem("selected_course_id");
-        localStorage.removeItem("selected_section_id");
+        if (isStudent) {
+          localStorage.removeItem("selected_course_id");
+          localStorage.removeItem("selected_section_id");
+        }
       } catch (error) {
         console.error("Error initializing dashboard:", error);
         isInitialized.current = false; // Allow retry on error
@@ -402,7 +430,7 @@ function DashboardContent() {
       setSwitchingSection(sectionId);
       await loadSectionModules(sectionId);
       // Keep last_section_id in sync when user switches sections
-      if (currentCourse) {
+      if (currentCourse && isStudent) {
         localStorage.setItem("last_course_slug", currentCourse.slug);
         localStorage.setItem("last_section_id", sectionId);
       }
@@ -446,8 +474,14 @@ function DashboardContent() {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
               <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
-              <p className="text-gray-600 mb-6">You are not enrolled in this course.</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {isStudent ? "Access Denied" : "Start your expert orientation"}
+              </h2>
+              <p className="text-gray-600 mb-6">
+                {isStudent
+                  ? "You are not enrolled in this course."
+                  : "We couldn't set up your expert orientation course. Refresh the page, or view the course below."}
+              </p>
               <a
                 href={`/courses/${slug}`}
                 className="bg-[#c5a8de] text-white px-6 py-2 rounded-lg hover:bg-[#b399d6] transition-colors inline-block"
@@ -495,7 +529,7 @@ function DashboardContent() {
               onClick={() => setWelcomeModalOpen(true)}
               className="text-sm sm:text-base font-medium bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg transition-colors shadow-md flex items-center justify-center sm:flex-shrink-0"
             >
-              <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2" /> Watch Your Welcome Video!
+              <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2" /> {copy.welcomeVideoLabel}
             </button>
           </div>
         </motion.div>
@@ -701,7 +735,7 @@ function DashboardContent() {
                     </div>
                     <div className="flex flex-col">
                       <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                        Want to schedule time with {expert.displayName}?
+                        {copy.helpHeading(expert.displayName)}
                       </h2>
                       <p className="text-gray-600 mb-4">
                         Or want to send a message to ask for help:
@@ -760,6 +794,36 @@ function DashboardContent() {
           )}
         </div>
 
+        {/* Welcome: static "how it works" guide (expert), or the course's own welcome content (student) */}
+        {(copy.welcomeGuide || welcomeContent) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="bg-white rounded-2xl shadow-lg p-5 sm:p-8 mb-8"
+          >
+            <h2 className="text-2xl font-semibold text-gray-900 mb-3">{copy.welcomeTitle}</h2>
+            {copy.welcomeGuide ? (
+              <>
+                <p className="text-gray-600 mb-6">{copy.welcomeGuide.intro}</p>
+                <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+                  {copy.welcomeGuide.steps.map((step) => (
+                    <li key={step.title}>
+                      <span className="font-semibold text-gray-900">{step.title}:</span>{" "}
+                      {step.description}
+                    </li>
+                  ))}
+                </ol>
+              </>
+            ) : (
+              <div
+                className="text-gray-700 space-y-3 [&_h1]:text-xl [&_h1]:font-semibold [&_h1]:text-gray-900 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-gray-900 [&_h3]:font-semibold [&_h3]:text-gray-900 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1 [&_strong]:font-semibold [&_em]:italic [&_u]:underline [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800"
+                dangerouslySetInnerHTML={{ __html: welcomeContent! }}
+              />
+            )}
+          </motion.div>
+        )}
+
         {/* Available Sections - Only show if course is loaded and has sections */}
         {currentCourse && availableSections.length > 0 && (
           <motion.div
@@ -770,7 +834,7 @@ function DashboardContent() {
           >
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">{currentCourse.name}</h2>
             <p className="text-gray-600 mb-4">Select a section to continue learning</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {availableSections.map((section, index) => {
                 const isActive = currentSectionId === section.id;
                 const isLoading = switchingSection === section.id;
@@ -911,15 +975,24 @@ function DashboardContent() {
   );
 }
 
-// Wrapper component that provides the Dashboard context
-export default function Dashboard() {
+/** Course dashboard (welcome, announcements, sections, DreamFlow) with the contexts it needs.
+ * Rendered inside a role's sidebar layout — students for their courses, experts for onboarding. */
+export function CourseDashboard({ slug, audience }: CourseDashboardProps) {
   return (
     <DashboardProvider>
       <CourseProvider>
-        <StudentDashboardLayout>
-          <DashboardContent />
-        </StudentDashboardLayout>
+        <DashboardContent slug={slug} audience={audience} />
       </CourseProvider>
     </DashboardProvider>
+  );
+}
+
+// Student route: /courses/:slug/dashboard
+export default function Dashboard() {
+  const { slug } = useParams<{ slug: string }>();
+  return (
+    <StudentDashboardLayout>
+      <CourseDashboard slug={slug} audience="student" />
+    </StudentDashboardLayout>
   );
 }

@@ -11,6 +11,7 @@ const statusConfig: Record<CourseStatus, { label: string; className: string }> =
     label: "Pending Review",
     className: "bg-yellow-100 text-yellow-700",
   },
+  [CourseStatus.WAITLIST]: { label: "Waitlist", className: "bg-blue-100 text-blue-700" },
   [CourseStatus.PUBLISHED]: { label: "Published", className: "bg-green-100 text-green-700" },
   [CourseStatus.ARCHIVED]: { label: "Archived", className: "bg-red-100 text-red-700" },
 };

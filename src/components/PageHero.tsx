@@ -4,16 +4,13 @@ interface PageHeroProps {
   title: string;
   subtitle?: string;
   eyebrow?: string;
-  /** Optional background photo, shown under a dark overlay. */
   backgroundImage?: string;
-  /** When provided, renders the pill search bar under the subtitle. */
   search?: {
     value: string;
     onChange: (value: string) => void;
     placeholder?: string;
   };
   className?: string;
-  /** Extra content under the search bar (e.g. filter pills). */
   children?: React.ReactNode;
 }
 
