@@ -7,6 +7,9 @@ export enum Role {
   User = "user",
 }
 
+// The view a user is currently operating in. Separate from Role, which is the account permission level.
+export type DashboardRole = "student" | "expert" | "partner";
+
 interface User {
   id: string;
   authUser?: Auth0User;

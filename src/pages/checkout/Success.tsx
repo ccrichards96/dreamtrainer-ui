@@ -83,7 +83,7 @@ export default function CheckoutSuccess() {
     if (courseSlug) {
       navigate(`/courses/${courseSlug}/dashboard`);
     } else {
-      navigate("/courses?tab=my-courses");
+      navigate("/my-courses");
     }
   };
 

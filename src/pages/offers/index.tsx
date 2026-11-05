@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Compass, Briefcase, Loader2 } from "lucide-react";
-import DashboardLayout, { type SidebarItem } from "../expert-dashboard/DashboardLayout";
+import { Loader2 } from "lucide-react";
+import StudentDashboardLayout from "../dashboard/StudentDashboardLayout";
 import ExploreOffers from "./ExploreOffers";
 import MyOffers from "./MyOffers";
 import OfferDetailModal from "./OfferDetailModal";
@@ -18,11 +18,6 @@ import type { OfferApplicationStatus, MyOfferApplication } from "../../types/off
 import { toast } from "../../components/toast";
 
 type Tab = "explore" | "my-offers";
-
-const sidebarItems: SidebarItem[] = [
-  { id: "explore", label: "Explore Offers", icon: Compass },
-  { id: "my-offers", label: "My Offers", icon: Briefcase },
-];
 
 const validTabs: Tab[] = ["explore", "my-offers"];
 
@@ -213,43 +208,42 @@ export default function StudentOffers() {
     navigate("/offers/explore");
   };
 
+  // My Offers lives in the student dashboard; Explore is a standalone page like /courses.
+  // fullBleed skips the padded container so content (the Explore hero) can span the page.
+  const renderShell = (content: React.ReactNode, fullBleed = false) => {
+    const body = fullBleed ? (
+      content
+    ) : (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{content}</div>
+    );
+    return activeTab === "my-offers" ? (
+      <StudentDashboardLayout>{body}</StudentDashboardLayout>
+    ) : (
+      <div className="min-h-screen bg-gray-50">{body}</div>
+    );
+  };
+
   if (loading) {
-    return (
-      <DashboardLayout
-        items={sidebarItems}
-        activeTab={activeTab}
-        onTabChange={(id) => navigate(`/offers/${id}`)}
-        title="Offers for Students"
-        breadcrumbRoot="Offers"
-      >
-        <div className="flex items-center justify-center gap-3 py-24">
-          <Loader2 className="size-8 animate-spin text-purple-500" />
-          <span className="text-gray-600">Loading offers...</span>
-        </div>
-      </DashboardLayout>
+    return renderShell(
+      <div className="flex items-center justify-center gap-3 py-24">
+        <Loader2 className="size-8 animate-spin text-purple-500" />
+        <span className="text-gray-600">Loading offers...</span>
+      </div>
     );
   }
 
   if (error) {
-    return (
-      <DashboardLayout
-        items={sidebarItems}
-        activeTab={activeTab}
-        onTabChange={(id) => navigate(`/offers/${id}`)}
-        title="Offers for Students"
-        breadcrumbRoot="Offers"
-      >
-        <div className="mx-auto max-w-md rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
-          <p className="font-medium text-red-600">{error}</p>
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
-          >
-            Retry
-          </button>
-        </div>
-      </DashboardLayout>
+    return renderShell(
+      <div className="mx-auto max-w-md rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+        <p className="font-medium text-red-600">{error}</p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+        >
+          Retry
+        </button>
+      </div>
     );
   }
 
@@ -257,14 +251,8 @@ export default function StudentOffers() {
   const selectedWithdrawable = selectedOffer ? withdrawableIds.includes(selectedOffer.id) : false;
   const selectedBusy = selectedOffer ? busyIds.includes(selectedOffer.id) : false;
 
-  return (
-    <DashboardLayout
-      items={sidebarItems}
-      activeTab={activeTab}
-      onTabChange={(id) => navigate(`/offers/${id}`)}
-      title="Offers for Students"
-      breadcrumbRoot="Offers"
-    >
+  return renderShell(
+    <>
       {activeTab === "explore" && (
         <ExploreOffers
           offers={offers}
@@ -307,6 +295,7 @@ export default function StudentOffers() {
         isSubmitting={applyingOffer ? busyIds.includes(applyingOffer.id) : false}
         onSubmit={handleSubmitApplication}
       />
-    </DashboardLayout>
+    </>,
+    activeTab === "explore"
   );
 }

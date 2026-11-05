@@ -11,6 +11,8 @@ export { ApiProvider, ApiContext } from "./ApiContext";
 export { useApiContext } from "./useApiContext";
 export { AppProvider, AppContext } from "./AppContext";
 export { useApp } from "./useAppContext";
+export { RoleProvider, RoleContext, type RoleContextType } from "./RoleContext";
+export { useRole } from "./useRoleContext";
 export { CourseProvider, CourseContext, type CourseContextType } from "./CourseContext";
 export { useCourseContext } from "./useCourseContext";
 export {

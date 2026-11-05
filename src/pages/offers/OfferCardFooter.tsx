@@ -22,7 +22,7 @@ export default function OfferCardFooter({
   onViewDetails,
 }: OfferCardFooterProps) {
   return (
-    <div className="bg-gray-50 px-5 py-4 flex items-center justify-between border-t border-gray-100 flex-shrink-0">
+    <div className="px-6 pb-6 flex items-center justify-between gap-x-4 flex-shrink-0">
       <button
         type="button"
         onClick={() => onViewDetails(offer)}
@@ -34,8 +34,8 @@ export default function OfferCardFooter({
 
       {hasApplied ? (
         <div className="flex items-center gap-x-2">
-          <span className="inline-flex items-center gap-x-1 rounded-lg bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-800">
-            <Check className="size-3.5" />
+          <span className="inline-flex items-center gap-x-1.5 rounded-lg bg-green-100 px-6 py-3 text-base font-medium text-green-800">
+            <Check className="size-5" />
             Applied
           </span>
           {canWithdraw && (
@@ -43,7 +43,7 @@ export default function OfferCardFooter({
               type="button"
               onClick={() => onWithdraw(offer.id)}
               disabled={isBusy}
-              className="text-xs font-semibold text-gray-500 hover:text-red-600 focus:outline-none disabled:opacity-50"
+              className="text-sm font-semibold text-gray-500 hover:text-red-600 focus:outline-none disabled:opacity-50"
             >
               Withdraw
             </button>
@@ -52,9 +52,9 @@ export default function OfferCardFooter({
       ) : isApplyLocked(offer) ? (
         <span
           title={`Pass ${offer.courseName ? `"${offer.courseName}"` : "the course"} to apply`}
-          className="inline-flex cursor-not-allowed items-center gap-x-1.5 rounded-lg bg-gray-200 px-4 py-2 text-xs font-semibold text-gray-500"
+          className="inline-flex cursor-not-allowed items-center gap-x-2 rounded-lg bg-gray-200 px-6 py-3 text-base font-medium text-gray-500"
         >
-          <Lock className="size-3.5" />
+          <Lock className="size-5" />
           Pass course to apply
         </span>
       ) : (
@@ -62,10 +62,10 @@ export default function OfferCardFooter({
           type="button"
           onClick={() => onApply(offer.id)}
           disabled={isBusy}
-          className="inline-flex items-center gap-x-1.5 rounded-lg bg-purple-600 px-4 py-2 text-xs font-semibold text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-sm transition disabled:opacity-50"
+          className="inline-flex items-center gap-x-2 rounded-lg bg-purple-600 px-8 py-3 text-base font-medium text-white hover:bg-purple-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-200 disabled:opacity-50"
         >
-          {isBusy && <Loader2 className="size-3.5 animate-spin" />}
           Apply
+          {isBusy ? <Loader2 className="size-5 animate-spin" /> : <ArrowRight className="size-5" />}
         </button>
       )}
     </div>

@@ -25,6 +25,7 @@ import { useDashboardContext, DashboardProvider } from "../../contexts";
 import { CourseProvider } from "../../contexts/CourseContext";
 import { useCourseContext } from "../../contexts/useCourseContext";
 import DreamFlow from "../../components/DreamFlow";
+import StudentDashboardLayout from "./StudentDashboardLayout";
 import Modal from "../../components/modals/Modal";
 import SupportMessageForm from "../../components/forms/SupportMessageForm";
 import { Section } from "../../types/modules";
@@ -424,7 +425,7 @@ function DashboardContent() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
+      <div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="flex items-center gap-3">
@@ -440,7 +441,7 @@ function DashboardContent() {
   // Not enrolled state
   if (enrollmentStatus === "not-enrolled") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
+      <div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
@@ -463,7 +464,7 @@ function DashboardContent() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
+      <div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
@@ -478,7 +479,7 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16">
+    <div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Banner */}
         <motion.div
@@ -915,7 +916,9 @@ export default function Dashboard() {
   return (
     <DashboardProvider>
       <CourseProvider>
-        <DashboardContent />
+        <StudentDashboardLayout>
+          <DashboardContent />
+        </StudentDashboardLayout>
       </CourseProvider>
     </DashboardProvider>
   );

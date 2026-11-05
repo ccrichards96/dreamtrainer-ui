@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { StudentOffer } from "./types";
-import { Search, Building, ImageIcon } from "lucide-react";
+import { Building, ImageIcon } from "lucide-react";
 import OfferCardFooter from "./OfferCardFooter";
+import PageHero from "../../components/PageHero";
 
 interface ExploreOffersProps {
   offers: StudentOffer[];
@@ -53,145 +54,139 @@ export default function ExploreOffers({
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header Info */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Explore Offers</h1>
-        <p className="mt-1 text-sm sm:text-base text-gray-600">
-          Find and apply to course-aligned internships, design apprenticeships, and entry-level
-          developer positions.
-        </p>
-      </div>
+    <>
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <PageHero
+        title="Explore Offers"
+        subtitle="Find and apply to course-aligned internships, design apprenticeships, and entry-level developer positions."
+        search={{
+          value: searchQuery,
+          onChange: setSearchQuery,
+          placeholder: "Search offers, partners, or keywords...",
+        }}
+      />
 
-      {/* Search & Filter Bar */}
-      <div className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm sm:flex-row sm:items-center">
-        {/* Search Input */}
-        <div className="relative flex-1">
-          <label htmlFor="search-offers" className="sr-only">
-            Search offers
-          </label>
-          <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-            <Search className="size-4 text-gray-400" />
-          </div>
-          <input
-            id="search-offers"
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search offers, partners, or keywords..."
-            className="w-full rounded-lg border border-gray-200 py-2.5 pe-4 ps-10 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
-          />
-        </div>
-      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Offers List — full-width cards matching the /courses layout */}
+        {filteredOffers.length > 0 ? (
+          <div className="space-y-6">
+            {filteredOffers.map((offer, index) => {
+              const hasApplied = appliedIds.includes(offer.id);
+              const logoGradient = gradientStyles[index % gradientStyles.length];
 
-      {/* Offers Grid */}
-      {filteredOffers.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
-          {filteredOffers.map((offer, index) => {
-            const hasApplied = appliedIds.includes(offer.id);
-            const logoGradient = gradientStyles[index % gradientStyles.length];
-
-            return (
-              <div
-                key={offer.id}
-                className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-150 hover:shadow-md hover:border-purple-250 transition duration-300"
-              >
-                {/* Cover image */}
-                <div className="flex h-40 items-center justify-center bg-gray-100">
-                  {offer.imageUrl ? (
-                    <img
-                      src={offer.imageUrl}
-                      alt=""
-                      className="size-full object-cover"
-                    />
-                  ) : (
-                    <ImageIcon className="size-10 text-gray-300" />
-                  )}
-                </div>
-
-                {/* Card Header */}
-                <div className="p-5 flex-1 space-y-4">
-                  <div className="flex items-start justify-between gap-x-4">
-                    <div className="flex items-center gap-x-3">
-                      {offer.partnerLogoUrl ? (
+              return (
+                <div
+                  key={offer.id}
+                  className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md hover:scale-[1.01] transition-all duration-300"
+                >
+                  <div className="flex flex-col md:flex-row h-full">
+                    {/* Left side - Cover image */}
+                    <div className="relative h-52 md:h-auto md:min-h-[300px] md:w-[400px] flex-shrink-0 bg-gray-100">
+                      {offer.imageUrl ? (
                         <img
-                          src={offer.partnerLogoUrl}
-                          alt=""
-                          className="size-11 flex-shrink-0 rounded-xl object-cover shadow-sm"
+                          src={offer.imageUrl}
+                          alt={offer.title}
+                          className="absolute inset-0 w-full h-full object-cover"
                         />
                       ) : (
-                        <div
-                          className={`flex size-11 items-center justify-center rounded-xl bg-gradient-to-br ${logoGradient} text-white font-bold text-sm shadow-sm flex-shrink-0`}
-                        >
-                          {getInitials(offer.partnerName || offer.title)}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <ImageIcon className="size-16 text-gray-300" />
                         </div>
                       )}
-                      <div>
-                        {offer.partnerName && (
-                          <h4 className="text-xs font-bold text-purple-600 uppercase tracking-wider">
-                            {offer.partnerName}
-                          </h4>
+                    </div>
+
+                    {/* Right side - Content */}
+                    <div className="flex-1 flex flex-col min-w-0">
+                      <div className="flex-1 p-6 space-y-4">
+                        {/* Partner */}
+                        <div className="flex items-center gap-x-3">
+                          {offer.partnerLogoUrl ? (
+                            <img
+                              src={offer.partnerLogoUrl}
+                              alt=""
+                              className="size-10 flex-shrink-0 rounded-xl object-cover shadow-sm"
+                            />
+                          ) : (
+                            <div
+                              className={`flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${logoGradient} text-white font-bold text-sm shadow-sm flex-shrink-0`}
+                            >
+                              {getInitials(offer.partnerName || offer.title)}
+                            </div>
+                          )}
+                          {offer.partnerName && (
+                            <h4 className="text-xs font-bold text-purple-600 uppercase tracking-wider truncate">
+                              {offer.partnerName}
+                            </h4>
+                          )}
+                        </div>
+
+                        {/* Title and description */}
+                        <div>
+                          <h2 className="text-2xl font-bold text-gray-900 mb-2">{offer.title}</h2>
+                          {offer.description && (
+                            <p className="text-sm text-gray-600 line-clamp-3">
+                              {offer.description}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Tags */}
+                        {/* {offer.tags && offer.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {offer.tags.map((tag, idx) => (
+                            <span
+                              key={idx}
+                              className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-xs font-semibold text-purple-700"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )} */}
+
+                        {/* Requirements Snippet */}
+                        {offer.requirements && offer.requirements.length > 0 && (
+                          <div className="space-y-1.5">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                              Key Requirements
+                            </p>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              {offer.requirements.slice(0, 2).map((req, idx) => (
+                                <li key={idx} className="line-clamp-1 flex items-start gap-x-2">
+                                  <span className="text-purple-500 font-bold">•</span>
+                                  <span>{req}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
-                        <h3 className="font-bold text-gray-800 text-base mt-0.5 line-clamp-1">
-                          {offer.title}
-                        </h3>
                       </div>
+
+                      <OfferCardFooter
+                        offer={offer}
+                        hasApplied={hasApplied}
+                        canWithdraw={withdrawableIds.includes(offer.id)}
+                        isBusy={busyIds.includes(offer.id)}
+                        onApply={onApply}
+                        onWithdraw={onWithdraw}
+                        onViewDetails={onViewDetails}
+                      />
                     </div>
                   </div>
-
-                  {/* Tags */}
-                  {/* {offer.tags && offer.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {offer.tags.map((tag, idx) => (
-                        <span
-                          key={idx}
-                          className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-xs font-semibold text-purple-700"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )} */}
-
-                  {/* Requirements Snippet */}
-                  {offer.requirements && offer.requirements.length > 0 && (
-                    <div className="space-y-1.5">
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                        Key Requirements
-                      </p>
-                      <ul className="text-sm text-gray-600 space-y-1">
-                        {offer.requirements.slice(0, 2).map((req, idx) => (
-                          <li key={idx} className="line-clamp-1 flex items-start gap-x-2">
-                            <span className="text-purple-500 font-bold">•</span>
-                            <span>{req}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
                 </div>
-                <OfferCardFooter
-                  offer={offer}
-                  hasApplied={hasApplied}
-                  canWithdraw={withdrawableIds.includes(offer.id)}
-                  isBusy={busyIds.includes(offer.id)}
-                  onApply={onApply}
-                  onWithdraw={onWithdraw}
-                  onViewDetails={onViewDetails}
-                />
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-          <Building className="mx-auto size-12 text-gray-300" />
-          <h3 className="mt-4 text-lg font-semibold text-gray-800">No offers found</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Try adjusting your search keywords or tags to find available offers.
-          </p>
-        </div>
-      )}
-    </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
+            <Building className="mx-auto size-12 text-gray-300" />
+            <h3 className="mt-4 text-lg font-semibold text-gray-800">No offers found</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Try adjusting your search keywords or tags to find available offers.
+            </p>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
