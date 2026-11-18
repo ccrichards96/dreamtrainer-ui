@@ -89,4 +89,10 @@ export type AdminUpdateUser = Partial<
   expertProfile?: AdminUpdateExpertProfile;
 };
 
+export type ImpersonateResponse = {
+  accessToken: string;
+  expiresIn: string;
+  user: User;
+};
+
 export type { User };

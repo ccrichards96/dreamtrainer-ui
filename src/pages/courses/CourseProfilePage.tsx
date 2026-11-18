@@ -17,6 +17,7 @@ import CourseSectionsPreview from "../../components/CourseSectionsPreview";
 import { CourseStatus } from "../../types/modules";
 import { Course } from "../../types/modules";
 import { CoursePricing } from "../../types/billing";
+import CourseAgreementModal from "../../components/CourseAgreementModal";
 
 export default function CourseProfilePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -30,6 +31,7 @@ export default function CourseProfilePage() {
   const [checkingEnrollment, setCheckingEnrollment] = useState(true);
   const [pricing, setPricing] = useState<CoursePricing | null>(null);
   const [loadingPricing, setLoadingPricing] = useState(false);
+  const [showAgreementModal, setShowAgreementModal] = useState(false);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -80,14 +82,8 @@ export default function CourseProfilePage() {
   // Waitlist courses are open for pre-order; enrolled students see the normal CTA.
   const isPreorder = course?.status === CourseStatus.WAITLIST && !isEnrolled;
 
-  const handleJoinCourse = () => {
+  const proceedToJoin = () => {
     if (!course) return;
-
-    if (isEnrolled) {
-      // Already enrolled → go to course dashboard
-      navigate(`/courses/${course.slug}/dashboard`);
-      return;
-    }
 
     if (!isAuthenticated) {
       // Not signed in → redirect to Auth0 signup, then return to this course page
@@ -100,6 +96,24 @@ export default function CourseProfilePage() {
 
     // Signed in, not enrolled → go to checkout (handles both free enrollment and paid)
     navigate(`/courses/${course.slug}/checkout`);
+  };
+
+  const handleJoinCourse = () => {
+    if (!course) return;
+
+    if (isEnrolled) {
+      // Already enrolled → go to course dashboard
+      navigate(`/courses/${course.slug}/dashboard`);
+      return;
+    }
+
+    if (course.courseAgreementText) {
+      // Gate on the agreement popup before proceeding to signup/checkout
+      setShowAgreementModal(true);
+      return;
+    }
+
+    proceedToJoin();
   };
 
   /**
@@ -372,6 +386,16 @@ export default function CourseProfilePage() {
           </div>
         </div>
       </div>
+
+      <CourseAgreementModal
+        isOpen={showAgreementModal}
+        agreementHtml={course.courseAgreementText ?? ""}
+        onConfirm={() => {
+          setShowAgreementModal(false);
+          proceedToJoin();
+        }}
+        onClose={() => setShowAgreementModal(false)}
+      />
     </div>
   );
 }

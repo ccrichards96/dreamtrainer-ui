@@ -24,7 +24,7 @@ import { useParams } from "react-router-dom";
 import { useDashboardContext, DashboardProvider } from "../../contexts";
 import { CourseProvider } from "../../contexts/CourseContext";
 import { useCourseContext } from "../../contexts/useCourseContext";
-import DreamFlow from "../../components/DreamFlow";
+import DreamFlow, { ProgressTracker } from "../../components/DreamFlow";
 import StudentDashboardLayout from "./StudentDashboardLayout";
 import { audienceConfig, DashboardAudience } from "./audienceConfig";
 import Modal from "../../components/modals/Modal";
@@ -321,6 +321,11 @@ function DashboardContent({ slug, audience }: CourseDashboardProps) {
     error: courseError,
     loadCourse,
     loadSectionModules,
+    currentModuleIndex,
+    completedModules,
+    getProgressPercentage,
+    setCurrentModuleIndex,
+    isTestMode,
   } = useCourseContext();
 
   // Expert-authored welcome message for the course (empty editor output counts as none)
@@ -335,6 +340,15 @@ function DashboardContent({ slug, audience }: CourseDashboardProps) {
   const [enrollmentStatus, setEnrollmentStatus] = useState<
     "checking" | "enrolled" | "not-enrolled"
   >("checking");
+
+  // Progress sidebar state - lifted to page level so it lays out alongside the
+  // whole dashboard (not just the course module card) and can never cover content
+  const [testSubmitted, setTestSubmitted] = useState(false);
+  const [isProgressSidebarCollapsed, setIsProgressSidebarCollapsed] = useState(false);
+
+  const handleModuleClick = (index: number) => {
+    setCurrentModuleIndex(index);
+  };
 
   // Ref to track if initialization has been done to prevent duplicate calls
   const isInitialized = useRef(false);
@@ -512,8 +526,15 @@ function DashboardContent({ slug, audience }: CourseDashboardProps) {
     );
   }
 
+  // The progress sidebar is only ever shown while actively working through modules
+  const showProgressSidebar = modules.length > 0 && !isTestMode && !testSubmitted;
+
   return (
-    <div>
+    <div
+      className={`min-h-screen bg-gradient-to-br from-[#c5a8de] via-[#e6d8f5] to-white pt-16 transition-[padding] duration-300 ease-in-out ${
+        showProgressSidebar ? (isProgressSidebarCollapsed ? "lg:pr-16" : "lg:pr-80") : ""
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Banner */}
         <motion.div
@@ -920,7 +941,11 @@ function DashboardContent({ slug, audience }: CourseDashboardProps) {
                 </p>
               </div>
               <div className="p-4">
-                <DreamFlow onComplete={handleCourseComplete} />
+                <DreamFlow
+                  onComplete={handleCourseComplete}
+                  testSubmitted={testSubmitted}
+                  onTestSubmittedChange={setTestSubmitted}
+                />
               </div>
             </div>
           </motion.div>
@@ -929,6 +954,20 @@ function DashboardContent({ slug, audience }: CourseDashboardProps) {
         {/* Course Resources Section */}
         <CourseResourcesSection courseId={currentCourse?.id} />
       </div>
+
+      {/* Progress Tracker Sidebar - pinned to the viewport edge; the page reserves
+          matching space via lg:pr-* above so nothing ever renders underneath it */}
+      {showProgressSidebar && (
+        <ProgressTracker
+          modules={modules}
+          currentModuleIndex={currentModuleIndex}
+          completedModules={completedModules}
+          getProgressPercentage={getProgressPercentage}
+          onModuleClick={handleModuleClick}
+          isCollapsed={isProgressSidebarCollapsed}
+          onCollapsedChange={setIsProgressSidebarCollapsed}
+        />
+      )}
       {/* Welcome Modal */}
       <Modal
         isOpen={welcomeModalOpen}

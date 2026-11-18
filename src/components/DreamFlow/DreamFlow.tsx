@@ -1,24 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import type { DreamFlowProps } from "./types";
-import { ProgressTracker, ModuleContent, NavigationButton, TestContent } from "./components";
+import { ModuleContent, NavigationButton, TestContent } from "./components";
 import { useCourseContext } from "../../contexts/useCourseContext";
 import { motion } from "framer-motion";
 import { CheckCircle, RotateCcw, Home } from "lucide-react";
 
-const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
-  const [testSubmitted, setTestSubmitted] = useState(false);
-
+const DreamFlow: React.FC<DreamFlowProps> = ({
+  onComplete,
+  testSubmitted,
+  onTestSubmittedChange,
+}) => {
   const {
     modules,
     currentModuleIndex,
-    completedModules,
     markModuleAsCompleted,
     nextModule,
     previousModule,
-    getProgressPercentage,
     isLastModule,
     isFirstModule,
-    setCurrentModuleIndex,
     // Test mode properties
     isTestMode,
     currentTest,
@@ -86,13 +85,13 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
       startTestMode(); // This will automatically find the next incomplete test
     } else {
       // All tests completed - show success page
-      setTestSubmitted(true);
+      onTestSubmittedChange(true);
     }
   };
 
   const handleReturnToCourse = () => {
     // Reset states and return to course
-    setTestSubmitted(false);
+    onTestSubmittedChange(false);
     exitTestMode();
     resetToFirstModule(true);
     onComplete?.();
@@ -102,14 +101,10 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
     exitTestMode();
   };
 
-  const handleModuleClick = (index: number) => {
-    setCurrentModuleIndex(index);
-  };
-
   return (
-    <div className="pt-0 sm:pt-8 px-0 sm:px-4 pb-24 lg:pb-8 lg:pr-24 overflow-x-hidden">
+    <div className="pt-0 sm:pt-8 px-0 sm:px-4 pb-8 overflow-x-hidden">
       <div className="w-full max-w-none">
-        {/* Main Content Area - Full width with sidebar space */}
+        {/* Main Content Area */}
         <div className="w-full">
           {testSubmitted ? (
             // Success Page
@@ -190,17 +185,6 @@ const DreamFlow: React.FC<DreamFlowProps> = ({ onComplete }) => {
         {/* Mobile Bottom Padding */}
         <div className="h-4 md:hidden" />
       </div>
-
-      {/* Fixed Sidebar Progress Tracker - Only show in module mode */}
-      {!isTestMode && !testSubmitted && (
-        <ProgressTracker
-          modules={modules}
-          currentModuleIndex={currentModuleIndex}
-          completedModules={completedModules}
-          getProgressPercentage={getProgressPercentage}
-          onModuleClick={handleModuleClick}
-        />
-      )}
     </div>
   );
 };

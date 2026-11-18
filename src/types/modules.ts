@@ -172,6 +172,8 @@ interface Course {
   status: CourseStatus;
   price: number;
   stripeProductId: string | null;
+  mailingListId: string | null;
+  courseAgreementText: string | null;
   listingStatus: ListingStatus;
   order: number;
   categoryOrder?: number; // Position within a category, present when loaded via a category's courses

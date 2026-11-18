@@ -16,6 +16,8 @@ import {
   MoreHorizontal,
   Plus,
   Layers,
+  Upload,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   Course,
@@ -30,8 +32,9 @@ import InvitePartnerModal from "./InvitePartnerModal";
 import { toast } from "../toast";
 import { Category } from "../../types/categories";
 import { User } from "../../types/user";
-import { updateCourse } from "../../services/api/modules";
 import CategoryMultiSelect from "./CategoryMultiSelect";
+import { updateCourse, uploadCourseImage } from "../../services/api/modules";
+import RichTextEditor, { TOOLBAR_BASIC } from "../RichTextEditor";
 import courseExpertsService from "../../services/api/course-experts";
 import coursePartnersService from "../../services/api/course-partners";
 import courseLevelsService from "../../services/api/course-levels";
@@ -40,7 +43,6 @@ import { getAllCategories } from "../../services/api/categories";
 import { getUsersPaginated } from "../../services/api/admin";
 import RevokeInviteModal from "./RevokeInviteModal";
 import DeleteCourseLevelModal from "./DeleteCourseLevelModal";
-import RichTextEditor from "../RichTextEditor";
 import { getPlainTextLength } from "../../utils/htmlSanitizer";
 
 interface CourseEditorProps {
@@ -160,6 +162,8 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
     prerequisites: course.prerequisites || [],
     targetAudiences: course.targetAudiences || [],
     stripeProductId: course.stripeProductId || "",
+    mailingListId: course.mailingListId || "",
+    courseAgreementText: course.courseAgreementText || "",
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -226,6 +230,11 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
   const [newLevelName, setNewLevelName] = useState("");
   const [levelSuccess, setLevelSuccess] = useState<string | null>(null);
   const [levelPendingDeletion, setLevelPendingDeletion] = useState<CourseLevel | null>(null);
+  // Image upload state
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getAllCategories()
@@ -631,6 +640,8 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
         prerequisites: formData.prerequisites,
         targetAudiences: formData.targetAudiences,
         stripeProductId: formData.stripeProductId || null,
+        mailingListId: formData.mailingListId || null,
+        courseAgreementText: formData.courseAgreementText || null,
       });
 
       setSuccess(true);
@@ -805,30 +816,140 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
               </div>
             </div>
 
-            {/* Image and Wrapper Fields */}
-
+            {/* Image Upload */}
             <div>
-              <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                Image URL
-              </label>
-              <div className="flex gap-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Course Image</label>
+
+              {/* Hidden file input */}
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                id="courseImageUpload"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setImageUploading(true);
+                  setImageUploadError(null);
+                  try {
+                    const updated = await uploadCourseImage(course.id, file);
+                    setFormData((prev) => ({ ...prev, imageUrl: updated.imageUrl || "" }));
+                  } catch (err: any) {
+                    setImageUploadError(err.message || "Upload failed");
+                  } finally {
+                    setImageUploading(false);
+                    // Reset so the same file can be re-selected
+                    e.target.value = "";
+                  }
+                }}
+              />
+
+              {/* Dropzone */}
+              <div
+                role="button"
+                tabIndex={0}
+                aria-label="Upload course image"
+                onClick={() => !imageUploading && imageInputRef.current?.click()}
+                onKeyDown={(e) => e.key === "Enter" && !imageUploading && imageInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true); }}
+                onDragLeave={() => setIsDraggingOver(false)}
+                onDrop={async (e) => {
+                  e.preventDefault();
+                  setIsDraggingOver(false);
+                  const file = e.dataTransfer.files[0];
+                  if (!file || !file.type.startsWith("image/")) return;
+                  setImageUploading(true);
+                  setImageUploadError(null);
+                  try {
+                    const updated = await uploadCourseImage(course.id, file);
+                    setFormData((prev) => ({ ...prev, imageUrl: updated.imageUrl || "" }));
+                  } catch (err: any) {
+                    setImageUploadError(err.message || "Upload failed");
+                  } finally {
+                    setImageUploading(false);
+                  }
+                }}
+                className={`relative flex flex-col items-center justify-center w-full rounded-xl border-2 border-dashed transition-colors cursor-pointer select-none ${
+                  isDraggingOver
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/40"
+                } ${ imageUploading ? "cursor-not-allowed opacity-70" : "" }`}
+                style={{ minHeight: formData.imageUrl ? "120px" : "140px" }}
+              >
+                {formData.imageUrl ? (
+                  /* Preview mode */
+                  <div className="flex items-center gap-4 w-full p-4">
+                    <img
+                      src={formData.imageUrl}
+                      alt="Course thumbnail"
+                      className="w-24 h-24 object-cover rounded-lg border border-gray-200 flex-shrink-0 shadow-sm"
+                      onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-700 truncate">Current image</p>
+                      <p className="text-xs text-gray-400 mt-0.5 truncate">{formData.imageUrl}</p>
+                      <p className="text-xs text-blue-600 mt-2 font-medium">
+                        {imageUploading ? "Uploading…" : "Click or drag to replace"}
+                      </p>
+                    </div>
+                    {imageUploading && (
+                      <Loader2 className="w-5 h-5 animate-spin text-blue-500 flex-shrink-0" />
+                    )}
+                  </div>
+                ) : (
+                  /* Empty state */
+                  <div className="flex flex-col items-center gap-2 py-8 px-4 text-center">
+                    {imageUploading ? (
+                      <>
+                        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                        <p className="text-sm text-blue-600 font-medium">Uploading image…</p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                          {isDraggingOver ? (
+                            <ImageIcon className="w-6 h-6 text-blue-500" />
+                          ) : (
+                            <Upload className="w-6 h-6 text-blue-500" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">
+                            {isDraggingOver ? "Drop image here" : "Upload course image"}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            Drag &amp; drop or <span className="text-blue-600 font-medium">browse</span> · PNG, JPG, WEBP
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Upload error */}
+              {imageUploadError && (
+                <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  {imageUploadError}
+                </p>
+              )}
+
+              {/* Manual URL override */}
+              <div className="mt-2">
+                <label htmlFor="imageUrl" className="block text-xs text-gray-400 mb-1">
+                  Or paste an image URL directly
+                </label>
                 <input
                   type="url"
                   id="imageUrl"
                   name="imageUrl"
                   value={formData.imageUrl}
                   onChange={handleInputChange}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-600 bg-white"
                   placeholder="https://..."
                 />
-                {formData.imageUrl && (
-                  <img
-                    src={formData.imageUrl}
-                    alt="Course thumbnail preview"
-                    className="w-16 h-16 object-cover rounded-lg border border-gray-200 flex-shrink-0"
-                    onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
-                  />
-                )}
               </div>
             </div>
 
@@ -907,6 +1028,28 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
           </div>
         </section>
 
+        {/* Section: Course Agreement */}
+        <section>
+          <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+            Course Agreement
+          </h4>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Agreement Text
+            </label>
+            <p className="text-xs text-gray-400 mb-2">
+              Shown as a confirmation popup before a student joins this course. Leave empty to
+              skip the popup.
+            </p>
+            <RichTextEditor
+              value={formData.courseAgreementText}
+              onChange={(html) => setFormData((p) => ({ ...p, courseAgreementText: html }))}
+              placeholder="Enter the terms students must agree to before joining…"
+              toolbar={TOOLBAR_BASIC}
+            />
+          </div>
+        </section>
+
         {/* Section: Metadata (read-only) */}
         <section>
           <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
@@ -928,6 +1071,23 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
                 placeholder="prod_..."
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="mailingListId"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Mailing List ID
+              </label>
+              <input
+                type="text"
+                id="mailingListId"
+                name="mailingListId"
+                value={formData.mailingListId}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                placeholder="e.g. list_..."
               />
             </div>
             {formData.slug && (

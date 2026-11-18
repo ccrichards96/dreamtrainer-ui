@@ -5,6 +5,7 @@ import "quill/dist/quill.snow.css";
 export interface RichTextEditorProps {
   value: string;
   onChange: (html: string) => void;
+  onImageUpload?: (file: File) => Promise<string>;
   placeholder?: string;
   minHeight?: number;
   toolbar?: unknown[];
@@ -39,14 +40,18 @@ export const TOOLBAR_WITH_IMAGE = [
 export default function RichTextEditor({
   value,
   onChange,
+  onImageUpload,
   placeholder,
   minHeight = 150,
   toolbar = TOOLBAR_BASIC,
 }: RichTextEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  // Stable ref so the text-change handler never closes over a stale onChange.
+  // Stable refs so event handlers never close over stale props.
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+
+  const onImageUploadRef = useRef(onImageUpload);
+  onImageUploadRef.current = onImageUpload;
 
   useEffect(() => {
     const wrapper = containerRef.current;
@@ -75,6 +80,44 @@ export default function RichTextEditor({
               } else {
                 quill.format("link", false);
               }
+            },
+            image: () => {
+              const input = document.createElement("input");
+              input.setAttribute("type", "file");
+              input.setAttribute(
+                "accept",
+                "image/jpeg, image/png, image/webp, image/gif, image/svg+xml"
+              );
+              input.click();
+
+              input.onchange = async () => {
+                const file = input.files?.[0];
+                if (!file) return;
+
+                if (onImageUploadRef.current) {
+                  try {
+                    const imageUrl = await onImageUploadRef.current(file);
+                    const range = quill.getSelection(true) || { index: quill.getLength() };
+                    quill.insertEmbed(range.index, "image", imageUrl);
+                    quill.setSelection(range.index + 1);
+                  } catch (err: any) {
+                    console.error("Failed to upload image:", err);
+                    alert(err.message || "Image upload failed. Please try again.");
+                  }
+                } else {
+                  // Fallback: default FileReader base64 embedding if no upload handler provided
+                  const reader = new FileReader();
+                  reader.onload = (e) => {
+                    const base64Url = e.target?.result as string;
+                    if (base64Url) {
+                      const range = quill.getSelection(true) || { index: quill.getLength() };
+                      quill.insertEmbed(range.index, "image", base64Url);
+                      quill.setSelection(range.index + 1);
+                    }
+                  };
+                  reader.readAsDataURL(file);
+                }
+              };
             },
           },
         },
@@ -116,3 +159,4 @@ export default function RichTextEditor({
     />
   );
 }
+

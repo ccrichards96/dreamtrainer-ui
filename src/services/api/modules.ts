@@ -331,6 +331,8 @@ export const updateCourse = async (
     welcomeContent?: string | null;
     featuredVideoUrl?: string | null;
     stripeProductId?: string | null;
+    mailingListId?: string | null;
+    courseAgreementText?: string | null;
   }
 ): Promise<Course> => {
   try {
@@ -339,6 +341,35 @@ export const updateCourse = async (
   } catch (error: any) {
     const apiError: ApiError = {
       message: error.response?.data?.message || "Failed to update course",
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
+/**
+ * Upload a course image
+ * POST /courses/:id/image
+ * @param courseId - The ID of the course
+ * @param file - The image file to upload
+ * @returns Promise<Course> - The updated course with new imageUrl
+ */
+export const uploadCourseImage = async (courseId: string, file: File): Promise<Course> => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await apiClient.post<APIResponse<Course>>(
+      `/courses/${courseId}/image`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+        timeout: 30000, // 30s for uploads
+      }
+    );
+    return response.data.data;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || "Failed to upload course image",
       status: error.response?.status,
     };
     throw apiError;
@@ -444,11 +475,41 @@ export const deleteModule = async (moduleId: string): Promise<void> => {
   }
 };
 
+/**
+ * Upload an image for module rich text content
+ * POST /modules/upload-image
+ * @param file - The image file to upload
+ * @returns Promise<string> - The public S3 image URL
+ */
+export const uploadModuleImage = async (file: File): Promise<string> => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await apiClient.post<
+      APIResponse<{ url: string; key: string; originalName: string }>
+    >(`/modules/upload-image`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data.data.url;
+  } catch (error: any) {
+    const apiError: ApiError = {
+      message: error.response?.data?.message || "Failed to upload image",
+      status: error.response?.status,
+    };
+    throw apiError;
+  }
+};
+
 // Default export object with key service functions
 const modulesService = {
   getModuleById,
   getSectionWithModules,
   getModulesBySection,
+  uploadModuleImage,
 };
 
 export default modulesService;
+

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuthContext } from "../../contexts";
 import { useNavigate } from "react-router-dom";
 import {
   User,
@@ -39,7 +39,7 @@ interface FormErrors {
 }
 
 export default function Assessment() {
-  const { user } = useAuth0();
+  const { user } = useAuthContext();
   const navigate = useNavigate();
   const { currentTest } = useCourseContext();
 

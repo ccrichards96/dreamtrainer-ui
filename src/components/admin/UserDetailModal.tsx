@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Save, AlertCircle, Trash2, UserPlus } from "lucide-react";
+import { Save, AlertCircle, Trash2, UserPlus, LogIn } from "lucide-react";
 import { User, AdminUpdateUser, AdminUpdateExpertProfile, Role } from "../../types/user";
 import { updateAdminUser, deleteAdminUser } from "../../services/api/admin";
 import { createExpertProfile } from "../../services/api/experts";
+import { useImpersonationContext } from "../../contexts/useImpersonationContext";
 import Modal from "../modals/Modal";
 
 type Tab = "user" | "expert";
@@ -53,6 +54,9 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [creatingExpert, setCreatingExpert] = useState(false);
+  const [impersonateLoading, setImpersonateLoading] = useState(false);
+
+  const { loginAsUser } = useImpersonationContext();
 
   const hasExpertProfile = !!user?.expertProfile;
 
@@ -249,6 +253,19 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
       setShowDeleteConfirm(false);
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  const handleLoginAs = async () => {
+    if (!user) return;
+    setImpersonateLoading(true);
+    setError(null);
+    try {
+      await loginAsUser(user.id);
+      // loginAsUser hard-reloads the page on success, so this component unmounts.
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to start impersonation");
+      setImpersonateLoading(false);
     }
   };
 
@@ -781,15 +798,37 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
           {/* Actions */}
           <div className="flex items-center justify-between gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => setShowDeleteConfirm(true)}
-              disabled={loading || deleteLoading || showDeleteConfirm}
-              className="px-4 py-2 text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete User
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={loading || deleteLoading || showDeleteConfirm}
+                className="px-4 py-2 text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete User
+              </button>
+              {user.role !== Role.Admin && (
+                <button
+                  type="button"
+                  onClick={handleLoginAs}
+                  disabled={loading || deleteLoading || impersonateLoading || showDeleteConfirm}
+                  className="px-4 py-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {impersonateLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-700"></div>
+                      Starting...
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="w-4 h-4" />
+                      Login As User
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
             <div className="flex items-center gap-3">
               <button
                 type="button"

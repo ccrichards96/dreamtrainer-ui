@@ -16,7 +16,7 @@ export default function Pricing() {
   const handleSave = async () => {
     if (!course) return;
     const amount = parseFloat(price);
-    if (isNaN(amount) || amount < 5) return;
+    if (isNaN(amount) || amount < 1) return;
 
     setIsSaving(true);
     setError(null);
@@ -41,7 +41,7 @@ export default function Pricing() {
           </label>
           <p className="mt-1 text-sm text-gray-500">
             Set the price for your course in USD. You can update this later if needed. (Minimum
-            $5.00)
+            $1.00)
           </p>
         </div>
 
@@ -50,12 +50,12 @@ export default function Pricing() {
           <input
             type="number"
             id="price"
-            min="5"
+            min="1"
             step="1.00"
-            defaultValue={"5"}
+            defaultValue={"1"}
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            placeholder="5.00"
+            placeholder="1.00"
             className="block w-full rounded-lg border border-gray-300 pl-8 pr-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500"
           />
         </div>

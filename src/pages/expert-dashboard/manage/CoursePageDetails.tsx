@@ -2,11 +2,15 @@ import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { useExpertDashboardContext } from "../../../contexts";
 import { updateCourse } from "../../../services/api/modules";
+import RichTextEditor, { TOOLBAR_BASIC } from "../../../components/RichTextEditor";
 
 export default function CoursePageDetails() {
   const { course } = useExpertDashboardContext();
   const [imageUrl, setImageUrl] = useState(course?.imageUrl ?? "");
   const [featuredVideoUrl, setFeaturedVideoUrl] = useState(course?.featuredVideoUrl ?? "");
+  const [courseAgreementText, setCourseAgreementText] = useState(
+    course?.courseAgreementText ?? ""
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -14,7 +18,8 @@ export default function CoursePageDetails() {
   useEffect(() => {
     setImageUrl(course?.imageUrl ?? "");
     setFeaturedVideoUrl(course?.featuredVideoUrl ?? "");
-  }, [course?.imageUrl, course?.featuredVideoUrl]);
+    setCourseAgreementText(course?.courseAgreementText ?? "");
+  }, [course?.imageUrl, course?.featuredVideoUrl, course?.courseAgreementText]);
 
   const handleSave = async () => {
     if (!course) return;
@@ -26,6 +31,7 @@ export default function CoursePageDetails() {
       await updateCourse(course.id, {
         imageUrl: imageUrl || null,
         featuredVideoUrl: featuredVideoUrl || null,
+        courseAgreementText: courseAgreementText || null,
       });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -76,6 +82,25 @@ export default function CoursePageDetails() {
             onChange={(e) => setFeaturedVideoUrl(e.target.value)}
             placeholder="https://www.youtube.com/watch?v=..."
             className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500"
+          />
+        </div>
+
+        <div className="w-full border-t border-gray-100"></div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-bold text-gray-900">Course Agreement</label>
+            <p className="mt-1 text-sm text-gray-500">
+              Shown as a confirmation popup before a student joins this course. Leave empty to
+              skip the popup.
+            </p>
+          </div>
+
+          <RichTextEditor
+            value={courseAgreementText}
+            onChange={setCourseAgreementText}
+            placeholder="Enter the terms students must agree to before joining…"
+            toolbar={TOOLBAR_BASIC}
           />
         </div>
 

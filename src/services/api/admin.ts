@@ -1,6 +1,6 @@
 import apiClient, { APIResponse } from "./client";
 import { APIResponseWithPagination } from "../../types/api";
-import { User, AdminCreateUser, AdminUpdateUser } from "../../types/user";
+import { User, AdminCreateUser, AdminUpdateUser, ImpersonateResponse } from "../../types/user";
 
 export interface PaginatedUsersResponse {
   users: User[];
@@ -108,12 +108,30 @@ export const deleteAdminUser = async (userId: string): Promise<void> => {
   }
 };
 
+/**
+ * Start an impersonation session for a user ("Login As")
+ */
+export const impersonateUser = async (userId: string): Promise<ImpersonateResponse> => {
+  try {
+    const response = await apiClient.post<APIResponse<ImpersonateResponse>>(
+      `/admin/users/${userId}/impersonate`
+    );
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to start impersonation: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred while starting impersonation");
+  }
+};
+
 export const adminService = {
   getAllUsers,
   getUsersPaginated,
   createAdminUser,
   updateAdminUser,
   deleteAdminUser,
+  impersonateUser,
 };
 
 export default adminService;
