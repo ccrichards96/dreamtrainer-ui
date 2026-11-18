@@ -47,26 +47,31 @@ const CategoryEditPage: React.FC = () => {
     const newList = [...courses];
     [newList[currentIndex], newList[newIndex]] = [newList[newIndex], newList[currentIndex]];
 
-    // Swap the two entries' order values (not sequential reindex) to avoid
-    // colliding with any other entry's order under the unique-per-category constraint.
-    const currentOrder = newList[currentIndex].order;
-    const swappedOrder = newList[newIndex].order;
-    newList[currentIndex] = { ...newList[currentIndex], order: swappedOrder };
-    newList[newIndex] = { ...newList[newIndex], order: currentOrder };
+    // Renumber the whole list from its new positions. Sending every course (not just the two
+    // that swapped) keeps the result deterministic and repairs any duplicate orders.
+    const reordered = newList.map((entry, index) => ({ ...entry, order: index }));
 
-    setCourses(newList);
+    // Optimistic update so the row moves immediately
+    setCourses(reordered);
     setReorderingId(courseId);
+    setError(null);
 
     try {
-      await reorderCategoryCourses(categoryId, [
-        { courseId: newList[currentIndex].courseId, order: newList[currentIndex].order },
-        { courseId: newList[newIndex].courseId, order: newList[newIndex].order },
-      ]);
+      await reorderCategoryCourses(
+        categoryId,
+        reordered.map(({ courseId: id, order }) => ({ courseId: id, order }))
+      );
     } catch (err) {
       console.error("Error reordering category courses:", err);
-      setError("Failed to reorder courses. Please refresh the page.");
-      const coursesData = await getCoursesByCategoryAdmin(categoryId);
-      setCourses(coursesData);
+      setError("Failed to reorder courses. The list has been reloaded from the server.");
+    }
+
+    // Whether it worked or not, show what the server actually has
+    try {
+      setCourses(await getCoursesByCategoryAdmin(categoryId));
+    } catch (err) {
+      console.error("Error reloading category courses:", err);
+      setError("Failed to reload courses. Please refresh the page.");
     } finally {
       setReorderingId(null);
     }
@@ -143,7 +148,7 @@ const CategoryEditPage: React.FC = () => {
           <div className="divide-y divide-gray-200">
             {courses.map((entry, index) => (
               <motion.div
-                key={entry.id}
+                key={entry.courseId}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="p-4 hover:bg-gray-50 transition-colors"

@@ -9,6 +9,7 @@ interface HeroBlok extends SbBlokData {
   }>;
   // Hero-specific fields
   subtitle?: string;
+  subtitleColor?: ColorValue;
   title?: string;
   description?: string;
   primaryButtonText?: string;
@@ -27,12 +28,48 @@ interface HeroBlok extends SbBlokData {
   padding?: string;
   margin?: string;
   // Gradient options
+  hideGradient?: boolean;
+  /** @deprecated use hideGradient — still honoured when explicitly false */
   showGradients?: boolean;
-  gradientColor1?: string;
-  gradientColor2?: string;
+  // Accent streak (small rotated band)
+  gradientColor1?: ColorValue;
+  gradientColor2?: ColorValue;
+  // Glow (large blurred shape behind the streak)
+  gradientGlowColor1?: ColorValue;
+  gradientGlowColor2?: ColorValue;
+  gradientOpacity?: string | number;
 }
 
+// Plain string (hex/rgb/hsl/css name) or Storyblok native-color-picker value
+type ColorValue = string | { color?: string };
+
+const resolveColor = (value: ColorValue | undefined): string | undefined => {
+  const color = typeof value === "string" ? value : value?.color;
+  return color?.trim() || undefined;
+};
+
 const Hero: React.FC<{ blok: HeroBlok }> = ({ blok }) => {
+  const showGradient = !blok.hideGradient && blok.showGradients !== false;
+  const subtitleColor = resolveColor(blok.subtitleColor);
+
+  const streakFrom = resolveColor(blok.gradientColor1) || "rgba(196, 181, 253, 0.5)";
+  const streakTo = resolveColor(blok.gradientColor2) || "#f3e8ff";
+
+  const glowEdge = resolveColor(blok.gradientGlowColor1);
+  const glowCenter = resolveColor(blok.gradientGlowColor2);
+  const hasCustomGlow = Boolean(glowEdge || glowCenter);
+  const glowStyle: React.CSSProperties | undefined = hasCustomGlow
+    ? {
+        background: `linear-gradient(to top left, ${glowEdge || glowCenter}, ${glowCenter || glowEdge}, ${glowEdge || glowCenter})`,
+      }
+    : undefined;
+
+  const parsedOpacity = Number(blok.gradientOpacity);
+  const gradientOpacity =
+    blok.gradientOpacity !== undefined && blok.gradientOpacity !== "" && !isNaN(parsedOpacity)
+      ? Math.min(Math.max(parsedOpacity, 0), 100) / 100
+      : undefined;
+
   console.log("Hero blok:", blok);
   const containerClasses = [
     "relative overflow-hidden",
@@ -59,18 +96,24 @@ const Hero: React.FC<{ blok: HeroBlok }> = ({ blok }) => {
   return (
     <div {...storyblokEditable(blok)} className={containerClasses} style={style}>
       {/* Gradients - only show if enabled */}
-      {blok.showGradients !== false && (
+      {showGradient && (
         <div
           aria-hidden="true"
-          className="flex absolute -top-96 start-1/2 transform -translate-x-1/2"
+          className="flex absolute -top-96 start-1/2 transform -translate-x-1/2 pointer-events-none"
+          style={gradientOpacity !== undefined ? { opacity: gradientOpacity } : undefined}
         >
           <div
             className="blur-3xl w-[400px] h-[700px] rotate-[-60deg] transform -translate-x-40"
-            style={{
-              background: `linear-gradient(to right, ${blok.gradientColor1 || "rgba(196, 181, 253, 0.5)"}, ${blok.gradientColor2 || "#f3e8ff"})`,
-            }}
+            style={{ background: `linear-gradient(to right, ${streakFrom}, ${streakTo})` }}
           ></div>
-          <div className="bg-gradient-to-tl from-blue-50 via-blue-100 to-blue-50 blur-3xl w-[1440px] h-[800px] rounded-full origin-top-left -rotate-12 -translate-x-60 dark:from-indigo-900/70 dark:via-indigo-900/70 dark:to-blue-900/70"></div>
+          <div
+            className={`blur-3xl w-[1440px] h-[800px] rounded-full origin-top-left -rotate-12 -translate-x-60 ${
+              hasCustomGlow
+                ? ""
+                : "bg-gradient-to-tl from-blue-50 via-blue-100 to-blue-50 dark:from-indigo-900/70 dark:via-indigo-900/70 dark:to-blue-900/70"
+            }`}
+            style={glowStyle}
+          ></div>
         </div>
       )}
 
@@ -79,7 +122,14 @@ const Hero: React.FC<{ blok: HeroBlok }> = ({ blok }) => {
           <div className="max-w-2xl text-center mx-auto">
             {/* Subtitle */}
             {blok.subtitle && (
-              <p className="inline-block text-sm font-medium bg-clip-text bg-gradient-to-l from-blue-600 to-violet-500 text-transparent dark:from-blue-400 dark:to-violet-400">
+              <p
+                className={`inline-block text-md font-medium ${
+                  subtitleColor
+                    ? ""
+                    : "bg-clip-text bg-gradient-to-l from-blue-600 to-violet-500 text-transparent dark:from-blue-400 dark:to-violet-400"
+                }`}
+                style={subtitleColor ? { color: subtitleColor } : undefined}
+              >
                 {blok.subtitle}
               </p>
             )}

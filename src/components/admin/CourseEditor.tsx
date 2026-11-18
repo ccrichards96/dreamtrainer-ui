@@ -619,7 +619,8 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
         description: formData.description,
         imageUrl: formData.imageUrl || null,
         slug: formData.slug || undefined,
-        categories: formData.categoryIds.map((categoryId, order) => ({ categoryId, order })),
+        // Positions within each category are managed on the Categories screen, not here
+        categories: formData.categoryIds.map((categoryId) => ({ categoryId })),
         status: formData.status,
         listingStatus: formData.listingStatus,
         welcomeVideoUrl: formData.welcomeVideoUrl || null,

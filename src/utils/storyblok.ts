@@ -26,6 +26,7 @@ import Spacer from "../components/storyblok/Spacer";
 import Testimonial from "../components/storyblok/Testimonial";
 import Accordion from "../components/storyblok/Accordion";
 import Video from "../components/storyblok/Video";
+import ContactForm from "../components/storyblok/ContactForm";
 
 const components = {
   grid: Grid,
@@ -47,6 +48,7 @@ const components = {
   testimonial: Testimonial,
   accordion: Accordion,
   video: Video,
+  contact_form: ContactForm,
 };
 
 // Determine which token to use based on environment

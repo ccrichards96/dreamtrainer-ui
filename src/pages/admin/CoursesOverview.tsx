@@ -68,10 +68,8 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
       await createCourse({
         name: newCourseData.name.trim(),
         description: newCourseData.description.trim() || undefined,
-        categories: newCourseData.categoryIds.map((categoryId, order) => ({
-          categoryId,
-          order,
-        })),
+        // A course's position within each category is set by the server (appended last)
+        categories: newCourseData.categoryIds.map((categoryId) => ({ categoryId })),
       });
 
       setSuccessMessage("Course created successfully!");

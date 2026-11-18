@@ -28,8 +28,7 @@ export type UpdateCategory = Partial<
 // A course assigned to a category (admin view), as returned by
 // GET /categories/:id/courses/admin — the courseCategories join row with the full course nested
 export interface CategoryCourse {
-  id: string;
-  categoryId: string;
+  courseCategoryId: string;
   courseId: string;
   order: number;
   course: {

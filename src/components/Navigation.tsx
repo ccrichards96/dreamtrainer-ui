@@ -14,8 +14,8 @@ interface NavItem {
 
 // Storyblok pages, served through CMSRoute at /site/<slug>
 const BECOME_LINKS: NavItem[] = [
-  { label: "Become an Expert", to: "/site/become-an-expert" },
-  { label: "Become a Partner", to: "/site/become-a-partner" },
+  { label: "Become a Dream Trainer", to: "/site/become-a-dream-trainer" },
+  { label: "Become a Dream Destination", to: "/site/become-a-dream-destination" },
 ];
 
 const desktopLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -52,8 +52,8 @@ export default function Navigation() {
 
   const navItems: NavItem[] = [
     { label: "Home", to: "/", end: true },
-    ...BECOME_LINKS,
     { label: "Courses", to: "/courses", end: true },
+    ...BECOME_LINKS,
     // Offers require an account
     ...(isAuthenticated ? [{ label: "Offers", to: "/offers" }] : []),
     { label: "Contact Us", to: "/site/contact-us" },
