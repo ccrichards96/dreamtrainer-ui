@@ -115,7 +115,7 @@ const sidebarSections: SidebarSection[] = [
     id: "course-management",
     label: "Course Management",
     items: [
-      { id: "welcome-video", label: "Welcome Video", icon: Video },
+      { id: "welcome-video", label: "Welcome Content", icon: Video },
       { id: "course-page-details", label: "Course Page Details", icon: FileText },
       { id: "announcements", label: "Announcements", icon: Megaphone },
       { id: "students", label: "Students", icon: Users },

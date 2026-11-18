@@ -1,4 +1,4 @@
-import type { Course } from "./modules";
+import type { Course, CourseLevel } from "./modules";
 
 export interface CourseEnrollment {
   id: string;
@@ -20,12 +20,19 @@ export interface CourseStudentUser {
   avatarUrl: string | null;
 }
 
+/** Pass state for a course student, set by the course expert. */
+export type CourseStudentStatus = "not_passed" | "passed";
+
 export interface CourseStudent {
   id: string;
   courseId: string;
   userId: string;
   subscriptionId: string | null;
   dateJoined: string | null;
+  status: CourseStudentStatus;
+  passedAt: string | null;
+  courseLevelId: string | null;
+  courseLevel: CourseLevel | null;
   createdAt: string;
   updatedAt: string;
   user: CourseStudentUser;

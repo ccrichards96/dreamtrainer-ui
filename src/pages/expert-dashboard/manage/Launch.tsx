@@ -13,6 +13,7 @@ export default function Launch() {
   const [error, setError] = useState<string | null>(null);
 
   const isPendingReview = course?.status === CourseStatus.PENDING_REVIEW;
+  const isWaitlist = course?.status === CourseStatus.WAITLIST;
   const isPublished = course?.status === CourseStatus.PUBLISHED;
 
   const handleSubmit = async () => {
@@ -41,6 +42,12 @@ export default function Launch() {
           </div>
         )}
 
+        {isWaitlist && (
+          <div className="mb-4 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800">
+            Your course is on the waitlist and not yet open to students.
+          </div>
+        )}
+
         {isPublished && (
           <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
             Your course is published and live for students.
@@ -49,7 +56,7 @@ export default function Launch() {
 
         <button
           onClick={() => setShowModal(true)}
-          disabled={isPendingReview || isPublished}
+          disabled={isPendingReview || isWaitlist || isPublished}
           className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <Rocket className="size-4" />

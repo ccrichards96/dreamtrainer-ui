@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { BookOpen, ArrowRight, Play } from "lucide-react";
-import type { Course } from "../../types/modules";
-import type { CourseEnrollment } from "../../types/enrollment";
+import { CourseStatus } from "../../types/modules";
+import { Course } from "../../types/modules";
+import { CourseEnrollment } from "../../types/enrollment";
 
 interface AllCoursesViewProps {
   courses: Course[];
@@ -68,6 +69,12 @@ export const AllCoursesView = ({ courses, enrollments = [] }: AllCoursesViewProp
                 {isEnrolled && (
                   <div className="absolute top-3 left-3 px-3 py-1 bg-blue-700 text-white text-xs font-semibold rounded-full">
                     Enrolled
+                  </div>
+                )}
+                {/* Waitlist badge */}
+                {!isEnrolled && course.status === CourseStatus.WAITLIST && (
+                  <div className="absolute top-3 left-3 px-3 py-1 bg-purple-600 text-white text-xs font-semibold rounded-full">
+                    Waitlist
                   </div>
                 )}
               </div>

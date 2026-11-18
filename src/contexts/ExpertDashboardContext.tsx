@@ -66,6 +66,7 @@ export interface ExpertDashboardContextType {
   course: Course | null;
   isLoadingCourse: boolean;
   loadCourse: (courseId: string) => Promise<void>;
+  patchCourse: (data: Partial<Course>) => void;
 
   // Course management data
   courseManageData: CourseManageData;
@@ -143,6 +144,12 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
     }
   }, []);
 
+  // Updates the loaded course in place. Unlike loadCourse, this doesn't toggle
+  // isLoadingCourse, which unmounts the active tab.
+  const patchCourse = useCallback((data: Partial<Course>) => {
+    setCourse((prev) => (prev ? { ...prev, ...data } : prev));
+  }, []);
+
   const updateCoursePlan = useCallback((data: Partial<CoursePlanFormData>) => {
     setCourseManageData((prev) => ({
       ...prev,
@@ -195,6 +202,7 @@ export const ExpertDashboardProvider: React.FC<ExpertDashboardProviderProps> = (
     course,
     isLoadingCourse,
     loadCourse,
+    patchCourse,
     courseManageData,
     updateCoursePlan,
     updateGoalsOutcomes,

@@ -17,6 +17,10 @@ export { default as billingService } from "./billing";
 export * from "./categories";
 export { default as categoriesService } from "./categories";
 
+// Export contact services
+export * from "./contact";
+export { default as contactService } from "./contact";
+
 // Export course assets services
 export * from "./course-assets";
 export { default as courseAssetsService } from "./course-assets";
@@ -29,7 +33,19 @@ export { default as courseProgressService } from "./course-progress";
 export * from "./modules";
 export { default as modulesService } from "./modules";
 
+// Export offers services
+export * from "./offers";
+export { default as offersService } from "./offers";
+
 // Export types
 export type { AssessmentSubmission, AssessmentResponse } from "./assessment";
 export type { UserBillingInfo, CheckoutSessionRequest } from "./billing";
 export type { CourseProgress, UpdateProgressDTO } from "../../types/course-progress";
+export type {
+  CourseOffer,
+  OfferApplication,
+  MyOfferApplication,
+  OfferApplicationStatus,
+  CourseApplicant,
+  ListOffersParams,
+} from "../../types/offers";

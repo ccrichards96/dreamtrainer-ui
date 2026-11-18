@@ -1,5 +1,5 @@
 import apiClient, { APIResponse } from "./client";
-import type { Category, DraftCategory, UpdateCategory } from "../../types/categories";
+import type { Category, CategoryCourse, DraftCategory, UpdateCategory } from "../../types/categories";
 
 // Categories API service
 export const categoriesApi = {
@@ -74,10 +74,49 @@ export const categoriesApi = {
       throw new Error("Failed to delete category");
     }
   },
+
+  /**
+   * Get all courses assigned to a category regardless of status, with order (admin only)
+   * GET /categories/{id}/courses/admin
+   */
+  async getCoursesByCategoryAdmin(id: string): Promise<CategoryCourse[]> {
+    try {
+      const response = await apiClient.get<APIResponse<CategoryCourse[]>>(
+        `/categories/${id}/courses/admin`
+      );
+      return (response.data.data || []).sort((a, b) => a.order - b.order);
+    } catch (error) {
+      console.error("Error fetching category courses:", error);
+      throw new Error("Failed to fetch category courses");
+    }
+  },
+
+  /**
+   * Reorder the courses assigned to a category
+   * PUT /categories/{id}/courses/reorder
+   */
+  async reorderCategoryCourses(
+    id: string,
+    courseOrders: { courseId: string; order: number }[]
+  ): Promise<void> {
+    try {
+      await apiClient.put(`/categories/${id}/courses/reorder`, { courseOrders });
+    } catch (error) {
+      console.error("Error reordering category courses:", error);
+      throw new Error("Failed to reorder category courses");
+    }
+  },
 };
 
 // Export individual functions for convenience
-export const { getAllCategories, getCategoryById, createCategory, updateCategory, deleteCategory } =
-  categoriesApi;
+export const {
+  getAllCategories,
+  getCategoryById,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  getCoursesByCategoryAdmin,
+  reorderCategoryCourses,
+} = categoriesApi;
 
 export default categoriesApi;

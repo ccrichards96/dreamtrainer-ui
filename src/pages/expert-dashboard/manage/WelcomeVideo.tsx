@@ -2,10 +2,13 @@ import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { useExpertDashboardContext } from "../../../contexts";
 import { updateCourse } from "../../../services/api/modules";
+import RichTextEditor from "../../../components/RichTextEditor";
+import { getPlainTextLength } from "../../../utils/htmlSanitizer";
 
 export default function WelcomeVideo() {
-  const { course } = useExpertDashboardContext();
+  const { course, patchCourse } = useExpertDashboardContext();
   const [url, setUrl] = useState(course?.welcomeVideoUrl ?? "");
+  const [content, setContent] = useState(course?.welcomeContent ?? "");
   const [isSaving, setIsSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -14,6 +17,10 @@ export default function WelcomeVideo() {
     setUrl(course?.welcomeVideoUrl ?? "");
   }, [course?.welcomeVideoUrl]);
 
+  useEffect(() => {
+    setContent(course?.welcomeContent ?? "");
+  }, [course?.welcomeContent]);
+
   const handleSave = async () => {
     if (!course) return;
 
@@ -21,11 +28,17 @@ export default function WelcomeVideo() {
     setError(null);
     setSuccess(false);
     try {
-      await updateCourse(course.id, { welcomeVideoUrl: url || null });
+      // A cleared Quill editor still emits "<p><br></p>", so store that as empty.
+      const updates = {
+        welcomeVideoUrl: url || null,
+        welcomeContent: getPlainTextLength(content) > 0 ? content : null,
+      };
+      await updateCourse(course.id, updates);
+      patchCourse(updates);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save welcome video");
+      setError(err instanceof Error ? err.message : "Failed to save welcome details");
     } finally {
       setIsSaving(false);
     }
@@ -52,11 +65,24 @@ export default function WelcomeVideo() {
           className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500"
         />
 
+        <div>
+          <p className="block text-sm font-bold text-gray-900">Welcome Content</p>
+          <p className="mt-1 text-sm text-gray-500">Add a welcome message to go with your video.</p>
+        </div>
+
+        <RichTextEditor
+          key={course?.id}
+          value={content}
+          onChange={setContent}
+          placeholder="Welcome to the course..."
+          minHeight={220}
+        />
+
         {error && <p className="text-sm text-red-600">{error}</p>}
         {success && (
           <p className="flex items-center gap-1.5 text-sm text-green-600">
             <Check className="size-4" />
-            Welcome video saved successfully
+            Welcome details saved successfully
           </p>
         )}
 

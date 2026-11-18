@@ -1,10 +1,14 @@
 import { User as Auth0User } from "@auth0/auth0-react";
 import { ExpertProfile, ExpertSocialLinks } from "./modules";
+import { PartnerProfile } from "./partner";
 
 export enum Role {
   Admin = "admin",
   User = "user",
 }
+
+// The view a user is currently operating in. Separate from Role, which is the account permission level.
+export type DashboardRole = "student" | "expert" | "partner";
 
 interface User {
   id: string;
@@ -18,6 +22,7 @@ interface User {
   avatarUrl: string | null;
   role: Role;
   expertProfile: ExpertProfile | null;
+  partnerProfile: PartnerProfile | null;
   lastLoginAt: Date | null;
   createdAt: Date | null;
   updatedAt: Date | null;

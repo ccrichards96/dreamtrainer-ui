@@ -14,9 +14,10 @@ import { isEnrolledInCourse } from "../../services/api/enrollment";
 import { useCheckoutContext } from "../../contexts";
 import ExpertProfileCard from "../../components/ExpertProfileCard";
 import CourseSectionsPreview from "../../components/CourseSectionsPreview";
+import { CourseStatus } from "../../types/modules";
+import { Course } from "../../types/modules";
+import { CoursePricing } from "../../types/billing";
 import CourseAgreementModal from "../../components/CourseAgreementModal";
-import type { Course } from "../../types/modules";
-import type { CoursePricing } from "../../types/billing";
 
 export default function CourseProfilePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -78,6 +79,8 @@ export default function CourseProfilePage() {
    * Determine CTA button label and action based on auth state + pricing
    */
   const isFree = !pricing || pricing.amount === 0;
+  // Waitlist courses are open for pre-order; enrolled students see the normal CTA.
+  const isPreorder = course?.status === CourseStatus.WAITLIST && !isEnrolled;
 
   const proceedToJoin = () => {
     if (!course) return;
@@ -118,6 +121,7 @@ export default function CourseProfilePage() {
    */
   const getButtonLabel = (): string => {
     if (isEnrolled) return "Continue Learning";
+    if (isPreorder) return isAuthenticated ? "Join the Waitlist" : "Sign Up to Join Waitlist";
 
     if (!isAuthenticated) {
       // Guest user

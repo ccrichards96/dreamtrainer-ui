@@ -1,4 +1,6 @@
 import { Test } from "./tests";
+import { PartnerCourseRole } from "./partner";
+import { Category } from "./categories";
 
 /**
  * Course status enum
@@ -6,6 +8,7 @@ import { Test } from "./tests";
 export enum CourseStatus {
   DRAFT = "draft",
   PENDING_REVIEW = "pending_review",
+  WAITLIST = "waitlist",
   PUBLISHED = "published",
   ARCHIVED = "archived",
 }
@@ -67,6 +70,22 @@ export interface CourseExpert {
 }
 
 /**
+ * Course Partner - connects a course with a partner profile
+ */
+export interface CoursePartner {
+  id: string;
+  partnerProfileId: string;
+  courseId: string;
+  role: PartnerCourseRole;
+  partnerProfile?: {
+    id: string;
+    orgName: string;
+    logoUrl: string | null;
+    user?: { firstName: string; lastName: string; email: string; avatarUrl?: string | null };
+  };
+}
+
+/**
  * Expert profile - instructor/creator profile for courses
  */
 export interface ExpertProfile {
@@ -97,6 +116,19 @@ export interface ExpertProfile {
 }
 
 /**
+ * Course Level - a custom skill tier/rank within a course (e.g. "Beginner", "Black Belt")
+ */
+export interface CourseLevel {
+  id: string;
+  courseId: string;
+  name: string;
+  order: number;
+  numberOfStudents: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
  * Section - Middle layer between Course and Module
  */
 interface Section {
@@ -114,6 +146,17 @@ interface Section {
 }
 
 /**
+ * CourseCategory - join row assigning a Category to a Course, with per-category order
+ */
+interface CourseCategory {
+  id: string;
+  courseId: string;
+  categoryId: string;
+  order: number;
+  category: Pick<Category, "id" | "name" | "slug" | "imageUrl">;
+}
+
+/**
  * Course - Top level container
  */
 interface Course {
@@ -124,7 +167,8 @@ interface Course {
   slug: string;
   expertProfileId: string | null;
   expertProfile?: ExpertProfile; // Nested expert profile data
-  categoryId?: string | null;
+  categoryId?: string | null; // Legacy single-category field, kept for backward compatibility
+  courseCategories?: CourseCategory[];
   status: CourseStatus;
   price: number;
   stripeProductId: string | null;
@@ -132,10 +176,12 @@ interface Course {
   courseAgreementText: string | null;
   listingStatus: ListingStatus;
   order: number;
+  categoryOrder?: number; // Position within a category, present when loaded via a category's courses
   learningObjectives?: string[];
   prerequisites?: string[];
   targetAudiences?: string[];
   welcomeVideoUrl?: string | null;
+  welcomeContent?: string | null;
   featuredVideoUrl?: string | null;
   numberOfSections?: number; // Returned from /courses endpoint
   createdAt: string;
@@ -192,7 +238,7 @@ export type DraftSection = Pick<Section, "courseId" | "name"> & {
 
 export type UpdateSection = Partial<Pick<Section, "name" | "description" | "imageUrl" | "order">>;
 
-export type { Course, Module, Section };
+export type { Course, CourseCategory, Module, Section };
 
 export interface Message {
   id: string;

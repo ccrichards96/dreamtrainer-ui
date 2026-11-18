@@ -1,18 +1,38 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
-import { listCourseStudents } from "../../../services/api/enrollment";
-import type { CourseStudent } from "../../../types/enrollment";
+import { listCourseStudents, updateCourseStudentStatus } from "../../../services/api/enrollment";
+import { getLevelsByCourse, assignStudentLevel } from "../../../services/api/course-levels";
+import type { CourseStudent, CourseStudentStatus } from "../../../types/enrollment";
+import type { CourseLevel } from "../../../types/modules";
+import { useExpertDashboardContext } from "../../../contexts";
+import { toast } from "../../../components/toast";
 import ManagePageHeader from "./ManagePageHeader";
+import StudentStatusDropdown from "./StudentStatusDropdown";
+import StudentStatusConfirmModal from "./StudentStatusConfirmModal";
+import StudentLevelDropdown from "./StudentLevelDropdown";
+
+/** A status change awaiting confirmation in the modal. */
+interface PendingStatusChange {
+  student: CourseStudent;
+  status: CourseStudentStatus;
+}
 
 export default function CourseStudents() {
   const { id: courseId } = useParams<{ id: string }>();
+  const { course } = useExpertDashboardContext();
 
   const [students, setStudents] = useState<CourseStudent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
+
+  const [pendingChange, setPendingChange] = useState<PendingStatusChange | null>(null);
+  const [isSubmittingStatus, setIsSubmittingStatus] = useState(false);
+
+  const [levels, setLevels] = useState<CourseLevel[]>([]);
+  const [submittingLevelStudentId, setSubmittingLevelStudentId] = useState<string | null>(null);
 
   const fetchStudents = useCallback(async () => {
     if (!courseId) return;
@@ -32,6 +52,69 @@ export default function CourseStudents() {
   useEffect(() => {
     fetchStudents();
   }, [fetchStudents]);
+
+  useEffect(() => {
+    if (!courseId) return;
+    getLevelsByCourse(courseId)
+      .then((result) => setLevels([...result].sort((a, b) => a.order - b.order)))
+      .catch(() => setLevels([]));
+  }, [courseId]);
+
+  const getStudentName = (student: CourseStudent) =>
+    `${student.user.firstName ?? ""} ${student.user.lastName ?? ""}`.trim() || student.user.email;
+
+  const handleConfirmStatus = async () => {
+    if (!courseId || !pendingChange) return;
+
+    const { student, status } = pendingChange;
+    setIsSubmittingStatus(true);
+    try {
+      const updated = await updateCourseStudentStatus(courseId, student.id, status);
+      setStudents((prev) =>
+        prev.map((row) =>
+          row.id === student.id
+            ? { ...row, status: updated.status, passedAt: updated.passedAt }
+            : row
+        )
+      );
+      toast.success(
+        status === "passed"
+          ? `${getStudentName(student)} marked as passed`
+          : `${getStudentName(student)} marked as not passed`,
+        status === "passed" ? { description: "They've been emailed the good news." } : undefined
+      );
+      setPendingChange(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update student status");
+    } finally {
+      setIsSubmittingStatus(false);
+    }
+  };
+
+  const handleSelectLevel = async (student: CourseStudent, levelId: string | null) => {
+    if (!courseId) return;
+
+    setSubmittingLevelStudentId(student.id);
+    try {
+      const updated = await assignStudentLevel(courseId, student.id, levelId);
+      setStudents((prev) =>
+        prev.map((row) =>
+          row.id === student.id
+            ? { ...row, courseLevelId: updated.courseLevelId, courseLevel: updated.courseLevel }
+            : row
+        )
+      );
+      toast.success(
+        levelId
+          ? `${getStudentName(student)} set to ${updated.courseLevel?.name ?? "the selected level"}`
+          : `${getStudentName(student)} unassigned from a level`
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update student level");
+    } finally {
+      setSubmittingLevelStudentId(null);
+    }
+  };
 
   const getInitials = (student: CourseStudent) => {
     const first = student.user.firstName?.[0] ?? "";
@@ -86,6 +169,12 @@ export default function CourseStudents() {
                     <th scope="col" className="px-6 py-3 text-start">
                       <span className="text-xs font-semibold uppercase text-gray-800">Joined</span>
                     </th>
+                    <th scope="col" className="px-6 py-3 text-start">
+                      <span className="text-xs font-semibold uppercase text-gray-800">Status</span>
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-start">
+                      <span className="text-xs font-semibold uppercase text-gray-800">Level</span>
+                    </th>
                   </tr>
                 </thead>
 
@@ -124,6 +213,27 @@ export default function CourseStudents() {
                           <span className="text-sm text-gray-500">
                             {formatDate(student.dateJoined)}
                           </span>
+                        </div>
+                      </td>
+                      <td className="size-px whitespace-nowrap">
+                        <div className="px-6 py-3">
+                          <StudentStatusDropdown
+                            status={student.status}
+                            studentName={getStudentName(student)}
+                            isBusy={isSubmittingStatus && pendingChange?.student.id === student.id}
+                            onSelect={(status) => setPendingChange({ student, status })}
+                          />
+                        </div>
+                      </td>
+                      <td className="size-px whitespace-nowrap">
+                        <div className="px-6 py-3">
+                          <StudentLevelDropdown
+                            levels={levels}
+                            levelId={student.courseLevelId}
+                            studentName={getStudentName(student)}
+                            isBusy={submittingLevelStudentId === student.id}
+                            onSelect={(levelId) => handleSelectLevel(student, levelId)}
+                          />
                         </div>
                       </td>
                     </tr>
@@ -165,6 +275,16 @@ export default function CourseStudents() {
           </>
         )}
       </div>
+
+      <StudentStatusConfirmModal
+        isOpen={pendingChange !== null}
+        status={pendingChange?.status ?? null}
+        studentName={pendingChange ? getStudentName(pendingChange.student) : ""}
+        courseName={course?.name}
+        isSubmitting={isSubmittingStatus}
+        onConfirm={handleConfirmStatus}
+        onCancel={() => setPendingChange(null)}
+      />
     </div>
   );
 }

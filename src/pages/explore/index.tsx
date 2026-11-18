@@ -1,27 +1,40 @@
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, Search } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { getAllPublicCourses, getMyCourses } from "../../services/api/modules";
+import { getMyCourses } from "../../services/api/modules";
 import { getAllCategories } from "../../services/api/categories";
 import { CourseProvider } from "../../contexts/CourseContext";
 import type { Course } from "../../types/modules";
 import type { Category } from "../../types/categories";
 import { AllCoursesView } from "./AllCoursesView";
-
-type TabType = "my-courses" | "explore";
+import PageHero from "../../components/PageHero";
 
 const HERO_BG_IMAGE = "";
 
 const ExploreCoursesContent = () => {
   const { isAuthenticated } = useAuth0();
-  const [exploreCourses, setExploreCourses] = useState<Course[]>([]);
   const [myCourses, setMyCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>("explore");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  // Selected category lives in the URL (?category=<slug>) so it can be linked to directly
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCategorySlug = searchParams.get("category");
+  const selectedCategoryId = categories.find((c) => c.slug === selectedCategorySlug)?.id ?? null;
+
+  const setSelectedCategory = (slug: string | null) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (slug) next.set("category", slug);
+        else next.delete("category");
+        return next;
+      },
+      { replace: true }
+    );
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,13 +42,9 @@ const ExploreCoursesContent = () => {
         setLoading(true);
         setError(null);
 
-        // Always fetch public courses and categories
-        const [publicCoursesResponse, categoriesData] = await Promise.all([
-          getAllPublicCourses(),
-          getAllCategories(),
-        ]);
+        const categoriesData = await getAllCategories();
 
-        // Only fetch user's courses if authenticated
+        // Only fetch user's courses if authenticated — they're excluded from the list (see My Courses)
         let myCoursesData: Course[] = [];
         if (isAuthenticated) {
           try {
@@ -46,12 +55,6 @@ const ExploreCoursesContent = () => {
           }
         }
 
-        const sortedPublic = (publicCoursesResponse.data || []).sort((a: Course, b: Course) => {
-          if (a.order !== b.order) return a.order - b.order;
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        });
-        const myCourseIds = new Set(myCoursesData.map((c) => c.id));
-        setExploreCourses(sortedPublic.filter((c) => !myCourseIds.has(c.id)));
         setMyCourses(myCoursesData);
         setCategories(categoriesData);
       } catch (err) {
@@ -64,24 +67,48 @@ const ExploreCoursesContent = () => {
     fetchData();
   }, [isAuthenticated]);
 
+  const sortByOrder = (a: Course, b: Course) => {
+    if (a.order !== b.order) return a.order - b.order;
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  };
+
+  // Within a category, respect the admin-defined categoryOrder; fall back to global order
+  const sortByCategoryOrder = (a: Course, b: Course) => {
+    const aOrder = a.categoryOrder ?? Number.MAX_SAFE_INTEGER;
+    const bOrder = b.categoryOrder ?? Number.MAX_SAFE_INTEGER;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return sortByOrder(a, b);
+  };
+
+  // Union every category's courses, deduped by id, for the unfiltered "All" view
+  const allCourses = useMemo(() => {
+    const byId = new Map<string, Course>();
+    categories.forEach((category) => {
+      category.courses?.forEach((course) => byId.set(course.id, course));
+    });
+    return Array.from(byId.values()).sort(sortByOrder);
+  }, [categories]);
+
+  const exploreCourses = useMemo(() => {
+    const myCourseIds = new Set(myCourses.map((c) => c.id));
+    const base = selectedCategoryId
+      ? [...(categories.find((c) => c.id === selectedCategoryId)?.courses ?? [])].sort(
+          sortByCategoryOrder
+        )
+      : allCourses;
+    return base.filter((c) => !myCourseIds.has(c.id));
+  }, [allCourses, categories, selectedCategoryId, myCourses]);
+
   const filteredCourses = useMemo(() => {
-    let filtered = activeTab === "my-courses" ? myCourses : exploreCourses;
+    if (!searchQuery.trim()) return exploreCourses;
 
-    if (selectedCategoryId) {
-      filtered = filtered.filter((course) => course.categoryId === selectedCategoryId);
-    }
-
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (course) =>
-          course.name.toLowerCase().includes(query) ||
-          course.description?.toLowerCase().includes(query)
-      );
-    }
-
-    return filtered;
-  }, [exploreCourses, myCourses, activeTab, selectedCategoryId, searchQuery]);
+    const query = searchQuery.toLowerCase();
+    return exploreCourses.filter(
+      (course) =>
+        course.name.toLowerCase().includes(query) ||
+        course.description?.toLowerCase().includes(query)
+    );
+  }, [exploreCourses, searchQuery]);
 
   if (loading) {
     return (
@@ -113,118 +140,50 @@ const ExploreCoursesContent = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <div
-        className="relative overflow-hidden bg-[#1e1630]"
-        style={
-          HERO_BG_IMAGE
-            ? {
-                backgroundImage: `url(${HERO_BG_IMAGE})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }
-            : undefined
-        }
+      <PageHero
+        title="Explore Courses"
+        subtitle="Find the perfect course to elevate your career."
+        backgroundImage={HERO_BG_IMAGE}
+        search={{
+          value: searchQuery,
+          onChange: setSearchQuery,
+          placeholder: "Search courses...",
+        }}
       >
-        {/* Dark overlay (only when background image is set) */}
-        {HERO_BG_IMAGE && <div className="absolute inset-0 bg-black/55" />}
-
-        {/* Preline-style gradient blobs */}
-        <div
-          aria-hidden="true"
-          className="flex absolute -top-96 start-1/2 -translate-x-1/2 pointer-events-none"
-        >
-          <div className="bg-gradient-to-r from-violet-500/40 to-purple-300/30 blur-3xl w-[400px] h-[700px] rotate-[-60deg] -translate-x-40" />
-          <div className="bg-gradient-to-tl from-indigo-900/60 via-purple-900/40 to-violet-800/30 blur-3xl w-[1440px] h-[800px] rounded-full origin-top-left -rotate-12 -translate-x-60" />
-        </div>
-
-        {/* Hero content */}
-        <div className="relative z-10 max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
-          <div className="max-w-2xl mx-auto text-center">
-            <p className="inline-block text-sm font-medium bg-clip-text bg-gradient-to-l from-blue-400 to-violet-400 text-transparent">
-              Dream Trainer
-            </p>
-            <h1 className="mt-3 block font-semibold text-white text-4xl md:text-5xl lg:text-6xl">
-              Explore Courses
-            </h1>
-            <p className="mt-4 text-lg text-white/70">
-              Find the perfect course to elevate your career.
-            </p>
-            {/* Search bar */}
-            <div className="mt-8 relative max-w-xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search courses..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-white border border-transparent rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent text-gray-900 placeholder-gray-400 transition-all"
-              />
-            </div>
-
-            {/* Category pills */}
-            {categories.length > 0 && (
-              <div className="mt-5 flex flex-wrap justify-center gap-2">
-                <button
-                  onClick={() => setSelectedCategoryId(null)}
-                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                    selectedCategoryId === null
-                      ? "bg-white text-purple-700 shadow-md"
-                      : "bg-white/15 text-white border border-white/25 hover:bg-white/25"
-                  }`}
-                >
-                  All
-                </button>
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() =>
-                      setSelectedCategoryId(selectedCategoryId === category.id ? null : category.id)
-                    }
-                    className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                      selectedCategoryId === category.id
-                        ? "bg-white text-purple-700 shadow-md"
-                        : "bg-white/15 text-white border border-white/25 hover:bg-white/25"
-                    }`}
-                  >
-                    {category.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Tabs + Course Grid ────────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
-        {/* Tabs — only show when authenticated */}
-        {isAuthenticated && (
-          <div className="mb-6">
-            <div className="flex space-x-1 bg-white p-1 rounded-xl shadow-sm border border-gray-200">
+        {/* Category pills */}
+        {categories.length > 0 && (
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                selectedCategoryId === null
+                  ? "bg-white text-purple-700 shadow-md"
+                  : "bg-white/15 text-white border border-white/25 hover:bg-white/25"
+              }`}
+            >
+              All
+            </button>
+            {categories.map((category) => (
               <button
-                onClick={() => setActiveTab("explore")}
-                className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === "explore"
-                    ? "bg-purple-600 text-white shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                key={category.id}
+                onClick={() =>
+                  setSelectedCategory(selectedCategoryId === category.id ? null : category.slug)
+                }
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  selectedCategoryId === category.id
+                    ? "bg-white text-purple-700 shadow-md"
+                    : "bg-white/15 text-white border border-white/25 hover:bg-white/25"
                 }`}
               >
-                Explore New Courses
+                {category.name}
               </button>
-              <button
-                onClick={() => setActiveTab("my-courses")}
-                className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === "my-courses"
-                    ? "bg-purple-600 text-white shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
-              >
-                My Courses
-              </button>
-            </div>
+            ))}
           </div>
         )}
+      </PageHero>
 
+      {/* ── Course Grid ────────────────────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
         <AllCoursesView courses={filteredCourses} />
       </div>
     </div>

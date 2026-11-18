@@ -17,6 +17,8 @@ export {
 export { useImpersonationContext } from "./useImpersonationContext";
 export { AppProvider, AppContext } from "./AppContext";
 export { useApp } from "./useAppContext";
+export { RoleProvider, RoleContext, type RoleContextType } from "./RoleContext";
+export { useRole } from "./useRoleContext";
 export { CourseProvider, CourseContext, type CourseContextType } from "./CourseContext";
 export { useCourseContext } from "./useCourseContext";
 export {
@@ -38,3 +40,9 @@ export {
   type ResourcesFormData,
 } from "./ExpertDashboardContext";
 export { useExpertDashboardContext } from "./useExpertDashboardContext";
+export {
+  PartnerDashboardProvider,
+  PartnerDashboardContext,
+  type PartnerDashboardContextType,
+} from "./PartnerDashboardContext";
+export { usePartnerDashboardContext } from "./usePartnerDashboardContext";
