@@ -229,8 +229,8 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
     >
       {/* Header */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Manage Sections</h3>
             </div>
@@ -245,14 +245,14 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
         </div>
 
         {/* Course Info */}
-        <div className="px-6 py-4 bg-gray-200 rounded-xl">
+        <div className="px-4 sm:px-6 py-4 bg-gray-200 rounded-xl">
           <div className="flex items-center gap-3">
             <Layers className="w-5 h-5 text-gray-400" />
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-900">{course.name}</p>
               <p className="text-sm text-gray-500">{course.description}</p>
             </div>
-            <span className="ml-auto text-sm text-gray-500">{sectionList.length} section(s)</span>
+            <span className="ml-auto flex-shrink-0 whitespace-nowrap text-sm text-gray-500">{sectionList.length} section(s)</span>
           </div>
         </div>
       </div>
@@ -278,8 +278,8 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
           animate={{ opacity: 1, y: 0 }}
           className="bg-white border border-gray-200 rounded-xl shadow-sm"
         >
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between gap-3">
               <h4 className="text-lg font-medium text-gray-900">
                 {editingSection ? "Edit Section" : "Add New Section"}
               </h4>
@@ -289,7 +289,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
             </div>
           </div>
 
-          <form onSubmit={handleSubmitSection} className="p-6">
+          <form onSubmit={handleSubmitSection} className="p-4 sm:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Section Name */}
               <div className="md:col-span-2">
@@ -345,7 +345,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
             </div>
 
             {/* Form Actions */}
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
               <button
                 type="button"
                 onClick={handleCancel}
@@ -357,7 +357,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                 type="button"
                 onClick={handleSubmitSection}
                 disabled={!isFormValid || loading}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -394,13 +394,13 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                 animate={{ opacity: 1 }}
                 className="p-4 hover:bg-gray-50 transition-colors"
               >
-                <div className="flex items-start gap-4">
+                <div className="flex flex-wrap sm:flex-nowrap items-start gap-x-3 gap-y-3 sm:gap-4">
                   {/* Reorder Controls */}
                   <div className="flex flex-col items-center gap-1 pt-1">
                     <button
                       onClick={() => handleMoveSection(section.id, "up")}
                       disabled={index === 0 || reorderingSectionId !== null}
-                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 sm:p-1"
                       title="Move up"
                     >
                       <ChevronUp className="w-4 h-4" />
@@ -408,7 +408,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                     <button
                       onClick={() => handleMoveSection(section.id, "down")}
                       disabled={index === sectionList.length - 1 || reorderingSectionId !== null}
-                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 sm:p-1"
                       title="Move down"
                     >
                       <ChevronDown className="w-4 h-4" />
@@ -432,11 +432,11 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
                     <button
                       onClick={() => onManageModules(section)}
                       disabled={reorderingSectionId !== null}
-                      className="text-green-600 hover:text-green-900 flex items-center gap-1 disabled:opacity-50 px-3 py-1.5 border border-green-200 rounded-lg hover:bg-green-50"
+                      className="text-green-600 hover:text-green-900 flex items-center justify-center flex-1 sm:flex-none gap-1 disabled:opacity-50 px-3 py-1.5 border border-green-200 rounded-lg hover:bg-green-50"
                     >
                       <BookOpen className="w-4 h-4" />
                       Modules
@@ -444,7 +444,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                     <button
                       onClick={() => handleEditSection(section)}
                       disabled={reorderingSectionId !== null}
-                      className="text-purple-600 hover:text-purple-900 flex items-center gap-1 disabled:opacity-50 px-3 py-1.5 border border-purple-200 rounded-lg hover:bg-purple-50"
+                      className="text-purple-600 hover:text-purple-900 flex items-center justify-center flex-1 sm:flex-none gap-1 disabled:opacity-50 px-3 py-1.5 border border-purple-200 rounded-lg hover:bg-purple-50"
                     >
                       <Edit3 className="w-4 h-4" />
                       Edit
@@ -452,7 +452,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ course, onManageModules
                     <button
                       onClick={() => handleDeleteSection(section.id)}
                       disabled={reorderingSectionId !== null}
-                      className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50 px-3 py-1.5 border border-red-200 rounded-lg hover:bg-red-50"
+                      className="text-red-600 hover:text-red-900 flex items-center justify-center flex-1 sm:flex-none gap-1 disabled:opacity-50 px-3 py-1.5 border border-red-200 rounded-lg hover:bg-red-50"
                     >
                       <Trash2 className="w-4 h-4" />
                       Delete

@@ -111,13 +111,13 @@ const CategoryEditPage: React.FC = () => {
       className="space-y-6"
     >
       <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900">{category.name}</h3>
           <p className="text-sm text-gray-500">
             Reorder the courses shown under this category using the up/down controls.
           </p>
         </div>
-        <div className="px-6 py-4 bg-gray-50">
+        <div className="px-4 sm:px-6 py-4 bg-gray-50">
           <div className="flex items-center gap-3">
             <BookOpen className="w-5 h-5 text-gray-400" />
             <span className="text-sm text-gray-500">{courses.length} course(s) assigned</span>
@@ -158,7 +158,7 @@ const CategoryEditPage: React.FC = () => {
                     <button
                       onClick={() => handleMove(entry.courseId, "up")}
                       disabled={index === 0 || reorderingId !== null}
-                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 sm:p-1"
                       title="Move up"
                     >
                       <ChevronUp className="w-4 h-4" />
@@ -166,7 +166,7 @@ const CategoryEditPage: React.FC = () => {
                     <button
                       onClick={() => handleMove(entry.courseId, "down")}
                       disabled={index === courses.length - 1 || reorderingId !== null}
-                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 sm:p-1"
                       title="Move down"
                     >
                       <ChevronDown className="w-4 h-4" />

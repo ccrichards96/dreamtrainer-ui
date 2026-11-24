@@ -211,8 +211,8 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
     >
       {/* Header */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Manage Modules</h3>
             </div>
@@ -228,14 +228,14 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
         </div>
 
         {/* Section Info */}
-        <div className="px-6 py-4 bg-gray-200">
+        <div className="px-4 sm:px-6 py-4 bg-gray-200">
           <div className="flex items-center gap-3">
             <Layers className="w-5 h-5 text-gray-400" />
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-900">{section.name}</p>
               <p className="text-sm text-gray-500">{section.description}</p>
             </div>
-            <span className="ml-auto text-sm text-gray-500">{moduleList.length} module(s)</span>
+            <span className="ml-auto flex-shrink-0 whitespace-nowrap text-sm text-gray-500">{moduleList.length} module(s)</span>
           </div>
         </div>
       </div>
@@ -262,8 +262,8 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white border border-gray-200 rounded-xl shadow-sm"
         >
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between gap-3">
               <h4 className="text-lg font-medium text-gray-900">
                 {editingModule ? "Edit Module" : "Add New Module"}
               </h4>
@@ -277,7 +277,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Module Topic */}
               <div className="md:col-span-2">
@@ -373,7 +373,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
             </div>
 
             {/* Form Actions */}
-            <div className="mt-6 flex items-center justify-end gap-3">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3">
               <button
                 type="button"
                 onClick={handleCancel}
@@ -385,7 +385,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                 type="button"
                 onClick={handleSubmitModule}
                 disabled={!isFormValid || loading}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -406,7 +406,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
 
       {/* Modules List */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
           <h4 className="text-lg font-medium text-gray-900">Modules ({moduleList.length})</h4>
         </div>
 
@@ -420,18 +420,18 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
             {moduleList.map((module, index) => (
               <div
                 key={module.id}
-                className={`p-6 hover:bg-gray-50 transition-colors ${
+                className={`p-4 sm:p-6 hover:bg-gray-50 transition-colors ${
                   reorderingModuleId === module.id ? "bg-purple-50" : ""
                 }`}
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-3 sm:gap-4">
                   {/* Reorder Controls */}
                   <div className="flex flex-col items-center gap-1 pt-1">
                     <button
                       type="button"
                       onClick={() => handleMoveModule(module.id, "up")}
                       disabled={index === 0 || reorderingModuleId !== null}
-                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 sm:p-1"
                       title="Move up"
                     >
                       <ChevronUp className="w-5 h-5" />
@@ -441,7 +441,7 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                       type="button"
                       onClick={() => handleMoveModule(module.id, "down")}
                       disabled={index === moduleList.length - 1 || reorderingModuleId !== null}
-                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 sm:p-1"
                       title="Move down"
                     >
                       <ChevronDown className="w-5 h-5" />
@@ -449,19 +449,19 @@ const ModuleManager: React.FC<ModuleManagerProps> = ({ section, modules }) => {
                   </div>
 
                   {/* Module Content */}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2">
                       <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
-                      <h5 className="text-lg font-medium text-gray-900">{module.topic}</h5>
+                      <h5 className="text-base sm:text-lg font-medium text-gray-900 break-words">{module.topic}</h5>
                       {reorderingModuleId === module.id && (
                         <span className="text-xs text-purple-600 animate-pulse">Updating...</span>
                       )}
                     </div>
-                    <p className="text-gray-600 mb-3">{module.description}</p>
+                    <p className="text-gray-600 mb-3 break-words">{module.description}</p>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                     <button
                       type="button"
                       onClick={() => handleEditModule(module)}
