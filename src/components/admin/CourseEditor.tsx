@@ -136,7 +136,7 @@ function TagInput({
           onKeyDown={handleKeyDown}
           onBlur={addTag}
           placeholder={values.length === 0 ? placeholder : ""}
-          className="flex-1 min-w-[120px] outline-none text-sm bg-transparent"
+          className="flex-1 min-w-[120px] outline-none text-base sm:text-sm bg-transparent"
         />
       </div>
       <p className="text-xs text-gray-400 mt-1">Press Enter or click away to add an item</p>
@@ -665,26 +665,30 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
       className="bg-white rounded-lg shadow"
     >
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
+      <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
             <h3 className="text-lg font-medium text-gray-900">Edit Course</h3>
-            <p className="text-sm text-gray-500">ID: {course.id}</p>
+            <p className="text-sm text-gray-500 truncate">ID: {course.id}</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[formData.status as CourseStatus] || "bg-gray-100 text-gray-700"}`}
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${STATUS_COLORS[formData.status as CourseStatus] || "bg-gray-100 text-gray-700"}`}
             >
               {STATUS_LABELS[formData.status as CourseStatus] || formData.status}
             </span>
-            <button onClick={onCancel} className="text-gray-400 hover:text-gray-600">
+            <button
+              onClick={onCancel}
+              className="p-1.5 -m-1.5 text-gray-400 hover:text-gray-600"
+              aria-label="Close"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-8">
+      <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-8">
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
@@ -797,7 +801,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                   name="slug"
                   value={formData.slug}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-base sm:text-sm"
                   placeholder="course-slug"
                 />
               </div>
@@ -947,7 +951,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                   name="imageUrl"
                   value={formData.imageUrl}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-600 bg-white"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm text-gray-600 bg-white"
                   placeholder="https://..."
                 />
               </div>
@@ -1069,7 +1073,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 name="stripeProductId"
                 value={formData.stripeProductId}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-base sm:text-sm"
                 placeholder="prod_..."
               />
             </div>
@@ -1086,7 +1090,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 name="mailingListId"
                 value={formData.mailingListId}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-base sm:text-sm"
                 placeholder="e.g. list_..."
               />
             </div>
@@ -1130,7 +1134,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 type="text"
                 value={new Date(course.createdAt).toLocaleString()}
                 disabled
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-400 text-sm"
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-400 text-base sm:text-sm"
               />
             </div>
             <div>
@@ -1139,7 +1143,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 type="text"
                 value={new Date(course.updatedAt).toLocaleString()}
                 disabled
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-400 text-sm"
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-400 text-base sm:text-sm"
               />
             </div>
           </div>
@@ -1166,8 +1170,8 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
               </div>
             ) : courseExperts.length > 0 ? (
               <div className="border border-gray-200 rounded-lg overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 text-sm">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full block md:table divide-y divide-gray-200 text-sm">
+                  <thead className="hidden md:table-header-group bg-gray-50">
                     <tr>
                       <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Expert
@@ -1180,10 +1184,10 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="block md:table-row-group bg-white divide-y divide-gray-200">
                     {courseExperts.map((expert) => (
-                      <tr key={expert.id}>
-                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                      <tr key={expert.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-3 md:table-row md:p-0">
+                        <td className="w-full min-w-0 md:w-auto md:px-6 md:py-3 md:whitespace-nowrap">
                           <div className="flex items-center">
                             {expert.expertProfile?.avatarUrl ? (
                               <img
@@ -1196,14 +1200,14 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                                 {expert.expertProfile?.displayName?.charAt(0) || "?"}
                               </div>
                             )}
-                            <div className="ml-3">
+                            <div className="ml-3 min-w-0">
                               <p className="text-sm font-medium text-gray-900">
                                 {expert.expertProfile?.displayName || "Unknown Expert"}
                               </p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                        <td className="flex-1 md:flex-none md:px-6 md:py-3 md:whitespace-nowrap">
                           {actionLoadingId === expert.id ? (
                             <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                           ) : (
@@ -1215,14 +1219,14 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                                   e.target.value as "owner" | "support-expert"
                                 )
                               }
-                              className="w-full min-w-[120px] text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              className="w-full min-w-[120px] text-base sm:text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
                               <option value="owner">Owner</option>
                               <option value="support-expert">Support Expert</option>
                             </select>
                           )}
                         </td>
-                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
+                        <td className="md:px-6 md:py-3 md:whitespace-nowrap text-right text-sm font-medium">
                           <button
                             type="button"
                             onClick={() => handleRemoveExpert(expert.id)}
@@ -1283,7 +1287,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                           }
                         }}
                         placeholder="Search by name or email…"
-                        className="w-full px-3 py-2.5 pe-9 bg-white border border-blue-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2.5 pe-9 bg-white border border-blue-200 rounded-lg text-base sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                       <div className="absolute top-1/2 right-3 -translate-y-1/2 flex items-center gap-1">
                         {loadingExpertsList && (
@@ -1355,7 +1359,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                   <select
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value as "owner" | "support-expert")}
-                    className="w-full px-3 py-2.5 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="w-full px-3 py-2.5 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm"
                   >
                     <option value="owner">Owner (Full Access)</option>
                     <option value="support-expert">Support Expert (Messages & Feedback)</option>
@@ -1401,8 +1405,8 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
               </div>
             ) : coursePartners.length > 0 || partnerInvites.length > 0 ? (
               <div className="border border-gray-200 rounded-lg overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 text-sm">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full block md:table divide-y divide-gray-200 text-sm">
+                  <thead className="hidden md:table-header-group bg-gray-50">
                     <tr>
                       <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Partner
@@ -1418,10 +1422,10 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="block md:table-row-group bg-white divide-y divide-gray-200">
                     {coursePartners.map((partner) => (
-                      <tr key={`partner-${partner.id}`}>
-                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                      <tr key={`partner-${partner.id}`} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-3 md:table-row md:p-0">
+                        <td className="w-full min-w-0 md:w-auto md:px-6 md:py-3 md:whitespace-nowrap">
                           <div className="flex items-center">
                             {partner.partnerProfile?.logoUrl ? (
                               <img
@@ -1434,19 +1438,19 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                                 {partner.partnerProfile?.orgName?.charAt(0) || "?"}
                               </div>
                             )}
-                            <div className="ml-3">
+                            <div className="ml-3 min-w-0">
                               <p className="text-sm font-medium text-gray-900">
                                 {partner.partnerProfile?.orgName || "Unknown Partner"}
                               </p>
                               {partner.partnerProfile?.user?.email && (
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-gray-500 break-all">
                                   {partner.partnerProfile.user.email}
                                 </p>
                               )}
                             </div>
                           </div>
                         </td>
-                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                        <td className="flex-1 md:flex-none md:px-6 md:py-3 md:whitespace-nowrap">
                           {partnerActionLoadingId === partner.id ? (
                             <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                           ) : (
@@ -1458,19 +1462,19 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                                   e.target.value as PartnerCourseRole
                                 )
                               }
-                              className="w-full min-w-[120px] text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              className="w-full min-w-[120px] text-base sm:text-sm border border-gray-300 rounded-md px-2 py-1.5 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
                               <option value="owner">Owner</option>
                               <option value="partner">Partner</option>
                             </select>
                           )}
                         </td>
-                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                        <td className="md:px-6 md:py-3 md:whitespace-nowrap">
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
                             active
                           </span>
                         </td>
-                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
+                        <td className="md:px-6 md:py-3 md:whitespace-nowrap text-right text-sm font-medium">
                           <button
                             type="button"
                             onClick={() => handleRemovePartner(partner.id)}
@@ -1483,19 +1487,19 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                       </tr>
                     ))}
                     {partnerInvites.map((invite) => (
-                      <tr key={`invite-${invite.id}`}>
-                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                      <tr key={`invite-${invite.id}`} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-3 md:table-row md:p-0">
+                        <td className="w-full min-w-0 md:w-auto md:px-6 md:py-3 md:whitespace-nowrap">
                           <div className="flex items-center gap-3">
                             <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
                               <Mail className="w-4 h-4 text-gray-400" />
                             </div>
-                            <p className="text-sm text-gray-900">{invite.email}</p>
+                            <p className="text-sm text-gray-900 break-all">{invite.email}</p>
                           </div>
                         </td>
-                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap capitalize text-gray-700">
+                        <td className="flex-1 md:flex-none md:px-6 md:py-3 md:whitespace-nowrap capitalize text-gray-700">
                           {invite.partnerRole || "partner"}
                         </td>
-                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                        <td className="md:px-6 md:py-3 md:whitespace-nowrap">
                           <span
                             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                               invite.status === "accepted"
@@ -1508,7 +1512,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                             {invite.status}
                           </span>
                         </td>
-                        <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-right">
+                        <td className="md:px-6 md:py-3 md:whitespace-nowrap text-right">
                           <div className="relative inline-block text-left">
                             <button
                               type="button"
@@ -1614,7 +1618,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                           }
                         }}
                         placeholder="Search by org name or email…"
-                        className="w-full px-3 py-2.5 pe-9 bg-white border border-blue-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2.5 pe-9 bg-white border border-blue-200 rounded-lg text-base sm:text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                       <div className="absolute top-1/2 right-3 -translate-y-1/2 flex items-center gap-1">
                         {loadingPartnersList && (
@@ -1685,7 +1689,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                   <select
                     value={selectedPartnerRole}
                     onChange={(e) => setSelectedPartnerRole(e.target.value as PartnerCourseRole)}
-                    className="w-full px-3 py-2.5 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="w-full px-3 py-2.5 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm"
                   >
                     <option value="owner">Owner (Full Access)</option>
                     <option value="partner">Partner</option>
@@ -1726,7 +1730,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                     value={partnerEmailInput}
                     onChange={(e) => setPartnerEmailInput(e.target.value)}
                     placeholder="partner@example.com"
-                    className="w-full px-3 py-2.5 bg-white border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm text-gray-900 placeholder:text-gray-400"
+                    className="w-full px-3 py-2.5 bg-white border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base sm:text-sm text-gray-900 placeholder:text-gray-400"
                   />
                 </div>
                 <div className="md:col-span-3">
@@ -1734,7 +1738,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                   <select
                     value={partnerInviteRole}
                     onChange={(e) => setPartnerInviteRole(e.target.value as PartnerCourseRole)}
-                    className="w-full px-3 py-2.5 bg-white border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                    className="w-full px-3 py-2.5 bg-white border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base sm:text-sm"
                   >
                     <option value="owner">Owner (Full Access)</option>
                     <option value="partner">Partner</option>
@@ -1822,7 +1826,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                         type="button"
                         onClick={() => handleMoveLevel(level.id, "up")}
                         disabled={index === 0 || reorderingLevelId !== null}
-                        className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-0.5"
+                        className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 sm:p-0.5"
                         title="Move up"
                       >
                         <ChevronUp className="w-4 h-4" />
@@ -1831,7 +1835,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                         type="button"
                         onClick={() => handleMoveLevel(level.id, "down")}
                         disabled={index === courseLevels.length - 1 || reorderingLevelId !== null}
-                        className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-0.5"
+                        className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 sm:p-0.5"
                         title="Move down"
                       >
                         <ChevronDown className="w-4 h-4" />
@@ -1856,7 +1860,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                             }
                           }}
                           onBlur={() => handleSaveLevelName(level.id)}
-                          className="w-full px-2 py-1 border border-blue-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-2 py-1 border border-blue-300 rounded-md text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       ) : (
                         <button
@@ -1899,7 +1903,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                 <Plus className="w-4 h-4" />
                 Add Level
               </h5>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
                   value={newLevelName}
@@ -1911,7 +1915,7 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
                     }
                   }}
                   placeholder="e.g. Beginner"
-                  className="flex-1 px-3 py-2.5 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="flex-1 px-3 py-2.5 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm"
                 />
                 <button
                   type="button"
@@ -1939,18 +1943,19 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onSave, onCancel })
         </section>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+        {/* Sticky on mobile so Save is always reachable on this long form */}
+        <div className="sticky bottom-0 z-10 -mx-4 -mb-4 px-4 py-3 bg-white/95 backdrop-blur border-t border-gray-200 rounded-b-lg flex items-center justify-end gap-3 sm:static sm:mx-0 sm:mb-0 sm:px-0 sm:pb-0 sm:pt-4 sm:bg-transparent sm:backdrop-blur-none sm:border-gray-100 sm:rounded-none">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-500"
+            className="flex-1 sm:flex-none px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-500"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={!isFormValid || loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading ? (
               <>

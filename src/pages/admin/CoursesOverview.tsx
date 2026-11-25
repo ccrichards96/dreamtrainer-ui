@@ -161,7 +161,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
           animate={{ opacity: 1, height: "auto" }}
           className="bg-white rounded-lg shadow mb-6"
         >
-          <div className="px-6 py-4 border-b border-gray-200 bg-blue-50">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-blue-50">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium text-gray-900">Create New Course</h3>
               <button
@@ -172,7 +172,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
               </button>
             </div>
           </div>
-          <form onSubmit={handleCreateCourse} className="p-6">
+          <form onSubmit={handleCreateCourse} className="p-4 sm:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -215,7 +215,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                 />
               </div>
             </div>
-            <div className="mt-4 flex justify-end gap-2">
+            <div className="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -229,7 +229,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
               <button
                 type="submit"
                 disabled={creatingCourse || !newCourseData.name.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {creatingCourse ? (
                   <>
@@ -253,7 +253,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-lg shadow p-6"
+          className="bg-white rounded-lg shadow p-4 sm:p-6"
         >
           <div className="flex items-center">
             <BookOpen className="w-8 h-8 text-blue-600" />
@@ -268,7 +268,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-lg shadow p-6"
+          className="bg-white rounded-lg shadow p-4 sm:p-6"
         >
           <div className="flex items-center">
             <Users className="w-8 h-8 text-green-600" />
@@ -282,7 +282,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
 
       {/* Search and Filter */}
       <div className="bg-white rounded-lg shadow mb-6">
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-4 sm:p-6 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -301,7 +301,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
       {/* Courses Grouped by Course Groups */}
       <div className="space-y-6">
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
             <div className="flex items-center gap-3">
               <BookOpen className="w-6 h-6 text-blue-600" />
               <div>
@@ -344,7 +344,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                         </p>
                       </div>
                     </div>
-                    <div className="mt-3 flex items-center gap-2 pl-10">
+                    <div className="mt-3 flex items-center gap-2">
                       <button
                         onClick={() => navigate(`/admin/courses/${course.id}`)}
                         className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50"
@@ -393,7 +393,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredCourses.map((course) => (
                       <tr key={course.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           <div className="flex items-start gap-3">
                             <div>
                               <div className="text-sm font-medium text-gray-900">
@@ -405,15 +405,15 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-6 py-4">
                           <div className="text-sm text-gray-900 max-w-xs truncate">
                             {course.description || "No description"}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {new Date(course.createdAt).toLocaleDateString()}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => navigate(`/admin/courses/${course.id}`)}
@@ -451,7 +451,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
       {/* Delete Confirmation Modal */}
       {courseToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 max-h-[90dvh] overflow-y-auto">
             <div className="px-6 py-5 border-b border-gray-200 flex items-center gap-3">
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
                 <Trash2 className="w-5 h-5 text-red-600" />
@@ -480,7 +480,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
                 ))}
               </ul>
             </div>
-            <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+            <div className="px-4 sm:px-6 py-4 bg-gray-50 flex flex-wrap justify-end gap-3">
               <button
                 onClick={() => setCourseToDelete(null)}
                 disabled={deletingCourse}
@@ -491,7 +491,7 @@ const CoursesOverview: React.FC<CoursesOverviewProps> = ({
               <button
                 onClick={handleConfirmDelete}
                 disabled={deletingCourse}
-                className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {deletingCourse ? (
                   <>

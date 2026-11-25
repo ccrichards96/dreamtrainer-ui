@@ -2,21 +2,17 @@ import { useNavigate } from "react-router-dom";
 import { BookOpen, ArrowRight, Play } from "lucide-react";
 import { CourseStatus } from "../../types/modules";
 import { Course } from "../../types/modules";
-import { CourseEnrollment } from "../../types/enrollment";
 
 interface AllCoursesViewProps {
   courses: Course[];
-  enrollments?: CourseEnrollment[];
+  /** IDs of courses the current user is enrolled in (shown with an "Enrolled" badge). */
+  enrolledCourseIds?: string[];
 }
 
-export const AllCoursesView = ({ courses, enrollments = [] }: AllCoursesViewProps) => {
+export const AllCoursesView = ({ courses, enrolledCourseIds: enrolledIds = [] }: AllCoursesViewProps) => {
   const navigate = useNavigate();
 
-  // Create a Set of enrolled course IDs for quick lookup
-  // An enrollment exists if it has a courseId and is not deleted
-  const enrolledCourseIds = new Set(
-    enrollments.filter((e) => e.courseId && !e.deletedAt).map((e) => e.courseId)
-  );
+  const enrolledCourseIds = new Set(enrolledIds);
 
   const handleCourseClick = (course: Course) => {
     if (enrolledCourseIds.has(course.id)) {

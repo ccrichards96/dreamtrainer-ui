@@ -60,7 +60,8 @@ export const RoleProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const lastCourseSlug = localStorage.getItem("last_course_slug");
         const lastSectionId = localStorage.getItem("last_section_id");
         if (!lastCourseSlug) {
-          navigate("/courses");
+          // No remembered course (e.g. fresh browser) — let them pick from their enrolled courses
+          navigate("/my-courses");
           return;
         }
         if (lastSectionId) {

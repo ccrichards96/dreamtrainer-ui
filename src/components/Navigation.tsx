@@ -4,6 +4,7 @@ import AvatarDropdown from "./AvatarDropdown";
 import { useEffect, useState } from "react";
 import { Play, Menu, X } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { getMyCourses } from "../services/api/modules";
 
 interface NavItem {
   label: string;
@@ -47,15 +48,38 @@ export default function Navigation() {
     setDrawerOpen(false);
   }, [location.pathname]);
 
-  // Students only get a dashboard once they've started a course; other roles always have one
-  const showDashboardButton = activeRole !== "student" || !!lastCourseSlug;
+  // last_course_slug only exists once a course dashboard has been opened in this browser, so a
+  // student who is enrolled but on a fresh browser (or being impersonated) would have no button.
+  // Fall back to checking their actual enrollments.
+  const [hasEnrollments, setHasEnrollments] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated || activeRole !== "student" || lastCourseSlug) {
+      setHasEnrollments(false);
+      return;
+    }
+    let cancelled = false;
+    getMyCourses()
+      .then((res) => {
+        if (!cancelled) setHasEnrollments((res.data?.length ?? 0) > 0);
+      })
+      .catch(() => {
+        if (!cancelled) setHasEnrollments(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, activeRole, lastCourseSlug]);
+
+  // Students get a dashboard once they've started or are enrolled in a course; other roles always have one
+  const showDashboardButton = activeRole !== "student" || !!lastCourseSlug || hasEnrollments;
 
   const navItems: NavItem[] = [
     { label: "Home", to: "/", end: true },
     { label: "Courses", to: "/courses", end: true },
+    ...(isAuthenticated ? [{ label: "Offers", to: "/offers" }] : []),
     ...BECOME_LINKS,
     // Offers require an account
-    ...(isAuthenticated ? [{ label: "Offers", to: "/offers" }] : []),
     { label: "Contact Us", to: "/site/contact-us" },
   ];
 

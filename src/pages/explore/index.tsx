@@ -44,7 +44,7 @@ const ExploreCoursesContent = () => {
 
         const categoriesData = await getAllCategories();
 
-        // Only fetch user's courses if authenticated — they're excluded from the list (see My Courses)
+        // Only fetch user's courses if authenticated — used to mark enrolled courses in the list
         let myCoursesData: Course[] = [];
         if (isAuthenticated) {
           try {
@@ -89,15 +89,18 @@ const ExploreCoursesContent = () => {
     return Array.from(byId.values()).sort(sortByOrder);
   }, [categories]);
 
-  const exploreCourses = useMemo(() => {
-    const myCourseIds = new Set(myCourses.map((c) => c.id));
-    const base = selectedCategoryId
-      ? [...(categories.find((c) => c.id === selectedCategoryId)?.courses ?? [])].sort(
-          sortByCategoryOrder
-        )
-      : allCourses;
-    return base.filter((c) => !myCourseIds.has(c.id));
-  }, [allCourses, categories, selectedCategoryId, myCourses]);
+  // Enrolled courses are kept in the list (marked as enrolled) rather than filtered out
+  const exploreCourses = useMemo(
+    () =>
+      selectedCategoryId
+        ? [...(categories.find((c) => c.id === selectedCategoryId)?.courses ?? [])].sort(
+            sortByCategoryOrder
+          )
+        : allCourses,
+    [allCourses, categories, selectedCategoryId]
+  );
+
+  const enrolledCourseIds = useMemo(() => myCourses.map((c) => c.id), [myCourses]);
 
   const filteredCourses = useMemo(() => {
     if (!searchQuery.trim()) return exploreCourses;
@@ -184,7 +187,7 @@ const ExploreCoursesContent = () => {
 
       {/* ── Course Grid ────────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-500">
-        <AllCoursesView courses={filteredCourses} />
+        <AllCoursesView courses={filteredCourses} enrolledCourseIds={enrolledCourseIds} />
       </div>
     </div>
   );

@@ -176,7 +176,7 @@ const UsersManager: React.FC = () => {
     >
       {/* Header */}
       <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Manage Users</h3>
@@ -193,7 +193,7 @@ const UsersManager: React.FC = () => {
         </div>
 
         {/* Stats */}
-        <div className="px-6 py-4 bg-gray-50">
+        <div className="px-4 sm:px-6 py-4 bg-gray-50">
           <div className="flex items-center gap-3">
             <Users className="w-5 h-5 text-gray-400" />
             <div>
@@ -225,7 +225,7 @@ const UsersManager: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-lg shadow"
         >
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h4 className="text-lg font-medium text-gray-900">Add New User</h4>
               <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600">
@@ -234,7 +234,7 @@ const UsersManager: React.FC = () => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmitUser} className="p-6">
+          <form onSubmit={handleSubmitUser} className="p-4 sm:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* First Name */}
               <div>
@@ -387,7 +387,7 @@ const UsersManager: React.FC = () => {
             </div>
 
             {/* Form Actions */}
-            <div className="mt-6 flex items-center justify-end gap-3">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3">
               <button
                 type="button"
                 onClick={handleCancel}
@@ -398,7 +398,7 @@ const UsersManager: React.FC = () => {
               <button
                 type="submit"
                 disabled={!isFormValid || loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -431,7 +431,7 @@ const UsersManager: React.FC = () => {
 
       {/* Users List */}
       <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
           <h4 className="text-lg font-medium text-gray-900">Users ({pagination.total})</h4>
         </div>
 
@@ -573,7 +573,7 @@ const UsersManager: React.FC = () => {
                   type="button"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2.5 sm:p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -584,7 +584,7 @@ const UsersManager: React.FC = () => {
                   type="button"
                   onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
                   disabled={page >= pagination.totalPages}
-                  className="p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2.5 sm:p-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

@@ -291,13 +291,13 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
       <form onSubmit={handleSubmit}>
         {/* Tabs */}
         {showExpertTab && (
-          <div className="flex border-b border-gray-200 px-6">
+          <div className="flex border-b border-gray-200 px-4 sm:px-6 overflow-x-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${
                   activeTab === tab.key
                     ? "border-blue-600 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700"
@@ -309,7 +309,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           </div>
         )}
 
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-6">
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
@@ -397,8 +397,8 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               <div className="space-y-4">
                 <h4 className="text-sm font-medium text-gray-700">Status</h4>
 
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-900">Onboarding Complete</p>
                     <p className="text-xs text-gray-500">
                       Whether the user has completed onboarding
@@ -419,8 +419,8 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-900">Email Verified</p>
                     <p className="text-xs text-gray-500">Whether the user's email is verified</p>
                   </div>
@@ -441,7 +441,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               </div>
 
               <div className="pt-4 border-t border-gray-200">
-                <div className="grid grid-cols-2 gap-4 text-sm text-gray-500">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-sm text-gray-500">
                   <div>
                     <span className="font-medium text-gray-700">Created:</span>{" "}
                     {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "\u2014"}
@@ -458,7 +458,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           {/* Create Expert Profile CTA — only on user tab when no expert profile and not in create mode */}
           {activeTab === "user" && !hasExpertProfile && !creatingExpert && (
             <div className="pt-4 border-t border-gray-200">
-              <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <div>
                   <p className="text-sm font-medium text-gray-900">Expert Profile</p>
                   <p className="text-xs text-gray-500">
@@ -488,7 +488,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     });
                     setActiveTab("expert");
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
                 >
                   <UserPlus className="w-4 h-4" />
                   Create Expert Profile
@@ -742,7 +742,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
               {/* Expert Meta */}
               <div className="pt-4 border-t border-gray-200">
-                <div className="grid grid-cols-2 gap-4 text-sm text-gray-500">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-sm text-gray-500 break-words">
                   <div>
                     <span className="font-medium text-gray-700">Slug:</span>{" "}
                     {user.expertProfile?.slug || "\u2014"}
@@ -768,7 +768,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                 This will delete their account, profile, and all associated data. This action cannot
                 be undone.
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={handleDelete}
@@ -797,13 +797,13 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           )}
 
           {/* Actions */}
-          <div className="flex items-center justify-between gap-3 pt-2">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={loading || deleteLoading || showDeleteConfirm}
-                className="px-4 py-2 text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
                 Delete User
@@ -813,7 +813,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   type="button"
                   onClick={handleLoginAs}
                   disabled={loading || deleteLoading || impersonateLoading || showDeleteConfirm}
-                  className="px-4 py-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {impersonateLoading ? (
                     <>
@@ -833,14 +833,14 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200"
+                className="flex-1 sm:flex-none px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={!isFormValid || loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>

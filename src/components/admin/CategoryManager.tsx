@@ -191,8 +191,8 @@ const CategoryManager: React.FC = () => {
     >
       {/* Header */}
       <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Manage Categories</h3>
               <p className="text-sm text-gray-500">Create and manage course categories</p>
@@ -207,7 +207,7 @@ const CategoryManager: React.FC = () => {
           </div>
         </div>
 
-        <div className="px-6 py-4 bg-gray-50">
+        <div className="px-4 sm:px-6 py-4 bg-gray-50">
           <div className="flex items-center gap-3">
             <Tag className="w-5 h-5 text-gray-400" />
             <span className="text-sm text-gray-500">{categories.length} category(ies)</span>
@@ -236,8 +236,8 @@ const CategoryManager: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-lg shadow"
         >
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between gap-3">
               <h4 className="text-lg font-medium text-gray-900">
                 {editingCategory ? "Edit Category" : "Add New Category"}
               </h4>
@@ -247,7 +247,7 @@ const CategoryManager: React.FC = () => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6">
+          <form onSubmit={handleSubmit} className="p-4 sm:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -299,7 +299,7 @@ const CategoryManager: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
               <button
                 type="button"
                 onClick={handleCancel}
@@ -310,7 +310,7 @@ const CategoryManager: React.FC = () => {
               <button
                 type="submit"
                 disabled={!isFormValid || loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -347,13 +347,13 @@ const CategoryManager: React.FC = () => {
                 animate={{ opacity: 1 }}
                 className="p-4 hover:bg-gray-50 transition-colors"
               >
-                <div className="flex items-start gap-4">
+                <div className="flex flex-wrap sm:flex-nowrap items-start gap-x-3 gap-y-3 sm:gap-4">
                   {/* Reorder Controls */}
                   <div className="flex flex-col items-center gap-1 pt-1">
                     <button
                       onClick={() => handleMove(category.id, "up")}
                       disabled={index === 0 || reorderingId !== null}
-                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 sm:p-1"
                       title="Move up"
                     >
                       <ChevronUp className="w-4 h-4" />
@@ -361,7 +361,7 @@ const CategoryManager: React.FC = () => {
                     <button
                       onClick={() => handleMove(category.id, "down")}
                       disabled={index === categories.length - 1 || reorderingId !== null}
-                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                      className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 sm:p-1"
                       title="Move down"
                     >
                       <ChevronDown className="w-4 h-4" />
@@ -387,11 +387,11 @@ const CategoryManager: React.FC = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     <button
                       onClick={() => navigate(`/admin/categories/${category.id}`)}
                       disabled={reorderingId !== null}
-                      className="text-gray-600 hover:text-gray-900 flex items-center gap-1 disabled:opacity-50 px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50"
+                      className="text-gray-600 hover:text-gray-900 flex items-center justify-center flex-1 sm:flex-none whitespace-nowrap gap-1 disabled:opacity-50 px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50"
                     >
                       <BookOpen className="w-4 h-4" />
                       Manage Courses
@@ -399,7 +399,7 @@ const CategoryManager: React.FC = () => {
                     <button
                       onClick={() => handleEditCategory(category)}
                       disabled={reorderingId !== null}
-                      className="text-blue-600 hover:text-blue-900 flex items-center gap-1 disabled:opacity-50 px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50"
+                      className="text-blue-600 hover:text-blue-900 flex items-center justify-center flex-1 sm:flex-none whitespace-nowrap gap-1 disabled:opacity-50 px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50"
                     >
                       <Edit3 className="w-4 h-4" />
                       Edit
@@ -407,7 +407,7 @@ const CategoryManager: React.FC = () => {
                     <button
                       onClick={() => handleDelete(category.id)}
                       disabled={reorderingId !== null}
-                      className="text-red-600 hover:text-red-900 flex items-center gap-1 disabled:opacity-50 px-3 py-1.5 border border-red-200 rounded-lg hover:bg-red-50"
+                      className="text-red-600 hover:text-red-900 flex items-center justify-center flex-1 sm:flex-none whitespace-nowrap gap-1 disabled:opacity-50 px-3 py-1.5 border border-red-200 rounded-lg hover:bg-red-50"
                     >
                       <Trash2 className="w-4 h-4" />
                       Delete

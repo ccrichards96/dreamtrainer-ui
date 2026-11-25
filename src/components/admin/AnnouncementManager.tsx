@@ -232,8 +232,8 @@ const AnnouncementManager: React.FC = () => {
     >
       {/* Header */}
       <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Manage Announcements</h3>
               <p className="text-sm text-gray-500">
@@ -251,7 +251,7 @@ const AnnouncementManager: React.FC = () => {
         </div>
 
         {/* Stats */}
-        <div className="px-6 py-4 bg-gray-50">
+        <div className="px-4 sm:px-6 py-4 bg-gray-50">
           <div className="flex items-center gap-3">
             <Megaphone className="w-5 h-5 text-gray-400" />
             <div>
@@ -279,8 +279,8 @@ const AnnouncementManager: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-lg shadow"
         >
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between gap-3">
               <h4 className="text-lg font-medium text-gray-900">
                 {editingAnnouncement ? "Edit Announcement" : "Add New Announcement"}
               </h4>
@@ -290,7 +290,7 @@ const AnnouncementManager: React.FC = () => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmitAnnouncement} className="p-6">
+          <form onSubmit={handleSubmitAnnouncement} className="p-4 sm:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Announcement Name */}
               <div className="md:col-span-2">
@@ -367,7 +367,7 @@ const AnnouncementManager: React.FC = () => {
             </div>
 
             {/* Form Actions */}
-            <div className="mt-6 flex items-center justify-end gap-3">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3">
               <button
                 type="button"
                 onClick={handleCancel}
@@ -378,7 +378,7 @@ const AnnouncementManager: React.FC = () => {
               <button
                 type="submit"
                 disabled={!isFormValid || loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -399,7 +399,7 @@ const AnnouncementManager: React.FC = () => {
 
       {/* Announcements List */}
       <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
           <h4 className="text-lg font-medium text-gray-900">
             Announcements ({announcements.length})
           </h4>
@@ -415,10 +415,10 @@ const AnnouncementManager: React.FC = () => {
         ) : (
           <div className="divide-y divide-gray-200">
             {announcements.map((announcement) => (
-              <div key={announcement.id} className="p-6 hover:bg-gray-50">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+              <div key={announcement.id} className="p-4 sm:p-6 hover:bg-gray-50">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-2">
                       <h5 className="text-lg font-medium text-gray-900">{announcement.name}</h5>
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1 ${getTypeColor(announcement.type)}`}
@@ -436,12 +436,12 @@ const AnnouncementManager: React.FC = () => {
                       className="text-gray-600 mb-3 prose prose-sm max-w-none [&>*]:mb-2 [&>h1]:text-lg [&>h2]:text-base [&>h3]:text-sm [&>p]:text-sm [&>ul]:text-sm [&>ol]:text-sm [&>strong]:font-semibold [&>em]:italic [&>u]:underline [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800"
                       dangerouslySetInnerHTML={{ __html: sanitizeHtml(announcement.message) }}
                     />
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
                       <span>Created: {new Date(announcement.createdAt).toLocaleDateString()}</span>
                       <span>Updated: {new Date(announcement.updatedAt).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-1 sm:gap-2 sm:ml-4 flex-shrink-0">
                     <button
                       onClick={() => handleEditAnnouncement(announcement)}
                       className="text-blue-600 hover:text-blue-800 p-2"

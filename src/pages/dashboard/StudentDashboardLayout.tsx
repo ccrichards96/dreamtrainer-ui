@@ -17,7 +17,7 @@ export default function StudentDashboardLayout({ children }: StudentDashboardLay
   const items: DashboardNavItem[] = [
     {
       id: "start",
-      label: "Start & Succeed",
+      label: "Now Learning",
       icon: Wand2,
       to: courseSlug ? `/courses/${courseSlug}/dashboard` : "/courses",
       match: ["/courses/:slug/dashboard"],

@@ -77,13 +77,13 @@ const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.3 }}
-            className={`relative bg-white rounded-2xl shadow-2xl w-full ${sizeClasses[size]} max-h-[85vh] sm:max-h-[90vh] overflow-hidden`}
+            className={`relative bg-white rounded-2xl shadow-2xl w-full ${sizeClasses[size]} max-h-[90dvh] flex flex-col overflow-hidden`}
           >
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between gap-2 p-4 sm:p-6 border-b border-gray-200 flex-shrink-0">
                 {title && (
-                  <h2 className="text-base sm:text-xl font-semibold text-gray-900">{title}</h2>
+                  <h2 className="text-base sm:text-xl font-semibold text-gray-900 min-w-0">{title}</h2>
                 )}
                 {showCloseButton && (
                   <button
@@ -98,7 +98,7 @@ const Modal: React.FC<ModalProps> = ({
             )}
 
             {/* Content */}
-            <div className="overflow-y-auto max-h-[calc(85vh-5rem)] sm:max-h-[calc(90vh-8rem)]">
+            <div className="overflow-y-auto flex-1 min-h-0">
               {children}
             </div>
           </motion.div>
